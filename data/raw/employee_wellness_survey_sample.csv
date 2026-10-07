@@ -1,0 +1,16 @@
+employee_id,department,work_mode,date,feedback_text
+EMP101,Engineering,Hybrid,2026-10-01,The team sprint retrospective was extremely positive and constructive. Great psychological safety!
+EMP102,Product,Remote,2026-10-01,Feeling isolated working alone all week. Need more casual social interactions or team coffee chats.
+EMP103,Design,Onsite,2026-10-02,Love the quiet pods on floor 3. Helps me focus without distractions.
+EMP104,Engineering,Remote,2026-10-02,Constant Slack pings after 7 PM are making it impossible to switch off mentally. Experiencing severe burnout.
+EMP105,Marketing,Hybrid,2026-10-03,Campaign launch was stressful but our lead provided great support and encouragement.
+EMP106,Sales,Onsite,2026-10-03,Target pressure is unbearable this quarter. Struggling with anxiety and poor sleep quality.
+EMP107,HR,Hybrid,2026-10-04,Standard weekly review completed. Tasks are on track and manageable.
+EMP108,Customer Support,Remote,2026-10-04,Handling difficult escalation calls all day leaves me emotionally drained and fatigued.
+EMP109,Engineering,Hybrid,2026-10-05,Pair programming sessions today were rewarding and fun. Really enjoyed solving bugs together.
+EMP110,Operations,Onsite,2026-10-05,Cafeteria food options have improved, but chair ergonomics in conference room B need urgent fixing.
+EMP111,Finance,Remote,2026-10-06,Month-end closing went smoothly without overtime. Feeling relaxed and satisfied.
+EMP112,Product,Hybrid,2026-10-06,Conflicting stakeholder feedback is frustrating. It feels like we are running in circles.
+EMP113,QA,Remote,2026-10-07,Automated regression suite saved us hours of manual testing. Mood is very upbeat!
+EMP114,Engineering,Hybrid,2026-10-07,Too many redundant status meetings. Please give us dedicated deep-work focus blocks.
+EMP115,Marketing,Remote,2026-10-07,Attended the mental wellness mindfulness seminar today. Very helpful meditation techniques.
