@@ -1,0 +1,18 @@
+{
+  "model_name": "VADER (Valence Aware Dictionary and sEntiment Reasoner)",
+  "version": "3.8.1",
+  "thresholds": {
+    "positive_cutoff": 0.05,
+    "negative_cutoff": -0.05
+  },
+  "scores": {
+    "positive": "compound >= 0.05",
+    "neutral": "-0.05 < compound < 0.05",
+    "negative": "compound <= -0.05"
+  },
+  "planned_finetuning_roadmap": [
+    "Milestone 1: Rule-based VADER Lexicon baseline",
+    "Milestone 2: DistilBERT fine-tuning on employee wellbeing corpus",
+    "Milestone 3: Domain-specific BERT emotion classifier"
+  ]
+}
