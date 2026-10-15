@@ -76,3 +76,23 @@ print(report.to_dict())
 pytest
 ruff check .
 ```
+
+## Deployment
+
+The repository includes a production-ready `Dockerfile` and `render.yaml`. To run
+the same container locally:
+
+```bash
+docker build -t employee-wellness-platform .
+docker run --rm -p 8501:8501 employee-wellness-platform
+```
+
+Open <http://localhost:8501>. The image installs all NLTK datasets during the build
+and exposes Streamlit's `/_stcore/health` endpoint for platform health checks.
+
+For Render, create a new **Blueprint** from this repository; Render will detect
+`render.yaml`, build the Docker image, and publish the service. The free plan has
+ephemeral storage, so the local `wellness.db` account database is suitable for
+demonstration only. Use a managed persistent database before production use.
+For any Docker host, set the `PORT` environment variable to the port supplied by
+the host.
