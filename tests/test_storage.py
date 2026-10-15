@@ -3,7 +3,16 @@ import sqlite3
 import pytest
 
 from wellness.errors import InputValidationError
-from wellness.storage import authenticate_user, register_user
+from wellness.storage import authenticate_user, connect_database, register_user
+
+
+def test_connect_database_initializes_users_table(tmp_path):
+    connection = connect_database(tmp_path / "wellness.db")
+    tables = connection.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'users'"
+    ).fetchall()
+    connection.close()
+    assert tables == [("users",)]
 
 
 def test_register_and_authenticate_user():
