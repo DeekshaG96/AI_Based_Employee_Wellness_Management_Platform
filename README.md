@@ -32,9 +32,9 @@ supports direct text, TXT upload, CSV upload with an optional text-column overri
 human-readable rendering, score cards, and JSON report download. Invalid or empty
 inputs are shown as explicit errors rather than producing an empty report.
 
-The download command installs `stopwords`, `wordnet`, `punkt`,
-`averaged_perceptron_tagger`, and `vader_lexicon`. The API reports a clear setup error
-if any required data is missing.
+The download command installs `stopwords`, `wordnet`, `punkt`, `punkt_tab`,
+`averaged_perceptron_tagger`, `averaged_perceptron_tagger_eng`, and `vader_lexicon`.
+The API reports a clear setup error if any required data is missing.
 
 ## Usage
 
