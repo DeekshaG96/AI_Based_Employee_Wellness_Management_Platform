@@ -1,10 +1,78 @@
 # AI-Based Employee Wellness Management Platform
 
-An employee wellness management platform developed for the Infosys Springboard internship initiative.
+Milestone 1 provides a reusable Python API and CLI for employee feedback ingestion,
+NLTK preprocessing, and VADER sentiment analysis. Future recommendations and web/API
+milestones are intentionally outside this implementation.
 
-## Overview
+## Setup
 
-This project analyzes employee feedback to gauge workplace sentiment and provide wellness recommendations.
+Python 3.10+ is required. Create and activate a virtual environment, then install the
+package and development tools:
 
-- **Current Stage:** Milestone 1 (Project Setup & Text Preprocessing)
-- **Tech Stack:** Python, NLTK
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+python -m pip install -e ".[dev]"
+python -m wellness.cli --download-nltk-data
+```
+
+To use the frontend, install the UI extra as well:
+
+```bash
+python -m pip install -e ".[dev,ui]"
+streamlit run app.py
+```
+
+The Streamlit page follows the application flow **Landing page -> Login or
+Registration -> Connect Database -> Input -> Sentiment Analysis**. Registration and
+login use a local SQLite database (`wellness.db`) with salted PBKDF2 password hashes.
+The database is a lightweight milestone boundary and can later be replaced by a
+managed database without changing the sentiment pipeline. The authenticated analyzer
+supports direct text, TXT upload, CSV upload with an optional text-column override,
+human-readable rendering, score cards, and JSON report download. Invalid or empty
+inputs are shown as explicit errors rather than producing an empty report.
+
+The download command installs `stopwords`, `wordnet`, `punkt`,
+`averaged_perceptron_tagger`, and `vader_lexicon`. The API reports a clear setup error
+if any required data is missing.
+
+## Usage
+
+Direct text:
+
+```bash
+wellness-analyze --text "I feel supported and motivated at work."
+wellness-analyze --text "The workload is exhausting." --json
+```
+
+Files:
+
+```bash
+wellness-analyze --file feedback.txt
+wellness-analyze --file feedback.csv --text-column feedback --json
+```
+
+TXT files must be UTF-8 and non-empty. CSV files must have a header and a non-empty
+text column. `text`, `feedback`, `comment`, `message`, and `content` are detected
+automatically; use `--text-column` for another name. Non-empty values from all rows
+are analyzed together. Missing, malformed, unsupported, or empty inputs return an
+explicit error and non-zero exit status.
+
+The report includes input summary, original/cleaned/processed text, final tokens,
+negative/neutral/positive/compound VADER scores, a positive/negative/neutral label,
+and useful counts. The Python API returns an `AnalysisReport`:
+
+```python
+from wellness import analyze_text, analyze_file
+
+report = analyze_text("My manager listens and supports the team.")
+print(report.sentiment_label.value)
+print(report.to_dict())
+```
+
+## Tests and checks
+
+```bash
+pytest
+ruff check .
+```
