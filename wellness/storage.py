@@ -25,6 +25,26 @@ def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
         )
         """
     )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS mood_entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            source_type TEXT NOT NULL,
+            source_name TEXT NOT NULL,
+            original_text TEXT NOT NULL,
+            cleaned_text TEXT NOT NULL,
+            tokens TEXT NOT NULL,
+            sentiment_label TEXT NOT NULL,
+            neg_score REAL NOT NULL,
+            neu_score REAL NOT NULL,
+            pos_score REAL NOT NULL,
+            compound_score REAL NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        """
+    )
     connection.commit()
     return connection
 
@@ -75,3 +95,77 @@ def authenticate_user(
     if row and _check_password(password, row[2]):
         return int(row[0]), str(row[1])
     return None
+
+
+def save_mood_entry(
+    connection: sqlite3.Connection,
+    user_id: int,
+    source_type: str,
+    source_name: str,
+    original_text: str,
+    cleaned_text: str,
+    tokens: tuple[str, ...] | list[str],
+    sentiment_label: str,
+    neg_score: float,
+    neu_score: float,
+    pos_score: float,
+    compound_score: float,
+) -> int:
+    """Insert a parsed mood and sentiment analysis record into SQLite."""
+    token_str = ", ".join(tokens)
+    cursor = connection.execute(
+        """
+        INSERT INTO mood_entries (
+            user_id, source_type, source_name, original_text, cleaned_text,
+            tokens, sentiment_label, neg_score, neu_score, pos_score, compound_score
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            user_id,
+            source_type,
+            source_name,
+            original_text,
+            cleaned_text,
+            token_str,
+            sentiment_label,
+            neg_score,
+            neu_score,
+            pos_score,
+            compound_score,
+        ),
+    )
+    connection.commit()
+    return int(cursor.lastrowid)
+
+
+def get_user_mood_entries(
+    connection: sqlite3.Connection, user_id: int | None = None
+) -> list[dict]:
+    """Retrieve mood entries for a specific user or all entries if user_id is None."""
+    query = (
+        """
+        SELECT id, user_id, source_type, source_name, original_text, cleaned_text,
+               tokens, sentiment_label, neg_score, neu_score, pos_score, compound_score,
+               created_at
+        FROM mood_entries
+        """
+    )
+    params: tuple = ()
+    if user_id is not None:
+        query += " WHERE user_id = ?"
+        params = (user_id,)
+    query += " ORDER BY created_at DESC, id DESC"
+
+    cursor = connection.execute(query, params)
+    columns = [desc[0] for desc in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+
+def delete_mood_entry(connection: sqlite3.Connection, entry_id: int, user_id: int) -> bool:
+    """Delete a mood entry belonging to the specified user."""
+    cursor = connection.execute(
+        "DELETE FROM mood_entries WHERE id = ? AND user_id = ?",
+        (entry_id, user_id),
+    )
+    connection.commit()
+    return cursor.rowcount > 0
