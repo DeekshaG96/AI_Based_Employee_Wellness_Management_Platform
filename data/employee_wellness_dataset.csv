@@ -1,0 +1,61 @@
+employee_id,department,role,work_mode,feedback,expected_sentiment
+EMP001,Engineering,Senior Developer,Remote,I feel very supported and valued by my team. The project milestone went smoothly and leadership is encouraging.,positive
+EMP002,Design,UI/UX Designer,Hybrid,Fantastic work-life balance and great team camaraderie. Everyone respects off-hours and creative input is always welcomed.,positive
+EMP003,Human Resources,HR Specialist,Onsite,Our leadership genuinely cares about mental health and employee well-being. Great wellness initiatives and supportive policies.,positive
+EMP004,Product,Product Manager,Remote,Cross-functional collaboration is seamless. Clear communication from leadership helps us stay aligned and motivated.,positive
+EMP005,Engineering,DevOps Engineer,Remote,Management trusts us to do our work without micromanagement. Continuous learning and growth opportunities are outstanding.,positive
+EMP006,Marketing,Content Strategist,Hybrid,Wonderful environment with inspiring colleagues. The constructive feedback culture helps everyone improve constantly.,positive
+EMP007,Customer Support,Support Lead,Onsite,"The team has a strong support system. When tickets surge, leaders step in to help rather than placing blame.",positive
+EMP008,Sales,Account Executive,Hybrid,Excellent commission structure and healthy competition. Team bonding events keep morale very high.,positive
+EMP009,Data Science,ML Engineer,Remote,Cutting-edge tooling and tremendous support from architects. Flexible schedule allows me to care for family effortlessly.,positive
+EMP010,Quality Assurance,QA Analyst,Hybrid,Appreciative managers who notice and reward extra effort. Thoroughly enjoy coming to work every single day.,positive
+EMP011,Engineering,Backend Engineer,Remote,Mentorship program has been transformative for my career. Seniors are always ready to pair program and assist.,positive
+EMP012,Operations,Operations Coordinator,Onsite,Transparent company town halls and genuine recognition of operational contributions. Very fulfilling atmosphere.,positive
+EMP013,Finance,Financial Analyst,Hybrid,"Solid benefits package, supportive teammates, and reasonable working hours even during quarterly financial closes.",positive
+EMP014,Security,SecOps Specialist,Remote,Proactive security culture and executive backing make handling incidents smooth and collaborative.,positive
+EMP015,Engineering,Frontend Engineer,Hybrid,Design system revamp was a huge success. The positive energy and celebration across teams was invigorating.,positive
+EMP016,Marketing,SEO Manager,Remote,Empathetic managers who encourage taking mental health days whenever needed. Very grateful for this workplace.,positive
+EMP017,Product,Associate PM,Hybrid,Welcoming team culture for new joiners. Psychological safety here allows everyone to voice creative ideas freely.,positive
+EMP018,Sales,BDR Representative,Onsite,Great coaching from sales leaders. Celebrating small wins together creates an energizing and vibrant environment.,positive
+EMP019,Engineering,Mobile Developer,Remote,Autonomous sprint planning and realistic deadlines have significantly boosted our team productivity and joy.,positive
+EMP020,Customer Support,Tier 2 Agent,Remote,"Empowering documentation and automated macros reduced repetitive tasks, letting us focus on meaningful client resolutions.",positive
+EMP021,Engineering,Full Stack Developer,Hybrid,The workload is completely overwhelming and exhausting. We have impossible deadlines and zero work-life balance.,negative
+EMP022,Marketing,Campaign Manager,Onsite,Constant last-minute goal shifting and intense micromanagement. Feel chronically stressed and underappreciated.,negative
+EMP023,Customer Support,Support Specialist,Remote,Inundated with customer complaints while understaffed. Management refuses to acknowledge our severe burnout.,negative
+EMP024,Sales,Account Manager,Onsite,Toxic pressure to hit unattainable quarterly targets. Late night calls and weekend messages have ruined personal downtime.,negative
+EMP025,Product,Technical PM,Hybrid,Endless meetings with no actionable outcomes. Developers are frustrated and leadership dismisses burnout concerns.,negative
+EMP026,Quality Assurance,Automation Tester,Remote,"Releases are continuously rushed without adequate testing time. When bugs slip through, engineers get unfairly blamed.",negative
+EMP027,Operations,Logistics Analyst,Onsite,Severely broken internal tools cause daily headaches. Requests for budget or upgraded software are continually ignored.,negative
+EMP028,Finance,Payroll Specialist,Hybrid,Severe understaffing during audit season. Working 14-hour days with zero overtime compensation is demoralizing.,negative
+EMP029,Engineering,Data Engineer,Remote,On-call alerts go off multiple times every night. Architecture is fragile and technical debt is spiraling out of control.,negative
+EMP030,Design,Brand Designer,Hybrid,Creative work is treated like a conveyor belt. Lack of respect for the design process causes extreme creative fatigue.,negative
+EMP031,Human Resources,Recruiter,Remote,Hiring quotas are completely detached from market reality. Candidate rejections lead to harsh criticism from directors.,negative
+EMP032,Sales,Sales Engineer,Hybrid,Conflicting promises made by sales reps create impossible delivery situations. The friction is unbearable.,negative
+EMP033,Engineering,Site Reliability Eng,Remote,Chronic fatigue due to repeated incident escalations. Leadership offers pizza parties instead of hiring more engineers.,negative
+EMP034,Marketing,Social Media Specialist,Onsite,Subject to round-the-clock monitoring and aggressive performance policing. Feel completely drained and demotivated.,negative
+EMP035,Product,Growth PM,Hybrid,Lack of transparent leadership and frequent layoffs have destroyed morale. Fear and job anxiety are widespread.,negative
+EMP036,Customer Support,Chat Representative,Remote,"Strict second-by-second activity trackers are humiliating. Breaks are penalized, leading to severe physical strain.",negative
+EMP037,Engineering,Platform Engineer,Remote,"Management constantly overrides technical recommendations, resulting in avoidable production outages and blame games.",negative
+EMP038,Operations,Procurement Specialist,Onsite,Bureaucracy and red tape stall every request. Finger-pointing culture makes collaboration stressful and hostile.,negative
+EMP039,Data Science,Data Analyst,Hybrid,Ad-hoc emergency requests disrupt core strategic modeling daily. Leaders fail to prioritize team bandwidth.,negative
+EMP040,Security,Compliance Officer,Hybrid,Ignored compliance warnings create massive liability. Being scapegoated for organizational delays is deeply frustrating.,negative
+EMP041,Engineering,Software Engineer,Remote,We held our daily sprint sync at 10 AM today. The team reviewed pull requests and updated milestone statuses.,neutral
+EMP042,Product,Product Owner,Hybrid,Roadmap documentation was submitted for Q3 review. Awaiting final comments from department stakeholders.,neutral
+EMP043,Human Resources,HR Coordinator,Onsite,Annual benefits enrollment opened on Monday. Employees have until the end of the month to finalize their selections.,neutral
+EMP044,Marketing,Digital Analyst,Remote,Monthly web traffic reports were exported to the shared drive. Bounce rates remained consistent with previous averages.,neutral
+EMP045,Operations,Office Administrator,Onsite,The office air filtration filters were replaced over the weekend. Conference room schedules remain unchanged.,neutral
+EMP046,Customer Support,Knowledge Specialist,Hybrid,Updated five internal help center articles to reflect the recent portal navigation changes.,neutral
+EMP047,Finance,Billing Specialist,Remote,Processed standard vendor invoices for the current billing cycle according to the routine schedule.,neutral
+EMP048,Engineering,Cloud Architect,Hybrid,Database maintenance window is scheduled for Saturday at midnight. Migration scripts were verified in staging.,neutral
+EMP049,Design,Visual Designer,Remote,Standard asset library folders were reorganized alphabetically for easier accessibility across departments.,neutral
+EMP050,Sales,Sales Operations,Onsite,CRM permissions were audited. Inactive accounts from departed contractors were deactivated as per protocol.,neutral
+EMP051,Data Science,BI Developer,Hybrid,Automated data warehouse ingestion pipeline completed at 4 AM without schema deviations.,neutral
+EMP052,Quality Assurance,Test Engineer,Remote,Executed regression test suite for build v2.4. Test pass rate is 98.5% with minor cosmetic issues noted.,neutral
+EMP053,Security,IAM Administrator,Onsite,Multi-factor authentication policy enforcement was rolled out to the remaining European regional offices.,neutral
+EMP054,Marketing,Event Coordinator,Hybrid,Logistics checklist for the upcoming developer conference was distributed to confirmed attendees.,neutral
+EMP055,Engineering,Systems Engineer,Remote,Server operating system security patches were installed. All nodes rebooted normally without cluster downtime.,neutral
+EMP056,Product,Technical Writer,Remote,API release notes for version 1.8 were compiled and reviewed by the development leads.,neutral
+EMP057,Finance,Tax Associate,Hybrid,Quarterly compliance filing forms were submitted to the local regulatory agency on time.,neutral
+EMP058,Operations,Facilities Specialist,Onsite,Desk relocation requests for the third-floor expansion will be processed beginning next Tuesday.,neutral
+EMP059,Human Resources,Training Coordinator,Hybrid,Mandatory compliance training invitations were sent out via email to all active employees.,neutral
+EMP060,Customer Support,QA Specialist,Remote,Random sampling of thirty support chats was reviewed for standard operating compliance adherence.,neutral

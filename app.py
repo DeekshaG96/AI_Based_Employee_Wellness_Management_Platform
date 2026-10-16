@@ -460,9 +460,24 @@ def _analysis_page() -> None:
 
     # TAB 2: FILE INGESTION
     with tab2:
-        st.subheader("2. Upload Feedback File (.txt or .csv)")
-        st.write("Upload employee survey responses, batch journal exports, or feedback files:")
+        st.subheader("2. File Ingestion & Workplace Dataset")
+        st.write("Upload feedback files (.txt / .csv) or test with the curated workplace wellness benchmark dataset:")
 
+        # Quick Benchmark Dataset Loader
+        benchmark_path = Path("data/employee_wellness_dataset.csv")
+        if benchmark_path.exists():
+            st.markdown("###### Curated Workplace Dataset (Kaggle Benchmark Standard):")
+            col_b1, col_b2 = st.columns([2, 1])
+            with col_b1:
+                st.caption("60 realistic employee pulse survey entries across Engineering, Marketing, HR, Product, and Sales.")
+            with col_b2:
+                load_bench = st.button("📊 Load Benchmark Dataset", use_container_width=True)
+                if load_bench:
+                    st.session_state.active_file_mode = "benchmark"
+                    st.rerun()
+
+        st.divider()
+        st.markdown("###### Upload Custom File:")
         uploaded = st.file_uploader(
             "Upload file (.txt or .csv)",
             type=["txt", "csv"],
@@ -474,8 +489,11 @@ def _analysis_page() -> None:
             placeholder="feedback (default auto-detects: text, feedback, comment, message, content)",
         )
 
+        # Check active file source: either uploaded or benchmark
+        active_source = None
         if uploaded is not None:
-            st.info(f"📄 Selected file: **{uploaded.name}** ({uploaded.size} bytes)")
+            active_source = ("uploaded", uploaded, uploaded.name)
+            st.info(f"📄 Selected uploaded file: **{uploaded.name}** ({uploaded.size} bytes)")
             if uploaded.name.lower().endswith(".csv"):
                 try:
                     df_preview = pd.read_csv(uploaded, nrows=5)
@@ -484,14 +502,28 @@ def _analysis_page() -> None:
                     uploaded.seek(0)
                 except (pd.errors.ParserError, ValueError, UnicodeDecodeError):
                     st.warning("Could not generate tabular preview for this CSV.")
+        elif st.session_state.get("active_file_mode") == "benchmark" and benchmark_path.exists():
+            active_source = ("benchmark", benchmark_path, "employee_wellness_dataset.csv")
+            st.success("🟢 Loaded: `data/employee_wellness_dataset.csv` (60 Workplace Reviews)")
+            try:
+                df_preview = pd.read_csv(benchmark_path)
+                st.dataframe(df_preview.head(10), use_container_width=True)
+            except (pd.errors.ParserError, ValueError, OSError):
+                st.warning("Could not generate tabular preview for this dataset.")
 
-        if st.button("🚀 Analyze Uploaded File", type="primary", key="btn_file_analyze"):
-            if uploaded is None:
-                st.error("Please upload a .txt or .csv file first.")
+
+
+        if st.button("🚀 Analyze File Content", type="primary", key="btn_file_analyze"):
+            if active_source is None:
+                st.error("Please upload a file or click 'Load Benchmark Dataset' above.")
             else:
                 try:
-                    with st.spinner("Reading file, preprocessing, and calculating sentiment..."):
-                        report = _analyze_upload(uploaded, custom_col or None)
+                    with st.spinner("Processing file, cleaning text, and computing sentiment..."):
+                        src_type, file_obj, display_name = active_source
+                        if src_type == "uploaded":
+                            report = _analyze_upload(file_obj, custom_col or None)
+                        else:
+                            report = analyze_file(file_obj, text_column="feedback")
 
                         # Persist to SQLite
                         conn = connect_database()
@@ -499,7 +531,7 @@ def _analysis_page() -> None:
                             conn,
                             user_id=user_id,
                             source_type=report.input_summary.source_type,
-                            source_name=uploaded.name,
+                            source_name=display_name,
                             original_text=report.original_text,
                             cleaned_text=report.cleaned_text,
                             tokens=report.tokens,
@@ -511,7 +543,7 @@ def _analysis_page() -> None:
                         )
                         conn.close()
 
-                    st.success(f"✅ File analyzed and recorded in database (Entry #{entry_id})!")
+                    st.success(f"✅ Analyzed and recorded in SQLite database (Entry #{entry_id})!")
                     st.divider()
 
                     _render_sentiment_card(report)
