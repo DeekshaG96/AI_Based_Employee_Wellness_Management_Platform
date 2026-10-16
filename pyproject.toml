@@ -18,9 +18,13 @@ ui = ["streamlit>=1.38", "pandas>=2.0"]
 [project.scripts]
 wellness-analyze = "wellness.cli:main"
 
+[tool.setuptools.packages.find]
+include = ["wellness*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
