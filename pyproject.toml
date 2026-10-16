@@ -12,7 +12,8 @@ dependencies = ["nltk>=3.8.1"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
-ui = ["streamlit>=1.38"]
+ui = ["streamlit>=1.38", "pandas>=2.0"]
+
 
 [project.scripts]
 wellness-analyze = "wellness.cli:main"

@@ -84,3 +84,25 @@ def preprocess(text: str) -> tuple[str, tuple[str, ...]]:
     lemmatizer = WordNetLemmatizer()
     lemmas = tuple(lemmatizer.lemmatize(token, _wordnet_pos(tag)) for token, tag in tagged)
     return cleaned, lemmas
+
+
+def get_preprocessing_breakdown(text: str) -> dict[str, object]:
+    """Return all intermediate stages of the preprocessing pipeline for visual display."""
+    validate_nltk_resources()
+    cleaned = clean_text(text)
+    raw_tokens = word_tokenize(cleaned)
+    stop_words = set(stopwords.words("english"))
+    filtered = [token for token in raw_tokens if token.isalpha() and token not in stop_words]
+    tagged = pos_tag(filtered)
+    lemmatizer = WordNetLemmatizer()
+    lemmas = tuple(lemmatizer.lemmatize(token, _wordnet_pos(tag)) for token, tag in tagged)
+    return {
+        "raw_text": text,
+        "cleaned_text": cleaned,
+        "raw_tokens": raw_tokens,
+        "filtered_tokens": filtered,
+        "pos_tags": tagged,
+        "lemmas": lemmas,
+        "processed_text": " ".join(lemmas),
+    }
+

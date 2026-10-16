@@ -79,3 +79,15 @@ def test_streamlit_upload_adapter_uses_backend_pipeline():
     report = _analyze_upload(uploaded, None)
     assert report.input_summary.source_type == "txt"
     assert report.sentiment_scores.compound > 0
+
+
+def test_preprocessing_breakdown():
+    from wellness.preprocessing import get_preprocessing_breakdown
+
+    breakdown = get_preprocessing_breakdown("The employees were working happily.")
+    assert "cleaned_text" in breakdown
+    assert "raw_tokens" in breakdown
+    assert "filtered_tokens" in breakdown
+    assert "lemmas" in breakdown
+    assert "the" not in breakdown["filtered_tokens"]
+
