@@ -1,14 +1,17 @@
 # 🌱 MoodMentor: AI-Powered Emotional Tone Analyzer & Employee Wellness Platform
 
+[![CI](https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform/actions/workflows/ci.yml/badge.svg)](https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![Tests](https://img.shields.io/badge/pytest-15%20passed-success.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Infosys Springboard](https://img.shields.io/badge/Infosys%20Springboard-Batch--4-orange.svg)](https://springboard.infosys.com/)
 
 > **Infosys Springboard Virtual Internship — Milestone 1**  
 > **Project Title:** AI-Powered Emotional Tone Analyzer and Well-Being Recommendation System  
 > **Student:** Deeksha Ganesh ([@DeekshaG96](https://github.com/DeekshaG96))  
 > **Official Milestone 1 Documentation:** [docs/Milestone1_Documentation.pdf](docs/Milestone1_Documentation.pdf) | [Markdown Version](docs/Milestone1_Documentation.md)
+
 
 ---
 
@@ -156,3 +159,13 @@ Open `http://localhost:8501`. Container health check is exposed at `/_stcore/hea
 - **Milestone 2:** Deep Emotion Classification using fine-tuned BERT and DistilBERT transformer models (Joy, Sadness, Anger, Fear, Surprise, Exhaustion).
 - **Milestone 3:** AI-driven personalized wellness recommendation engine, longitudinal trend tracking, and FastAPI REST endpoints.
 - **Milestone 4:** Production packaging, multi-tenant RBAC, CLI enhancements, and enterprise deployment.
+
+---
+
+## 📄 License & Community Guidelines
+
+- **License:** Distributed under the [MIT License](LICENSE).
+- **Contributing:** Please read our [Contributing Guide](CONTRIBUTING.md) before submitting pull requests.
+- **Security:** Review our [Security Policy](SECURITY.md) to report vulnerabilities responsibly.
+- **Maintainer:** [Deeksha Ganesh](https://github.com/DeekshaG96) (Infosys Springboard Virtual Internship).
+
