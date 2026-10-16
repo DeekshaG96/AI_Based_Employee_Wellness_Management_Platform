@@ -1,20 +1,14 @@
-# 🌱 MoodMentor: AI-Powered Employee Wellness Platform
+#  MoodMentor: AI-Powered Employee Wellness Platform
 
-[![CI](https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform/actions/workflows/ci.yml/badge.svg)](https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform/actions)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/pytest-15%20passed-success.svg)](tests/)
-[![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Infosys Springboard](https://img.shields.io/badge/Infosys%20Springboard-Batch--4-orange.svg)](https://springboard.infosys.com/)
 
 > **Infosys Springboard Virtual Internship — Milestone 1**  
-> **Student:** Deeksha Ganesh ([@DeekshaG96](https://github.com/DeekshaG96)) • **Report:** [Milestone 1 Documentation PDF](docs/Milestone1_Documentation.pdf)
+> **Student:** Deeksha G ([@DeekshaG96](https://github.com/DeekshaG96)) • **Report:** [Milestone 1 Documentation PDF](docs/Milestone1_Documentation.pdf)
 
 **MoodMentor** analyzes emotional signals from workplace feedback (journal entries, 1-on-1s, survey exports, and chat) using a standardized NLP preprocessing pipeline, baseline VADER sentiment scoring, and persistent SQLite storage within a modern 3-tab Streamlit application.
 
 ---
 
-## ⚡ Quickstart
+##  Quickstart
 
 ```bash
 # 1. Clone repository
