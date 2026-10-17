@@ -122,7 +122,7 @@ def main() -> None:
 
 def _landing_page() -> None:
     st.title("🌱 MoodMentor: Employee Wellness Platform")
-    st.caption("Infosys Springboard Virtual Internship • Milestone 1 (Batch-4)")
+    st.caption("Intelligent Emotional Tone Analyzer & Well-Being Recommendation Platform")
 
     st.markdown(
         """
@@ -364,7 +364,7 @@ def _analysis_page() -> None:
 
     # Main Heading
     st.title("🌱 MoodMentor: Emotional Tone & Wellness Analyzer")
-    st.caption("Infosys Springboard Virtual Internship • Milestone 1")
+    st.caption("AI-Powered Workplace Emotion Analytics & Sentiment Telemetry")
 
     if not st.session_state.db:
         st.warning("⚠️ Please connect to the database in the sidebar before analyzing feedback.")
