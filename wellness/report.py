@@ -1,6 +1,6 @@
 """Typed report models for wellness text analysis."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any
 
@@ -40,6 +40,10 @@ class AnalysisReport:
     sentiment_scores: SentimentScores
     sentiment_label: SentimentLabel
     counts: dict[str, int]
+    vader_input_text: str = ""
+    dominant_emotion: str = "neutral"
+    emotion_scores: dict[str, float] = field(default_factory=dict)
+    recommendations: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-serializable machine-readable report."""
@@ -49,6 +53,10 @@ class AnalysisReport:
             "tokens": list(self.tokens),
             "sentiment_scores": asdict(self.sentiment_scores),
             "sentiment_label": self.sentiment_label.value,
+            "vader_input_text": self.vader_input_text,
+            "dominant_emotion": self.dominant_emotion,
+            "emotion_scores": self.emotion_scores,
+            "recommendations": self.recommendations,
         }
 
     def to_human_readable(self) -> str:
@@ -65,6 +73,7 @@ class AnalysisReport:
                 f"Processed text: {self.processed_text or '(no tokens)'}",
                 f"Tokens: {', '.join(self.tokens) or '(none)'}",
                 f"Sentiment: {self.sentiment_label.value}",
+                f"Dominant Emotion: {self.dominant_emotion}",
                 (
                     f"Scores: negative={scores.negative:.3f}, neutral={scores.neutral:.3f}, "
                     f"positive={scores.positive:.3f}, compound={scores.compound:.3f}"

@@ -37,10 +37,12 @@ venv.bak/
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
 
-# Pytest & testing
+# Pytest & Linter Cache
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
+*.log
 
 # Environments & IDEs
 .env
@@ -48,15 +50,18 @@ htmlcov/
 .idea/
 *.swp
 *.swo
+
+# Local SQLite databases (strictly never committed to git)
 *.db
 *.sqlite
 *.sqlite3
+wellness.db
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# Large model weights (keep configs/placeholders in repo)
+# Large model weights / caches (keep configs/placeholders in repo)
 *.pt
 *.bin
 *.h5

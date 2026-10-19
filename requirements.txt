@@ -1,0 +1,13 @@
+# Core Dependencies
+nltk>=3.8.1
+pandas>=2.0.0
+plotly>=5.18.0
+streamlit>=1.38.0
+
+# Development & Testing
+pytest>=8.0.0
+ruff>=0.6.0
+
+# Optional Transformer Emotion Intelligence
+transformers>=4.38.0
+torch>=2.0.0

@@ -1,4 +1,4 @@
-import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -13,10 +13,10 @@ from wellness.storage import (
 )
 
 
-def test_connect_database_initializes_tables(tmp_path):
+def test_connect_database_initializes_tables(tmp_path: Path):
     connection = connect_database(tmp_path / "wellness.db")
     tables = {
-        row[0]
+        row["name"]
         for row in connection.execute(
             "SELECT name FROM sqlite_master WHERE type = 'table'"
         ).fetchall()
@@ -26,28 +26,24 @@ def test_connect_database_initializes_tables(tmp_path):
     assert "mood_entries" in tables
 
 
-def test_register_and_authenticate_user():
-    connection = sqlite3.connect(":memory:")
-    connection.execute(
-        "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT UNIQUE, "
-        "password_hash TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP)"
-    )
-    register_user(connection, "Ada Lovelace", "ADA@example.com", "securepass")
-    assert authenticate_user(connection, "ada@example.com", "securepass") == (1, "Ada Lovelace")
+def test_register_and_authenticate_user(tmp_path: Path):
+    connection = connect_database(tmp_path / "wellness.db")
+    register_user(connection, "Ada Lovelace", "ADA@example.com", "securepass123")
+    auth_success = authenticate_user(connection, "ada@example.com", "securepass123")
+    assert auth_success is not None
+    assert auth_success[1] == "Ada Lovelace"
     assert authenticate_user(connection, "ada@example.com", "wrongpass") is None
+    connection.close()
 
 
-def test_registration_validates_input():
-    connection = sqlite3.connect(":memory:")
-    connection.execute(
-        "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT UNIQUE, "
-        "password_hash TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP)"
-    )
-    with pytest.raises(InputValidationError, match="8 characters"):
-        register_user(connection, "Ada", "ada@example.com", "short")
+def test_registration_validates_input(tmp_path: Path):
+    connection = connect_database(tmp_path / "wellness.db")
+    with pytest.raises(InputValidationError, match="6 characters"):
+        register_user(connection, "Ada", "ada@example.com", "123")
+    connection.close()
 
 
-def test_save_and_get_mood_entries(tmp_path):
+def test_save_and_get_mood_entries_with_emotion_telemetry(tmp_path: Path):
     connection = connect_database(tmp_path / "wellness.db")
     register_user(connection, "User One", "user1@example.com", "password123")
     user = authenticate_user(connection, "user1@example.com", "password123")
@@ -55,18 +51,21 @@ def test_save_and_get_mood_entries(tmp_path):
     user_id = user[0]
 
     entry_id = save_mood_entry(
-        connection,
-        user_id,
-        "text",
-        "direct text",
-        "I feel happy and productive.",
-        "i feel happy and productive",
-        ("feel", "happy", "productive"),
-        "positive",
-        0.0,
-        0.3,
-        0.7,
-        0.65,
+        connection=connection,
+        user_id=user_id,
+        source_type="text",
+        source_name="direct text",
+        original_text="I feel happy and productive.",
+        cleaned_text="i feel happy and productive",
+        tokens=("feel", "happy", "productive"),
+        sentiment_label="positive",
+        neg_score=0.0,
+        neu_score=0.3,
+        pos_score=0.7,
+        compound_score=0.65,
+        dominant_emotion="joy",
+        emotion_scores={"joy": 0.85, "neutral": 0.15},
+        recommendation={"title": "Keep up the momentum"},
     )
     assert entry_id > 0
 
@@ -74,10 +73,10 @@ def test_save_and_get_mood_entries(tmp_path):
     assert len(entries) == 1
     assert entries[0]["sentiment_label"] == "positive"
     assert entries[0]["compound_score"] == 0.65
+    assert entries[0]["dominant_emotion"] == "joy"
     assert "happy" in entries[0]["tokens"]
 
     # Test delete
     assert delete_mood_entry(connection, entry_id, user_id) is True
     assert len(get_user_mood_entries(connection, user_id)) == 0
     connection.close()
-
