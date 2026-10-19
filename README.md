@@ -1,13 +1,16 @@
 # 🧠 MoodMentor: AI-Powered Employee Wellness Platform
 
 [![CI](https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform/actions/workflows/ci.yml/badge.svg)](https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform/actions)
+[![Deploy to GitHub Pages](https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform/actions/workflows/deploy.yml/badge.svg)](https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform/actions/workflows/deploy.yml)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Showcase-brightgreen?logo=github)](https://deekshag96.github.io/AI_Based_Employee_Wellness_Management_Platform/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.38+-FF4B4B.svg)](https://streamlit.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > **Infosys Springboard Virtual Internship**  
-> **Student:** Deeksha Ganesh ([@DeekshaG96](https://github.com/DeekshaG96)) • **Report:** [Milestone 1 Documentation PDF](docs/Milestone1_Documentation.pdf)
+> **Student:** Deeksha Ganesh ([@DeekshaG96](https://github.com/DeekshaG96)) • **Report:** [Milestone 1 Documentation PDF](docs/Milestone1_Documentation.pdf)  
+> **🌐 Live Deployment:** [https://deekshag96.github.io/AI_Based_Employee_Wellness_Management_Platform/](https://deekshag96.github.io/AI_Based_Employee_Wellness_Management_Platform/)
 
 **MoodMentor** is an intelligent workplace mental health and emotion telemetry platform. It analyzes emotional tone from employee feedback, journal entries, 1-on-1 notes, and pulse surveys using a standardized NLP pipeline, precision VADER sentiment scoring, fine-grained Transformer emotion classification, and persistent SQLite relational storage.
 
