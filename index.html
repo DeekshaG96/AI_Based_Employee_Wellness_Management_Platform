@@ -45,7 +45,7 @@
       line-height: 1.6;
     }
 
-    /* Background Ambient Lighting */
+    /* Ambient Lighting Mesh */
     .bg-mesh {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
@@ -57,19 +57,19 @@
       pointer-events: none;
     }
 
-    /* Navigation */
+    /* Top Sticky Header */
     header {
       position: sticky;
       top: 0;
       z-index: 100;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      background: rgba(7, 9, 14, 0.85);
+      background: rgba(7, 9, 14, 0.88);
       border-bottom: 1px solid var(--card-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 2.5rem;
+      padding: 0.9rem 2.5rem;
       transition: all 0.3s ease;
     }
 
@@ -126,7 +126,7 @@
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
     }
     .status-badge {
       display: inline-flex;
@@ -139,6 +139,7 @@
       font-size: 0.78rem;
       font-weight: 600;
       color: #34d399;
+      margin-right: 0.25rem;
     }
     .status-dot {
       width: 7px;
@@ -158,15 +159,16 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.55rem;
-      padding: 0.65rem 1.35rem;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
       border-radius: 10px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       text-decoration: none;
       transition: all 0.25s ease;
       cursor: pointer;
       border: none;
+      white-space: nowrap;
     }
     .btn-primary {
       background: var(--gradient-brand);
@@ -184,7 +186,7 @@
     }
     .btn-secondary:hover {
       background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.25);
     }
     .btn-accent {
       background: rgba(56, 189, 248, 0.12);
@@ -195,50 +197,163 @@
       background: rgba(56, 189, 248, 0.22);
       border-color: var(--accent-cyan);
     }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: #ef4444;
+      color: #fff;
+    }
 
-    /* User Header Pill */
-    .user-pill {
+    /* Standard User Profile Menu & Dropdown */
+    .user-menu-container {
+      position: relative;
       display: none;
+    }
+    .user-menu-btn {
+      display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.65rem;
       padding: 0.35rem 0.85rem;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 9999px;
-      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .user-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: var(--accent-cyan);
     }
     .user-avatar {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: var(--gradient-brand);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+    .user-name-text {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+    .user-caret {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+    .user-menu-container.open .user-caret {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown Flyout */
+    .user-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 290px;
+      background: #0e131f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 1.1rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65);
+      z-index: 200;
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    .user-menu-container.open .user-dropdown-menu {
+      display: block;
+    }
+    .dropdown-user-header {
+      padding-bottom: 0.85rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .dropdown-full-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #fff;
     }
-    .btn-logout {
+    .dropdown-email {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+    .dropdown-meta-badges {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .meta-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+    }
+    .dropdown-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+    .dropdown-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
       background: none;
       border: none;
-      color: var(--text-muted);
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      font-weight: 500;
       cursor: pointer;
-      font-size: 0.8rem;
-      transition: color 0.2s;
+      text-align: left;
+      width: 100%;
+      transition: all 0.15s ease;
+      text-decoration: none;
     }
-    .btn-logout:hover { color: #f87171; }
+    .dropdown-action-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+    .dropdown-action-btn.danger {
+      color: #f87171;
+      margin-top: 0.35rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 0.65rem;
+    }
+    .dropdown-action-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fff;
+    }
 
-    /* Session Banner */
+    /* Workspace Session Banner */
     .session-banner {
-      display: none;
       background: linear-gradient(90deg, rgba(56, 189, 248, 0.12) 0%, rgba(99, 102, 241, 0.12) 100%);
       border: 1px solid rgba(56, 189, 248, 0.3);
       border-radius: 14px;
       padding: 0.85rem 1.5rem;
       margin-bottom: 2rem;
+      display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
       animation: fadeIn 0.4s ease;
     }
     .session-info {
@@ -260,13 +375,13 @@
     main {
       max-width: 1240px;
       margin: 0 auto;
-      padding: 2.5rem 1.5rem 5rem;
+      padding: 2rem 1.5rem 5rem;
     }
 
     /* Hero Section */
     .hero {
       text-align: center;
-      padding: 3.5rem 1rem 4rem;
+      padding: 3rem 1rem 3.5rem;
       position: relative;
     }
     .hero-pill {
@@ -310,7 +425,7 @@
       flex-wrap: wrap;
     }
 
-    /* Key Metrics Strip */
+    /* Metrics Strip */
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -351,7 +466,7 @@
     }
 
     /* =========================================================================
-       15-Second Mood Check-in Studio (AuraWell / Employee Mood Index Inspired)
+       15-Second Daily Mood Check-In Studio (AuraWell / Employee Mood Index)
        ========================================================================= */
     .checkin-section {
       background: linear-gradient(180deg, rgba(14, 19, 31, 0.95) 0%, rgba(9, 13, 22, 0.98) 100%);
@@ -390,8 +505,20 @@
       font-size: 0.95rem;
       margin-top: 0.25rem;
     }
+    .user-session-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      font-weight: 600;
+    }
 
-    /* 5-Point Mood Rating Selector Cards */
+    /* 5-Point Mood Selector */
     .mood-selector-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -426,12 +553,8 @@
       filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
       transition: transform 0.2s ease;
     }
-    .mood-card:hover .mood-emoji {
-      transform: scale(1.15);
-    }
-    .mood-card.active .mood-emoji {
-      transform: scale(1.2);
-    }
+    .mood-card:hover .mood-emoji { transform: scale(1.15); }
+    .mood-card.active .mood-emoji { transform: scale(1.2); }
     .mood-label {
       font-weight: 700;
       font-size: 0.86rem;
@@ -443,7 +566,7 @@
       color: var(--text-muted);
     }
 
-    /* Step Subheadings & Chip Collections */
+    /* Step Labels & Chips */
     .step-label {
       font-size: 0.82rem;
       font-weight: 700;
@@ -494,14 +617,13 @@
       box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
     }
 
-    /* Check-in 2-Column Split: Reflection Input vs Real-Time AI Telemetry */
+    /* Check-in 2-Column Grid */
     .checkin-grid {
       display: grid;
       grid-template-columns: 1.15fr 0.85fr;
       gap: 1.5rem;
       align-items: start;
     }
-
     .input-box-wrapper {
       display: flex;
       flex-direction: column;
@@ -556,7 +678,7 @@
       color: var(--text-muted);
     }
 
-    /* Live Telemetry Output Card */
+    /* Output Panel */
     .telemetry-output-panel {
       background: rgba(10, 14, 24, 0.85);
       border: 1px solid var(--card-border);
@@ -644,7 +766,7 @@
       line-height: 1.5;
     }
 
-    /* NLP Pipeline Breakdown */
+    /* Pipeline Strip */
     .pipeline-inspector-strip {
       margin-top: 1.25rem;
       padding: 1.1rem 1.4rem;
@@ -675,7 +797,7 @@
     }
 
     /* =========================================================================
-       Executive Wellbeing & Department Analytics (AuraWell Admin Dashboard Inspired)
+       Executive Wellbeing & Department Analytics (AuraWell Admin Inspired)
        ========================================================================= */
     .analytics-section {
       background: var(--card-bg);
@@ -706,7 +828,7 @@
       margin-top: 0.25rem;
     }
 
-    /* Department Filter Pills */
+    /* Department Filter Tabs */
     .dept-tabs {
       display: flex;
       gap: 0.5rem;
@@ -734,7 +856,7 @@
       box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
     }
 
-    /* Executive KPI Grid */
+    /* KPI Grid */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -819,7 +941,6 @@
       border-radius: 50%;
     }
 
-    /* SVG Chart */
     .timeline-svg {
       width: 100%;
       height: 220px;
@@ -858,7 +979,7 @@
       fill: #38bdf8;
     }
 
-    /* Breakdown 2-Column: Drivers/Detractors vs Feelings Distribution */
+    /* Breakdown 2-Column Split */
     .analytics-split {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1035,12 +1156,13 @@
       font-size: 1.05rem;
     }
 
-    /* Modal */
+    /* Modal Overlay & Card */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(3, 5, 8, 0.82);
-      backdrop-filter: blur(12px);
+      background: rgba(3, 5, 8, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       z-index: 999;
       display: none;
       align-items: center;
@@ -1052,11 +1174,11 @@
     .modal-card {
       background: #0e131f;
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
+      border-radius: 22px;
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       padding: 2.25rem;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 25px 65px rgba(0, 0, 0, 0.7);
       position: relative;
       animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -1085,12 +1207,12 @@
     }
     .modal-tab-btn {
       flex: 1;
-      padding: 0.65rem 0.5rem;
+      padding: 0.7rem 0.5rem;
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
       color: var(--text-secondary);
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
@@ -1100,12 +1222,12 @@
       border-bottom-color: var(--accent-cyan);
     }
     .form-group {
-      margin-bottom: 1rem;
+      margin-bottom: 1.1rem;
       text-align: left;
     }
     .form-group label {
       display: block;
-      font-size: 0.82rem;
+      font-size: 0.84rem;
       font-weight: 600;
       color: var(--text-secondary);
       margin-bottom: 0.4rem;
@@ -1120,9 +1242,73 @@
       font-family: inherit;
       font-size: 0.92rem;
       outline: none;
+      transition: border-color 0.2s;
     }
     .form-input:focus {
       border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Password Input with Show/Hide Toggle */
+    .password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .password-input-wrapper .form-input {
+      padding-right: 2.75rem;
+    }
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.85rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem;
+      transition: color 0.2s;
+    }
+    .password-toggle-btn:hover {
+      color: var(--text-primary);
+    }
+
+    /* Persona Quick Cards */
+    .persona-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .persona-card:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.35);
+      transform: translateX(4px);
+    }
+    .persona-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .persona-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
     }
 
     /* Toast Notification */
@@ -1242,38 +1428,72 @@
         <span>AI Engine Online</span>
       </div>
 
-      <!-- Authenticated User Avatar -->
-      <div id="userHeaderPill" class="user-pill">
-        <div id="userAvatar" class="user-avatar">DE</div>
-        <span id="userNameHeader" style="font-weight: 600; color: #f8fafc;">Demo Staff</span>
-        <button class="btn-logout" onclick="handleLogout()" title="Sign Out">Sign Out</button>
+      <!-- Logged-Out Actions -->
+      <div id="loggedOutActions" style="display: flex; align-items: center; gap: 0.65rem;">
+        <button class="btn btn-secondary" onclick="openAuthModal('login')">
+          <span>Sign In</span>
+        </button>
+        <button class="btn btn-primary" onclick="openAuthModal('register')">
+          <span>Create Account</span>
+        </button>
+        <button class="btn btn-accent" onclick="openAuthModal('demo')">
+          <span>⚡ 1-Click Demo</span>
+        </button>
       </div>
 
-      <button id="authHeaderBtn" class="btn btn-accent" onclick="openAuthModal('login')">
-        <span>🔐</span>
-        <span>Sign In</span>
-      </button>
+      <!-- Logged-In User Profile Menu & Dropdown -->
+      <div id="loggedInUserMenu" class="user-menu-container">
+        <div class="user-menu-btn" onclick="toggleUserDropdown(event)">
+          <div id="headerAvatar" class="user-avatar">DG</div>
+          <span id="headerUserName" class="user-name-text">Deeksha Ganesh</span>
+          <span class="user-caret">▼</span>
+        </div>
 
-      <button class="btn btn-primary" onclick="openAuthModal('demo')">
-        <span>⚡ 1-Click Demo</span>
-      </button>
+        <!-- Dropdown Flyout -->
+        <div id="userDropdownFlyout" class="user-dropdown-menu">
+          <div class="dropdown-user-header">
+            <div id="dropdownFullName" class="dropdown-full-name">Deeksha Ganesh</div>
+            <div id="dropdownEmail" class="dropdown-email">deeksha@moodmentor.ai</div>
+            <div class="dropdown-meta-badges">
+              <span id="dropdownDept" class="meta-badge">Engineering & Product</span>
+              <span id="dropdownRole" class="meta-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">Lead Staff Engineer</span>
+            </div>
+          </div>
+
+          <div class="dropdown-items-list">
+            <a href="#checkin" class="dropdown-action-btn" onclick="closeUserDropdown()">
+              <span>⚡</span> 15s Daily Check-in Studio
+            </a>
+            <a href="#analytics" class="dropdown-action-btn" onclick="closeUserDropdown()">
+              <span>📈</span> Department Morale Analytics
+            </a>
+            <button class="dropdown-action-btn" onclick="openAuthModal('demo'); closeUserDropdown();">
+              <span>🔄</span> Switch Demo Persona
+            </button>
+          </div>
+
+          <button class="dropdown-action-btn danger" onclick="handleLogout()">
+            <span>🚪</span> Sign Out of Workspace
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
   <main>
-    <!-- Authenticated Session Banner -->
+    <!-- Workspace Session Banner (Adapts dynamically between Logged-In and Guest Mode) -->
     <div id="sessionBanner" class="session-banner">
       <div class="session-info">
-        <div class="session-badge">Private Session Active</div>
+        <div id="sessionBannerBadge" class="session-badge">Private Session Active</div>
         <div>
-          <strong id="sessionGreeting">Welcome back, Demo Staff!</strong>
-          <div style="font-size: 0.82rem; color: #94a3b8;">
-            Zero-Knowledge PBKDF2 Encryption • <span id="sessionStreak">🔥 14-day check-in streak</span> • Department: Engineering & Product
+          <strong id="sessionGreeting">Welcome back, Deeksha Ganesh!</strong>
+          <div id="sessionSubtext" style="font-size: 0.82rem; color: #94a3b8;">
+            Zero-Knowledge PBKDF2 Encryption • <span id="sessionStreak">🔥 15-day check-in streak</span> • Department: Engineering & Product
           </div>
         </div>
       </div>
-      <div>
-        <button class="btn btn-secondary" onclick="handleLogout()" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
+      <div id="sessionBannerActions">
+        <button class="btn btn-secondary" onclick="handleLogout()" style="padding: 0.4rem 0.95rem; font-size: 0.82rem;">
           Sign Out
         </button>
       </div>
@@ -1293,12 +1513,12 @@
         <a href="#checkin" class="btn btn-primary">
           <span>⚡ Launch 15s Check-in Studio</span>
         </a>
-        <button class="btn btn-secondary" onclick="openAuthModal('demo')">
-          <span>🚀 Instant 1-Click Demo Login</span>
+        <button class="btn btn-secondary" onclick="openAuthModal('login')">
+          <span>🔐 Employee Sign In</span>
         </button>
-        <a href="#analytics" class="btn btn-accent">
-          <span>📈 Executive Wellbeing Index</span>
-        </a>
+        <button class="btn btn-accent" onclick="openAuthModal('demo')">
+          <span>🚀 Instant 1-Click Demo</span>
+        </button>
       </div>
     </section>
 
@@ -1335,8 +1555,9 @@
           <h2><span>⚡</span> 15-Second Daily Mood Check-In Studio</h2>
           <div class="checkin-sub">Select your emotional state, identify workplace contributors, and receive instant AI affect telemetry.</div>
         </div>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-          <span style="font-size: 0.85rem; color: #34d399; font-weight: 600;">● Live Affect Scoring</span>
+        <div class="user-session-indicator">
+          <span>👤</span>
+          <span id="checkinProfileLabel">Checking in as: Deeksha Ganesh (Engineering & Product)</span>
         </div>
       </div>
 
@@ -1794,51 +2015,88 @@
         </p>
       </div>
 
+      <!-- Standard Auth Tabs -->
       <div class="modal-tabs">
-        <button id="modalTabDemo" class="modal-tab-btn active" onclick="switchModalTab('demo')">⚡ 1-Click Demo</button>
-        <button id="modalTabLogin" class="modal-tab-btn" onclick="switchModalTab('login')">🔑 Sign In</button>
-        <button id="modalTabRegister" class="modal-tab-btn" onclick="switchModalTab('register')">📝 Register</button>
+        <button id="modalTabLogin" class="modal-tab-btn active" onclick="switchModalTab('login')">🔑 Sign In</button>
+        <button id="modalTabRegister" class="modal-tab-btn" onclick="switchModalTab('register')">📝 Create Account</button>
+        <button id="modalTabDemo" class="modal-tab-btn" onclick="switchModalTab('demo')">⚡ 1-Click Demo</button>
       </div>
 
-      <!-- Pane 1: 1-Click Demo -->
-      <div id="modalPaneDemo">
-        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem;">
-          <div style="font-weight: 700; font-size: 0.9rem; color: #fff; margin-bottom: 0.25rem;">Pre-Authorized Staff Account:</div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent-cyan);">
-            demo@moodmentor.ai • DemoPass123!
-          </div>
-          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem;">
-            Department: Product Engineering • Role: Senior Staff Engineer
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="quickDemoLogin()" style="width: 100%; padding: 0.8rem;">
-          🚀 Enter Workspace as Demo Staff
-        </button>
-      </div>
-
-      <!-- Pane 2: Sign In -->
-      <div id="modalPaneLogin" style="display: none;">
+      <!-- Tab 1: Sign In -->
+      <div id="modalPaneLogin">
         <form onsubmit="handleModalLogin(event)">
           <div class="form-group">
             <label for="modalEmail">Work Email Address</label>
-            <input id="modalEmail" type="email" class="form-input" placeholder="e.g. staff@company.com" required value="demo@moodmentor.ai">
+            <input id="modalEmail" type="email" class="form-input" placeholder="e.g. deeksha@company.com" required value="deeksha@moodmentor.ai">
           </div>
+
           <div class="form-group">
             <label for="modalPassword">Password</label>
-            <input id="modalPassword" type="password" class="form-input" placeholder="••••••••••••" required value="DemoPass123!">
+            <div class="password-input-wrapper">
+              <input id="modalPassword" type="password" class="form-input" placeholder="Enter your password" required value="DemoPass123!">
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('modalPassword', this)" title="Show/Hide Password">
+                👁️
+              </button>
+            </div>
           </div>
-          <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
-            <button type="submit" class="btn btn-primary" style="flex: 1;">
-              Sign In
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="fillModalDemo()">
-              Autofill Demo
-            </button>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; font-size: 0.82rem;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; color: var(--text-secondary); cursor: pointer;">
+              <input type="checkbox" checked style="accent-color: var(--accent-cyan);"> Remember me for 30 days
+            </label>
+            <a href="javascript:void(0)" onclick="showToast('Password reset link sent to registered email.')" style="color: var(--accent-cyan); text-decoration: none;">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
+            Sign In to Workspace
+          </button>
+
+          <!-- Quick Persona Selector Divider -->
+          <div style="text-align: center; margin: 1.5rem 0 1rem; position: relative;">
+            <div style="height: 1px; background: rgba(255,255,255,0.08); width: 100%;"></div>
+            <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #0e131f; padding: 0 0.75rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">
+              Or sign in instantly with a persona
+            </span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div class="persona-card" onclick="loginAsPersona('deeksha')">
+              <div class="persona-info">
+                <div class="persona-avatar" style="background: var(--gradient-brand);">DG</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Deeksha Ganesh</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Lead Staff Engineer • Product & Tech</div>
+                </div>
+              </div>
+              <span class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">Login</span>
+            </div>
+
+            <div class="persona-card" onclick="loginAsPersona('sarah')">
+              <div class="persona-info">
+                <div class="persona-avatar" style="background: linear-gradient(135deg, #10b981 0%, #38bdf8 100%);">SJ</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Sarah Jenkins</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">People & Culture Director • HR</div>
+                </div>
+              </div>
+              <span class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">Login</span>
+            </div>
+
+            <div class="persona-card" onclick="loginAsPersona('marcus')">
+              <div class="persona-info">
+                <div class="persona-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);">MC</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Marcus Chen</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Operations Lead • Infrastructure</div>
+                </div>
+              </div>
+              <span class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">Login</span>
+            </div>
           </div>
         </form>
       </div>
 
-      <!-- Pane 3: Register -->
+      <!-- Tab 2: Create Account / Register -->
       <div id="modalPaneRegister" style="display: none;">
         <form onsubmit="handleModalRegister(event)">
           <div class="form-group">
@@ -1859,20 +2117,48 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="regModalPass">Password (Min 6 Characters)</label>
-            <input id="regModalPass" type="password" class="form-input" placeholder="••••••••••••" minlength="6" required>
+            <label for="regModalRole">Role / Job Title</label>
+            <input id="regModalRole" type="text" class="form-input" placeholder="e.g. Senior Software Engineer" value="Software Engineer">
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.75rem;">
+          <div class="form-group">
+            <label for="regModalPass">Password (Min 6 Characters)</label>
+            <div class="password-input-wrapper">
+              <input id="regModalPass" type="password" class="form-input" placeholder="Choose a secure password" minlength="6" required>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('regModalPass', this)" title="Show/Hide Password">
+                👁️
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem; font-size: 0.95rem;">
             Create Staff Account
           </button>
+          <div style="text-align: center; margin-top: 1rem; font-size: 0.82rem; color: var(--text-secondary);">
+            Already have an account? <a href="javascript:void(0)" onclick="switchModalTab('login')" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">Sign In</a>
+          </div>
         </form>
+      </div>
+
+      <!-- Tab 3: 1-Click Demo -->
+      <div id="modalPaneDemo" style="display: none;">
+        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 1.4rem; margin-bottom: 1.5rem;">
+          <div style="font-weight: 700; font-size: 0.95rem; color: #fff; margin-bottom: 0.4rem;">Pre-Authorized Enterprise Session</div>
+          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 1rem;">
+            Launches an authenticated workspace loaded with 30 days of longitudinal check-in history, 15-day streak progression, and executive department drilldown telemetry.
+          </p>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent-cyan); background: rgba(0,0,0,0.3); padding: 0.5rem 0.85rem; border-radius: 8px;">
+            Account: deeksha@moodmentor.ai • Role: Lead Staff Engineer
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="loginAsPersona('deeksha')" style="width: 100%; padding: 0.85rem; font-size: 0.95rem;">
+          🚀 Launch Demo as Deeksha Ganesh
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast">
-    <div style="font-size: 1.3rem;">🎉</div>
+    <div id="toastIcon" style="font-size: 1.3rem;">🎉</div>
     <div id="toastMessage" style="font-size: 0.9rem; font-weight: 500;">Authenticated successfully!</div>
   </div>
 
@@ -1898,16 +2184,16 @@
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Platform</h4>
+        <h4>Account & Access</h4>
         <ul>
+          <li><a href="javascript:void(0)" onclick="openAuthModal('login')">Employee Sign In</a></li>
+          <li><a href="javascript:void(0)" onclick="openAuthModal('register')">Create Account</a></li>
           <li><a href="javascript:void(0)" onclick="openAuthModal('demo')">1-Click Demo</a></li>
-          <li><a href="javascript:void(0)" onclick="openAuthModal('login')">Sign In</a></li>
-          <li><a href="javascript:void(0)" onclick="openAuthModal('register')">Register Account</a></li>
-          <li><a href="https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform" target="_blank">Source Code</a></li>
+          <li><a href="https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform" target="_blank">Source Repository</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Security</h4>
+        <h4>Security & Ethics</h4>
         <ul>
           <li><a href="javascript:void(0)" onclick="showToast('Zero-knowledge PBKDF2 encryption verified')">Data Privacy</a></li>
           <li><a href="javascript:void(0)" onclick="showToast('Ethical AI crisis screen active')">Crisis Safeguards</a></li>
@@ -1927,7 +2213,34 @@
   </footer>
 
   <script>
-    // --- Data Definitions (Inspired by AuraWell / Employee-Mood-Index) ---
+    // --- Personas Definition for Seamless Demo / Auth ---
+    const PERSONAS = {
+      deeksha: {
+        name: "Deeksha Ganesh",
+        email: "deeksha@moodmentor.ai",
+        dept: "Engineering & Product",
+        role: "Lead Staff Engineer",
+        streak: "15-day streak",
+        initials: "DG"
+      },
+      sarah: {
+        name: "Sarah Jenkins",
+        email: "sarah@moodmentor.ai",
+        dept: "People & Culture",
+        role: "People & Culture Director",
+        streak: "21-day streak",
+        initials: "SJ"
+      },
+      marcus: {
+        name: "Marcus Chen",
+        email: "marcus@moodmentor.ai",
+        dept: "Operations & Support",
+        role: "Senior Operations Lead",
+        streak: "9-day streak",
+        initials: "MC"
+      }
+    };
+
     const FEELINGS_BY_MOOD = {
       5: ['Happy', 'Excited', 'Grateful', 'Inspired', 'Confident', 'Energetic', 'Proud', 'Optimistic'],
       4: ['Content', 'Calm', 'Productive', 'Focused', 'Relaxed', 'Hopeful', 'Satisfied', 'Positive'],
@@ -2033,6 +2346,14 @@
       renderFeelingChips(selectedMood);
       renderTimelineChart(DEPARTMENT_DATA.all.timeline);
       selectScenarioPreset('joy', document.querySelector('.preset-pill'));
+
+      // Close user dropdown if clicked outside
+      document.addEventListener("click", (e) => {
+        const menu = document.getElementById("loggedInUserMenu");
+        if (menu && !menu.contains(e.target)) {
+          closeUserDropdown();
+        }
+      });
     });
 
     // --- User Session Management ---
@@ -2041,58 +2362,90 @@
       if (saved) {
         try {
           currentUser = JSON.parse(saved);
-          renderAuthState();
         } catch (e) {
-          localStorage.removeItem("moodmentor_user");
+          currentUser = PERSONAS.deeksha;
         }
+      } else {
+        // Default to Deeksha Ganesh persona for immediate active experience
+        currentUser = PERSONAS.deeksha;
+        localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       }
+      renderAuthState();
     }
 
-    function openAuthModal(tab = 'demo') {
+    function toggleUserDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("loggedInUserMenu");
+      menu.classList.toggle("open");
+    }
+
+    function closeUserDropdown() {
+      const menu = document.getElementById("loggedInUserMenu");
+      if (menu) menu.classList.remove("open");
+    }
+
+    function openAuthModal(tab = 'login') {
       document.getElementById('authModal').classList.add('open');
       switchModalTab(tab);
     }
+
     function closeAuthModal() {
       document.getElementById('authModal').classList.remove('open');
     }
+
     function closeAuthModalOnBackdrop(e) {
       if (e.target.id === 'authModal') closeAuthModal();
     }
+
     function switchModalTab(tab) {
-      document.getElementById('modalTabDemo').classList.toggle('active', tab === 'demo');
       document.getElementById('modalTabLogin').classList.toggle('active', tab === 'login');
       document.getElementById('modalTabRegister').classList.toggle('active', tab === 'register');
-      document.getElementById('modalPaneDemo').style.display = tab === 'demo' ? 'block' : 'none';
+      document.getElementById('modalTabDemo').classList.toggle('active', tab === 'demo');
+
       document.getElementById('modalPaneLogin').style.display = tab === 'login' ? 'block' : 'none';
       document.getElementById('modalPaneRegister').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('modalPaneDemo').style.display = tab === 'demo' ? 'block' : 'none';
     }
 
-    function quickDemoLogin() {
-      currentUser = {
-        name: "Demo Staff",
-        email: "demo@moodmentor.ai",
-        dept: "Engineering & Product",
-        streak: "15-day streak"
-      };
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "👁️‍🗨️";
+      } else {
+        input.type = "password";
+        btn.textContent = "👁️";
+      }
+    }
+
+    function loginAsPersona(key) {
+      const persona = PERSONAS[key] || PERSONAS.deeksha;
+      currentUser = persona;
       localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       renderAuthState();
       closeAuthModal();
-      showToast("Signed in as Demo Staff! Workspace unlocked.");
+      showToast(`Welcome back, ${persona.name}! Authenticated as ${persona.role}.`);
     }
 
     function handleModalLogin(e) {
       e.preventDefault();
       const email = document.getElementById("modalEmail").value.trim();
+      const rawName = email.split("@")[0].replace(/[._-]/g, " ");
+      const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+      const initials = name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase() || "EM";
+
       currentUser = {
-        name: email.split("@")[0].replace(".", " ").toUpperCase(),
+        name: name,
         email: email,
         dept: "Engineering & Product",
-        streak: "7-day streak"
+        role: "Team Member",
+        streak: "5-day streak",
+        initials: initials
       };
       localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       renderAuthState();
       closeAuthModal();
-      showToast(`Welcome back, ${currentUser.name}!`);
+      showToast(`Signed in successfully as ${currentUser.name}!`);
     }
 
     function handleModalRegister(e) {
@@ -2100,49 +2453,88 @@
       const name = document.getElementById("regModalName").value.trim();
       const email = document.getElementById("regModalEmail").value.trim();
       const dept = document.getElementById("regModalDept").value;
+      const role = document.getElementById("regModalRole").value.trim() || "Staff Member";
+      const initials = name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
+
       currentUser = {
         name: name,
         email: email,
         dept: dept,
-        streak: "1-day streak"
+        role: role,
+        streak: "1-day streak",
+        initials: initials
       };
       localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       renderAuthState();
       closeAuthModal();
-      showToast(`Staff Account created for ${name}!`);
-    }
-
-    function fillModalDemo() {
-      document.getElementById("modalEmail").value = "demo@moodmentor.ai";
-      document.getElementById("modalPassword").value = "DemoPass123!";
+      showToast(`Welcome, ${name}! Your account has been registered.`);
     }
 
     function handleLogout() {
       currentUser = null;
       localStorage.removeItem("moodmentor_user");
       renderAuthState();
-      showToast("Signed out of secure session.");
+      closeUserDropdown();
+      showToast("Signed out. You are now in Guest Mode.");
     }
 
     function renderAuthState() {
-      const banner = document.getElementById("sessionBanner");
-      const userPill = document.getElementById("userHeaderPill");
-      const authBtn = document.getElementById("authHeaderBtn");
+      const loggedOutDiv = document.getElementById("loggedOutActions");
+      const loggedInMenu = document.getElementById("loggedInUserMenu");
+      const bannerGreeting = document.getElementById("sessionGreeting");
+      const bannerSubtext = document.getElementById("sessionSubtext");
+      const bannerBadge = document.getElementById("sessionBannerBadge");
+      const bannerActions = document.getElementById("sessionBannerActions");
+      const checkinLabel = document.getElementById("checkinProfileLabel");
 
       if (currentUser) {
-        banner.style.display = "flex";
-        userPill.style.display = "flex";
-        authBtn.style.display = "none";
-        
-        const initials = currentUser.name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
-        document.getElementById("userAvatar").textContent = initials;
-        document.getElementById("userNameHeader").textContent = currentUser.name;
-        document.getElementById("sessionGreeting").textContent = `Welcome back, ${currentUser.name}!`;
-        document.getElementById("sessionStreak").textContent = `🔥 ${currentUser.streak || "14-day streak"} • Dept: ${currentUser.dept}`;
+        loggedOutDiv.style.display = "none";
+        loggedInMenu.style.display = "block";
+
+        const initials = currentUser.initials || "DG";
+        document.getElementById("headerAvatar").textContent = initials;
+        document.getElementById("headerUserName").textContent = currentUser.name;
+
+        document.getElementById("dropdownFullName").textContent = currentUser.name;
+        document.getElementById("dropdownEmail").textContent = currentUser.email;
+        document.getElementById("dropdownDept").textContent = currentUser.dept;
+        document.getElementById("dropdownRole").textContent = currentUser.role || "Staff Member";
+
+        bannerBadge.textContent = "Private Session Active";
+        bannerGreeting.textContent = `Welcome back, ${currentUser.name}!`;
+        bannerSubtext.innerHTML = `Zero-Knowledge PBKDF2 Encryption • <span id="sessionStreak">🔥 ${currentUser.streak || "14-day streak"}</span> • Dept: ${currentUser.dept}`;
+
+        bannerActions.innerHTML = `
+          <button class="btn btn-secondary" onclick="handleLogout()" style="padding: 0.4rem 0.95rem; font-size: 0.82rem;">
+            Sign Out
+          </button>
+        `;
+
+        if (checkinLabel) {
+          checkinLabel.textContent = `Checking in as: ${currentUser.name} (${currentUser.dept})`;
+        }
       } else {
-        banner.style.display = "none";
-        userPill.style.display = "none";
-        authBtn.style.display = "inline-flex";
+        loggedOutDiv.style.display = "flex";
+        loggedInMenu.style.display = "none";
+
+        bannerBadge.textContent = "Guest Mode";
+        bannerGreeting.textContent = "Welcome to MoodMentor Platform";
+        bannerSubtext.textContent = "Sign in or try the 1-Click Demo to save reflections and unlock your personal wellness streak.";
+
+        bannerActions.innerHTML = `
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="openAuthModal('login')" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
+              Sign In
+            </button>
+            <button class="btn btn-primary" onclick="openAuthModal('demo')" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
+              ⚡ 1-Click Demo
+            </button>
+          </div>
+        `;
+
+        if (checkinLabel) {
+          checkinLabel.textContent = "Browsing in Guest Mode (Sign in to record to your personal timeline)";
+        }
       }
     }
 
@@ -2201,14 +2593,12 @@
 
       const scenario = PRESET_SCENARIOS[key];
       if (scenario) {
-        // Set mood card
         selectedMood = scenario.mood;
         const moodCards = document.querySelectorAll(".mood-card");
         moodCards.forEach(c => c.classList.remove("active"));
         if (moodCards[selectedMood - 1]) moodCards[selectedMood - 1].classList.add("active");
         renderFeelingChips(selectedMood);
 
-        // Populate text
         document.getElementById("reflectionInput").value = scenario.text;
         runLiveAffectAnalysis();
       }
@@ -2226,13 +2616,14 @@
     }
 
     function submitDailyCheckIn() {
+      const name = currentUser ? currentUser.name : "Guest";
       const streak = currentUser ? "16-day streak" : "1-day streak";
       if (currentUser) {
         currentUser.streak = streak;
         localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
         renderAuthState();
       }
-      showToast(`Daily 15s Check-In Logged! Mood Score: ${selectedMood * 20}/100 • ${streak}`);
+      showToast(`Daily 15s Check-In Recorded for ${name}! Mood Score: ${selectedMood * 20}/100 • ${streak}`);
     }
 
     // --- Real-Time Affect Scoring Engine ---
@@ -2240,7 +2631,6 @@
       const rawText = document.getElementById("reflectionInput").value;
       document.getElementById("charCountLabel").textContent = `${rawText.length} characters`;
 
-      // Dual-track sentiment evaluation
       let compound = 0;
       let emotions = { joy: 0.1, sadness: 0.1, fear: 0.1, anger: 0.05, surprise: 0.05, disgust: 0.05, neutral: 0.55 };
 
@@ -2255,8 +2645,7 @@
         emotions = { sadness: 0.75, fear: 0.18, anger: 0.05, disgust: 0.01, joy: 0.0, surprise: 0.01, neutral: 0.0 };
         displayCrisisOverride();
       } else if (rawText.trim().length === 0) {
-        // Fallback to selectedMood
-        const moodNorm = (selectedMood - 3) / 2; // -1.0 to +1.0
+        const moodNorm = (selectedMood - 3) / 2;
         compound = moodNorm * 0.75;
         if (selectedMood >= 4) {
           emotions = { joy: 0.65, surprise: 0.15, neutral: 0.15, sadness: 0.02, fear: 0.01, anger: 0.01, disgust: 0.01 };
@@ -2266,7 +2655,6 @@
           emotions = { sadness: 0.45, fear: 0.35, anger: 0.12, disgust: 0.05, neutral: 0.02, joy: 0.01, surprise: 0.0 };
         }
       } else {
-        // Lexicon polarity
         const posWords = ["thrilled", "seamlessly", "positive", "valued", "inspired", "happy", "great", "excellent", "proud", "love", "awesome", "good", "productive", "triumph"];
         const negWords = ["exhausted", "overwhelmed", "burned", "anxious", "disconnected", "worried", "frustrated", "wasted", "invalidated", "bad", "terrible", "hard", "friction"];
         
@@ -2354,12 +2742,10 @@
         barsContainer.appendChild(row);
       });
 
-      // Dynamic Recommendation
       if (!isCrisis) {
         renderRecommendation(dominant);
       }
 
-      // Render Linguistic Token Pipeline
       renderLinguisticTokens(rawText);
     }
 
@@ -2448,12 +2834,11 @@
       const svgH = 220;
       const minX = 40;
       const maxX = 880;
-      const minY = 30; // Score 90
-      const maxY = 180; // Score 60
+      const minY = 30;
+      const maxY = 180;
 
       const stepX = (maxX - minX) / (points.length - 1);
 
-      // Convert score (60 to 90) to Y
       function getY(score) {
         const clamped = Math.max(60, Math.min(90, score));
         return maxY - ((clamped - 60) / 30) * (maxY - minY);
@@ -2474,7 +2859,6 @@
           dArea += ` L ${x} ${y}`;
         }
 
-        // Draw dot
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", x);
         circle.setAttribute("cy", y);
@@ -2484,7 +2868,6 @@
         circle.onclick = () => showToast(`Day ${i + 1} Mood Index: ${val}/100`);
         nodesGroup.appendChild(circle);
 
-        // Date Label on every 2nd point
         if (i % 2 === 0) {
           const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
           text.setAttribute("x", x);
