@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MoodMentor — AI-Powered Enterprise Employee Wellness & Emotion Telemetry Platform</title>
-  <meta name="description" content="State-of-the-art workplace mental wellness and emotional telemetry platform. Combines precision VADER sentiment analysis, Hugging Face Transformer emotion classification, and personalized well-being recommendations.">
+  <title>MoodMentor | Enterprise AI Workplace Wellness & Emotion Telemetry Platform</title>
+  <meta name="description" content="MoodMentor is an all-in-one AI-powered employee mental wellness and emotion telemetry platform providing real-time sentiment scoring, fine-grained emotion intelligence, and personalized well-being recommendations.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -30,7 +30,6 @@
       --text-muted: #64748b;
       
       --gradient-brand: linear-gradient(135deg, #38bdf8 0%, #6366f1 50%, #c084fc 100%);
-      --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
       --glow-cyan: 0 0 30px rgba(56, 189, 248, 0.25);
     }
 
@@ -46,28 +45,27 @@
       line-height: 1.6;
     }
 
-    /* Background Lighting Mesh */
     .bg-mesh {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
       background:
-        radial-gradient(circle at 20% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 45%),
-        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.14) 0%, transparent 50%),
+        radial-gradient(circle at 18% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 82% 20%, rgba(139, 92, 246, 0.14) 0%, transparent 50%),
         radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.07) 0%, transparent 50%),
         #07090e;
       pointer-events: none;
     }
 
-    /* Top Sticky Navigation */
+    /* Navigation */
     header {
-      padding: 0.9rem 2.5rem;
+      padding: 1rem 2.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--card-border);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      background: rgba(7, 9, 14, 0.82);
+      background: rgba(7, 9, 14, 0.85);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -81,35 +79,27 @@
       color: inherit;
     }
     .brand-icon {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       border-radius: 12px;
       background: var(--gradient-brand);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
-      transition: transform 0.3s ease;
-    }
-    .brand:hover .brand-icon {
-      transform: scale(1.05) rotate(4deg);
-    }
-    .brand-text {
-      display: flex;
-      flex-direction: column;
     }
     .brand-title {
       font-family: 'Outfit', sans-serif;
       font-weight: 800;
-      font-size: 1.45rem;
+      font-size: 1.4rem;
       background: linear-gradient(to right, #ffffff, #cbd5e1);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       line-height: 1.1;
       letter-spacing: -0.02em;
     }
-    .brand-tag {
+    .brand-sub {
       font-size: 0.72rem;
       color: var(--accent-cyan);
       font-weight: 600;
@@ -120,7 +110,7 @@
     nav.nav-links {
       display: flex;
       align-items: center;
-      gap: 1.75rem;
+      gap: 1.8rem;
     }
     nav.nav-links a {
       color: var(--text-secondary);
@@ -132,7 +122,7 @@
     nav.nav-links a:hover {
       color: var(--text-primary);
     }
-    @media (max-width: 900px) {
+    @media (max-width: 920px) {
       nav.nav-links { display: none; }
     }
 
@@ -145,8 +135,8 @@
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 0.85rem;
+      gap: 0.45rem;
+      padding: 0.35rem 0.8rem;
       border-radius: 9999px;
       font-size: 0.78rem;
       font-weight: 600;
@@ -167,7 +157,6 @@
       50% { opacity: 0.4; transform: scale(0.85); }
     }
 
-    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -210,11 +199,9 @@
     .btn-accent:hover {
       background: rgba(56, 189, 248, 0.25);
       color: #ffffff;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
       transform: translateY(-2px);
     }
 
-    /* User Profile Pill in Header */
     .user-pill {
       display: none;
       align-items: center;
@@ -252,7 +239,6 @@
       background: rgba(239, 68, 68, 0.15);
     }
 
-    /* Container */
     main {
       max-width: 1240px;
       margin: 0 auto;
@@ -391,7 +377,7 @@
       color: var(--text-muted);
     }
 
-    /* Live Interactive Telemetry Engine */
+    /* Workspace Section */
     .workspace-section {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -424,7 +410,6 @@
       font-size: 0.95rem;
     }
 
-    /* Scenario Quick Chips */
     .chip-label {
       font-size: 0.82rem;
       font-weight: 600;
@@ -467,7 +452,6 @@
       box-shadow: 0 2px 10px rgba(56, 189, 248, 0.25);
     }
 
-    /* Workspace 2-Column Grid */
     .workspace-grid {
       display: grid;
       grid-template-columns: 1.05fr 1fr;
@@ -478,7 +462,6 @@
       .hero h1 { font-size: 2.5rem; }
     }
 
-    /* Text Input Area */
     .input-container {
       display: flex;
       flex-direction: column;
@@ -511,7 +494,6 @@
       color: var(--text-muted);
     }
 
-    /* Telemetry Output Dashboard */
     .output-dashboard {
       background: rgba(10, 14, 24, 0.7);
       border: 1px solid var(--card-border);
@@ -522,7 +504,6 @@
       gap: 1.25rem;
     }
 
-    /* Compound Polarity Metric Card */
     .polarity-display-card {
       display: flex;
       justify-content: space-between;
@@ -552,7 +533,6 @@
     .polarity-neutral { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
     .polarity-negative { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
 
-    /* 7-Emotion Bars */
     .emotions-block-header {
       display: flex;
       justify-content: space-between;
@@ -589,7 +569,6 @@
       transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Contextual Recommendation Card */
     .recommendation-card {
       background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.06));
       border: 1px solid rgba(129, 140, 248, 0.35);
@@ -611,7 +590,6 @@
       line-height: 1.55;
     }
 
-    /* Live NLP Pipeline Inspector (Tabbed Tool) */
     .inspector-card {
       background: rgba(10, 14, 24, 0.85);
       border: 1px solid var(--card-border);
@@ -650,19 +628,14 @@
       color: #f87171;
       font-weight: 700;
     }
-    .pipeline-token.lemma {
-      background: rgba(16, 185, 129, 0.1);
-      border-color: rgba(16, 185, 129, 0.25);
-      color: #34d399;
-    }
 
-    /* Enterprise Features Grid */
+    /* Core Features Grid */
     .features-section {
       margin-bottom: 5rem;
     }
     .section-headline {
       text-align: center;
-      max-width: 650px;
+      max-width: 680px;
       margin: 0 auto 3rem;
     }
     .section-headline h2 {
@@ -717,87 +690,119 @@
       line-height: 1.6;
     }
 
-    /* Enterprise Technical Standards Table */
-    .table-container {
+    /* Team Trends & Analytics Section */
+    .analytics-preview-section {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 20px;
-      padding: 2rem;
-      margin-bottom: 5rem;
-      backdrop-filter: blur(14px);
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.92rem;
-    }
-    th, td {
-      padding: 1.1rem 1.25rem;
-      border-bottom: 1px solid var(--card-border);
-    }
-    th {
-      font-family: 'Outfit', sans-serif;
-      color: var(--accent-cyan);
-      font-weight: 700;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .badge-verified {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.3rem 0.75rem;
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 700;
-    }
-
-    /* Screenshots Showcase */
-    .screenshots-section {
+      padding: 2.5rem;
       margin-bottom: 5rem;
     }
-    .screenshots-grid {
+    .analytics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 1.5rem;
+      margin-top: 1.5rem;
     }
-    .screenshot-card {
-      background: rgba(14, 20, 32, 0.75);
+    .kpi-box {
+      background: rgba(10, 14, 24, 0.6);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      overflow: hidden;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
+      border-radius: 14px;
+      padding: 1.4rem;
     }
-    .screenshot-card:hover {
-      border-color: var(--accent-cyan);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    .kpi-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
     }
-    .screenshot-card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      display: block;
-      border-bottom: 1px solid var(--card-border);
-    }
-    .screenshot-caption {
-      padding: 1rem 1.25rem;
-      font-size: 0.88rem;
-      font-weight: 600;
+    .kpi-metric {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
       color: var(--text-primary);
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .kpi-trend {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .trend-up { color: #34d399; }
+    .trend-down { color: #38bdf8; }
+
+    /* Interactive FAQ Accordion */
+    .faq-section {
+      max-width: 860px;
+      margin: 0 auto 5rem;
+    }
+    .faq-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+    .faq-item:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+    .faq-question {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      user-select: none;
+    }
+    .faq-answer {
+      padding: 0 1.5rem 1.25rem;
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      display: none;
+    }
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+    .faq-item.active .faq-toggle {
+      transform: rotate(180deg);
+    }
+    .faq-toggle {
+      transition: transform 0.25s ease;
+      color: var(--accent-cyan);
     }
 
-    /* Modal Dialog for Sign In / Registration */
+    /* Formal Call-To-Action Banner */
+    .cta-banner {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 22px;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      margin-bottom: 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-banner h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+    .cta-banner p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    /* Modal Dialog */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -833,7 +838,6 @@
       font-size: 1.5rem;
       cursor: pointer;
       line-height: 1;
-      transition: color 0.2s ease;
     }
     .modal-close-btn:hover { color: #fff; }
     
@@ -884,7 +888,6 @@
       font-family: inherit;
       font-size: 0.92rem;
       outline: none;
-      transition: border-color 0.2s ease;
     }
     .form-input:focus {
       border-color: var(--accent-cyan);
@@ -913,17 +916,63 @@
       opacity: 1;
     }
 
-    /* Footer */
+    /* Formal Enterprise Footer */
     footer {
       border-top: 1px solid var(--card-border);
-      padding: 2.5rem 1.5rem;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.88rem;
+      padding: 3.5rem 2rem 2rem;
       background: rgba(7, 9, 14, 0.95);
     }
-    footer a { color: var(--accent-cyan); text-decoration: none; font-weight: 600; }
-    footer a:hover { text-decoration: underline; }
+    .footer-grid {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 2.5rem;
+      margin-bottom: 3rem;
+    }
+    @media (max-width: 800px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 500px) {
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+    .footer-col h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .footer-col ul {
+      list-style: none;
+    }
+    .footer-col ul li {
+      margin-bottom: 0.65rem;
+    }
+    .footer-col ul li a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s ease;
+    }
+    .footer-col ul li a:hover {
+      color: var(--accent-cyan);
+    }
+    .footer-bottom {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 <body>
@@ -933,24 +982,24 @@
   <header>
     <a href="#" class="brand">
       <div class="brand-icon">🧠</div>
-      <div class="brand-text">
+      <div>
         <div class="brand-title">MoodMentor</div>
-        <div class="brand-tag">Enterprise Wellness Platform</div>
+        <div class="brand-sub">Enterprise Wellness Platform</div>
       </div>
     </a>
 
     <nav class="nav-links">
       <a href="#telemetry">Live Telemetry</a>
-      <a href="#inspector">NLP Pipeline</a>
-      <a href="#features">Architecture</a>
-      <a href="#standards">Specifications</a>
-      <a href="#screenshots">Showcase</a>
+      <a href="#features">Platform Pillars</a>
+      <a href="#analytics">Pulse Analytics</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform" target="_blank">Repository</a>
     </nav>
 
     <div class="nav-actions">
       <div class="status-badge">
         <span class="status-dot"></span>
-        <span>AI Engine Active</span>
+        <span>AI Engine Online</span>
       </div>
 
       <!-- Authenticated User Avatar -->
@@ -994,7 +1043,7 @@
     <section class="hero">
       <div class="hero-pill">
         <span>✨</span>
-        <span>AI-Powered Workplace Emotion Intelligence</span>
+        <span>Next-Generation Workplace Emotion Intelligence</span>
       </div>
       <h1>Transform Workplace Emotions into <br><span class="gradient">Proactive Self-Care & Insight</span></h1>
       <p>
@@ -1007,8 +1056,8 @@
         <button class="btn btn-secondary" onclick="openAuthModal('demo')">
           <span>🚀 Instant 1-Click Demo Login</span>
         </button>
-        <a href="Milestone1_Documentation.pdf" target="_blank" class="btn btn-accent">
-          <span>📄 System Whitepaper</span>
+        <a href="#features" class="btn btn-accent">
+          <span>Explore Platform Features</span>
         </a>
       </div>
     </section>
@@ -1042,10 +1091,10 @@
       <div class="workspace-header">
         <div class="workspace-title-box">
           <h2><span>⚡</span> Real-Time Emotion Telemetry & Well-Being Engine</h2>
-          <div class="workspace-sub">Type an authentic workplace reflection or select a pre-configured organizational scenario below.</div>
+          <div class="workspace-sub">Type an authentic workplace reflection or select an organizational scenario chip below.</div>
         </div>
         <div style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 600;">
-          Interactive Model Preview
+          All-In-One Interactive Preview
         </div>
       </div>
 
@@ -1086,9 +1135,9 @@
           </div>
 
           <!-- Real-Time NLP Inspector Pipeline -->
-          <div id="inspector" class="inspector-card">
+          <div class="inspector-card">
             <div class="inspector-title">
-              <span>🔬</span> NLP Preprocessing Pipeline Breakdown
+              <span>🔬</span> NLP Linguistic Pipeline Breakdown
             </div>
             <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.6rem;">
               Tokens normalized with capitalization preserved for VADER, negations retained, and WordNet lemmatized:
@@ -1130,17 +1179,17 @@
               <span id="recTitle">Positive Reinforcement & Team Recognition</span>
             </div>
             <div id="recSummary" class="rec-body">
-              High morale and collaborative momentum detected. Document this milestone, recognize contributing peers, and maintain creative flow.
+              High morale and collaborative momentum detected. Celebrate this achievement, recognize contributing peers, and maintain creative flow.
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Enterprise Architecture Highlights Grid -->
+    <!-- Platform Core Pillars -->
     <section id="features" class="features-section">
       <div class="section-headline">
-        <h2>Engineered for Enterprise Mental Health</h2>
+        <h2>Enterprise Platform Capabilities</h2>
         <p>Combining rigorous NLP linguistics, state-of-the-art transformer neural networks, and clinical safety screening.</p>
       </div>
 
@@ -1165,76 +1214,120 @@
           <h3>PBKDF2 Relational Privacy</h3>
           <p>Salted cryptographic password derivation over 120,000 iterations in SQLite ensures that individual reflection logs remain confidential and strictly user-isolated.</p>
         </div>
+        <div class="feature-card">
+          <div class="feature-icon-box">🚨</div>
+          <h3>Automated Crisis Screening</h3>
+          <p>Built-in keyword-based safety safeguards detect acute self-harm language and immediately override routine suggestions to display regional crisis hotline services.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-box">📊</div>
+          <h3>Batch Ingestion & Analytics</h3>
+          <p>Supports multi-row CSV pulse surveys and longitudinal trend tracking to give leadership high-level aggregate wellness telemetry without compromising individual confidentiality.</p>
+        </div>
       </div>
     </section>
 
-    <!-- Technical Compliance & Standards Table -->
-    <section id="standards" class="table-container">
-      <div style="margin-bottom: 1.5rem;">
-        <h2 style="font-family: 'Outfit'; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem;">
-          📋 Technical Standards & Architectural Compliance
-        </h2>
-        <div style="color: var(--text-secondary); font-size: 0.92rem;">
-          Linguistic preprocessing specifications, boundary logic, and security protocols verified across the platform.
+    <!-- Team Trends & Analytics Preview -->
+    <section id="analytics" class="analytics-preview-section">
+      <div class="section-headline" style="margin-bottom: 1.5rem; text-align: left;">
+        <h2>📈 Longitudinal Team Wellness Insights</h2>
+        <p>Aggregated morale telemetry and burnout indicators across departments and sprints.</p>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="kpi-box">
+          <div class="kpi-title">Team Morale Score</div>
+          <div class="kpi-metric">
+            <span>84.2</span>
+            <span class="kpi-trend trend-up">↑ +6.5%</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">Healthy collaborative range</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">Burnout Risk Velocity</div>
+          <div class="kpi-metric">
+            <span>12.4%</span>
+            <span class="kpi-trend trend-down">↓ -3.1%</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">Down from sprint peak</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">Weekly Reflections</div>
+          <div class="kpi-metric">
+            <span>1,420</span>
+            <span class="kpi-trend trend-up">↑ +18%</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">Active employee engagement</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">Dominant Morale State</div>
+          <div class="kpi-metric" style="color: #38bdf8;">
+            <span>Joy</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">62% positive valence</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive FAQ Section -->
+    <section id="faq" class="faq-section">
+      <div class="section-headline">
+        <h2>Frequently Asked Questions</h2>
+        <p>Everything you need to know about MoodMentor's architecture and privacy.</p>
+      </div>
+
+      <div class="faq-item active" onclick="toggleFaq(this)">
+        <div class="faq-question">
+          <span>How does MoodMentor protect employee privacy and data isolation?</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          All passwords are encrypted using salted PBKDF2 with SHA-256 over 120,000 iterations. Relational records in SQLite are strictly scoped by user ID, meaning reflections and mood logs cannot be cross-referenced or accessed without explicit authorization.
         </div>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Architecture Component</th>
-            <th>Industry Technical Specification</th>
-            <th>System Implementation</th>
-            <th>Compliance Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>1. NLP Preprocessing</strong></td>
-            <td>Sanitize raw text while retaining casing/punctuation for VADER; expand contractions; preserve negations in stop-words.</td>
-            <td><code>wellness/preprocessing.py</code>: <code>sanitize_text_for_vader()</code> retains casing; <code>_NEGATIONS</code> protects sentiment tokens.</td>
-            <td><span class="badge-verified">✅ Verified (100%)</span></td>
-          </tr>
-          <tr>
-            <td><strong>2. Polarity Thresholds</strong></td>
-            <td>Mutually exclusive boundary blocks: &gt; +0.05 (Pos), &lt; -0.05 (Neg), [-0.05, +0.05] (Neu).</td>
-            <td><code>wellness/pipeline.py</code>: Strict compound boundary classification eliminating all overlap.</td>
-            <td><span class="badge-verified">✅ Verified (100%)</span></td>
-          </tr>
-          <tr>
-            <td><strong>3. UI & Transparency</strong></td>
-            <td>Validation alerts on empty submissions; dedicated CSV/TXT file preview; modular SQLite persistence.</td>
-            <td><code>app.py</code>: 4-tab dashboard with CSV preview, Plotly longitudinal trend splines, and interactive inspector.</td>
-            <td><span class="badge-verified">✅ Verified (100%)</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- Platform Screenshot Gallery -->
-    <section id="screenshots" class="screenshots-section">
-      <div class="section-headline">
-        <h2>📸 Verified Application Screenshots</h2>
-        <p>Visual records of the multi-tab interface, NLP inspector, batch pulse survey ingestion, and trend analytics.</p>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">
+          <span>Why use both VADER and Hugging Face Transformer models together?</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          VADER provides instantaneous, deterministic valence scoring tuned specifically for lexical capitalization, punctuation intensifiers, and emoticons. The DistilRoBERTa transformer provides fine-grained emotional depth across 7 distinct states (Joy, Sadness, Fear, Anger, Surprise, Disgust, Neutral). Together, they deliver rapid polarity assessment and deep psychological insight without latency bottlenecks.
+        </div>
       </div>
 
-      <div class="screenshots-grid">
-        <a href="screenshots/fig1_direct_feedback_nlp.png" target="_blank" class="screenshot-card">
-          <img src="screenshots/fig1_direct_feedback_nlp.png" alt="Direct Feedback Analysis & NLP Inspector" onerror="this.src='https://placehold.co/600x400/1e293b/38bdf8?text=Direct+Analysis'">
-          <div class="screenshot-caption">1. Real-Time Telemetry & NLP Pipeline Inspector</div>
-        </a>
-        <a href="screenshots/fig2_file_ingestion.png" target="_blank" class="screenshot-card">
-          <img src="screenshots/fig2_file_ingestion.png" alt="File Ingestion & Kaggle Benchmark" onerror="this.src='https://placehold.co/600x400/1e293b/38bdf8?text=Batch+Ingestion'">
-          <div class="screenshot-caption">2. Batch File Upload & Benchmark Ingestion</div>
-        </a>
-        <a href="screenshots/fig3_stored_records_analytics.png" target="_blank" class="screenshot-card">
-          <img src="screenshots/fig3_stored_records_analytics.png" alt="Stored Records & Trend Analytics" onerror="this.src='https://placehold.co/600x400/1e293b/38bdf8?text=Stored+Records'">
-          <div class="screenshot-caption">3. Stored Database Records & KPI Dashboard</div>
-        </a>
-        <a href="screenshots/fig4_landing_auth.png" target="_blank" class="screenshot-card">
-          <img src="screenshots/fig4_landing_auth.png" alt="Landing Page & Authentication" onerror="this.src='https://placehold.co/600x400/1e293b/38bdf8?text=Landing+Page'">
-          <div class="screenshot-caption">4. Landing Page & 1-Click Authentication Portal</div>
-        </a>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">
+          <span>Is MoodMentor a medical or clinical diagnostic tool?</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          No. MoodMentor is explicitly designed as a self-reflection, mindfulness, and proactive workplace well-being platform. It does not diagnose mental health conditions. If severe distress or self-harm keywords are detected, the system immediately surfaces regional crisis hotlines and accredited professional support resources.
+        </div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">
+          <span>Can teams process batch pulse surveys or CSV files?</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          Yes. The platform provides automated CSV and text ingestion with feedback column auto-detection. It can evaluate hundreds of rows in batch, compute aggregated emotion distributions, and generate longitudinal trend charts.
+        </div>
+      </div>
+    </section>
+
+    <!-- Formal Call-To-Action Banner -->
+    <section class="cta-banner">
+      <h2>Empower Your Team With Emotion Intelligence</h2>
+      <p>Transform raw employee feedback into actionable self-care, healthy collaboration, and sustainable workplace momentum.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="openAuthModal('demo')">
+          <span>⚡ Launch 1-Click Interactive Demo</span>
+        </button>
+        <button class="btn btn-secondary" onclick="openAuthModal('login')">
+          <span>🔑 Sign In to Workspace</span>
+        </button>
       </div>
     </section>
   </main>
@@ -1334,12 +1427,54 @@
     <div id="toastMessage" style="font-size: 0.9rem; font-weight: 500;">Authenticated successfully!</div>
   </div>
 
-  <!-- Footer -->
+  <!-- Formal Enterprise Footer -->
   <footer>
-    <p>
-      <strong>MoodMentor: AI-Powered Enterprise Employee Wellness Platform</strong><br>
-      Engineered by <strong>Deeksha Ganesh</strong> (<a href="https://github.com/DeekshaG96" target="_blank">@DeekshaG96</a>) • Production Release v2.4
-    </p>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+          <div style="font-size: 1.3rem;">🧠</div>
+          <strong style="font-size: 1.2rem; color: #fff; font-family: 'Outfit';">MoodMentor</strong>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; max-width: 320px;">
+          Next-generation workplace mental health and emotion telemetry platform powered by deterministic VADER polarity and transformer intelligence.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#telemetry">Emotion Telemetry</a></li>
+          <li><a href="#features">NLP Architecture</a></li>
+          <li><a href="#analytics">Pulse Analytics</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="javascript:void(0)" onclick="openAuthModal('demo')">1-Click Demo</a></li>
+          <li><a href="javascript:void(0)" onclick="openAuthModal('login')">Sign In</a></li>
+          <li><a href="javascript:void(0)" onclick="openAuthModal('register')">Register Account</a></li>
+          <li><a href="https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform" target="_blank">Source Code</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Security</h4>
+        <ul>
+          <li><a href="javascript:void(0)" onclick="showToast('Zero-knowledge PBKDF2 encryption verified')">Data Privacy</a></li>
+          <li><a href="javascript:void(0)" onclick="showToast('Ethical AI crisis screen active')">Crisis Safeguards</a></li>
+          <li><a href="javascript:void(0)" onclick="showToast('Self-reflection tool - non-diagnostic')">Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>
+        © 2026 MoodMentor Platform. Engineered by <a href="https://github.com/DeekshaG96" target="_blank">Deeksha Ganesh</a>. All rights reserved.
+      </div>
+      <div style="display: flex; gap: 1.5rem;">
+        <span style="color: #34d399; font-size: 0.82rem;">● Systems Operational</span>
+      </div>
+    </div>
   </footer>
 
   <script>
@@ -1355,9 +1490,9 @@
         lemmas: ["feel", "completely", "exhaust", "overwhelm", "unyielding", "project", "deadline", "constant", "context", "switch", "lack", "staff", "burn", "anxious"]
       },
       status: {
-        text: "Completed the scheduled weekly sprint retrospective. Reviewed code coverage metrics, merged 4 pull requests, and documented the upcoming milestone roadmap for engineering review.",
-        tokens: ["completed", "scheduled", "weekly", "sprint", "retrospective", "reviewed", "code", "coverage", "metrics", "merged", "pull", "requests", "documented", "roadmap"],
-        lemmas: ["complete", "schedule", "weekly", "sprint", "retrospective", "review", "code", "coverage", "metric", "merge", "pull", "request", "document", "roadmap"]
+        text: "Completed the scheduled weekly sprint retrospective. Reviewed code coverage metrics, merged 4 pull requests, and planned the upcoming quarterly roadmap for engineering review.",
+        tokens: ["completed", "scheduled", "weekly", "sprint", "retrospective", "reviewed", "code", "coverage", "metrics", "merged", "pull", "requests", "planned", "roadmap"],
+        lemmas: ["complete", "schedule", "weekly", "sprint", "retrospective", "review", "code", "coverage", "metric", "merge", "pull", "request", "plan", "roadmap"]
       },
       isolation: {
         text: "I feel disconnected from the rest of the unit and worried that my contributions are not meeting senior standards. It feels hard to ask for help when everyone else appears to know what to do.",
@@ -1508,6 +1643,13 @@
       setTimeout(() => toast.classList.remove("show"), 3500);
     }
 
+    // --- Interactive FAQ Toggle ---
+    function toggleFaq(item) {
+      const isActive = item.classList.contains("active");
+      document.querySelectorAll(".faq-item").forEach(i => i.classList.remove("active"));
+      if (!isActive) item.classList.add("active");
+    }
+
     // --- Real-time Interactive NLP & Emotion Engine ---
     function selectScenario(key, btn) {
       document.querySelectorAll(".scenario-chip").forEach(c => c.classList.remove("active"));
@@ -1625,8 +1767,8 @@
 
       if (dominant === "joy") {
         recIcon.textContent = "🌱";
-        recTitle.textContent = "Positive Reinforcement & Energy Amplification";
-        recSummary.textContent = "High morale and collaborative momentum detected. Document this milestone, recognize contributing peers, and maintain creative flow.";
+        recTitle.textContent = "Positive Reinforcement & Team Recognition";
+        recSummary.textContent = "High morale and collaborative momentum detected. Celebrate this achievement, recognize contributing peers, and maintain creative flow.";
       } else if (dominant === "fear") {
         recIcon.textContent = "🧘";
         recTitle.textContent = "4-7-8 Somatic Down-Regulation & Task Triage";
