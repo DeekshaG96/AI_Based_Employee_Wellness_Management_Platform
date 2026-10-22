@@ -1,6 +1,6 @@
 """Streamlit frontend for MoodMentor: AI-Powered Employee Wellness Management Platform.
-
-Infosys Springboard Virtual Internship — Milestone 1 & 2 Architecture:
+ 
+MoodMentor Enterprise Platform Architecture:
 Landing Page -> Login / Registration -> Protected Workspace -> SQLite Persistence ->
 VADER Polarity & Transformer Emotion Telemetry -> Well-Being Recommendation Engine.
 """
@@ -162,7 +162,7 @@ def render_landing_and_auth():
     st.markdown('<div class="brand-title">🧠 MoodMentor</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="brand-sub">AI-Powered Emotional Tone Analyzer & Employee Wellness Recommendation Platform<br>'
-        '<em>Infosys Springboard Virtual Internship Project</em></div>',
+        '<em>Enterprise AI Well-Being Telemetry Platform</em></div>',
         unsafe_allow_html=True,
     )
 
@@ -185,7 +185,7 @@ def render_landing_and_auth():
             """
         )
 
-        st.info("💡 **Demo Evaluation Mode:** Click the quick access button on the right to instantly tour the application with pre-configured employee records.")
+        st.info("💡 **1-Click Access:** Click the quick access button on the right to instantly tour the application with pre-configured employee records.")
 
     with col_auth:
         st.markdown("### 🔐 Access Platform")
@@ -194,8 +194,8 @@ def render_landing_and_auth():
         conn = connect_database()
 
         if auth_mode == "⚡ 1-Click Demo Login":
-            st.markdown("##### Instant Evaluation Access")
-            st.write("Sign in immediately as a pre-authorized demo employee without entering credentials.")
+            st.markdown("##### Instant Platform Access")
+            st.write("Sign in immediately as a pre-authorized employee without entering credentials.")
             if st.button("🚀 Enter MoodMentor Workspace", type="primary", use_container_width=True):
                 # Ensure demo user exists
                 try:
