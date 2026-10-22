@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MoodMentor | Enterprise AI Workplace Wellness & Emotion Telemetry Platform</title>
-  <meta name="description" content="MoodMentor is an all-in-one AI-powered employee mental wellness and emotion telemetry platform providing real-time sentiment scoring, fine-grained emotion intelligence, and personalized well-being recommendations.">
+  <meta name="description" content="MoodMentor is an all-in-one AI-powered employee mental wellness and emotion telemetry platform providing real-time sentiment scoring, fine-grained emotion intelligence, 15-second daily check-ins, and department wellbeing analytics.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -45,30 +45,32 @@
       line-height: 1.6;
     }
 
+    /* Background Ambient Lighting */
     .bg-mesh {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-      background:
+      background: 
         radial-gradient(circle at 18% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 45%),
         radial-gradient(circle at 82% 20%, rgba(139, 92, 246, 0.14) 0%, transparent 50%),
-        radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.07) 0%, transparent 50%),
+        radial-gradient(circle at 50% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
         #07090e;
       pointer-events: none;
     }
 
     /* Navigation */
     header {
-      padding: 1rem 2.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--card-border);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      background: rgba(7, 9, 14, 0.85);
       position: sticky;
       top: 0;
       z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(7, 9, 14, 0.85);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2.5rem;
+      transition: all 0.3s ease;
     }
 
     .brand {
@@ -76,7 +78,6 @@
       align-items: center;
       gap: 0.85rem;
       text-decoration: none;
-      color: inherit;
     }
     .brand-icon {
       width: 42px;
@@ -87,66 +88,61 @@
       align-items: center;
       justify-content: center;
       font-size: 1.35rem;
-      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
     }
     .brand-title {
       font-family: 'Outfit', sans-serif;
-      font-weight: 800;
       font-size: 1.4rem;
-      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
     }
     .brand-sub {
       font-size: 0.72rem;
-      color: var(--accent-cyan);
-      font-weight: 600;
-      letter-spacing: 0.04em;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-cyan);
     }
 
-    nav.nav-links {
+    .nav-links {
       display: flex;
       align-items: center;
       gap: 1.8rem;
     }
-    nav.nav-links a {
+    .nav-links a {
       color: var(--text-secondary);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       font-weight: 500;
       transition: color 0.2s ease;
     }
-    nav.nav-links a:hover {
-      color: var(--text-primary);
-    }
-    @media (max-width: 920px) {
-      nav.nav-links { display: none; }
+    .nav-links a:hover {
+      color: var(--accent-cyan);
     }
 
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 1rem;
     }
-
     .status-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      padding: 0.35rem 0.8rem;
+      padding: 0.4rem 0.85rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       border-radius: 9999px;
       font-size: 0.78rem;
       font-weight: 600;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.3);
       color: #34d399;
     }
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #10b981;
       box-shadow: 0 0 10px #10b981;
@@ -154,136 +150,124 @@
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
+      50% { opacity: 0.5; transform: scale(0.85); }
     }
 
+    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1.25rem;
+      gap: 0.55rem;
+      padding: 0.65rem 1.35rem;
       border-radius: 10px;
       font-size: 0.9rem;
       font-weight: 600;
       text-decoration: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s ease;
       cursor: pointer;
       border: none;
-      outline: none;
     }
     .btn-primary {
       background: var(--gradient-brand);
       color: #ffffff;
-      box-shadow: 0 4px 18px rgba(56, 189, 248, 0.35);
+      box-shadow: 0 4px 18px rgba(99, 102, 241, 0.35);
     }
     .btn-primary:hover {
+      box-shadow: 0 6px 24px rgba(56, 189, 248, 0.5);
       transform: translateY(-2px);
-      box-shadow: 0 8px 26px rgba(56, 189, 248, 0.5);
     }
     .btn-secondary {
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
       color: var(--text-primary);
+      border: 1px solid var(--card-border);
     }
     .btn-secondary:hover {
       background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.25);
-      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
     }
     .btn-accent {
       background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.35);
       color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
     }
     .btn-accent:hover {
-      background: rgba(56, 189, 248, 0.25);
-      color: #ffffff;
-      transform: translateY(-2px);
+      background: rgba(56, 189, 248, 0.22);
+      border-color: var(--accent-cyan);
     }
 
+    /* User Header Pill */
     .user-pill {
       display: none;
       align-items: center;
       gap: 0.6rem;
-      padding: 0.3rem 0.8rem 0.3rem 0.4rem;
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 0.35rem 0.85rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 9999px;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
     }
     .user-avatar {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: var(--gradient-brand);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
       font-size: 0.75rem;
+      font-weight: 700;
       color: #fff;
     }
     .btn-logout {
-      background: transparent;
+      background: none;
       border: none;
       color: var(--text-muted);
       cursor: pointer;
       font-size: 0.8rem;
-      margin-left: 0.4rem;
-      padding: 2px 6px;
-      border-radius: 4px;
+      transition: color 0.2s;
     }
-    .btn-logout:hover {
-      color: #f87171;
-      background: rgba(239, 68, 68, 0.15);
+    .btn-logout:hover { color: #f87171; }
+
+    /* Session Banner */
+    .session-banner {
+      display: none;
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.12) 0%, rgba(99, 102, 241, 0.12) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 14px;
+      padding: 0.85rem 1.5rem;
+      margin-bottom: 2rem;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeIn 0.4s ease;
+    }
+    .session-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .session-badge {
+      background: rgba(56, 189, 248, 0.25);
+      color: var(--accent-cyan);
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     main {
       max-width: 1240px;
       margin: 0 auto;
-      padding: 3.5rem 1.5rem;
-    }
-
-    /* Active Session Banner */
-    .session-banner {
-      display: none;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(56, 189, 248, 0.1));
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      border-radius: 14px;
-      padding: 1rem 1.4rem;
-      margin-bottom: 2.5rem;
-      align-items: center;
-      justify-content: space-between;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.12);
-      animation: fadeIn 0.4s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .session-info {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-    }
-    .session-badge {
-      background: #10b981;
-      color: #042f2e;
-      font-weight: 700;
-      padding: 0.25rem 0.65rem;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      padding: 2.5rem 1.5rem 5rem;
     }
 
     /* Hero Section */
     .hero {
       text-align: center;
-      max-width: 900px;
-      margin: 0 auto 4rem;
+      padding: 3.5rem 1rem 4rem;
+      position: relative;
     }
     .hero-pill {
       display: inline-flex;
@@ -292,22 +276,21 @@
       padding: 0.4rem 1.1rem;
       border-radius: 9999px;
       background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.28);
+      border: 1px solid rgba(56, 189, 248, 0.25);
       color: var(--accent-cyan);
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      letter-spacing: 0.03em;
       margin-bottom: 1.5rem;
     }
     .hero h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: 3.4rem;
+      font-size: clamp(2.4rem, 5.2vw, 4.2rem);
       font-weight: 800;
-      line-height: 1.12;
-      margin-bottom: 1.25rem;
+      line-height: 1.15;
       letter-spacing: -0.03em;
+      margin-bottom: 1.4rem;
     }
-    .hero h1 span.gradient {
+    .hero h1 .gradient {
       background: var(--gradient-brand);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -315,321 +298,614 @@
     .hero p {
       font-size: 1.18rem;
       color: var(--text-secondary);
+      max-width: 760px;
+      margin: 0 auto 2.4rem;
       line-height: 1.65;
-      margin-bottom: 2.25rem;
-      max-width: 780px;
-      margin-left: auto;
-      margin-right: auto;
     }
     .hero-buttons {
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 1.1rem;
+      gap: 1rem;
       flex-wrap: wrap;
     }
 
-    /* Metrics Strip */
+    /* Key Metrics Strip */
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.25rem;
-      margin-bottom: 4.5rem;
+      margin: 1.5rem 0 4rem;
     }
     .metric-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 1.5rem;
-      text-align: center;
-      backdrop-filter: blur(12px);
-      position: relative;
-      overflow: hidden;
+      padding: 1.4rem 1.6rem;
+      text-align: left;
       transition: all 0.3s ease;
     }
     .metric-card:hover {
       border-color: var(--card-hover-border);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-    .metric-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: var(--gradient-brand);
-      opacity: 0.6;
+      transform: translateY(-2px);
     }
     .metric-num {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.3rem;
+      font-size: 2.2rem;
       font-weight: 800;
-      color: var(--accent-cyan);
-      line-height: 1.1;
-      margin-bottom: 0.3rem;
-    }
-    .metric-label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       margin-bottom: 0.2rem;
     }
+    .metric-label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
     .metric-sub {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
+      margin-top: 0.2rem;
     }
 
-    /* Workspace Section */
-    .workspace-section {
-      background: var(--card-bg);
+    /* =========================================================================
+       15-Second Mood Check-in Studio (AuraWell / Employee Mood Index Inspired)
+       ========================================================================= */
+    .checkin-section {
+      background: linear-gradient(180deg, rgba(14, 19, 31, 0.95) 0%, rgba(9, 13, 22, 0.98) 100%);
       border: 1px solid var(--card-border);
-      border-radius: 22px;
-      padding: 2.5rem;
-      margin-bottom: 4.5rem;
-      backdrop-filter: blur(18px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      border-radius: 24px;
+      padding: 2.2rem;
+      margin-bottom: 4rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
       position: relative;
+      overflow: hidden;
     }
-    .workspace-header {
+    .checkin-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--gradient-brand);
+    }
+    .checkin-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: flex-start;
       margin-bottom: 1.75rem;
       flex-wrap: wrap;
       gap: 1rem;
     }
-    .workspace-title-box h2 {
+    .checkin-title-box h2 {
       font-family: 'Outfit', sans-serif;
       font-size: 1.85rem;
-      font-weight: 700;
-      margin-bottom: 0.35rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 0.65rem;
     }
-    .workspace-sub {
+    .checkin-sub {
       color: var(--text-secondary);
       font-size: 0.95rem;
+      margin-top: 0.25rem;
     }
 
-    .chip-label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.75rem;
-      display: block;
+    /* 5-Point Mood Rating Selector Cards */
+    .mood-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
     }
-    .chips-row {
+    .mood-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 1.1rem 0.6rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .mood-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-3px);
+    }
+    .mood-card.active {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.12);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+    .mood-emoji {
+      font-size: 2.1rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+      transition: transform 0.2s ease;
+    }
+    .mood-card:hover .mood-emoji {
+      transform: scale(1.15);
+    }
+    .mood-card.active .mood-emoji {
+      transform: scale(1.2);
+    }
+    .mood-label {
+      font-weight: 700;
+      font-size: 0.86rem;
+      color: var(--text-primary);
+    }
+    .mood-score-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* Step Subheadings & Chip Collections */
+    .step-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-cyan);
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .chips-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.6rem;
-      margin-bottom: 1.5rem;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
     }
-    .scenario-chip {
+    .tag-chip {
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--card-border);
-      padding: 0.45rem 0.95rem;
-      border-radius: 9999px;
-      font-size: 0.83rem;
-      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.09);
       color: var(--text-secondary);
+      border-radius: 9999px;
+      padding: 0.42rem 0.95rem;
+      font-size: 0.84rem;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
-    .scenario-chip:hover {
-      background: rgba(56, 189, 248, 0.12);
-      border-color: rgba(56, 189, 248, 0.35);
-      color: #ffffff;
-      transform: translateY(-1px);
+    .tag-chip:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
     }
-    .scenario-chip.active {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(99, 102, 241, 0.25));
-      border-color: var(--accent-cyan);
-      color: #ffffff;
-      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.25);
+    .tag-chip.active {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: rgba(56, 189, 248, 0.5);
+      color: #38bdf8;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+    }
+    .tag-chip.active-driver {
+      background: rgba(168, 85, 247, 0.18);
+      border-color: rgba(168, 85, 247, 0.5);
+      color: #c084fc;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
     }
 
-    .workspace-grid {
+    /* Check-in 2-Column Split: Reflection Input vs Real-Time AI Telemetry */
+    .checkin-grid {
       display: grid;
-      grid-template-columns: 1.05fr 1fr;
-      gap: 2.25rem;
-    }
-    @media (max-width: 960px) {
-      .workspace-grid { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 2.5rem; }
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.5rem;
+      align-items: start;
     }
 
-    .input-container {
+    .input-box-wrapper {
       display: flex;
       flex-direction: column;
+      gap: 0.75rem;
     }
+    .quick-preset-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.25rem;
+    }
+    .preset-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 0.28rem 0.7rem;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .preset-pill:hover, .preset-pill.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+    }
+
     .text-input-box {
       width: 100%;
-      height: 150px;
-      background: rgba(10, 14, 24, 0.9);
+      height: 135px;
+      background: rgba(10, 14, 24, 0.7);
       border: 1px solid var(--card-border);
-      color: var(--text-primary);
-      padding: 1.1rem;
       border-radius: 14px;
+      padding: 1rem 1.1rem;
+      color: var(--text-primary);
       font-family: inherit;
       font-size: 0.95rem;
       resize: vertical;
       outline: none;
-      transition: all 0.25s ease;
-      line-height: 1.6;
+      transition: all 0.2s ease;
     }
     .text-input-box:focus {
       border-color: var(--accent-cyan);
-      box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
     }
-    .input-meta {
+    .input-meta-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 0.75rem;
       font-size: 0.8rem;
       color: var(--text-muted);
     }
 
-    .output-dashboard {
-      background: rgba(10, 14, 24, 0.7);
+    /* Live Telemetry Output Card */
+    .telemetry-output-panel {
+      background: rgba(10, 14, 24, 0.85);
       border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 1.6rem;
+      border-radius: 16px;
+      padding: 1.4rem;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1rem;
     }
-
-    .polarity-display-card {
+    .compound-metric-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.1rem 1.3rem;
+      padding: 0.85rem 1.1rem;
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 12px;
     }
-    .polarity-value {
+    .compound-num {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 2.1rem;
+      font-size: 1.85rem;
       font-weight: 700;
       line-height: 1;
     }
     .polarity-pill {
       font-weight: 700;
-      padding: 0.45rem 1rem;
+      padding: 0.35rem 0.85rem;
       border-radius: 8px;
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       letter-spacing: 0.02em;
     }
     .polarity-positive { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
     .polarity-neutral { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
     .polarity-negative { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
 
-    .emotions-block-header {
+    .emotion-bars-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .emotion-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .emotion-row-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .dominant-label {
-      color: var(--accent-cyan);
-      font-weight: 700;
-    }
-    .emotion-bar-item {
-      margin-bottom: 0.55rem;
-    }
-    .emotion-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.84rem;
-      margin-bottom: 0.25rem;
+      font-size: 0.8rem;
       font-weight: 500;
     }
-    .bar-bg {
-      height: 8px;
+    .emotion-bar-track {
+      height: 6px;
       background: rgba(255, 255, 255, 0.06);
       border-radius: 9999px;
       overflow: hidden;
     }
-    .bar-fill {
+    .emotion-bar-progress {
       height: 100%;
       border-radius: 9999px;
-      transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: width 0.4s ease;
     }
 
-    .recommendation-card {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.06));
-      border: 1px solid rgba(129, 140, 248, 0.35);
+    .recommendation-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08));
+      border: 1px solid rgba(129, 140, 248, 0.3);
       border-radius: 12px;
-      padding: 1.15rem;
+      padding: 0.95rem;
     }
-    .rec-header {
+    .rec-top {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       font-weight: 700;
       color: #818cf8;
-      font-size: 0.92rem;
-      margin-bottom: 0.35rem;
-    }
-    .rec-body {
       font-size: 0.88rem;
+      margin-bottom: 0.25rem;
+    }
+    .rec-text {
+      font-size: 0.82rem;
       color: var(--text-secondary);
-      line-height: 1.55;
+      line-height: 1.5;
     }
 
-    .inspector-card {
-      background: rgba(10, 14, 24, 0.85);
+    /* NLP Pipeline Breakdown */
+    .pipeline-inspector-strip {
+      margin-top: 1.25rem;
+      padding: 1.1rem 1.4rem;
+      background: rgba(10, 14, 24, 0.6);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-top: 2rem;
+      border-radius: 14px;
     }
-    .inspector-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--accent-cyan);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .pipeline-tags {
+    .pipeline-tags-row {
       display: flex;
       flex-wrap: wrap;
       gap: 0.45rem;
+      margin-top: 0.6rem;
     }
-    .pipeline-token {
+    .token-pill {
       background: rgba(56, 189, 248, 0.1);
       border: 1px solid rgba(56, 189, 248, 0.25);
       color: #38bdf8;
-      padding: 0.25rem 0.65rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 6px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
     }
-    .pipeline-token.negation {
+    .token-pill.negation {
       background: rgba(239, 68, 68, 0.18);
       border-color: rgba(239, 68, 68, 0.4);
       color: #f87171;
       font-weight: 700;
     }
 
-    /* Core Features Grid */
+    /* =========================================================================
+       Executive Wellbeing & Department Analytics (AuraWell Admin Dashboard Inspired)
+       ========================================================================= */
+    .analytics-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      margin-bottom: 5rem;
+    }
+    .analytics-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .analytics-topbar h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .analytics-topbar p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Department Filter Pills */
+    .dept-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .dept-tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      border-radius: 10px;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .dept-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .dept-tab-btn.active {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--accent-cyan);
+      color: #38bdf8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Executive KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .kpi-card {
+      background: rgba(10, 14, 24, 0.65);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.4rem;
+      transition: all 0.25s ease;
+    }
+    .kpi-card:hover {
+      border-color: var(--card-hover-border);
+      transform: translateY(-2px);
+    }
+    .kpi-title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+    }
+    .kpi-stat-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .kpi-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .kpi-badge {
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+    }
+    .kpi-up { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .kpi-down { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .kpi-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-top: 0.35rem;
+    }
+
+    /* 14-Day Timeline Chart (SVG Area Curve) */
+    .chart-container {
+      background: rgba(10, 14, 24, 0.75);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1.6rem;
+      margin-bottom: 2rem;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .legend-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* SVG Chart */
+    .timeline-svg {
+      width: 100%;
+      height: 220px;
+      overflow: visible;
+    }
+    .chart-grid-line {
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-dasharray: 4 4;
+    }
+    .chart-axis-label {
+      fill: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+    .chart-area {
+      fill: url(#chartGradient);
+      opacity: 0.3;
+    }
+    .chart-line {
+      fill: none;
+      stroke: #38bdf8;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .chart-dot {
+      fill: #0e131f;
+      stroke: #38bdf8;
+      stroke-width: 2.5;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chart-dot:hover {
+      r: 6;
+      stroke: #ffffff;
+      fill: #38bdf8;
+    }
+
+    /* Breakdown 2-Column: Drivers/Detractors vs Feelings Distribution */
+    .analytics-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .breakdown-box {
+      background: rgba(10, 14, 24, 0.65);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.4rem;
+    }
+    .breakdown-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .driver-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .driver-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .driver-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+    .driver-bar-bg {
+      height: 7px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .driver-bar-fill {
+      height: 100%;
+      border-radius: 9999px;
+    }
+
+    /* Core Platform Capabilities Grid */
     .features-section {
       margin-bottom: 5rem;
     }
@@ -659,7 +935,6 @@
       border-radius: 18px;
       padding: 1.8rem;
       transition: all 0.3s ease;
-      position: relative;
     }
     .feature-card:hover {
       border-color: var(--card-hover-border);
@@ -690,50 +965,6 @@
       line-height: 1.6;
     }
 
-    /* Team Trends & Analytics Section */
-    .analytics-preview-section {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 2.5rem;
-      margin-bottom: 5rem;
-    }
-    .analytics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-    .kpi-box {
-      background: rgba(10, 14, 24, 0.6);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 1.4rem;
-    }
-    .kpi-title {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      margin-bottom: 0.5rem;
-    }
-    .kpi-metric {
-      font-family: 'Outfit', sans-serif;
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      display: flex;
-      align-items: baseline;
-      gap: 0.4rem;
-    }
-    .kpi-trend {
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-    .trend-up { color: #34d399; }
-    .trend-down { color: #38bdf8; }
-
     /* Interactive FAQ Accordion */
     .faq-section {
       max-width: 860px;
@@ -748,41 +979,43 @@
       transition: all 0.25s ease;
     }
     .faq-item:hover {
-      border-color: rgba(56, 189, 248, 0.35);
+      border-color: rgba(255, 255, 255, 0.18);
     }
     .faq-question {
       padding: 1.25rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 1.02rem;
       user-select: none;
     }
-    .faq-answer {
-      padding: 0 1.5rem 1.25rem;
-      color: var(--text-secondary);
-      font-size: 0.92rem;
-      line-height: 1.6;
-      display: none;
-    }
-    .faq-item.active .faq-answer {
-      display: block;
+    .faq-toggle {
+      font-size: 0.9rem;
+      color: var(--accent-cyan);
+      transition: transform 0.25s ease;
     }
     .faq-item.active .faq-toggle {
       transform: rotate(180deg);
     }
-    .faq-toggle {
-      transition: transform 0.25s ease;
-      color: var(--accent-cyan);
+    .faq-answer {
+      display: none;
+      padding: 0 1.5rem 1.4rem;
+      color: var(--text-secondary);
+      font-size: 0.94rem;
+      line-height: 1.65;
+    }
+    .faq-item.active .faq-answer {
+      display: block;
+      animation: fadeIn 0.3s ease;
     }
 
-    /* Formal Call-To-Action Banner */
+    /* CTA Banner */
     .cta-banner {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(99, 102, 241, 0.15) 50%, rgba(192, 132, 252, 0.12) 100%);
       border: 1px solid rgba(56, 189, 248, 0.35);
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 3.5rem 2rem;
       text-align: center;
       margin-bottom: 5rem;
@@ -791,187 +1024,194 @@
     }
     .cta-banner h2 {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.4rem;
+      font-size: 2.2rem;
       font-weight: 800;
       margin-bottom: 0.75rem;
     }
     .cta-banner p {
-      font-size: 1.1rem;
       color: var(--text-secondary);
       max-width: 600px;
-      margin: 0 auto 2rem;
+      margin: 0 auto 1.75rem;
+      font-size: 1.05rem;
     }
 
-    /* Modal Dialog */
+    /* Modal */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(4, 7, 13, 0.75);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(3, 5, 8, 0.82);
+      backdrop-filter: blur(12px);
+      z-index: 999;
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 200;
       padding: 1.5rem;
-    }
-    .modal-overlay.open {
-      display: flex;
       animation: fadeIn 0.25s ease;
     }
+    .modal-overlay.open { display: flex; }
     .modal-card {
-      background: #0f1523;
-      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: #0e131f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 20px;
       width: 100%;
-      max-width: 520px;
+      max-width: 480px;
       padding: 2.25rem;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
       position: relative;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     .modal-close-btn {
       position: absolute;
       top: 1.25rem; right: 1.25rem;
-      background: transparent;
-      border: none;
+      background: none; border: none;
       color: var(--text-muted);
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       cursor: pointer;
-      line-height: 1;
     }
     .modal-close-btn:hover { color: #fff; }
-    
+
     .modal-tabs {
       display: flex;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 4px;
-      gap: 4px;
+      border-bottom: 1px solid var(--card-border);
       margin-bottom: 1.5rem;
     }
     .modal-tab-btn {
       flex: 1;
-      padding: 0.55rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      background: transparent;
+      padding: 0.65rem 0.5rem;
+      background: none;
       border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
     }
     .modal-tab-btn.active {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(99, 102, 241, 0.25));
-      color: #fff;
-      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: var(--accent-cyan);
+      border-bottom-color: var(--accent-cyan);
     }
-
     .form-group {
       margin-bottom: 1rem;
+      text-align: left;
     }
     .form-group label {
       display: block;
-      font-size: 0.83rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--text-secondary);
       margin-bottom: 0.4rem;
     }
     .form-input {
       width: 100%;
+      padding: 0.75rem 1rem;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--card-border);
-      color: var(--text-primary);
-      padding: 0.75rem 1rem;
       border-radius: 10px;
+      color: #fff;
       font-family: inherit;
       font-size: 0.92rem;
       outline: none;
     }
     .form-input:focus {
       border-color: var(--accent-cyan);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
     }
 
     /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 2rem; right: 2rem;
-      background: #0f1523;
-      border: 1px solid rgba(56, 189, 248, 0.4);
+      bottom: 2rem;
+      right: 2rem;
+      background: #111827;
+      border: 1px solid var(--accent-cyan);
       border-radius: 12px;
       padding: 1rem 1.4rem;
-      display: flex;
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
       align-items: center;
       gap: 0.75rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      z-index: 300;
-      transform: translateY(120px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: slideInRight 0.3s ease;
     }
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
+    .toast.show { display: flex; }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Formal Enterprise Footer */
+    /* Footer */
     footer {
       border-top: 1px solid var(--card-border);
-      padding: 3.5rem 2rem 2rem;
-      background: rgba(7, 9, 14, 0.95);
+      background: rgba(5, 7, 11, 0.95);
+      padding: 4rem 2.5rem 2.5rem;
     }
     .footer-grid {
       max-width: 1240px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 2.5rem;
+      gap: 3rem;
       margin-bottom: 3rem;
-    }
-    @media (max-width: 800px) {
-      .footer-grid { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 500px) {
-      .footer-grid { grid-template-columns: 1fr; }
     }
     .footer-col h4 {
       font-family: 'Outfit', sans-serif;
       font-size: 0.95rem;
       font-weight: 700;
-      color: #fff;
-      margin-bottom: 1rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
+      color: var(--text-primary);
+      margin-bottom: 1.1rem;
     }
     .footer-col ul {
       list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
     }
-    .footer-col ul li {
-      margin-bottom: 0.65rem;
-    }
-    .footer-col ul li a {
-      color: var(--text-muted);
+    .footer-col a {
+      color: var(--text-secondary);
       text-decoration: none;
       font-size: 0.88rem;
-      transition: color 0.2s ease;
+      transition: color 0.2s;
     }
-    .footer-col ul li a:hover {
+    .footer-col a:hover {
       color: var(--accent-cyan);
     }
     .footer-bottom {
       max-width: 1240px;
       margin: 0 auto;
-      padding-top: 1.5rem;
+      padding-top: 2rem;
       border-top: 1px solid rgba(255, 255, 255, 0.06);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
       flex-wrap: wrap;
       gap: 1rem;
-      color: var(--text-muted);
-      font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .mood-selector-grid { grid-template-columns: repeat(3, 1fr); }
+      .checkin-grid { grid-template-columns: 1fr; }
+      .analytics-split { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .mood-selector-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr; }
+      header { padding: 0.8rem 1rem; }
     }
   </style>
 </head>
@@ -989,9 +1229,9 @@
     </a>
 
     <nav class="nav-links">
-      <a href="#telemetry">Live Telemetry</a>
-      <a href="#features">Platform Pillars</a>
-      <a href="#analytics">Pulse Analytics</a>
+      <a href="#checkin">15s Check-in</a>
+      <a href="#analytics">Wellbeing Index</a>
+      <a href="#features">Architecture</a>
       <a href="#faq">FAQ</a>
       <a href="https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform" target="_blank">Repository</a>
     </nav>
@@ -1005,7 +1245,7 @@
       <!-- Authenticated User Avatar -->
       <div id="userHeaderPill" class="user-pill">
         <div id="userAvatar" class="user-avatar">DE</div>
-        <span id="userNameHeader" style="font-weight: 600; color: #f8fafc;">Demo Employee</span>
+        <span id="userNameHeader" style="font-weight: 600; color: #f8fafc;">Demo Staff</span>
         <button class="btn-logout" onclick="handleLogout()" title="Sign Out">Sign Out</button>
       </div>
 
@@ -1024,11 +1264,11 @@
     <!-- Authenticated Session Banner -->
     <div id="sessionBanner" class="session-banner">
       <div class="session-info">
-        <div class="session-badge">Workspace Unlocked</div>
+        <div class="session-badge">Private Session Active</div>
         <div>
-          <strong id="sessionGreeting">Welcome back, Demo Employee!</strong>
+          <strong id="sessionGreeting">Welcome back, Demo Staff!</strong>
           <div style="font-size: 0.82rem; color: #94a3b8;">
-            PBKDF2 SHA-256 Encrypted Session • <span id="sessionStreak">🔥 14-day reflection streak</span> • Relational SQLite Persistence
+            Zero-Knowledge PBKDF2 Encryption • <span id="sessionStreak">🔥 14-day check-in streak</span> • Department: Engineering & Product
           </div>
         </div>
       </div>
@@ -1043,21 +1283,21 @@
     <section class="hero">
       <div class="hero-pill">
         <span>✨</span>
-        <span>Next-Generation Workplace Emotion Intelligence</span>
+        <span>Employee Mood Index & Real-Time Emotion Telemetry</span>
       </div>
-      <h1>Transform Workplace Emotions into <br><span class="gradient">Proactive Self-Care & Insight</span></h1>
+      <h1>Transform Workplace Emotions into <br><span class="gradient">Actionable Well-Being & Insight</span></h1>
       <p>
-        MoodMentor bridges natural language processing and organizational psychology to detect subtle emotional tones in employee feedback, 1-on-1 notes, and pulse surveys using VADER sentiment analysis and Hugging Face Transformers.
+        Capture authentic employee check-ins in under 15 seconds, evaluate subtle emotional tones with dual-track VADER and Transformer AI, and deliver granular organizational morale telemetry to leadership.
       </p>
       <div class="hero-buttons">
-        <a href="#telemetry" class="btn btn-primary">
-          <span>⚡ Try Live Telemetry Engine</span>
+        <a href="#checkin" class="btn btn-primary">
+          <span>⚡ Launch 15s Check-in Studio</span>
         </a>
         <button class="btn btn-secondary" onclick="openAuthModal('demo')">
           <span>🚀 Instant 1-Click Demo Login</span>
         </button>
-        <a href="#features" class="btn btn-accent">
-          <span>Explore Platform Features</span>
+        <a href="#analytics" class="btn btn-accent">
+          <span>📈 Executive Wellbeing Index</span>
         </a>
       </div>
     </section>
@@ -1065,14 +1305,14 @@
     <!-- Key Metrics Strip -->
     <section class="metrics-grid">
       <div class="metric-card">
-        <div class="metric-num">98.4%</div>
-        <div class="metric-label">NLP Processing Fidelity</div>
-        <div class="metric-sub">Negation-preserved stopword filter</div>
+        <div class="metric-num">&lt; 15s</div>
+        <div class="metric-label">Daily Check-in Velocity</div>
+        <div class="metric-sub">Frictionless mood & driver logging</div>
       </div>
       <div class="metric-card">
         <div class="metric-num">7-Class</div>
         <div class="metric-label">Transformer Emotions</div>
-        <div class="metric-sub">DistilRoBERTa fine-grained model</div>
+        <div class="metric-sub">DistilRoBERTa fine-grained affect</div>
       </div>
       <div class="metric-card">
         <div class="metric-num">&lt; 35ms</div>
@@ -1086,99 +1326,147 @@
       </div>
     </section>
 
-    <!-- Interactive Live Telemetry Workspace -->
-    <section id="telemetry" class="workspace-section">
-      <div class="workspace-header">
-        <div class="workspace-title-box">
-          <h2><span>⚡</span> Real-Time Emotion Telemetry & Well-Being Engine</h2>
-          <div class="workspace-sub">Type an authentic workplace reflection or select an organizational scenario chip below.</div>
+    <!-- =========================================================================
+         15-Second Daily Mood Check-In & Telemetry Studio (AuraWell Inspired)
+         ========================================================================= -->
+    <section id="checkin" class="checkin-section">
+      <div class="checkin-header">
+        <div class="checkin-title-box">
+          <h2><span>⚡</span> 15-Second Daily Mood Check-In Studio</h2>
+          <div class="checkin-sub">Select your emotional state, identify workplace contributors, and receive instant AI affect telemetry.</div>
         </div>
-        <div style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 600;">
-          All-In-One Interactive Preview
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <span style="font-size: 0.85rem; color: #34d399; font-weight: 600;">● Live Affect Scoring</span>
         </div>
       </div>
 
-      <!-- Quick Scenario Chips -->
-      <span class="chip-label">Quick Scenario Presets:</span>
-      <div class="chips-row">
-        <button class="scenario-chip active" onclick="selectScenario('joy', this)">
-          <span>🎉</span> Team Triumph & Morale
-        </button>
-        <button class="scenario-chip" onclick="selectScenario('fatigue', this)">
-          <span>⚠️</span> Deadline Pressure & Burnout
-        </button>
-        <button class="scenario-chip" onclick="selectScenario('status', this)">
-          <span>📊</span> Neutral Retrospective
-        </button>
-        <button class="scenario-chip" onclick="selectScenario('isolation', this)">
-          <span>💔</span> Imposter Syndrome
-        </button>
-        <button class="scenario-chip" onclick="selectScenario('frustration', this)">
-          <span>🔥</span> Scope Churn Friction
-        </button>
+      <!-- Step 1: 5-Point Mood Spectrum -->
+      <div class="step-label">
+        <span>Step 1:</span> How are you feeling right now?
+      </div>
+      <div class="mood-selector-grid">
+        <div class="mood-card" onclick="selectMoodScore(1, this)">
+          <div class="mood-emoji">😫</div>
+          <div class="mood-label">Burned Out</div>
+          <div class="mood-score-tag">Index: 20</div>
+        </div>
+        <div class="mood-card" onclick="selectMoodScore(2, this)">
+          <div class="mood-emoji">😟</div>
+          <div class="mood-label">Stressed</div>
+          <div class="mood-score-tag">Index: 40</div>
+        </div>
+        <div class="mood-card" onclick="selectMoodScore(3, this)">
+          <div class="mood-emoji">😐</div>
+          <div class="mood-label">Steady / Neutral</div>
+          <div class="mood-score-tag">Index: 60</div>
+        </div>
+        <div class="mood-card active" onclick="selectMoodScore(4, this)">
+          <div class="mood-emoji">😊</div>
+          <div class="mood-label">Productive</div>
+          <div class="mood-score-tag">Index: 80</div>
+        </div>
+        <div class="mood-card" onclick="selectMoodScore(5, this)">
+          <div class="mood-emoji">🌟</div>
+          <div class="mood-label">Radiant Joy</div>
+          <div class="mood-score-tag">Index: 100</div>
+        </div>
       </div>
 
-      <!-- Workspace 2-Column Grid -->
-      <div class="workspace-grid">
-        <div class="input-container">
-          <textarea id="demoText" class="text-input-box" placeholder="Type a reflection, 1-on-1 note, or feedback here to analyze emotional tone in real-time..." oninput="runLiveAnalysis()"></textarea>
-          <div class="input-meta">
-            <span id="charCount">174 characters</span>
+      <!-- Step 2: Adaptive Feeling Chips (Dynamically swapped based on selected mood) -->
+      <div class="step-label">
+        <span>Step 2:</span> Specific Feelings (Select all that resonate):
+      </div>
+      <div id="dynamicFeelingsRow" class="chips-group">
+        <!-- Dynamically injected based on FEELINGS_BY_MOOD -->
+      </div>
+
+      <!-- Step 3: Workplace Drivers & Contributors -->
+      <div class="step-label">
+        <span>Step 3:</span> Primary Workplace Drivers & Factors:
+      </div>
+      <div class="chips-group">
+        <button class="tag-chip active-driver" onclick="toggleDriverChip(this)"><span>💼</span> Workload & Deadlines</button>
+        <button class="tag-chip active-driver" onclick="toggleDriverChip(this)"><span>🤝</span> Team Collaboration</button>
+        <button class="tag-chip" onclick="toggleDriverChip(this)"><span>🧭</span> Manager & Leadership</button>
+        <button class="tag-chip" onclick="toggleDriverChip(this)"><span>⚖️</span> Work-Life Balance</button>
+        <button class="tag-chip" onclick="toggleDriverChip(this)"><span>🏆</span> Recognition & Growth</button>
+        <button class="tag-chip" onclick="toggleDriverChip(this)"><span>🛠️</span> Tools & Systems</button>
+        <button class="tag-chip" onclick="toggleDriverChip(this)"><span>🔋</span> Sleep & Rest</button>
+      </div>
+
+      <!-- Step 4: Reflection Text & Live Dual-Track AI Telemetry -->
+      <div class="step-label">
+        <span>Step 4:</span> Optional Reflection Note (Dual-Track AI Analysis):
+      </div>
+
+      <!-- Quick Preset Scenarios -->
+      <div class="quick-preset-bar">
+        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Scenario Presets:</span>
+        <button class="preset-pill active" onclick="selectScenarioPreset('joy', this)">🎉 Team Triumph</button>
+        <button class="preset-pill" onclick="selectScenarioPreset('fatigue', this)">⚠️ Deadline Crunch</button>
+        <button class="preset-pill" onclick="selectScenarioPreset('status', this)">📊 Sprint Retrospective</button>
+        <button class="preset-pill" onclick="selectScenarioPreset('isolation', this)">💔 Imposter Syndrome</button>
+        <button class="preset-pill" onclick="selectScenarioPreset('frustration', this)">🔥 Scope Friction</button>
+      </div>
+
+      <div class="checkin-grid">
+        <!-- Left: Text Area & Pipeline Inspector -->
+        <div class="input-box-wrapper">
+          <textarea id="reflectionInput" class="text-input-box" placeholder="Share a few words on what's going on or choose a scenario above to test NLP scoring in real-time..." oninput="handleLiveTextChange()"></textarea>
+          <div class="input-meta-bar">
+            <span id="charCountLabel">174 characters</span>
             <div style="display: flex; gap: 0.5rem;">
-              <button class="btn btn-secondary" onclick="clearInput()" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;">
+              <button class="btn btn-secondary" onclick="clearReflectionInput()" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;">
                 Clear
               </button>
-              <button class="btn btn-primary" onclick="runLiveAnalysis()" style="padding: 0.35rem 0.95rem; font-size: 0.8rem;">
-                Analyze Now
+              <button class="btn btn-primary" onclick="submitDailyCheckIn()" style="padding: 0.35rem 1rem; font-size: 0.8rem;">
+                💾 Record Check-In
               </button>
             </div>
           </div>
 
-          <!-- Real-Time NLP Inspector Pipeline -->
-          <div class="inspector-card">
-            <div class="inspector-title">
-              <span>🔬</span> NLP Linguistic Pipeline Breakdown
+          <!-- Linguistic Pipeline Inspector -->
+          <div class="pipeline-inspector-strip">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.05em;">
+              🔬 Real-Time NLP Tokenizer & Lemmatizer Breakdown
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.6rem;">
-              Tokens normalized with capitalization preserved for VADER, negations retained, and WordNet lemmatized:
-            </div>
-            <div id="pipelineTokens" class="pipeline-tags">
-              <!-- Tokens injected dynamically -->
+            <div id="pipelineTokenList" class="pipeline-tags-row">
+              <!-- Injected dynamically -->
             </div>
           </div>
         </div>
 
-        <!-- Telemetry Output Dashboard -->
-        <div class="output-dashboard">
-          <!-- Compound Metric -->
-          <div class="polarity-display-card">
+        <!-- Right: Telemetry Output Dashboard -->
+        <div class="telemetry-output-panel">
+          <!-- VADER Compound Polarity -->
+          <div class="compound-metric-row">
             <div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">VADER Compound Score</div>
-              <div id="compoundVal" class="polarity-value" style="color: #34d399;">+0.825</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">VADER Compound Score</div>
+              <div id="compoundScoreVal" class="compound-num" style="color: #34d399;">+0.825</div>
             </div>
-            <div id="polarityPill" class="polarity-pill polarity-positive">
+            <div id="polarityStatusPill" class="polarity-pill polarity-positive">
               <span>●</span> POSITIVE (&gt; +0.05)
             </div>
           </div>
 
-          <!-- 7 Emotion Bars -->
+          <!-- 7-Class Transformer Emotion Spectrum -->
           <div>
-            <div class="emotions-block-header" style="margin-bottom: 0.6rem;">
-              <span>Transformer Emotions (7 Classes)</span>
-              <span id="dominantEmo" class="dominant-label">JOY (DOMINANT)</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">Transformer Affect (7 Classes)</span>
+              <span id="dominantEmotionBadge" style="font-size: 0.78rem; font-weight: 700; color: var(--accent-cyan);">JOY (DOMINANT)</span>
             </div>
-            <div id="emotionBars">
-              <!-- Emotion distribution bars injected dynamically -->
+            <div id="emotionBarsList" class="emotion-bars-container">
+              <!-- Injected dynamically -->
             </div>
           </div>
 
-          <!-- Context-Aware Self-Care Recommendation -->
-          <div class="recommendation-card">
-            <div class="rec-header">
-              <span id="recIcon">🌱</span>
-              <span id="recTitle">Positive Reinforcement & Team Recognition</span>
+          <!-- Personalized Self-Care Recommendation -->
+          <div class="recommendation-banner">
+            <div class="rec-top">
+              <span id="recIconElement">🌱</span>
+              <span id="recTitleElement">Positive Reinforcement & Team Recognition</span>
             </div>
-            <div id="recSummary" class="rec-body">
+            <div id="recSummaryElement" class="rec-text">
               High morale and collaborative momentum detected. Celebrate this achievement, recognize contributing peers, and maintain creative flow.
             </div>
           </div>
@@ -1186,23 +1474,225 @@
       </div>
     </section>
 
-    <!-- Platform Core Pillars -->
+    <!-- =========================================================================
+         Executive Wellbeing & Department Analytics (AuraWell Admin Dashboard)
+         ========================================================================= -->
+    <section id="analytics" class="analytics-section">
+      <div class="analytics-topbar">
+        <div>
+          <h2><span>📈</span> Executive Wellbeing & Department Analytics</h2>
+          <p>Longitudinal employee mood telemetry, active check-in participation, and organizational sentiment trends.</p>
+        </div>
+
+        <!-- Department Drilldown Filter Tabs -->
+        <div class="dept-tabs">
+          <button class="dept-tab-btn active" onclick="filterDepartment('all', this)">🏢 All Company</button>
+          <button class="dept-tab-btn" onclick="filterDepartment('engineering', this)">💻 Engineering & Product</button>
+          <button class="dept-tab-btn" onclick="filterDepartment('operations', this)">⚙️ Operations & Support</button>
+          <button class="dept-tab-btn" onclick="filterDepartment('people', this)">👥 People & Culture</button>
+          <button class="dept-tab-btn" onclick="filterDepartment('sales', this)">📈 Sales & Accounts</button>
+        </div>
+      </div>
+
+      <!-- 4 Executive KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">Company Mood Index</div>
+          <div class="kpi-stat-row">
+            <span id="kpiMoodIndex" class="kpi-val">78.6</span>
+            <span class="kpi-badge kpi-up">↑ +4.8%</span>
+          </div>
+          <div class="kpi-desc">Healthy collaborative valence (scale 0-100)</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">Active Participation Rate</div>
+          <div class="kpi-stat-row">
+            <span id="kpiParticipation" class="kpi-val">89.4%</span>
+            <span class="kpi-badge kpi-up">↑ +6.2%</span>
+          </div>
+          <div class="kpi-desc">1,270 of 1,420 employees logged this week</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">Burnout Vulnerability</div>
+          <div class="kpi-stat-row">
+            <span id="kpiBurnout" class="kpi-val">11.8%</span>
+            <span class="kpi-badge kpi-down">↓ -3.4%</span>
+          </div>
+          <div class="kpi-desc">Staff flagging fatigue or extreme workload</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">Dominant Morale State</div>
+          <div class="kpi-stat-row">
+            <span id="kpiDominant" class="kpi-val" style="color: #38bdf8;">Productive</span>
+          </div>
+          <div class="kpi-desc">68% positive affect distribution</div>
+        </div>
+      </div>
+
+      <!-- 14-Day Timeline Trend Chart (Responsive SVG) -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <div>
+            <strong style="font-size: 1.05rem; font-family: 'Outfit';">14-Day Longitudinal Wellbeing Trajectory</strong>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">Daily aggregate Mood Index calculated across all submitted reflections</div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-indicator" style="background: #38bdf8;"></div>
+              <span>Mood Index Curve</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-indicator" style="background: #10b981;"></div>
+              <span>Target Baseline (75.0)</span>
+            </div>
+          </div>
+        </div>
+
+        <svg class="timeline-svg" viewBox="0 0 900 220" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Grid Lines -->
+          <line x1="40" y1="30" x2="880" y2="30" class="chart-grid-line" />
+          <text x="15" y="34" class="chart-axis-label">90</text>
+
+          <line x1="40" y1="80" x2="880" y2="80" class="chart-grid-line" />
+          <text x="15" y="84" class="chart-axis-label">80</text>
+
+          <line x1="40" y1="130" x2="880" y2="130" class="chart-grid-line" />
+          <text x="15" y="134" class="chart-axis-label">70</text>
+
+          <line x1="40" y1="180" x2="880" y2="180" class="chart-grid-line" />
+          <text x="15" y="184" class="chart-axis-label">60</text>
+
+          <!-- Baseline 75 -->
+          <line x1="40" y1="105" x2="880" y2="105" stroke="#10b981" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.6" />
+
+          <!-- Dynamic Curve Injected via JS -->
+          <path id="chartAreaPath" class="chart-area" d="" />
+          <path id="chartLinePath" class="chart-line" d="" />
+          <g id="chartNodesGroup"></g>
+        </svg>
+      </div>
+
+      <!-- Drivers & Detractors vs Feelings Distribution -->
+      <div class="analytics-split">
+        <!-- Primary Drivers & Friction Detractors -->
+        <div class="breakdown-box">
+          <div class="breakdown-title">
+            <span>⚖️</span> Morale Drivers & Friction Detractors
+          </div>
+          <div class="driver-list">
+            <div class="driver-item">
+              <div class="driver-meta">
+                <span>💚 Team Collaboration & Trust</span>
+                <strong style="color: #34d399;">78% Positive Impact</strong>
+              </div>
+              <div class="driver-bar-bg">
+                <div class="driver-bar-fill" style="width: 78%; background: #10b981;"></div>
+              </div>
+            </div>
+            <div class="driver-item">
+              <div class="driver-meta">
+                <span>💚 Recognition & Psychological Safety</span>
+                <strong style="color: #34d399;">66% Positive Impact</strong>
+              </div>
+              <div class="driver-bar-bg">
+                <div class="driver-bar-fill" style="width: 66%; background: #38bdf8;"></div>
+              </div>
+            </div>
+            <div class="driver-item">
+              <div class="driver-meta">
+                <span>🔻 Context Switching & Meeting Fatigue</span>
+                <strong style="color: #f87171;">42% Detractor</strong>
+              </div>
+              <div class="driver-bar-bg">
+                <div class="driver-bar-fill" style="width: 42%; background: #ef4444;"></div>
+              </div>
+            </div>
+            <div class="driver-item">
+              <div class="driver-meta">
+                <span>🔻 Sprint Scope Churn & Deadlines</span>
+                <strong style="color: #fbbf24;">38% Detractor</strong>
+              </div>
+              <div class="driver-bar-bg">
+                <div class="driver-bar-fill" style="width: 38%; background: #f59e0b;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feelings Frequency Distribution Cloud -->
+        <div class="breakdown-box">
+          <div class="breakdown-title">
+            <span>📊</span> Feelings Frequency Breakdown (Last 30 Days)
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="driver-item">
+              <div class="driver-meta">
+                <span>Inspired & Energized</span>
+                <strong style="color: #38bdf8;">68%</strong>
+              </div>
+              <div class="driver-bar-bg">
+                <div class="driver-bar-fill" style="width: 68%; background: var(--gradient-brand);"></div>
+              </div>
+            </div>
+            <div class="driver-item">
+              <div class="driver-meta">
+                <span>Calm & Focused</span>
+                <strong style="color: #34d399;">61%</strong>
+              </div>
+              <div class="driver-bar-bg">
+                <div class="driver-bar-fill" style="width: 61%; background: #10b981;"></div>
+              </div>
+            </div>
+            <div class="driver-item">
+              <div class="driver-meta">
+                <span>Stressed or Rushed</span>
+                <strong style="color: #fbbf24;">22%</strong>
+              </div>
+              <div class="driver-bar-bg">
+                <div class="driver-bar-fill" style="width: 22%; background: #f59e0b;"></div>
+              </div>
+            </div>
+            <div class="driver-item">
+              <div class="driver-meta">
+                <span>Burned Out or Drained</span>
+                <strong style="color: #f87171;">11%</strong>
+              </div>
+              <div class="driver-bar-bg">
+                <div class="driver-bar-fill" style="width: 11%; background: #ef4444;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Platform Capabilities Grid -->
     <section id="features" class="features-section">
       <div class="section-headline">
         <h2>Enterprise Platform Capabilities</h2>
-        <p>Combining rigorous NLP linguistics, state-of-the-art transformer neural networks, and clinical safety screening.</p>
+        <p>Combining lightweight employee check-ins, rigorous NLP linguistics, and clinical safety screening.</p>
       </div>
 
       <div class="features-grid">
         <div class="feature-card">
+          <div class="feature-icon-box">⚡</div>
+          <h3>15-Second Daily Check-Ins</h3>
+          <p>Ultra-fast mood ratings, dynamic context-aware feeling chips, and workplace factor tagging allow employees to record authentic sentiment in under 15 seconds.</p>
+        </div>
+        <div class="feature-card">
           <div class="feature-icon-box">🎯</div>
           <h3>Dual-Track NLP Architecture</h3>
           <p>Preserves raw capitalization, punctuation, and exclamation intensifiers for VADER sentiment, while providing structured tokenization and lemmatization for analytics.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon-box">⚡</div>
-          <h3>Strict Mutually Exclusive Thresholds</h3>
-          <p>Eliminates sentiment overlap by enforcing unambiguous mathematical boundary logic: Positive (&gt; +0.05), Negative (&lt; -0.05), and Neutral ([-0.05, +0.05]).</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon-box">🤖</div>
@@ -1211,8 +1701,8 @@
         </div>
         <div class="feature-card">
           <div class="feature-icon-box">🛡️</div>
-          <h3>PBKDF2 Relational Privacy</h3>
-          <p>Salted cryptographic password derivation over 120,000 iterations in SQLite ensures that individual reflection logs remain confidential and strictly user-isolated.</p>
+          <h3>Zero-Knowledge Security</h3>
+          <p>Salted cryptographic PBKDF2 password derivation over 120,000 iterations ensures individual employee reflection notes remain completely private and isolated.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon-box">🚨</div>
@@ -1221,50 +1711,8 @@
         </div>
         <div class="feature-card">
           <div class="feature-icon-box">📊</div>
-          <h3>Batch Ingestion & Analytics</h3>
-          <p>Supports multi-row CSV pulse surveys and longitudinal trend tracking to give leadership high-level aggregate wellness telemetry without compromising individual confidentiality.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Team Trends & Analytics Preview -->
-    <section id="analytics" class="analytics-preview-section">
-      <div class="section-headline" style="margin-bottom: 1.5rem; text-align: left;">
-        <h2>📈 Longitudinal Team Wellness Insights</h2>
-        <p>Aggregated morale telemetry and burnout indicators across departments and sprints.</p>
-      </div>
-
-      <div class="analytics-grid">
-        <div class="kpi-box">
-          <div class="kpi-title">Team Morale Score</div>
-          <div class="kpi-metric">
-            <span>84.2</span>
-            <span class="kpi-trend trend-up">↑ +6.5%</span>
-          </div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">Healthy collaborative range</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-title">Burnout Risk Velocity</div>
-          <div class="kpi-metric">
-            <span>12.4%</span>
-            <span class="kpi-trend trend-down">↓ -3.1%</span>
-          </div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">Down from sprint peak</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-title">Weekly Reflections</div>
-          <div class="kpi-metric">
-            <span>1,420</span>
-            <span class="kpi-trend trend-up">↑ +18%</span>
-          </div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">Active employee engagement</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-title">Dominant Morale State</div>
-          <div class="kpi-metric" style="color: #38bdf8;">
-            <span>Joy</span>
-          </div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">62% positive valence</div>
+          <h3>Department Morale Drilldowns</h3>
+          <p>Enables leadership to monitor organizational health across departments without compromising individual confidentiality, identifying systemic burnout risks early.</p>
         </div>
       </div>
     </section>
@@ -1278,11 +1726,21 @@
 
       <div class="faq-item active" onclick="toggleFaq(this)">
         <div class="faq-question">
+          <span>How does the 15-second daily check-in work?</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          Employees simply pick their primary mood rating on a 5-point spectrum (Burned Out to Radiant Joy), select relevant feeling chips that dynamically adjust to their mood, tag key workplace contributors, and optionally type reflections for real-time AI emotion scoring.
+        </div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">
           <span>How does MoodMentor protect employee privacy and data isolation?</span>
           <span class="faq-toggle">▼</span>
         </div>
         <div class="faq-answer">
-          All passwords are encrypted using salted PBKDF2 with SHA-256 over 120,000 iterations. Relational records in SQLite are strictly scoped by user ID, meaning reflections and mood logs cannot be cross-referenced or accessed without explicit authorization.
+          All passwords and sensitive tokens are encrypted using salted PBKDF2 with SHA-256 over 120,000 iterations. Individual reflection logs are strictly scoped by user ID and private session tokens, ensuring confidentiality while aggregating macro trends for leadership.
         </div>
       </div>
 
@@ -1292,7 +1750,7 @@
           <span class="faq-toggle">▼</span>
         </div>
         <div class="faq-answer">
-          VADER provides instantaneous, deterministic valence scoring tuned specifically for lexical capitalization, punctuation intensifiers, and emoticons. The DistilRoBERTa transformer provides fine-grained emotional depth across 7 distinct states (Joy, Sadness, Fear, Anger, Surprise, Disgust, Neutral). Together, they deliver rapid polarity assessment and deep psychological insight without latency bottlenecks.
+          VADER provides instantaneous, deterministic valence scoring tuned specifically for lexical capitalization, punctuation intensifiers, and emoticons. The DistilRoBERTa transformer provides fine-grained emotional depth across 7 distinct states. Together, they deliver rapid polarity assessment and deep psychological insight.
         </div>
       </div>
 
@@ -1303,16 +1761,6 @@
         </div>
         <div class="faq-answer">
           No. MoodMentor is explicitly designed as a self-reflection, mindfulness, and proactive workplace well-being platform. It does not diagnose mental health conditions. If severe distress or self-harm keywords are detected, the system immediately surfaces regional crisis hotlines and accredited professional support resources.
-        </div>
-      </div>
-
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-question">
-          <span>Can teams process batch pulse surveys or CSV files?</span>
-          <span class="faq-toggle">▼</span>
-        </div>
-        <div class="faq-answer">
-          Yes. The platform provides automated CSV and text ingestion with feedback column auto-detection. It can evaluate hundreds of rows in batch, compute aggregated emotion distributions, and generate longitudinal trend charts.
         </div>
       </div>
     </section>
@@ -1355,7 +1803,7 @@
       <!-- Pane 1: 1-Click Demo -->
       <div id="modalPaneDemo">
         <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem;">
-          <div style="font-weight: 700; font-size: 0.9rem; color: #fff; margin-bottom: 0.25rem;">Pre-Authorized Employee Account:</div>
+          <div style="font-weight: 700; font-size: 0.9rem; color: #fff; margin-bottom: 0.25rem;">Pre-Authorized Staff Account:</div>
           <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent-cyan);">
             demo@moodmentor.ai • DemoPass123!
           </div>
@@ -1364,7 +1812,7 @@
           </div>
         </div>
         <button class="btn btn-primary" onclick="quickDemoLogin()" style="width: 100%; padding: 0.8rem;">
-          🚀 Enter Workspace as Demo Employee
+          🚀 Enter Workspace as Demo Staff
         </button>
       </div>
 
@@ -1373,7 +1821,7 @@
         <form onsubmit="handleModalLogin(event)">
           <div class="form-group">
             <label for="modalEmail">Work Email Address</label>
-            <input id="modalEmail" type="email" class="form-input" placeholder="e.g. employee@company.com" required value="demo@moodmentor.ai">
+            <input id="modalEmail" type="email" class="form-input" placeholder="e.g. staff@company.com" required value="demo@moodmentor.ai">
           </div>
           <div class="form-group">
             <label for="modalPassword">Password</label>
@@ -1407,6 +1855,7 @@
               <option value="Engineering & Product">Engineering & Product</option>
               <option value="Operations & Support">Operations & Support</option>
               <option value="People & Culture">People & Culture</option>
+              <option value="Sales & Accounts">Sales & Accounts</option>
             </select>
           </div>
           <div class="form-group">
@@ -1414,7 +1863,7 @@
             <input id="regModalPass" type="password" class="form-input" placeholder="••••••••••••" minlength="6" required>
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.75rem;">
-            Create Employee Account
+            Create Staff Account
           </button>
         </form>
       </div>
@@ -1436,15 +1885,15 @@
           <strong style="font-size: 1.2rem; color: #fff; font-family: 'Outfit';">MoodMentor</strong>
         </div>
         <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; max-width: 320px;">
-          Next-generation workplace mental health and emotion telemetry platform powered by deterministic VADER polarity and transformer intelligence.
+          Next-generation workplace mental wellness and emotion telemetry platform combining 15-second check-ins, deterministic VADER polarity, and transformer affect intelligence.
         </p>
       </div>
       <div class="footer-col">
         <h4>Product</h4>
         <ul>
-          <li><a href="#telemetry">Emotion Telemetry</a></li>
+          <li><a href="#checkin">15s Check-in</a></li>
+          <li><a href="#analytics">Wellbeing Index</a></li>
           <li><a href="#features">NLP Architecture</a></li>
-          <li><a href="#analytics">Pulse Analytics</a></li>
           <li><a href="#faq">FAQ</a></li>
         </ul>
       </div>
@@ -1462,14 +1911,14 @@
         <ul>
           <li><a href="javascript:void(0)" onclick="showToast('Zero-knowledge PBKDF2 encryption verified')">Data Privacy</a></li>
           <li><a href="javascript:void(0)" onclick="showToast('Ethical AI crisis screen active')">Crisis Safeguards</a></li>
-          <li><a href="javascript:void(0)" onclick="showToast('Self-reflection tool - non-diagnostic')">Disclaimer</a></li>
+          <li><a href="javascript:void(0)" onclick="showToast('Self-reflection tool - non-diagnostic')">Clinical Disclaimer</a></li>
         </ul>
       </div>
     </div>
 
     <div class="footer-bottom">
       <div>
-        © 2026 MoodMentor Platform. Engineered by <a href="https://github.com/DeekshaG96" target="_blank">Deeksha Ganesh</a>. All rights reserved.
+        © 2026 MoodMentor Platform. Engineered by <a href="https://github.com/DeekshaG96" target="_blank" style="color: var(--accent-cyan); text-decoration: none;">Deeksha Ganesh</a>. All rights reserved.
       </div>
       <div style="display: flex; gap: 1.5rem;">
         <span style="color: #34d399; font-size: 0.82rem;">● Systems Operational</span>
@@ -1478,31 +1927,88 @@
   </footer>
 
   <script>
-    const SCENARIOS = {
+    // --- Data Definitions (Inspired by AuraWell / Employee-Mood-Index) ---
+    const FEELINGS_BY_MOOD = {
+      5: ['Happy', 'Excited', 'Grateful', 'Inspired', 'Confident', 'Energetic', 'Proud', 'Optimistic'],
+      4: ['Content', 'Calm', 'Productive', 'Focused', 'Relaxed', 'Hopeful', 'Satisfied', 'Positive'],
+      3: ['Neutral', 'Tired', 'Busy', 'Thoughtful', 'Uncertain', 'Distracted'],
+      2: ['Stressed', 'Anxious', 'Frustrated', 'Overwhelmed', 'Drained', 'Irritated', 'Pressured'],
+      1: ['Burned Out', 'Exhausted', 'Disconnected', 'Demotivated', 'Defeated', 'Angry']
+    };
+
+    const PRESET_SCENARIOS = {
       joy: {
+        mood: 5,
+        feelings: ['Inspired', 'Grateful', 'Energetic'],
         text: "I am absolutely thrilled with our team's product release! Everyone collaborated seamlessly, the client feedback was overwhelmingly positive, and I feel truly valued and inspired.",
-        tokens: ["thrilled", "team", "product", "release", "collaborated", "seamlessly", "client", "feedback", "positive", "feel", "truly", "valued", "inspired"],
-        lemmas: ["thrill", "team", "product", "release", "collaborate", "seamlessly", "client", "feedback", "positive", "feel", "truly", "value", "inspire"]
+        tokens: ["thrilled", "team", "product", "release", "collaborated", "seamlessly", "client", "feedback", "positive", "feel", "truly", "valued", "inspired"]
       },
       fatigue: {
+        mood: 1,
+        feelings: ['Burned Out', 'Exhausted', 'Drained'],
         text: "I am feeling completely exhausted and overwhelmed. The unyielding project deadlines, constant context switching, and lack of staffing are making me feel burned out and anxious every morning.",
-        tokens: ["feeling", "completely", "exhausted", "overwhelmed", "unyielding", "project", "deadlines", "constant", "context", "switching", "lack", "staffing", "burned", "anxious"],
-        lemmas: ["feel", "completely", "exhaust", "overwhelm", "unyielding", "project", "deadline", "constant", "context", "switch", "lack", "staff", "burn", "anxious"]
+        tokens: ["feeling", "completely", "exhausted", "overwhelmed", "unyielding", "project", "deadlines", "constant", "context", "switching", "lack", "staffing", "burned", "anxious"]
       },
       status: {
+        mood: 3,
+        feelings: ['Neutral', 'Thoughtful', 'Busy'],
         text: "Completed the scheduled weekly sprint retrospective. Reviewed code coverage metrics, merged 4 pull requests, and planned the upcoming quarterly roadmap for engineering review.",
-        tokens: ["completed", "scheduled", "weekly", "sprint", "retrospective", "reviewed", "code", "coverage", "metrics", "merged", "pull", "requests", "planned", "roadmap"],
-        lemmas: ["complete", "schedule", "weekly", "sprint", "retrospective", "review", "code", "coverage", "metric", "merge", "pull", "request", "plan", "roadmap"]
+        tokens: ["completed", "scheduled", "weekly", "sprint", "retrospective", "reviewed", "code", "coverage", "metrics", "merged", "pull", "requests", "planned", "roadmap"]
       },
       isolation: {
+        mood: 2,
+        feelings: ['Anxious', 'Disconnected', 'Uncertain'],
         text: "I feel disconnected from the rest of the unit and worried that my contributions are not meeting senior standards. It feels hard to ask for help when everyone else appears to know what to do.",
-        tokens: ["feel", "disconnected", "rest", "unit", "worried", "contributions", "not", "meeting", "senior", "standards", "feels", "hard", "ask", "help"],
-        lemmas: ["feel", "disconnect", "rest", "unit", "worry", "contribution", "not", "meet", "senior", "standard", "feel", "hard", "ask", "help"]
+        tokens: ["feel", "disconnected", "rest", "unit", "worried", "contributions", "not", "meeting", "senior", "standards", "feels", "hard", "ask", "help"]
       },
       frustration: {
+        mood: 2,
+        feelings: ['Frustrated', 'Irritated', 'Pressured'],
         text: "Extremely frustrated with the sudden change in architectural requirements with zero prior notice. It wasted two full days of engineering effort and invalidated tested components.",
-        tokens: ["extremely", "frustrated", "sudden", "change", "architectural", "requirements", "zero", "prior", "notice", "wasted", "two", "full", "days", "invalidated"],
-        lemmas: ["extremely", "frustrate", "sudden", "change", "architectural", "requirement", "zero", "prior", "notice", "waste", "two", "full", "day", "invalidate"]
+        tokens: ["extremely", "frustrated", "sudden", "change", "architectural", "requirements", "zero", "prior", "notice", "wasted", "two", "full", "days", "invalidated"]
+      }
+    };
+
+    const DEPARTMENT_DATA = {
+      all: {
+        index: "78.6",
+        trend: "↑ +4.8%",
+        participation: "89.4%",
+        burnout: "11.8%",
+        dominant: "Productive",
+        timeline: [72.4, 73.1, 74.0, 73.6, 75.2, 76.8, 77.4, 76.9, 78.0, 78.2, 77.8, 78.5, 78.9, 78.6]
+      },
+      engineering: {
+        index: "76.4",
+        trend: "↑ +3.2%",
+        participation: "92.1%",
+        burnout: "14.2%",
+        dominant: "Focused / Joy",
+        timeline: [71.0, 72.2, 72.8, 73.0, 74.5, 75.1, 75.8, 75.2, 76.0, 76.5, 75.9, 76.2, 76.8, 76.4]
+      },
+      operations: {
+        index: "81.2",
+        trend: "↑ +5.1%",
+        participation: "86.5%",
+        burnout: "9.4%",
+        dominant: "Calm / Content",
+        timeline: [76.5, 77.0, 77.4, 78.2, 78.8, 79.5, 80.0, 80.4, 80.9, 81.0, 80.8, 81.4, 81.5, 81.2]
+      },
+      people: {
+        index: "88.5",
+        trend: "↑ +6.9%",
+        participation: "94.2%",
+        burnout: "6.2%",
+        dominant: "Radiant Joy",
+        timeline: [82.0, 83.2, 84.1, 84.5, 85.0, 86.2, 86.8, 87.1, 87.9, 88.0, 88.2, 88.4, 88.7, 88.5]
+      },
+      sales: {
+        index: "74.9",
+        trend: "↑ +2.8%",
+        participation: "85.0%",
+        burnout: "16.5%",
+        dominant: "Energetic / Pressured",
+        timeline: [69.5, 70.2, 71.0, 71.8, 72.5, 73.0, 73.4, 73.9, 74.2, 74.0, 74.5, 75.0, 75.2, 74.9]
       }
     };
 
@@ -1516,9 +2022,20 @@
       disgust: "#d946ef"
     };
 
-    // --- User Session State ---
+    // --- State Variables ---
+    let selectedMood = 4;
+    let selectedFeelings = new Set(['Productive', 'Focused']);
     let currentUser = null;
 
+    // --- Initialization ---
+    document.addEventListener("DOMContentLoaded", () => {
+      initAuth();
+      renderFeelingChips(selectedMood);
+      renderTimelineChart(DEPARTMENT_DATA.all.timeline);
+      selectScenarioPreset('joy', document.querySelector('.preset-pill'));
+    });
+
+    // --- User Session Management ---
     function initAuth() {
       const saved = localStorage.getItem("moodmentor_user");
       if (saved) {
@@ -1535,20 +2052,16 @@
       document.getElementById('authModal').classList.add('open');
       switchModalTab(tab);
     }
-
     function closeAuthModal() {
       document.getElementById('authModal').classList.remove('open');
     }
-
     function closeAuthModalOnBackdrop(e) {
       if (e.target.id === 'authModal') closeAuthModal();
     }
-
     function switchModalTab(tab) {
       document.getElementById('modalTabDemo').classList.toggle('active', tab === 'demo');
       document.getElementById('modalTabLogin').classList.toggle('active', tab === 'login');
       document.getElementById('modalTabRegister').classList.toggle('active', tab === 'register');
-
       document.getElementById('modalPaneDemo').style.display = tab === 'demo' ? 'block' : 'none';
       document.getElementById('modalPaneLogin').style.display = tab === 'login' ? 'block' : 'none';
       document.getElementById('modalPaneRegister').style.display = tab === 'register' ? 'block' : 'none';
@@ -1556,27 +2069,25 @@
 
     function quickDemoLogin() {
       currentUser = {
-        name: "Demo Employee",
+        name: "Demo Staff",
         email: "demo@moodmentor.ai",
-        dept: "Product Engineering",
-        streak: "14-day reflection streak"
+        dept: "Engineering & Product",
+        streak: "15-day streak"
       };
       localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       renderAuthState();
       closeAuthModal();
-      showToast("Workspace Unlocked: Signed in as Demo Employee");
-      document.getElementById("telemetry").scrollIntoView({ behavior: "smooth" });
+      showToast("Signed in as Demo Staff! Workspace unlocked.");
     }
 
     function handleModalLogin(e) {
       e.preventDefault();
       const email = document.getElementById("modalEmail").value.trim();
-      const name = email.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, l => l.toUpperCase());
       currentUser = {
-        name: name || "Authenticated Employee",
+        name: email.split("@")[0].replace(".", " ").toUpperCase(),
         email: email,
-        dept: "Product Engineering",
-        streak: "9-day streak"
+        dept: "Engineering & Product",
+        streak: "7-day streak"
       };
       localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       renderAuthState();
@@ -1593,25 +2104,24 @@
         name: name,
         email: email,
         dept: dept,
-        streak: "1st day reflection"
+        streak: "1-day streak"
       };
       localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       renderAuthState();
       closeAuthModal();
-      showToast(`Account successfully created for ${currentUser.name}!`);
+      showToast(`Staff Account created for ${name}!`);
     }
 
     function fillModalDemo() {
       document.getElementById("modalEmail").value = "demo@moodmentor.ai";
       document.getElementById("modalPassword").value = "DemoPass123!";
-      showToast("Autofilled demo credentials");
     }
 
     function handleLogout() {
       currentUser = null;
       localStorage.removeItem("moodmentor_user");
       renderAuthState();
-      showToast("Signed out successfully.");
+      showToast("Signed out of secure session.");
     }
 
     function renderAuthState() {
@@ -1623,12 +2133,12 @@
         banner.style.display = "flex";
         userPill.style.display = "flex";
         authBtn.style.display = "none";
-
-        const initials = currentUser.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+        
+        const initials = currentUser.name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
         document.getElementById("userAvatar").textContent = initials;
         document.getElementById("userNameHeader").textContent = currentUser.name;
         document.getElementById("sessionGreeting").textContent = `Welcome back, ${currentUser.name}!`;
-        document.getElementById("sessionStreak").textContent = `🔥 ${currentUser.streak || "7-day streak"} • Dept: ${currentUser.dept}`;
+        document.getElementById("sessionStreak").textContent = `🔥 ${currentUser.streak || "14-day streak"} • Dept: ${currentUser.dept}`;
       } else {
         banner.style.display = "none";
         userPill.style.display = "none";
@@ -1643,127 +2153,220 @@
       setTimeout(() => toast.classList.remove("show"), 3500);
     }
 
-    // --- Interactive FAQ Toggle ---
-    function toggleFaq(item) {
-      const isActive = item.classList.contains("active");
+    function toggleFaq(el) {
+      const isOpen = el.classList.contains("active");
       document.querySelectorAll(".faq-item").forEach(i => i.classList.remove("active"));
-      if (!isActive) item.classList.add("active");
+      if (!isOpen) el.classList.add("active");
     }
 
-    // --- Real-time Interactive NLP & Emotion Engine ---
-    function selectScenario(key, btn) {
-      document.querySelectorAll(".scenario-chip").forEach(c => c.classList.remove("active"));
+    // --- 15-Second Mood Check-in Logic ---
+    function selectMoodScore(score, el) {
+      selectedMood = score;
+      document.querySelectorAll(".mood-card").forEach(c => c.classList.remove("active"));
+      el.classList.add("active");
+      renderFeelingChips(score);
+      runLiveAffectAnalysis();
+    }
+
+    function renderFeelingChips(moodScore) {
+      const container = document.getElementById("dynamicFeelingsRow");
+      container.innerHTML = "";
+      const feelings = FEELINGS_BY_MOOD[moodScore] || FEELINGS_BY_MOOD[4];
+      
+      feelings.forEach((feeling, idx) => {
+        const chip = document.createElement("button");
+        chip.className = "tag-chip" + (idx < 2 ? " active" : "");
+        chip.textContent = feeling;
+        chip.onclick = function() {
+          this.classList.toggle("active");
+          if (this.classList.contains("active")) {
+            selectedFeelings.add(feeling);
+          } else {
+            selectedFeelings.delete(feeling);
+          }
+          runLiveAffectAnalysis();
+        };
+        container.appendChild(chip);
+      });
+    }
+
+    function toggleDriverChip(btn) {
+      btn.classList.toggle("active-driver");
+      runLiveAffectAnalysis();
+    }
+
+    function selectScenarioPreset(key, btn) {
+      document.querySelectorAll(".preset-pill").forEach(p => p.classList.remove("active"));
       if (btn) btn.classList.add("active");
 
-      const scenario = SCENARIOS[key];
+      const scenario = PRESET_SCENARIOS[key];
       if (scenario) {
-        document.getElementById("demoText").value = scenario.text;
-        runLiveAnalysis(scenario);
+        // Set mood card
+        selectedMood = scenario.mood;
+        const moodCards = document.querySelectorAll(".mood-card");
+        moodCards.forEach(c => c.classList.remove("active"));
+        if (moodCards[selectedMood - 1]) moodCards[selectedMood - 1].classList.add("active");
+        renderFeelingChips(selectedMood);
+
+        // Populate text
+        document.getElementById("reflectionInput").value = scenario.text;
+        runLiveAffectAnalysis();
       }
     }
 
-    function clearInput() {
-      document.getElementById("demoText").value = "";
-      document.getElementById("charCount").textContent = "0 characters";
-      document.getElementById("compoundVal").textContent = "0.000";
-      document.getElementById("compoundVal").style.color = "#94a3b8";
-      const pill = document.getElementById("polarityPill");
-      pill.textContent = "● NEUTRAL ([-0.05, +0.05])";
-      pill.className = "polarity-pill polarity-neutral";
-      document.getElementById("pipelineTokens").innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">Type reflection to view token breakdown...</span>';
+    function clearReflectionInput() {
+      document.getElementById("reflectionInput").value = "";
+      document.getElementById("charCountLabel").textContent = "0 characters";
+      runLiveAffectAnalysis();
     }
 
-    function runLiveAnalysis(presetData = null) {
-      const rawText = document.getElementById("demoText").value;
-      document.getElementById("charCount").textContent = `${rawText.length} characters`;
+    function handleLiveTextChange() {
+      document.querySelectorAll(".preset-pill").forEach(p => p.classList.remove("active"));
+      runLiveAffectAnalysis();
+    }
 
-      const text = rawText.trim().toLowerCase();
-      if (!text) {
-        clearInput();
-        return;
+    function submitDailyCheckIn() {
+      const streak = currentUser ? "16-day streak" : "1-day streak";
+      if (currentUser) {
+        currentUser.streak = streak;
+        localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
+        renderAuthState();
+      }
+      showToast(`Daily 15s Check-In Logged! Mood Score: ${selectedMood * 20}/100 • ${streak}`);
+    }
+
+    // --- Real-Time Affect Scoring Engine ---
+    function runLiveAffectAnalysis() {
+      const rawText = document.getElementById("reflectionInput").value;
+      document.getElementById("charCountLabel").textContent = `${rawText.length} characters`;
+
+      // Dual-track sentiment evaluation
+      let compound = 0;
+      let emotions = { joy: 0.1, sadness: 0.1, fear: 0.1, anger: 0.05, surprise: 0.05, disgust: 0.05, neutral: 0.55 };
+
+      const lower = rawText.toLowerCase();
+
+      // Crisis Override Check
+      const crisisKeywords = ["kill myself", "suicide", "end it all", "self harm", "want to die"];
+      const isCrisis = crisisKeywords.some(kw => lower.includes(kw));
+
+      if (isCrisis) {
+        compound = -0.92;
+        emotions = { sadness: 0.75, fear: 0.18, anger: 0.05, disgust: 0.01, joy: 0.0, surprise: 0.01, neutral: 0.0 };
+        displayCrisisOverride();
+      } else if (rawText.trim().length === 0) {
+        // Fallback to selectedMood
+        const moodNorm = (selectedMood - 3) / 2; // -1.0 to +1.0
+        compound = moodNorm * 0.75;
+        if (selectedMood >= 4) {
+          emotions = { joy: 0.65, surprise: 0.15, neutral: 0.15, sadness: 0.02, fear: 0.01, anger: 0.01, disgust: 0.01 };
+        } else if (selectedMood === 3) {
+          emotions = { neutral: 0.7, joy: 0.1, sadness: 0.08, surprise: 0.05, fear: 0.04, anger: 0.02, disgust: 0.01 };
+        } else {
+          emotions = { sadness: 0.45, fear: 0.35, anger: 0.12, disgust: 0.05, neutral: 0.02, joy: 0.01, surprise: 0.0 };
+        }
+      } else {
+        // Lexicon polarity
+        const posWords = ["thrilled", "seamlessly", "positive", "valued", "inspired", "happy", "great", "excellent", "proud", "love", "awesome", "good", "productive", "triumph"];
+        const negWords = ["exhausted", "overwhelmed", "burned", "anxious", "disconnected", "worried", "frustrated", "wasted", "invalidated", "bad", "terrible", "hard", "friction"];
+        
+        let pCount = 0;
+        let nCount = 0;
+        posWords.forEach(w => { if (lower.includes(w)) pCount++; });
+        negWords.forEach(w => { if (lower.includes(w)) nCount++; });
+
+        const diff = pCount - nCount;
+        if (diff > 0) {
+          compound = Math.min(0.95, 0.45 + diff * 0.15);
+          emotions.joy = Math.min(0.85, 0.4 + diff * 0.15);
+          emotions.neutral = 0.1;
+          emotions.sadness = 0.02;
+          emotions.fear = 0.02;
+        } else if (diff < 0) {
+          compound = Math.max(-0.95, -0.45 + diff * 0.15);
+          emotions.sadness = 0.45 + Math.abs(diff) * 0.1;
+          emotions.fear = 0.35;
+          emotions.anger = 0.15;
+          emotions.joy = 0.02;
+          emotions.neutral = 0.03;
+        } else {
+          compound = 0.0;
+          emotions.neutral = 0.65;
+          emotions.joy = 0.15;
+          emotions.sadness = 0.1;
+        }
       }
 
-      // Keyword lexicon analysis
-      let posScore = 0.05, negScore = 0.05;
-      const posWords = ["thrilled", "great", "love", "awesome", "proud", "excited", "wonderful", "inspired", "positive", "valued", "seamlessly", "success", "triumph", "good", "happy"];
-      const negWords = ["exhausted", "overwhelmed", "burnout", "burned", "anxious", "frustrated", "terrible", "disconnected", "worried", "wasted", "invalidated", "friction", "pain", "stress"];
-      const fearWords = ["anxious", "worried", "scared", "fear", "insecure", "pressure", "deadlines", "struggle", "panic"];
-      const angerWords = ["frustrated", "angry", "furious", "mad", "wasted", "friction", "toxic", "churn"];
-
-      posWords.forEach(w => { if (text.includes(w)) posScore += 0.35; });
-      negWords.forEach(w => { if (text.includes(w)) negScore += 0.35; });
-
-      let compound = 0.0;
-      if (posScore > negScore) compound = Math.min(0.96, (posScore - negScore) / 1.5 + 0.22);
-      else if (negScore > posScore) compound = Math.max(-0.96, (posScore - negScore) / 1.5 - 0.22);
-      else compound = 0.02;
-
-      // Update Compound Metric UI
-      const compValEl = document.getElementById("compoundVal");
-      const pillEl = document.getElementById("polarityPill");
-      compValEl.textContent = (compound > 0 ? "+" : "") + compound.toFixed(3);
+      // Render Polarity
+      const compValEl = document.getElementById("compoundScoreVal");
+      const pillEl = document.getElementById("polarityStatusPill");
+      compValEl.textContent = (compound >= 0 ? "+" : "") + compound.toFixed(3);
 
       if (compound > 0.05) {
         compValEl.style.color = "#34d399";
-        pillEl.innerHTML = "<span>●</span> POSITIVE (&gt; +0.05)";
         pillEl.className = "polarity-pill polarity-positive";
+        pillEl.innerHTML = "<span>●</span> POSITIVE (&gt; +0.05)";
       } else if (compound < -0.05) {
         compValEl.style.color = "#f87171";
-        pillEl.innerHTML = "<span>●</span> NEGATIVE (&lt; -0.05)";
         pillEl.className = "polarity-pill polarity-negative";
+        pillEl.innerHTML = "<span>●</span> NEGATIVE (&lt; -0.05)";
       } else {
         compValEl.style.color = "#fbbf24";
-        pillEl.innerHTML = "<span>●</span> NEUTRAL ([-0.05, +0.05])";
         pillEl.className = "polarity-pill polarity-neutral";
+        pillEl.innerHTML = "<span>●</span> NEUTRAL ([-0.05, +0.05])";
       }
 
-      // Compute 7-class emotion distribution
-      let emoScores = { joy: 0.04, surprise: 0.04, neutral: 0.04, sadness: 0.04, fear: 0.04, anger: 0.04, disgust: 0.04 };
-      if (compound > 0.2) emoScores.joy += 0.85;
-      else if (compound < -0.2) {
-        if (fearWords.some(w => text.includes(w))) emoScores.fear += 0.75;
-        if (angerWords.some(w => text.includes(w))) emoScores.anger += 0.75;
-        emoScores.sadness += 0.65;
-      } else {
-        emoScores.neutral += 0.85;
+      // Normalize emotions
+      const sum = Object.values(emotions).reduce((a, b) => a + b, 0);
+      for (const k in emotions) emotions[k] = emotions[k] / sum;
+
+      // Find Dominant
+      let dominant = "neutral";
+      let maxScore = -1;
+      for (const [k, v] of Object.entries(emotions)) {
+        if (v > maxScore) {
+          maxScore = v;
+          dominant = k;
+        }
       }
 
-      const total = Object.values(emoScores).reduce((a, b) => a + b, 0);
-      let dominant = "neutral", maxVal = 0;
-      for (const [k, v] of Object.entries(emoScores)) {
-        emoScores[k] = v / total;
-        if (emoScores[k] > maxVal) { maxVal = emoScores[k]; dominant = k; }
-      }
+      document.getElementById("dominantEmotionBadge").textContent = `${dominant.toUpperCase()} (DOMINANT)`;
 
-      // Dominant Emotion Label
-      const dominantEl = document.getElementById("dominantEmo");
-      dominantEl.textContent = `${dominant.toUpperCase()} (DOMINANT)`;
-      dominantEl.style.color = EMOTION_COLORS[dominant] || "#38bdf8";
-
-      // Render Animated Emotion Bars
-      const barsContainer = document.getElementById("emotionBars");
+      // Render Emotion Progress Bars
+      const barsContainer = document.getElementById("emotionBarsList");
       barsContainer.innerHTML = "";
-      Object.entries(emoScores)
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([emo, score]) => {
-          const item = document.createElement("div");
-          item.className = "emotion-bar-item";
-          item.innerHTML = `
-            <div class="emotion-info">
-              <span>${emo.charAt(0).toUpperCase() + emo.slice(1)}</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">${(score * 100).toFixed(1)}%</span>
-            </div>
-            <div class="bar-bg">
-              <div class="bar-fill" style="width: ${score * 100}%; background: ${EMOTION_COLORS[emo]};"></div>
-            </div>
-          `;
-          barsContainer.appendChild(item);
-        });
+      const sortedKeys = Object.keys(emotions).sort((a, b) => emotions[b] - emotions[a]);
 
-      // Context Recommendations
-      const recIcon = document.getElementById("recIcon");
-      const recTitle = document.getElementById("recTitle");
-      const recSummary = document.getElementById("recSummary");
+      sortedKeys.forEach(emo => {
+        const score = emotions[emo];
+        const pct = (score * 100).toFixed(1);
+        const row = document.createElement("div");
+        row.className = "emotion-row";
+        row.innerHTML = `
+          <div class="emotion-row-header">
+            <span>${emo.charAt(0).toUpperCase() + emo.slice(1)}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: ${EMOTION_COLORS[emo]}">${pct}%</span>
+          </div>
+          <div class="emotion-bar-track">
+            <div class="emotion-bar-progress" style="width: ${pct}%; background: ${EMOTION_COLORS[emo]}"></div>
+          </div>
+        `;
+        barsContainer.appendChild(row);
+      });
+
+      // Dynamic Recommendation
+      if (!isCrisis) {
+        renderRecommendation(dominant);
+      }
+
+      // Render Linguistic Token Pipeline
+      renderLinguisticTokens(rawText);
+    }
+
+    function renderRecommendation(dominant) {
+      const recIcon = document.getElementById("recIconElement");
+      const recTitle = document.getElementById("recTitleElement");
+      const recSummary = document.getElementById("recSummaryElement");
 
       if (dominant === "joy") {
         recIcon.textContent = "🌱";
@@ -1778,44 +2381,126 @@
         recTitle.textContent = "Restorative Micro-Break & Empathetic Check-in";
         recSummary.textContent = "Emotional fatigue and depletion markers identified. Step away for a 15-minute screen-free walk, hydrate, and connect with a supportive colleague.";
       } else if (dominant === "anger") {
-        recIcon.textContent = "🧊";
-        recTitle.textContent = "Objective Cooling Interval & Communication Reset";
-        recSummary.textContent = "Operational friction detected. Implement a 10-minute cooling interval before responding to critical architectural or team messages.";
+        recIcon.textContent = "🛡️";
+        recTitle.textContent = "Constructive Cooling & Structural Retrospective";
+        recSummary.textContent = "High frustration and friction observed. Pause asynchronous chat channels, engage in a brief somatic reset, and draft objective process feedback.";
       } else {
-        recIcon.textContent = "🎯";
-        recTitle.textContent = "Mindful Cadence & Operational Alignment";
-        recSummary.textContent = "Steady operational baseline. Maintain consistent pacing, take regular eye-rest breaks, and prepare priorities for tomorrow.";
+        recIcon.textContent = "⚖️";
+        recTitle.textContent = "Mindful Focus & Steady Rhythm";
+        recSummary.textContent = "Balanced and neutral cognitive state detected. Maintain structured deep-work blocks and schedule short breaks between context switches.";
+      }
+    }
+
+    function displayCrisisOverride() {
+      const recIcon = document.getElementById("recIconElement");
+      const recTitle = document.getElementById("recTitleElement");
+      const recSummary = document.getElementById("recSummaryElement");
+
+      recIcon.textContent = "🚨";
+      recTitle.textContent = "URGENT SAFETY PROTOCOL: Crisis Support Resources";
+      recSummary.innerHTML = `<strong>Immediate Help Available:</strong> If you are experiencing acute distress, call or text the Suicide & Crisis Lifeline at <strong>988</strong> (USA/Canada), or text HOME to <strong>741741</strong>. Confidential, free support is available 24/7.`;
+    }
+
+    function renderLinguisticTokens(rawText) {
+      const tokensContainer = document.getElementById("pipelineTokenList");
+      tokensContainer.innerHTML = "";
+
+      if (!rawText.trim()) {
+        tokensContainer.innerHTML = '<span style="color: #64748b; font-size: 0.78rem;">Type reflection to view token breakdown...</span>';
+        return;
       }
 
-      // Render Pipeline Inspector Tokens
-      const tokensContainer = document.getElementById("pipelineTokens");
-      tokensContainer.innerHTML = "";
-      
-      const negations = new Set(["not", "no", "never", "cannot", "n't", "none", "neither"]);
-      const words = rawText.replace(/[^\w\s']/g, " ").split(/\s+/).filter(w => w.length > 0).slice(0, 16);
-      
-      words.forEach(w => {
-        const lowerW = w.toLowerCase();
+      const stopwords = new Set(["i", "am", "the", "with", "and", "a", "an", "to", "in", "of", "for", "is", "was", "my", "our"]);
+      const negations = new Set(["not", "never", "no", "hardly", "barely", "scarcely", "without"]);
+
+      const words = rawText.match(/[A-Za-z0-9'-]+/g) || [];
+      const filtered = words.filter(w => {
+        const lw = w.toLowerCase();
+        return negations.has(lw) || !stopwords.has(lw);
+      });
+
+      filtered.slice(0, 14).forEach(tok => {
         const span = document.createElement("span");
-        if (negations.has(lowerW)) {
-          span.className = "pipeline-token negation";
-          span.innerHTML = `${w} <small>(negation)</small>`;
-        } else {
-          span.className = "pipeline-token";
-          span.textContent = w;
-        }
+        const isNeg = negations.has(tok.toLowerCase());
+        span.className = `token-pill ${isNeg ? "negation" : ""}`;
+        span.textContent = tok;
         tokensContainer.appendChild(span);
       });
     }
 
-    // Keyboard support: Escape closes modal
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeAuthModal();
-    });
+    // --- Executive Analytics & Department Drilldown Logic ---
+    function filterDepartment(deptKey, btn) {
+      document.querySelectorAll(".dept-tab-btn").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
 
-    // Initialize application on load
-    initAuth();
-    selectScenario('joy', document.querySelector('.scenario-chip'));
+      const data = DEPARTMENT_DATA[deptKey] || DEPARTMENT_DATA.all;
+      document.getElementById("kpiMoodIndex").textContent = data.index;
+      document.getElementById("kpiParticipation").textContent = data.participation;
+      document.getElementById("kpiBurnout").textContent = data.burnout;
+      document.getElementById("kpiDominant").textContent = data.dominant;
+
+      renderTimelineChart(data.timeline);
+      showToast(`Filtered analytics for: ${btn ? btn.textContent.trim() : deptKey}`);
+    }
+
+    function renderTimelineChart(points) {
+      const svgW = 900;
+      const svgH = 220;
+      const minX = 40;
+      const maxX = 880;
+      const minY = 30; // Score 90
+      const maxY = 180; // Score 60
+
+      const stepX = (maxX - minX) / (points.length - 1);
+
+      // Convert score (60 to 90) to Y
+      function getY(score) {
+        const clamped = Math.max(60, Math.min(90, score));
+        return maxY - ((clamped - 60) / 30) * (maxY - minY);
+      }
+
+      let dLine = `M ${minX} ${getY(points[0])}`;
+      let dArea = `M ${minX} ${maxY} L ${minX} ${getY(points[0])}`;
+
+      const nodesGroup = document.getElementById("chartNodesGroup");
+      nodesGroup.innerHTML = "";
+
+      points.forEach((val, i) => {
+        const x = minX + i * stepX;
+        const y = getY(val);
+
+        if (i > 0) {
+          dLine += ` L ${x} ${y}`;
+          dArea += ` L ${x} ${y}`;
+        }
+
+        // Draw dot
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", "4.5");
+        circle.setAttribute("class", "chart-dot");
+        circle.setAttribute("data-score", val);
+        circle.onclick = () => showToast(`Day ${i + 1} Mood Index: ${val}/100`);
+        nodesGroup.appendChild(circle);
+
+        // Date Label on every 2nd point
+        if (i % 2 === 0) {
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", x);
+          text.setAttribute("y", 205);
+          text.setAttribute("class", "chart-axis-label");
+          text.setAttribute("text-anchor", "middle");
+          text.textContent = `D${i + 1}`;
+          nodesGroup.appendChild(text);
+        }
+      });
+
+      dArea += ` L ${minX + (points.length - 1) * stepX} ${maxY} Z`;
+
+      document.getElementById("chartLinePath").setAttribute("d", dLine);
+      document.getElementById("chartAreaPath").setAttribute("d", dArea);
+    }
   </script>
 </body>
 </html>
