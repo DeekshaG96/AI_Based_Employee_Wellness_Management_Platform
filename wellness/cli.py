@@ -31,7 +31,9 @@ def build_parser() -> argparse.ArgumentParser:
     source.add_argument("--file", help="Path to a UTF-8 .txt or .csv file.")
     parser.add_argument("--text-column", help="CSV column containing feedback text.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
-    parser.add_argument("--download-nltk-data", action="store_true", help="Install required NLTK data.")
+    parser.add_argument(
+        "--download-nltk-data", action="store_true", help="Install required NLTK data."
+    )
     return parser
 
 

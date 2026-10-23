@@ -41,6 +41,7 @@ class AnalysisReport:
     sentiment_label: SentimentLabel
     counts: dict[str, int]
     vader_input_text: str = ""
+    emotion_method: str = "lexical_fallback"
     dominant_emotion: str = "neutral"
     emotion_scores: dict[str, float] = field(default_factory=dict)
     recommendations: dict[str, Any] = field(default_factory=dict)
@@ -74,6 +75,7 @@ class AnalysisReport:
                 f"Tokens: {', '.join(self.tokens) or '(none)'}",
                 f"Sentiment: {self.sentiment_label.value}",
                 f"Dominant Emotion: {self.dominant_emotion}",
+                f"Emotion Estimator: {self.emotion_method}",
                 (
                     f"Scores: negative={scores.negative:.3f}, neutral={scores.neutral:.3f}, "
                     f"positive={scores.positive:.3f}, compound={scores.compound:.3f}"

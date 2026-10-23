@@ -1,15 +1,16 @@
-"""NLTK text preprocessing pipeline for MoodMentor.
+"""spaCy and NLTK text preprocessing pipeline for MoodMentor.
 
 Provides two dedicated paths:
 1. `sanitize_text_for_vader(text)` — Light sanitization strictly preserving
    capitalization, punctuation, intensifiers, and negations for VADER.
 2. `preprocess(text)` / `get_preprocessing_breakdown(text)` — Full sequential
    NLP breakdown (Normalization -> Tokenization -> Negation-Preserved Stopwords
-   -> POS Tagging -> WordNet Lemmatization) for transparency and keyword analytics.
+   -> spaCy tokenization/lemmatization (or NLTK POS/WordNet fallback) for transparency.
 """
 
 from __future__ import annotations
 
+import os
 import re
 from typing import Any
 
@@ -51,6 +52,26 @@ _REQUIRED_RESOURCES = (
     (("sentiment/vader_lexicon", "sentiment/vader_lexicon.zip"), "vader_lexicon"),
 )
 
+_SPACY_NLP: Any = None
+_SPACY_CHECKED = False
+
+
+def _get_spacy_pipeline() -> Any:
+    """Load spaCy's English pipeline once, returning None when it is not installed."""
+    global _SPACY_NLP, _SPACY_CHECKED
+    if _SPACY_CHECKED:
+        return _SPACY_NLP
+    _SPACY_CHECKED = True
+    try:
+        import spacy
+
+        _SPACY_NLP = spacy.load(
+            os.getenv("SPACY_MODEL", "en_core_web_sm"), disable=["parser", "ner"]
+        )
+    except (ImportError, OSError):
+        _SPACY_NLP = None
+    return _SPACY_NLP
+
 
 def validate_nltk_resources() -> None:
     """Raise a clear setup error if required NLTK data is unavailable."""
@@ -61,8 +82,7 @@ def validate_nltk_resources() -> None:
         if not any(_resource_exists(nltk, path) for path in paths):
             missing.append(name)
     if not any(
-        _resource_exists(nltk, path)
-        for path in ("tokenizers/punkt", "tokenizers/punkt_tab")
+        _resource_exists(nltk, path) for path in ("tokenizers/punkt", "tokenizers/punkt_tab")
     ):
         missing.append("punkt")
     if not any(
@@ -134,16 +154,36 @@ def _wordnet_pos(tag: str) -> str:
     return "n"
 
 
-def preprocess(text: str) -> tuple[str, tuple[str, ...]]:
-    """Run full sequential NLP pipeline for keyword analytics with negations preserved."""
-    validate_nltk_resources()
-    cleaned = clean_text(text)
-    raw_tokens = word_tokenize(cleaned)
+def _tokenize_and_lemmatize(
+    cleaned: str,
+) -> tuple[list[str], list[str], list[tuple[str, str]], tuple[str, ...]]:
+    """Use spaCy model tokens and lemmas where available, with NLTK as a fallback."""
     stop_words = set(stopwords.words("english")) - _NEGATIONS
+    nlp = _get_spacy_pipeline()
+    if nlp is not None:
+        document = nlp(cleaned)
+        raw_tokens = [token.text.lower() for token in document if not token.is_space]
+        kept = [
+            token for token in document if token.is_alpha and token.text.lower() not in stop_words
+        ]
+        filtered = [token.text.lower() for token in kept]
+        tagged = [(token.text.lower(), token.tag_ or token.pos_) for token in kept]
+        lemmas = tuple((token.lemma_ or token.text).lower().strip() for token in kept)
+        return raw_tokens, filtered, tagged, lemmas
+
+    raw_tokens = word_tokenize(cleaned)
     filtered = [token for token in raw_tokens if token.isalpha() and token not in stop_words]
     tagged = pos_tag(filtered)
     lemmatizer = WordNetLemmatizer()
     lemmas = tuple(lemmatizer.lemmatize(token, _wordnet_pos(tag)) for token, tag in tagged)
+    return raw_tokens, filtered, tagged, lemmas
+
+
+def preprocess(text: str) -> tuple[str, tuple[str, ...]]:
+    """Run full sequential NLP pipeline for keyword analytics with negations preserved."""
+    validate_nltk_resources()
+    cleaned = clean_text(text)
+    _raw_tokens, _filtered, _tagged, lemmas = _tokenize_and_lemmatize(cleaned)
     return cleaned, lemmas
 
 
@@ -152,12 +192,7 @@ def get_preprocessing_breakdown(text: str) -> dict[str, Any]:
     validate_nltk_resources()
     vader_input = sanitize_text_for_vader(text)
     cleaned = clean_text(text)
-    raw_tokens = word_tokenize(cleaned)
-    stop_words = set(stopwords.words("english")) - _NEGATIONS
-    filtered = [token for token in raw_tokens if token.isalpha() and token not in stop_words]
-    tagged = pos_tag(filtered)
-    lemmatizer = WordNetLemmatizer()
-    lemmas = tuple(lemmatizer.lemmatize(token, _wordnet_pos(tag)) for token, tag in tagged)
+    raw_tokens, filtered, tagged, lemmas = _tokenize_and_lemmatize(cleaned)
     return {
         "raw_text": text,
         "vader_input": vader_input,

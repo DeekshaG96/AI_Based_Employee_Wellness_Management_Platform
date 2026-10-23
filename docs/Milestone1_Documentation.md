@@ -122,6 +122,7 @@ def validate_text(text: str) -> str:
         raise InputValidationError("Text input cannot be empty.")
     return text.strip()
 
+
 def read_input_file(path: str | Path, text_column: str | None = None) -> tuple[str, str]:
     file_path = Path(path)
     if not file_path.exists():
@@ -142,6 +143,7 @@ Implements the full 5-stage NLP cleaning, tokenization, filtering, and lemmatiza
 ```python
 def clean_text(text: str) -> str:
     return re.sub(r"\s+", " ", _NON_LETTER.sub(" ", _URL.sub(" ", text.lower()))).strip()
+
 
 def preprocess(text: str) -> tuple[str, tuple[str, ...]]:
     validate_nltk_resources()
@@ -166,12 +168,16 @@ def analyze_text(text: str, source_name: str = "direct text") -> AnalysisReport:
     scores = SentimentIntensityAnalyzer().polarity_scores(original)
     compound = scores["compound"]
     label = (
-        SentimentLabel.POSITIVE if compound >= 0.05
-        else SentimentLabel.NEGATIVE if compound <= -0.05
+        SentimentLabel.POSITIVE
+        if compound >= 0.05
+        else SentimentLabel.NEGATIVE
+        if compound <= -0.05
         else SentimentLabel.NEUTRAL
     )
     return AnalysisReport(
-        input_summary=InputSummary("text", source_name, len(original), len(original.splitlines()), len(tokens)),
+        input_summary=InputSummary(
+            "text", source_name, len(original), len(original.splitlines()), len(tokens)
+        ),
         original_text=original,
         cleaned_text=cleaned,
         processed_text=" ".join(tokens),
@@ -207,8 +213,19 @@ def save_mood_entry(
             tokens, sentiment_label, neg_score, neu_score, pos_score, compound_score
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (user_id, source_type, source_name, original_text, cleaned_text,
-         ", ".join(tokens), sentiment_label, neg_score, neu_score, pos_score, compound_score),
+        (
+            user_id,
+            source_type,
+            source_name,
+            original_text,
+            cleaned_text,
+            ", ".join(tokens),
+            sentiment_label,
+            neg_score,
+            neu_score,
+            pos_score,
+            compound_score,
+        ),
     )
     connection.commit()
     return int(cursor.lastrowid)

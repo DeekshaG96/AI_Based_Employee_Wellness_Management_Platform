@@ -58,11 +58,17 @@ def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
     existing_cols = {row["name"] for row in cursor.fetchall()}
 
     if "dominant_emotion" not in existing_cols:
-        connection.execute("ALTER TABLE mood_entries ADD COLUMN dominant_emotion TEXT NOT NULL DEFAULT 'neutral'")
+        connection.execute(
+            "ALTER TABLE mood_entries ADD COLUMN dominant_emotion TEXT NOT NULL DEFAULT 'neutral'"
+        )
     if "emotion_scores" not in existing_cols:
-        connection.execute("ALTER TABLE mood_entries ADD COLUMN emotion_scores TEXT NOT NULL DEFAULT '{}'")
+        connection.execute(
+            "ALTER TABLE mood_entries ADD COLUMN emotion_scores TEXT NOT NULL DEFAULT '{}'"
+        )
     if "recommendation" not in existing_cols:
-        connection.execute("ALTER TABLE mood_entries ADD COLUMN recommendation TEXT NOT NULL DEFAULT ''")
+        connection.execute(
+            "ALTER TABLE mood_entries ADD COLUMN recommendation TEXT NOT NULL DEFAULT ''"
+        )
     connection.commit()
 
     return connection
@@ -78,9 +84,7 @@ def _check_password(password: str, encoded: str) -> bool:
     try:
         salt_hex, digest_hex = encoded.split("$", 1)
         expected = bytes.fromhex(digest_hex)
-        actual = hashlib.pbkdf2_hmac(
-            "sha256", password.encode(), bytes.fromhex(salt_hex), 120_000
-        )
+        actual = hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt_hex), 120_000)
     except (ValueError, TypeError):
         return False
     return hmac.compare_digest(actual, expected)
@@ -181,14 +185,12 @@ def get_user_mood_entries(
     connection: sqlite3.Connection, user_id: int | None = None
 ) -> list[dict[str, Any]]:
     """Retrieve mood entries for a specific user or all entries if user_id is None."""
-    query = (
-        """
+    query = """
         SELECT id, user_id, source_type, source_name, original_text, cleaned_text,
                tokens, sentiment_label, neg_score, neu_score, pos_score, compound_score,
                dominant_emotion, emotion_scores, recommendation, created_at
         FROM mood_entries
         """
-    )
     params: tuple = ()
     if user_id is not None:
         query += " WHERE user_id = ?"

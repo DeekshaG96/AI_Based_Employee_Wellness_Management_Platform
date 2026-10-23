@@ -43,8 +43,10 @@ def _read_csv(path: Path, text_column: str | None) -> str:
             if not reader.fieldnames:
                 raise InputValidationError("CSV input must contain a header row.")
             columns = [column.strip() for column in reader.fieldnames if column]
-            selected = text_column.strip() if text_column else next(
-                (column for column in columns if column.lower() in _TEXT_COLUMNS), None
+            selected = (
+                text_column.strip()
+                if text_column
+                else next((column for column in columns if column.lower() in _TEXT_COLUMNS), None)
             )
             if not selected or selected not in columns:
                 raise InputValidationError(
