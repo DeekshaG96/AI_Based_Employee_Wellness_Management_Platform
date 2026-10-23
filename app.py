@@ -13,9 +13,9 @@ import streamlit as st
 
 from wellness.api_client import (
     ApiError,
+    analysis_report_from_dict,
 )
 from wellness.api_client import (
-    analysis_report_from_dict,
     analyze as api_analyze,
 )
 from wellness.api_client import (
