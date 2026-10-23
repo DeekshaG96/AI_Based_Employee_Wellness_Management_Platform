@@ -1428,54 +1428,22 @@
         <span>AI Engine Online</span>
       </div>
 
-      <!-- Logged-Out Actions -->
+      <!-- Logged-Out Action: Simple Sign In Button -->
       <div id="loggedOutActions" style="display: flex; align-items: center; gap: 0.65rem;">
-        <button class="btn btn-secondary" onclick="openAuthModal('login')">
+        <button class="btn btn-primary" onclick="openAuthModal()" id="navSignInBtn">
           <span>Sign In</span>
-        </button>
-        <button class="btn btn-primary" onclick="openAuthModal('register')">
-          <span>Create Account</span>
-        </button>
-        <button class="btn btn-accent" onclick="openAuthModal('demo')">
-          <span>⚡ 1-Click Demo</span>
         </button>
       </div>
 
-      <!-- Logged-In User Profile Menu & Dropdown -->
-      <div id="loggedInUserMenu" class="user-menu-container">
-        <div class="user-menu-btn" onclick="toggleUserDropdown(event)">
-          <div id="headerAvatar" class="user-avatar">DG</div>
-          <span id="headerUserName" class="user-name-text">Deeksha Ganesh</span>
-          <span class="user-caret">▼</span>
+      <!-- Logged-In User Profile: Avatar + Name + Direct Log Out Button -->
+      <div id="loggedInUserMenu" style="display: none; align-items: center; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.55rem; padding: 0.35rem 0.85rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 9999px;">
+          <div id="headerAvatar" class="user-avatar" style="width: 26px; height: 26px; border-radius: 50%; background: var(--gradient-brand); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #fff;">DG</div>
+          <span id="headerUserName" style="font-size: 0.88rem; font-weight: 600; color: #f8fafc;">Deeksha Ganesh</span>
         </div>
-
-        <!-- Dropdown Flyout -->
-        <div id="userDropdownFlyout" class="user-dropdown-menu">
-          <div class="dropdown-user-header">
-            <div id="dropdownFullName" class="dropdown-full-name">Deeksha Ganesh</div>
-            <div id="dropdownEmail" class="dropdown-email">deeksha@moodmentor.ai</div>
-            <div class="dropdown-meta-badges">
-              <span id="dropdownDept" class="meta-badge">Engineering & Product</span>
-              <span id="dropdownRole" class="meta-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">Lead Staff Engineer</span>
-            </div>
-          </div>
-
-          <div class="dropdown-items-list">
-            <a href="#checkin" class="dropdown-action-btn" onclick="closeUserDropdown()">
-              <span>⚡</span> 15s Daily Check-in Studio
-            </a>
-            <a href="#analytics" class="dropdown-action-btn" onclick="closeUserDropdown()">
-              <span>📈</span> Department Morale Analytics
-            </a>
-            <button class="dropdown-action-btn" onclick="openAuthModal('demo'); closeUserDropdown();">
-              <span>🔄</span> Switch Demo Persona
-            </button>
-          </div>
-
-          <button class="dropdown-action-btn danger" onclick="handleLogout()">
-            <span>🚪</span> Sign Out of Workspace
-          </button>
-        </div>
+        <button class="btn btn-danger" onclick="handleLogout()" id="navLogoutBtn" style="padding: 0.4rem 0.9rem; font-size: 0.82rem;">
+          <span>Log Out</span>
+        </button>
       </div>
     </div>
   </header>
@@ -1484,17 +1452,17 @@
     <!-- Workspace Session Banner (Adapts dynamically between Logged-In and Guest Mode) -->
     <div id="sessionBanner" class="session-banner">
       <div class="session-info">
-        <div id="sessionBannerBadge" class="session-badge">Private Session Active</div>
+        <div id="sessionBannerBadge" class="session-badge">Active Session</div>
         <div>
-          <strong id="sessionGreeting">Welcome back, Deeksha Ganesh!</strong>
+          <strong id="sessionGreeting">Welcome, Deeksha Ganesh!</strong>
           <div id="sessionSubtext" style="font-size: 0.82rem; color: #94a3b8;">
-            Zero-Knowledge PBKDF2 Encryption • <span id="sessionStreak">🔥 15-day check-in streak</span> • Department: Engineering & Product
+            Signed in as deeksha@moodmentor.ai
           </div>
         </div>
       </div>
       <div id="sessionBannerActions">
-        <button class="btn btn-secondary" onclick="handleLogout()" style="padding: 0.4rem 0.95rem; font-size: 0.82rem;">
-          Sign Out
+        <button class="btn btn-secondary" onclick="handleLogout()" id="bannerAuthBtn" style="padding: 0.4rem 0.95rem; font-size: 0.82rem;">
+          Log Out
         </button>
       </div>
     </div>
@@ -1513,11 +1481,8 @@
         <a href="#checkin" class="btn btn-primary">
           <span>⚡ Launch 15s Check-in Studio</span>
         </a>
-        <button class="btn btn-secondary" onclick="openAuthModal('login')">
-          <span>🔐 Employee Sign In</span>
-        </button>
-        <button class="btn btn-accent" onclick="openAuthModal('demo')">
-          <span>🚀 Instant 1-Click Demo</span>
+        <button class="btn btn-secondary" onclick="openAuthModal()" id="heroSignInBtn">
+          <span>Sign In</span>
         </button>
       </div>
     </section>
@@ -1991,168 +1956,53 @@
       <h2>Empower Your Team With Emotion Intelligence</h2>
       <p>Transform raw employee feedback into actionable self-care, healthy collaboration, and sustainable workplace momentum.</p>
       <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-        <button class="btn btn-primary" onclick="openAuthModal('demo')">
-          <span>⚡ Launch 1-Click Interactive Demo</span>
-        </button>
-        <button class="btn btn-secondary" onclick="openAuthModal('login')">
-          <span>🔑 Sign In to Workspace</span>
+        <a href="#checkin" class="btn btn-primary">
+          <span>⚡ Start Check-in</span>
+        </a>
+        <button class="btn btn-secondary" onclick="openAuthModal()" id="ctaSignInBtn">
+          <span>Sign In</span>
         </button>
       </div>
     </section>
   </main>
 
-  <!-- Interactive Sign In & Registration Modal -->
+  <!-- Simple Sign In / Log In Modal -->
   <div id="authModal" class="modal-overlay" onclick="closeAuthModalOnBackdrop(event)">
-    <div class="modal-card">
-      <button class="modal-close-btn" onclick="closeAuthModal()">&times;</button>
+    <div class="modal-card" style="max-width: 400px; padding: 2.2rem;">
+      <button class="modal-close-btn" onclick="closeAuthModal()" title="Close">&times;</button>
       
-      <div style="margin-bottom: 1.25rem;">
-        <h3 id="modalTitle" style="font-family: 'Outfit'; font-size: 1.5rem; font-weight: 700; color: #fff;">
-          🔐 Employee Access Portal
+      <div style="text-align: center; margin-bottom: 1.6rem;">
+        <div style="width: 50px; height: 50px; border-radius: 14px; background: var(--gradient-brand); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 0.85rem; box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);">
+          🔐
+        </div>
+        <h3 id="modalTitle" style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700; color: #fff;">
+          Sign In
         </h3>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
-          Secured with PBKDF2 SHA-256 salted password hashing & private session isolation.
+        <p style="font-size: 0.86rem; color: var(--text-secondary); margin-top: 0.3rem;">
+          Enter your email and password to log in
         </p>
       </div>
 
-      <!-- Standard Auth Tabs -->
-      <div class="modal-tabs">
-        <button id="modalTabLogin" class="modal-tab-btn active" onclick="switchModalTab('login')">🔑 Sign In</button>
-        <button id="modalTabRegister" class="modal-tab-btn" onclick="switchModalTab('register')">📝 Create Account</button>
-        <button id="modalTabDemo" class="modal-tab-btn" onclick="switchModalTab('demo')">⚡ 1-Click Demo</button>
-      </div>
+      <form onsubmit="handleModalLogin(event)">
+        <div class="form-group" style="margin-bottom: 1.2rem;">
+          <label for="modalEmail">Email Address</label>
+          <input id="modalEmail" type="email" class="form-input" placeholder="e.g. deeksha@moodmentor.ai" required value="deeksha@moodmentor.ai">
+        </div>
 
-      <!-- Tab 1: Sign In -->
-      <div id="modalPaneLogin">
-        <form onsubmit="handleModalLogin(event)">
-          <div class="form-group">
-            <label for="modalEmail">Work Email Address</label>
-            <input id="modalEmail" type="email" class="form-input" placeholder="e.g. deeksha@company.com" required value="deeksha@moodmentor.ai">
-          </div>
-
-          <div class="form-group">
-            <label for="modalPassword">Password</label>
-            <div class="password-input-wrapper">
-              <input id="modalPassword" type="password" class="form-input" placeholder="Enter your password" required value="DemoPass123!">
-              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('modalPassword', this)" title="Show/Hide Password">
-                👁️
-              </button>
-            </div>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; font-size: 0.82rem;">
-            <label style="display: flex; align-items: center; gap: 0.4rem; color: var(--text-secondary); cursor: pointer;">
-              <input type="checkbox" checked style="accent-color: var(--accent-cyan);"> Remember me for 30 days
-            </label>
-            <a href="javascript:void(0)" onclick="showToast('Password reset link sent to registered email.')" style="color: var(--accent-cyan); text-decoration: none;">Forgot password?</a>
-          </div>
-
-          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
-            Sign In to Workspace
-          </button>
-
-          <!-- Quick Persona Selector Divider -->
-          <div style="text-align: center; margin: 1.5rem 0 1rem; position: relative;">
-            <div style="height: 1px; background: rgba(255,255,255,0.08); width: 100%;"></div>
-            <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #0e131f; padding: 0 0.75rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">
-              Or sign in instantly with a persona
-            </span>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <div class="persona-card" onclick="loginAsPersona('deeksha')">
-              <div class="persona-info">
-                <div class="persona-avatar" style="background: var(--gradient-brand);">DG</div>
-                <div>
-                  <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Deeksha Ganesh</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">Lead Staff Engineer • Product & Tech</div>
-                </div>
-              </div>
-              <span class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">Login</span>
-            </div>
-
-            <div class="persona-card" onclick="loginAsPersona('sarah')">
-              <div class="persona-info">
-                <div class="persona-avatar" style="background: linear-gradient(135deg, #10b981 0%, #38bdf8 100%);">SJ</div>
-                <div>
-                  <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Sarah Jenkins</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">People & Culture Director • HR</div>
-                </div>
-              </div>
-              <span class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">Login</span>
-            </div>
-
-            <div class="persona-card" onclick="loginAsPersona('marcus')">
-              <div class="persona-info">
-                <div class="persona-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);">MC</div>
-                <div>
-                  <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Marcus Chen</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">Operations Lead • Infrastructure</div>
-                </div>
-              </div>
-              <span class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">Login</span>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <!-- Tab 2: Create Account / Register -->
-      <div id="modalPaneRegister" style="display: none;">
-        <form onsubmit="handleModalRegister(event)">
-          <div class="form-group">
-            <label for="regModalName">Full Name</label>
-            <input id="regModalName" type="text" class="form-input" placeholder="e.g. Deeksha Ganesh" required>
-          </div>
-          <div class="form-group">
-            <label for="regModalEmail">Work Email Address</label>
-            <input id="regModalEmail" type="email" class="form-input" placeholder="e.g. deeksha@company.com" required>
-          </div>
-          <div class="form-group">
-            <label for="regModalDept">Department</label>
-            <select id="regModalDept" class="form-input">
-              <option value="Engineering & Product">Engineering & Product</option>
-              <option value="Operations & Support">Operations & Support</option>
-              <option value="People & Culture">People & Culture</option>
-              <option value="Sales & Accounts">Sales & Accounts</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="regModalRole">Role / Job Title</label>
-            <input id="regModalRole" type="text" class="form-input" placeholder="e.g. Senior Software Engineer" value="Software Engineer">
-          </div>
-          <div class="form-group">
-            <label for="regModalPass">Password (Min 6 Characters)</label>
-            <div class="password-input-wrapper">
-              <input id="regModalPass" type="password" class="form-input" placeholder="Choose a secure password" minlength="6" required>
-              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('regModalPass', this)" title="Show/Hide Password">
-                👁️
-              </button>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem; font-size: 0.95rem;">
-            Create Staff Account
-          </button>
-          <div style="text-align: center; margin-top: 1rem; font-size: 0.82rem; color: var(--text-secondary);">
-            Already have an account? <a href="javascript:void(0)" onclick="switchModalTab('login')" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">Sign In</a>
-          </div>
-        </form>
-      </div>
-
-      <!-- Tab 3: 1-Click Demo -->
-      <div id="modalPaneDemo" style="display: none;">
-        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 1.4rem; margin-bottom: 1.5rem;">
-          <div style="font-weight: 700; font-size: 0.95rem; color: #fff; margin-bottom: 0.4rem;">Pre-Authorized Enterprise Session</div>
-          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 1rem;">
-            Launches an authenticated workspace loaded with 30 days of longitudinal check-in history, 15-day streak progression, and executive department drilldown telemetry.
-          </p>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent-cyan); background: rgba(0,0,0,0.3); padding: 0.5rem 0.85rem; border-radius: 8px;">
-            Account: deeksha@moodmentor.ai • Role: Lead Staff Engineer
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label for="modalPassword">Password</label>
+          <div class="password-input-wrapper" style="position: relative; display: flex; align-items: center;">
+            <input id="modalPassword" type="password" class="form-input" placeholder="Enter password" required value="password123" style="padding-right: 2.8rem;">
+            <button type="button" class="password-toggle-btn" id="toggleLoginPwdBtn" onclick="togglePasswordVisibility('modalPassword', this)" title="Show/Hide Password" style="position: absolute; right: 0.75rem; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted); padding: 0.2rem;">
+              👁️
+            </button>
           </div>
         </div>
-        <button class="btn btn-primary" onclick="loginAsPersona('deeksha')" style="width: 100%; padding: 0.85rem; font-size: 0.95rem;">
-          🚀 Launch Demo as Deeksha Ganesh
+
+        <button type="submit" class="btn btn-primary" id="modalSubmitBtn" style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 700; border-radius: 10px;">
+          Log In
         </button>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -2186,9 +2036,8 @@
       <div class="footer-col">
         <h4>Account & Access</h4>
         <ul>
-          <li><a href="javascript:void(0)" onclick="openAuthModal('login')">Employee Sign In</a></li>
-          <li><a href="javascript:void(0)" onclick="openAuthModal('register')">Create Account</a></li>
-          <li><a href="javascript:void(0)" onclick="openAuthModal('demo')">1-Click Demo</a></li>
+          <li><a href="javascript:void(0)" onclick="openAuthModal()">Sign In</a></li>
+          <li><a href="javascript:void(0)" onclick="handleLogout()">Log Out</a></li>
           <li><a href="https://github.com/DeekshaG96/AI_Based_Employee_Wellness_Management_Platform" target="_blank">Source Repository</a></li>
         </ul>
       </div>
@@ -2363,52 +2212,32 @@
         try {
           currentUser = JSON.parse(saved);
         } catch (e) {
-          currentUser = PERSONAS.deeksha;
+          currentUser = { name: "Deeksha Ganesh", email: "deeksha@moodmentor.ai" };
         }
       } else {
-        // Default to Deeksha Ganesh persona for immediate active experience
-        currentUser = PERSONAS.deeksha;
+        currentUser = { name: "Deeksha Ganesh", email: "deeksha@moodmentor.ai" };
         localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       }
       renderAuthState();
     }
 
-    function toggleUserDropdown(e) {
-      if (e) e.stopPropagation();
-      const menu = document.getElementById("loggedInUserMenu");
-      menu.classList.toggle("open");
-    }
-
-    function closeUserDropdown() {
-      const menu = document.getElementById("loggedInUserMenu");
-      if (menu) menu.classList.remove("open");
-    }
-
-    function openAuthModal(tab = 'login') {
-      document.getElementById('authModal').classList.add('open');
-      switchModalTab(tab);
+    function openAuthModal() {
+      const modal = document.getElementById("authModal");
+      if (modal) modal.classList.add("open");
     }
 
     function closeAuthModal() {
-      document.getElementById('authModal').classList.remove('open');
+      const modal = document.getElementById("authModal");
+      if (modal) modal.classList.remove("open");
     }
 
     function closeAuthModalOnBackdrop(e) {
-      if (e.target.id === 'authModal') closeAuthModal();
-    }
-
-    function switchModalTab(tab) {
-      document.getElementById('modalTabLogin').classList.toggle('active', tab === 'login');
-      document.getElementById('modalTabRegister').classList.toggle('active', tab === 'register');
-      document.getElementById('modalTabDemo').classList.toggle('active', tab === 'demo');
-
-      document.getElementById('modalPaneLogin').style.display = tab === 'login' ? 'block' : 'none';
-      document.getElementById('modalPaneRegister').style.display = tab === 'register' ? 'block' : 'none';
-      document.getElementById('modalPaneDemo').style.display = tab === 'demo' ? 'block' : 'none';
+      if (e.target && e.target.id === "authModal") closeAuthModal();
     }
 
     function togglePasswordVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
+      if (!input) return;
       if (input.type === "password") {
         input.type = "text";
         btn.textContent = "👁️‍🗨️";
@@ -2418,122 +2247,94 @@
       }
     }
 
-    function loginAsPersona(key) {
-      const persona = PERSONAS[key] || PERSONAS.deeksha;
-      currentUser = persona;
-      localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
-      renderAuthState();
-      closeAuthModal();
-      showToast(`Welcome back, ${persona.name}! Authenticated as ${persona.role}.`);
-    }
-
     function handleModalLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById("modalEmail").value.trim();
-      const rawName = email.split("@")[0].replace(/[._-]/g, " ");
-      const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-      const initials = name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase() || "EM";
+      if (e) e.preventDefault();
+      const emailInput = document.getElementById("modalEmail");
+      const email = emailInput ? emailInput.value.trim() : "deeksha@moodmentor.ai";
+      
+      let name = "Deeksha Ganesh";
+      if (email.toLowerCase().includes("deeksha")) {
+        name = "Deeksha Ganesh";
+      } else if (email.includes("@")) {
+        const raw = email.split("@")[0].replace(/[._-]/g, " ");
+        name = raw.charAt(0).toUpperCase() + raw.slice(1);
+      }
 
       currentUser = {
         name: name,
-        email: email,
-        dept: "Engineering & Product",
-        role: "Team Member",
-        streak: "5-day streak",
-        initials: initials
+        email: email
       };
       localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
       renderAuthState();
       closeAuthModal();
-      showToast(`Signed in successfully as ${currentUser.name}!`);
-    }
-
-    function handleModalRegister(e) {
-      e.preventDefault();
-      const name = document.getElementById("regModalName").value.trim();
-      const email = document.getElementById("regModalEmail").value.trim();
-      const dept = document.getElementById("regModalDept").value;
-      const role = document.getElementById("regModalRole").value.trim() || "Staff Member";
-      const initials = name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
-
-      currentUser = {
-        name: name,
-        email: email,
-        dept: dept,
-        role: role,
-        streak: "1-day streak",
-        initials: initials
-      };
-      localStorage.setItem("moodmentor_user", JSON.stringify(currentUser));
-      renderAuthState();
-      closeAuthModal();
-      showToast(`Welcome, ${name}! Your account has been registered.`);
+      showToast(`Welcome back, ${currentUser.name}! You are logged in.`);
     }
 
     function handleLogout() {
       currentUser = null;
       localStorage.removeItem("moodmentor_user");
       renderAuthState();
-      closeUserDropdown();
-      showToast("Signed out. You are now in Guest Mode.");
+      showToast("Logged out successfully.");
     }
 
     function renderAuthState() {
       const loggedOutDiv = document.getElementById("loggedOutActions");
-      const loggedInMenu = document.getElementById("loggedInUserMenu");
+      const loggedInDiv = document.getElementById("loggedInUserMenu");
+      const heroSignInBtn = document.getElementById("heroSignInBtn");
+      const ctaSignInBtn = document.getElementById("ctaSignInBtn");
       const bannerGreeting = document.getElementById("sessionGreeting");
       const bannerSubtext = document.getElementById("sessionSubtext");
       const bannerBadge = document.getElementById("sessionBannerBadge");
-      const bannerActions = document.getElementById("sessionBannerActions");
+      const bannerAuthBtn = document.getElementById("bannerAuthBtn");
       const checkinLabel = document.getElementById("checkinProfileLabel");
 
       if (currentUser) {
-        loggedOutDiv.style.display = "none";
-        loggedInMenu.style.display = "block";
+        if (loggedOutDiv) loggedOutDiv.style.display = "none";
+        if (loggedInDiv) loggedInDiv.style.display = "flex";
+        if (heroSignInBtn) heroSignInBtn.style.display = "none";
+        if (ctaSignInBtn) ctaSignInBtn.style.display = "none";
 
-        const initials = currentUser.initials || "DG";
-        document.getElementById("headerAvatar").textContent = initials;
-        document.getElementById("headerUserName").textContent = currentUser.name;
+        const initials = currentUser.name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase() || "DG";
+        const avatarEl = document.getElementById("headerAvatar");
+        const nameEl = document.getElementById("headerUserName");
+        if (avatarEl) avatarEl.textContent = initials;
+        if (nameEl) nameEl.textContent = currentUser.name;
 
-        document.getElementById("dropdownFullName").textContent = currentUser.name;
-        document.getElementById("dropdownEmail").textContent = currentUser.email;
-        document.getElementById("dropdownDept").textContent = currentUser.dept;
-        document.getElementById("dropdownRole").textContent = currentUser.role || "Staff Member";
-
-        bannerBadge.textContent = "Private Session Active";
-        bannerGreeting.textContent = `Welcome back, ${currentUser.name}!`;
-        bannerSubtext.innerHTML = `Zero-Knowledge PBKDF2 Encryption • <span id="sessionStreak">🔥 ${currentUser.streak || "14-day streak"}</span> • Dept: ${currentUser.dept}`;
-
-        bannerActions.innerHTML = `
-          <button class="btn btn-secondary" onclick="handleLogout()" style="padding: 0.4rem 0.95rem; font-size: 0.82rem;">
-            Sign Out
-          </button>
-        `;
+        if (bannerBadge) {
+          bannerBadge.textContent = "Active Session";
+          bannerBadge.style.background = "rgba(16, 185, 129, 0.2)";
+          bannerBadge.style.color = "#34d399";
+        }
+        if (bannerGreeting) bannerGreeting.textContent = `Welcome, ${currentUser.name}!`;
+        if (bannerSubtext) bannerSubtext.textContent = `Signed in as ${currentUser.email}`;
+        if (bannerAuthBtn) {
+          bannerAuthBtn.textContent = "Log Out";
+          bannerAuthBtn.onclick = handleLogout;
+        }
 
         if (checkinLabel) {
-          checkinLabel.textContent = `Checking in as: ${currentUser.name} (${currentUser.dept})`;
+          checkinLabel.textContent = `Checking in as: ${currentUser.name}`;
         }
       } else {
-        loggedOutDiv.style.display = "flex";
-        loggedInMenu.style.display = "none";
+        if (loggedOutDiv) loggedOutDiv.style.display = "flex";
+        if (loggedInDiv) loggedInDiv.style.display = "none";
+        if (heroSignInBtn) heroSignInBtn.style.display = "inline-flex";
+        if (ctaSignInBtn) ctaSignInBtn.style.display = "inline-flex";
 
-        bannerBadge.textContent = "Guest Mode";
-        bannerGreeting.textContent = "Welcome to MoodMentor Platform";
-        bannerSubtext.textContent = "Sign in or try the 1-Click Demo to save reflections and unlock your personal wellness streak.";
-
-        bannerActions.innerHTML = `
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-secondary" onclick="openAuthModal('login')" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
-              Sign In
-            </button>
-            <button class="btn btn-primary" onclick="openAuthModal('demo')" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
-              ⚡ 1-Click Demo
-            </button>
-          </div>
-        `;
+        if (bannerBadge) {
+          bannerBadge.textContent = "Logged Out";
+          bannerBadge.style.background = "rgba(245, 158, 11, 0.2)";
+          bannerBadge.style.color = "#fbbf24";
+        }
+        if (bannerGreeting) bannerGreeting.textContent = "You are currently signed out";
+        if (bannerSubtext) bannerSubtext.textContent = "Sign in to save your daily mood reflections and insights.";
+        if (bannerAuthBtn) {
+          bannerAuthBtn.textContent = "Sign In";
+          bannerAuthBtn.onclick = openAuthModal;
+        }
 
         if (checkinLabel) {
-          checkinLabel.textContent = "Browsing in Guest Mode (Sign in to record to your personal timeline)";
+          checkinLabel.textContent = "Guest session (Sign in to save entries)";
         }
       }
     }
