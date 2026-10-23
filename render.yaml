@@ -1,9 +1,41 @@
 services:
   - type: web
+    name: moodmentor-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.api.render
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: moodmentor-db
+          property: connectionString
+      - key: SPACY_MODEL
+        value: en_core_web_sm
+      - key: WELLNESS_DISABLE_TRANSFORMER
+        value: "1"
+
+  - type: web
     name: employee-wellness-platform
     runtime: docker
     plan: free
+    dockerfilePath: ./Dockerfile.ui
+    dockerContext: .
     healthCheckPath: /_stcore/health
     envVars:
       - key: PORT
-        value: "8501"
+        value: "10000"
+      - key: API_URL
+        fromService:
+          name: moodmentor-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+
+databases:
+  - name: moodmentor-db
+    databaseName: moodmentor
+    user: moodmentor
+    plan: free

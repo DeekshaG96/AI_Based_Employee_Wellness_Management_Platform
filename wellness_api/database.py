@@ -14,10 +14,16 @@ class Base(DeclarativeBase):
 
 
 def _database_url() -> str:
-    return os.getenv(
+    url = os.getenv(
         "DATABASE_URL",
         "postgresql+psycopg://moodmentor:moodmentor@localhost:5432/moodmentor",
     )
+    # Render supplies standard PostgreSQL URLs; this project uses psycopg 3.
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://") :]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
+    return url
 
 
 def _make_engine(url: str):

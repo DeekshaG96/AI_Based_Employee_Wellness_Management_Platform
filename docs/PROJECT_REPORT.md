@@ -108,3 +108,9 @@ The project includes tests for preprocessing, VADER behavior, legacy SQLite util
 ## Short mentor summary
 
 > MoodMentor is a full-stack NLP prototype that processes short written reflections with NLTK preprocessing, VADER sentiment analysis, and a Hugging Face emotion classifier. A FastAPI service validates requests, authenticates users, stores analysis history and recommendations in PostgreSQL, and powers a Streamlit dashboard with interactive trends. The outputs are informational and intended for personal reflection, not clinical or employment decisions.
+
+## Hosted review deployment
+
+The Render Blueprint defines a Streamlit web service, a FastAPI web service, and a PostgreSQL database. The API receives its database connection string through a Render service reference, while the dashboard receives the API's public URL dynamically. Both containers listen on Render's assigned port. No passwords or database URLs are committed to the repository.
+
+The free hosted review uses a lean API image without PyTorch or Transformers. In that environment, sentiment uses VADER and emotion estimates use the documented lexical heuristic. The full Hugging Face classifier is available through the local Docker Compose setup. The public free web services can sleep after inactivity, and Render's free PostgreSQL databases expire 30 days after creation. The hosted version is suitable for review and demonstration only; it is not a durable or production deployment.

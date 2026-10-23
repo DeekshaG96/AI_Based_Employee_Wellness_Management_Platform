@@ -132,12 +132,22 @@ wellness/api_client.py         Authenticated dashboard-to-API client
 wellness_api/                  FastAPI routes, schemas, security, and SQLAlchemy models
 scripts/migrate_sqlite_to_postgres.py
 tests/                         Pipeline, legacy storage, and API contract tests
-Dockerfile.api                 FastAPI and NLP runtime
+Dockerfile.api                 Full FastAPI and transformer runtime for local Compose
+Dockerfile.api.render          Lightweight FastAPI runtime for the hosted free demo
+requirements-api-render.txt    API dependencies without PyTorch/Transformers
 Dockerfile.ui                  Streamlit runtime
 docker-compose.yml             PostgreSQL, API, dashboard, and model cache
-docs/PROJECT_REPORT.md         Mentor-facing report and presentation outline
+docs/PROJECT_REPORT.md         Canonical mentor-facing report and presentation outline
 ```
 
 ## Responsible-use notes
 
 MoodMentor is a learning and self-reflection tool, not a clinical assessment, diagnosis, or emergency service. Text classifiers can misread context, sarcasm, dialect, and individual communication styles. Do not use these outputs to make employment, performance, or other high-impact decisions. Journal text can contain sensitive personal information: use consent, restricted access, a retention policy, encrypted transport, and production-grade secret management before any real deployment. The Compose credentials are for local development only.
+
+## Deploy the hosted review demo
+
+The Render Blueprint in render.yaml defines three connected services: the Streamlit dashboard, a FastAPI service, and PostgreSQL. Connect this repository to Render as a Blueprint and apply the proposed changes. Render supplies the API's public URL to the dashboard and the database connection string to the API; no credentials belong in GitHub.
+
+The hosted free demo uses a lightweight API image and a lexical emotion fallback so it stays within the free service memory limit. The full transformer classifier remains available in the local Docker Compose setup. Free services can sleep after inactivity, so the first visit may take about a minute to wake. Render's free PostgreSQL instance expires 30 days after it is created; treat hosted records as temporary demo data, not durable storage. Upgrade the database plan before relying on it for longer-term data.
+
+The project landing page is published from docs/index.html. It links to the hosted dashboard and the canonical mentor report in docs/PROJECT_REPORT.md.

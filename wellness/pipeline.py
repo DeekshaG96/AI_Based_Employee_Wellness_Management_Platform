@@ -135,6 +135,12 @@ def _get_emotion_pipeline() -> Any:
     if _EMOTION_CLF_LOADED:
         return _EMOTION_CLF
 
+    # Keep the free hosted demo within its memory limit; local Compose can use the transformer.
+    if os.getenv("WELLNESS_DISABLE_TRANSFORMER") == "1":
+        _EMOTION_CLF = None
+        _EMOTION_CLF_LOADED = True
+        return None
+
     # During pytest runs or when offline testing is requested, use high-speed fallback
     if os.getenv("PYTEST_CURRENT_TEST") or os.getenv("WELLNESS_FAST_TEST"):
         _EMOTION_CLF = None

@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    NLTK_DATA=/usr/local/share/nltk_data
+
+WORKDIR /app
+COPY requirements-api-render.txt ./requirements-api-render.txt
+RUN pip install --no-cache-dir -r requirements-api-render.txt \
+    && python -m spacy download en_core_web_sm \
+    && python -m nltk.downloader --extract -d "$NLTK_DATA" \
+       stopwords wordnet omw-1.4 punkt punkt_tab \
+       averaged_perceptron_tagger_eng vader_lexicon \
+    && chmod -R a+rX "$NLTK_DATA"
+
+COPY wellness ./wellness
+COPY wellness_api ./wellness_api
+RUN useradd --create-home --uid 10001 appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 10000
+CMD ["sh", "-c", "uvicorn wellness_api.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
