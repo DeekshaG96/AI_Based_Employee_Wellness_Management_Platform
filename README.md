@@ -150,4 +150,4 @@ The Render Blueprint in render.yaml defines three connected services: the Stream
 
 The hosted free demo uses a lightweight API image and a lexical emotion fallback so it stays within the free service memory limit. The full transformer classifier remains available in the local Docker Compose setup. Free services can sleep after inactivity, so the first visit may take about a minute to wake. Render's free PostgreSQL instance expires 30 days after it is created; treat hosted records as temporary demo data, not durable storage. Upgrade the database plan before relying on it for longer-term data.
 
-The project landing page is published from docs/index.html. It links to the hosted dashboard and the canonical mentor report in docs/PROJECT_REPORT.md.
+The project landing page is published from docs/index.html. It links to the hosted dashboard and the canonical mentor report in docs/PROJECT_REPORT.md. If Render shows a Service Suspended page, the service owner must reactivate it in the Render Dashboard; sync this Blueprint afterward if the services are not managed by it.
