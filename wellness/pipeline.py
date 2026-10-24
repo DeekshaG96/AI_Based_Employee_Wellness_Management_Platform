@@ -19,7 +19,7 @@ from .preprocessing import (
 )
 from .report import AnalysisReport, InputSummary, SentimentLabel, SentimentScores
 
-# Standard 7 Emotion Classes and Palette
+# The transformer's seven classes; the lexical fallback can also flag fatigue.
 EMOTIONS: tuple[str, ...] = ("joy", "sadness", "anger", "fear", "surprise", "disgust", "neutral")
 
 _EMOTION_KEYWORDS: dict[str, list[str]] = {
@@ -51,10 +51,10 @@ _EMOTION_KEYWORDS: dict[str, list[str]] = {
         "hurt",
         "crying",
         "lost",
-        "exhausted",
         "burnout",
         "unmotivated",
     ],
+    "fatigue": ["tired", "fatigued", "exhausted", "worn out", "sleepy", "drained"],
     "anger": [
         "angry",
         "mad",
@@ -374,6 +374,26 @@ def _action_paths_for_emotion(emotion: str, *, is_crisis: bool = False) -> list[
                 "steps": ["Send a specific thank-you to someone who contributed.", "If you prefer, keep the note as a private reflection."],
             },
         ],
+        "fatigue": [
+            {
+                "title": "Take a small reset",
+                "duration": "5 minutes",
+                "description": "Give yourself a brief pause without needing to earn it.",
+                "steps": ["Get some water or fresh air if that would help.", "Stretch, sit quietly, or rest for a few minutes."],
+            },
+            {
+                "title": "Make the next task lighter",
+                "duration": "5 minutes",
+                "description": "A smaller next step can protect your energy.",
+                "steps": ["Choose one task that matters most.", "Shorten it, split it into a first step, or let another task wait."],
+            },
+            {
+                "title": "Ask for a little support",
+                "duration": "A few minutes",
+                "description": "You can name what you need without having a perfect plan.",
+                "steps": ["Tell someone you trust that you are feeling tired.", "Ask for one specific kind of help or a chance to pause."],
+            },
+        ],
         "neutral": [
             {
                 "title": "Check what you need",
@@ -444,6 +464,28 @@ def generate_recommendations(
                 "Sync with your mentor or manager to calibrate pending deadlines.",
             ],
             "action_paths": _action_paths_for_emotion(dominant_emotion),
+            "is_crisis": False,
+        }
+
+    has_fatigue_cue = any(
+        re.search(rf"(?<!\w){re.escape(keyword)}(?!\w)", lower)
+        for keyword in _EMOTION_KEYWORDS["fatigue"]
+    )
+    if has_fatigue_cue:
+        return {
+            "title": "Balance Energy with Recovery",
+            "category": "Rest & Recovery",
+            "urgency": "Low",
+            "summary": (
+                "Your entry mentions feeling tired. Low energy can exist alongside a positive "
+                "mood, so choose a supportive pace instead of pushing harder."
+            ),
+            "action_items": [
+                "Take a brief pause and notice whether water, food, fresh air, or quiet would help.",
+                "Choose one priority and let a less urgent task wait if you can.",
+                "Tell someone you trust how you are feeling and ask for one small form of support.",
+            ],
+            "action_paths": _action_paths_for_emotion("fatigue"),
             "is_crisis": False,
         }
 

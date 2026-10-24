@@ -114,6 +114,7 @@ def _clear_last_analysis_report() -> None:
 
 EMOTION_PALETTE = {
     "joy": "#4c9a79",
+    "fatigue": "#778da9",
     "surprise": "#d49a43",
     "neutral": "#87968d",
     "sadness": "#7486b5",
@@ -813,13 +814,6 @@ def render_workspace():
                         )
                         st.plotly_chart(fig_gauge, use_container_width=True)
 
-                        # 4 Score cards
-                        c1, c2, c3, c4 = st.columns(4)
-                        c1.metric("Compound", f"{compound:.3f}")
-                        c2.metric("Positive", f"{report.sentiment_scores.positive:.3f}")
-                        c3.metric("Neutral", f"{report.sentiment_scores.neutral:.3f}")
-                        c4.metric("Negative", f"{report.sentiment_scores.negative:.3f}")
-
                     with col_emotions:
                         st.markdown("##### Fine-Grained Emotion Distribution")
                         if report.emotion_method == "no_emotion_signal":
@@ -832,27 +826,34 @@ def render_workspace():
                             estimator = EMOTION_ESTIMATOR_LABELS.get(
                                 report.emotion_method, report.emotion_method
                             )
-                            st.caption(
-                                f"Estimator: {estimator}. "
-                                "Heuristic scores are not model confidence values."
+                            score_label = (
+                                "Model score"
+                                if report.emotion_method == "transformer"
+                                else "Relative cue share"
                             )
+                            score_note = (
+                                "Model estimates are indicators, not a diagnosis."
+                                if report.emotion_method == "transformer"
+                                else "Relative shares of matched emotion words, not model confidence values."
+                            )
+                            st.caption(f"Estimator: {estimator}. {score_note}")
                             emo_df = pd.DataFrame(
                                 [
                                     {
                                         "Emotion": emo.capitalize(),
-                                        "Probability": prob,
+                                        "Score": prob,
                                         "Color": EMOTION_PALETTE.get(emo, "#94a3b8"),
                                     }
                                     for emo, prob in report.emotion_scores.items()
                                 ]
-                            ).sort_values("Probability", ascending=True)
+                            ).sort_values("Score", ascending=True)
 
                             fig_bar = px.bar(
                                 emo_df,
-                                x="Probability",
+                                x="Score",
                                 y="Emotion",
                                 orientation="h",
-                                text="Probability",
+                                text="Score",
                                 color="Emotion",
                                 color_discrete_map={
                                     row["Emotion"]: row["Color"] for _, row in emo_df.iterrows()
@@ -863,11 +864,26 @@ def render_workspace():
                                 showlegend=False,
                                 height=280,
                                 margin={"l": 10, "r": 30, "t": 10, "b": 10},
-                                xaxis={"range": [0, 1.1], "tickformat": ".0%"},
+                                xaxis={
+                                    "range": [0, 1.1],
+                                    "tickformat": ".0%",
+                                    "title": score_label,
+                                },
                                 paper_bgcolor="rgba(0,0,0,0)",
                                 plot_bgcolor="rgba(0,0,0,0)",
                             )
                             st.plotly_chart(fig_bar, use_container_width=True)
+
+                    # Give these values the full content width so narrow columns cannot clip them.
+                    score_cols = st.columns(4, gap="small")
+                    score_values = (
+                        ("Compound", compound),
+                        ("Positive", report.sentiment_scores.positive),
+                        ("Neutral", report.sentiment_scores.neutral),
+                        ("Negative", report.sentiment_scores.negative),
+                    )
+                    for score_col, (label, value) in zip(score_cols, score_values):
+                        score_col.metric(label, f"{value:.3f}")
 
                     # Personalized well-being suggestions
                     rec = report.recommendations
