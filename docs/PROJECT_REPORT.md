@@ -14,7 +14,7 @@ The prototype does not claim to infer a person's true emotional state. Text can 
 
 1. Accept free text and small TXT/CSV uploads.
 2. Preserve punctuation, casing, and negation for VADER while creating a normalized token stream for inspection.
-3. Return sentiment scores and a dominant emotion with class scores.
+3. Return sentiment scores and either emotion class scores or an unclassified result when no supported cue matches.
 4. Provide practical, non-clinical well-being actions based on simple rules.
 5. Store account-scoped analysis records and recommendations in PostgreSQL.
 6. Present current results and personal history through a usable dashboard.
@@ -40,7 +40,7 @@ The UI handles presentation and sends requests to FastAPI. The API validates inp
 ## Implementation modules
 
 - `wellness/preprocessing.py`: URL/HTML/email cleanup, contraction expansion, negation-preserving preprocessing, and spaCy tokenization/lemmatization with an NLTK POS/WordNet fallback.
-- `wellness/pipeline.py`: VADER scores and polarity labels; lazy Hugging Face emotion inference; heuristic fallback for offline use; recommendation generation.
+- `wellness/pipeline.py`: VADER scores and polarity labels; lazy Hugging Face emotion inference; keyword fallback for offline and low-resource hosting; recommendation generation. When no supported cue matches, the result is marked unclassified.
 - `wellness/report.py`: Typed analysis result and JSON conversion.
 - `wellness_api/main.py`: health, authentication, analysis, file-upload, history, and delete routes.
 - `wellness_api/schemas.py`: API payload and response validation.
@@ -65,7 +65,7 @@ Each mood log belongs to a user. History queries require a valid bearer token an
 2. The dashboard sends it to an authenticated FastAPI endpoint.
 3. Input validation rejects empty or oversized content. CSV processing detects a likely feedback column or uses the supplied column name.
 4. The NLP pipeline keeps a sentiment-safe text form, preprocesses a token form, and computes VADER's negative, neutral, positive, and compound values.
-5. The configured Hugging Face model produces emotion scores. If it is unavailable, a deterministic keyword-based fallback is used and is treated as a heuristic. Each saved result records which estimator produced its scores.
+5. The configured Hugging Face model produces emotion scores. If it is unavailable, a deterministic keyword-based fallback is used and treated as a heuristic. When no supported cue matches, the system reports an unclassified result rather than fabricating an even distribution. Each saved result records which estimator produced its result.
 6. A small ruleset selects a general well-being recommendation.
 7. The API commits the mood log and its recommendation. The response returns the result for charts and user review.
 8. History and exports use the authenticated user's stored records.

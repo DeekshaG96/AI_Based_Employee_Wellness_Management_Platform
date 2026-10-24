@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -177,16 +178,27 @@ def classify_emotions_with_method(text: str) -> tuple[dict[str, float], str, str
         except Exception:
             pass
 
-    # Deterministic lexical fallback for offline environments; these are not model confidences.
+    # Keyword scores are a lightweight cue, not a calibrated emotion probability.
+    # Match whole words and phrases so "happy" does not spuriously match "unhappy".
     lower = text.lower()
-    raw_scores: dict[str, float] = {e: 0.05 for e in EMOTIONS}
-    for emo, keywords in _EMOTION_KEYWORDS.items():
-        count = sum(1 for kw in keywords if kw in lower)
-        if count > 0:
-            raw_scores[emo] += count * 0.35
+    match_counts = {
+        emotion: sum(
+            len(re.findall(rf"(?<!\w){re.escape(keyword)}(?!\w)", lower))
+            for keyword in keywords
+        )
+        for emotion, keywords in _EMOTION_KEYWORDS.items()
+    }
+    total_matches = sum(match_counts.values())
+    if total_matches == 0:
+        # Avoid inventing an equal-probability distribution when the text has no
+        # supported emotion cue. Neutral sentiment is not implied by this result.
+        return {}, "unclassified", "no_emotion_signal"
 
-    total = sum(raw_scores.values()) or 1.0
-    normalized = {e: round(val / total, 4) for e, val in raw_scores.items()}
+    normalized = {
+        emotion: round(count / total_matches, 4)
+        for emotion, count in match_counts.items()
+        if count > 0
+    }
     dominant = max(normalized, key=normalized.get)
     return normalized, dominant, "lexical_fallback"
 

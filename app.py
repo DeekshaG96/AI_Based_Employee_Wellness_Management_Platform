@@ -119,6 +119,15 @@ EMOTION_PALETTE = {
     "fear": "#c78557",
     "anger": "#cb715e",
     "disgust": "#a5799b",
+    "unclassified": "#94a3b8",
+}
+
+EMOTION_ESTIMATOR_LABELS = {
+    "transformer": "Hugging Face transformer",
+    "lexical_fallback": "lexical keyword heuristic",
+    "no_emotion_signal": "no clear emotion cue matched",
+    "legacy_unknown": "legacy record (method not stored)",
+    "legacy_import": "imported legacy record (method not stored)",
 }
 
 
@@ -126,12 +135,20 @@ def _build_analysis_report_markdown(report) -> str:
     """Create a portable report for one journal analysis."""
     scores = report.sentiment_scores
     rec = report.recommendations
-    emotion_lines = [
-        f"- {emotion.capitalize()}: {score:.1%}"
-        for emotion, score in sorted(
-            report.emotion_scores.items(), key=lambda item: item[1], reverse=True
-        )
-    ]
+    no_emotion_signal = report.emotion_method == "no_emotion_signal"
+    emotion_lines = (
+        [
+            "- No fine-grained emotion estimate was produced because no supported "
+            "emotion cue matched."
+        ]
+        if no_emotion_signal
+        else [
+            f"- {emotion.capitalize()}: {score:.1%}"
+            for emotion, score in sorted(
+                report.emotion_scores.items(), key=lambda item: item[1], reverse=True
+            )
+        ]
+    )
     action_lines = [f"- {item}" for item in rec.get("action_items", [])]
     action_path_lines: list[str] = []
     for path in rec.get("action_paths", []):
@@ -143,6 +160,14 @@ def _build_analysis_report_markdown(report) -> str:
                 "",
             ]
         )
+    dominant_emotion = (
+        "Unclassified (no clear emotion cue)"
+        if no_emotion_signal
+        else report.dominant_emotion.capitalize()
+    )
+    estimator_label = EMOTION_ESTIMATOR_LABELS.get(
+        report.emotion_method, report.emotion_method
+    )
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     return "\n".join(
         [
@@ -152,9 +177,9 @@ def _build_analysis_report_markdown(report) -> str:
             "",
             "## Mood summary",
             f"- Sentiment: {report.sentiment_label.value.capitalize()}",
-            f"- Dominant emotion: {report.dominant_emotion.capitalize()}",
+            f"- Dominant emotion: {dominant_emotion}",
             f"- VADER compound score: {scores.compound:.3f}",
-            f"- Emotion estimator: {report.emotion_method}",
+            f"- Emotion estimator: {estimator_label}",
             "",
             "## Sentiment scores",
             f"- Positive: {scores.positive:.3f}",
@@ -504,47 +529,52 @@ def render_workspace():
 
                     with col_emotions:
                         st.markdown("##### Fine-Grained Emotion Distribution")
-                        estimator = {
-                            "transformer": "Hugging Face transformer",
-                            "lexical_fallback": "lexical fallback heuristic",
-                            "legacy_unknown": "legacy record (method not stored)",
-                            "legacy_import": "imported legacy record (method not stored)",
-                        }.get(report.emotion_method, report.emotion_method)
-                        st.caption(
-                            f"Estimator: {estimator}. Heuristic scores are not model confidence values."
-                        )
-                        emo_df = pd.DataFrame(
-                            [
-                                {
-                                    "Emotion": emo.capitalize(),
-                                    "Probability": prob,
-                                    "Color": EMOTION_PALETTE.get(emo, "#94a3b8"),
-                                }
-                                for emo, prob in report.emotion_scores.items()
-                            ]
-                        ).sort_values("Probability", ascending=True)
+                        if report.emotion_method == "no_emotion_signal":
+                            st.info(
+                                "No clear emotion keywords matched, so MoodMentor is leaving "
+                                "this chart unclassified instead of guessing how you feel. "
+                                "Your VADER sentiment result is shown alongside it."
+                            )
+                        else:
+                            estimator = EMOTION_ESTIMATOR_LABELS.get(
+                                report.emotion_method, report.emotion_method
+                            )
+                            st.caption(
+                                f"Estimator: {estimator}. "
+                                "Heuristic scores are not model confidence values."
+                            )
+                            emo_df = pd.DataFrame(
+                                [
+                                    {
+                                        "Emotion": emo.capitalize(),
+                                        "Probability": prob,
+                                        "Color": EMOTION_PALETTE.get(emo, "#94a3b8"),
+                                    }
+                                    for emo, prob in report.emotion_scores.items()
+                                ]
+                            ).sort_values("Probability", ascending=True)
 
-                        fig_bar = px.bar(
-                            emo_df,
-                            x="Probability",
-                            y="Emotion",
-                            orientation="h",
-                            text="Probability",
-                            color="Emotion",
-                            color_discrete_map={
-                                row["Emotion"]: row["Color"] for _, row in emo_df.iterrows()
-                            },
-                        )
-                        fig_bar.update_traces(texttemplate="%{text:.1%}", textposition="outside")
-                        fig_bar.update_layout(
-                            showlegend=False,
-                            height=280,
-                            margin={"l": 10, "r": 30, "t": 10, "b": 10},
-                            xaxis={"range": [0, 1.1], "tickformat": ".0%"},
-                            paper_bgcolor="rgba(0,0,0,0)",
-                            plot_bgcolor="rgba(0,0,0,0)",
-                        )
-                        st.plotly_chart(fig_bar, use_container_width=True)
+                            fig_bar = px.bar(
+                                emo_df,
+                                x="Probability",
+                                y="Emotion",
+                                orientation="h",
+                                text="Probability",
+                                color="Emotion",
+                                color_discrete_map={
+                                    row["Emotion"]: row["Color"] for _, row in emo_df.iterrows()
+                                },
+                            )
+                            fig_bar.update_traces(texttemplate="%{text:.1%}", textposition="outside")
+                            fig_bar.update_layout(
+                                showlegend=False,
+                                height=280,
+                                margin={"l": 10, "r": 30, "t": 10, "b": 10},
+                                xaxis={"range": [0, 1.1], "tickformat": ".0%"},
+                                paper_bgcolor="rgba(0,0,0,0)",
+                                plot_bgcolor="rgba(0,0,0,0)",
+                            )
+                            st.plotly_chart(fig_bar, use_container_width=True)
 
                     # Personalized well-being suggestions
                     rec = report.recommendations
