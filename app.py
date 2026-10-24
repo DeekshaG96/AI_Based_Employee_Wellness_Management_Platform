@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from html import escape
+from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
@@ -208,6 +209,298 @@ def _build_analysis_report_markdown(report) -> str:
             "",
         ]
     )
+
+
+def _build_analysis_report_pdf(report) -> bytes:
+    """Create a readable PDF report for one journal analysis."""
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_CENTER
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+    forest = colors.HexColor("#155c49")
+    ink = colors.HexColor("#19352d")
+    muted = colors.HexColor("#657b71")
+    pale = colors.HexColor("#e9f4eb")
+    line = colors.HexColor("#dce7df")
+
+    def safe_text(value) -> str:
+        """Keep PDF output robust for emojis and characters outside Helvetica."""
+        text = str(value or "")
+        replacements = {
+            "’": "'",
+            "‘": "'",
+            "“": '"',
+            "”": '"',
+            "—": "-",
+            "–": "-",
+            "…": "...",
+            "•": "-",
+        }
+        for source, replacement in replacements.items():
+            text = text.replace(source, replacement)
+        return text.encode("cp1252", errors="replace").decode("cp1252")
+
+    styles = getSampleStyleSheet()
+    styles.add(
+        ParagraphStyle(
+            name="MoodTitle",
+            parent=styles["Title"],
+            fontName="Helvetica-Bold",
+            fontSize=22,
+            leading=27,
+            textColor=forest,
+            alignment=TA_CENTER,
+            spaceAfter=5 * mm,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="MoodSubtitle",
+            parent=styles["Normal"],
+            fontSize=9,
+            leading=13,
+            textColor=muted,
+            alignment=TA_CENTER,
+            spaceAfter=7 * mm,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="MoodSection",
+            parent=styles["Heading2"],
+            fontName="Helvetica-Bold",
+            fontSize=13,
+            leading=17,
+            textColor=forest,
+            spaceBefore=5 * mm,
+            spaceAfter=2.5 * mm,
+            keepWithNext=True,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="MoodBody",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=9.5,
+            leading=14,
+            textColor=ink,
+            spaceAfter=2 * mm,
+            wordWrap="CJK",
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="MoodSmall",
+            parent=styles["BodyText"],
+            fontSize=8,
+            leading=11,
+            textColor=muted,
+        )
+    )
+
+    def paragraph(value, style="MoodBody") -> Paragraph:
+        escaped = escape(safe_text(value)).replace("\n", "<br/>")
+        return Paragraph(escaped or " ", styles[style])
+
+    buffer = BytesIO()
+    page_width, _ = A4
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=18 * mm,
+        leftMargin=18 * mm,
+        topMargin=17 * mm,
+        bottomMargin=18 * mm,
+        title="MoodMentor Mood Analysis Report",
+        author="MoodMentor",
+        subject="Personal mood reflection and well-being suggestions",
+    )
+    content_width = page_width - 36 * mm
+    report_scores = report.sentiment_scores
+    recommendation = report.recommendations
+    no_emotion_signal = report.emotion_method == "no_emotion_signal"
+    dominant_emotion = (
+        "Unclassified (no clear emotion cue)"
+        if no_emotion_signal
+        else report.dominant_emotion.capitalize()
+    )
+    estimator = EMOTION_ESTIMATOR_LABELS.get(
+        report.emotion_method, report.emotion_method
+    )
+
+    story = [
+        paragraph("MoodMentor", "MoodTitle"),
+        paragraph("Personal Mood Analysis Report", "MoodSubtitle"),
+        paragraph(
+            f"Generated {datetime.now(timezone.utc):%Y-%m-%d %H:%M:%S UTC}",
+            "MoodSmall",
+        ),
+        Spacer(1, 4 * mm),
+        paragraph("Mood summary", "MoodSection"),
+    ]
+    summary = Table(
+        [
+            ["SENTIMENT", "DOMINANT EMOTION"],
+            [report.sentiment_label.value.capitalize(), safe_text(dominant_emotion)],
+            ["VADER COMPOUND", "EMOTION ESTIMATOR"],
+            [f"{report_scores.compound:.3f}", safe_text(estimator)],
+        ],
+        colWidths=[content_width / 2, content_width / 2],
+        hAlign="LEFT",
+    )
+    summary.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), pale),
+                ("BACKGROUND", (0, 2), (-1, 2), pale),
+                ("TEXTCOLOR", (0, 0), (-1, -1), ink),
+                ("TEXTCOLOR", (0, 0), (-1, 0), forest),
+                ("TEXTCOLOR", (0, 2), (-1, 2), forest),
+                ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTNAME", (0, 2), (-1, 2), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("FONTSIZE", (0, 0), (-1, 0), 7.5),
+                ("FONTSIZE", (0, 2), (-1, 2), 7.5),
+                ("BOX", (0, 0), (-1, -1), 0.6, line),
+                ("INNERGRID", (0, 0), (-1, -1), 0.35, line),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 9),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 9),
+                ("TOPPADDING", (0, 0), (-1, -1), 8),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ]
+        )
+    )
+    story.extend([summary, paragraph("Sentiment scores", "MoodSection")])
+    sentiment_table = Table(
+        [
+            ["Positive", "Neutral", "Negative"],
+            [
+                f"{report_scores.positive:.3f}",
+                f"{report_scores.neutral:.3f}",
+                f"{report_scores.negative:.3f}",
+            ],
+        ],
+        colWidths=[content_width / 3] * 3,
+        hAlign="LEFT",
+    )
+    sentiment_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), pale),
+                ("TEXTCOLOR", (0, 0), (-1, -1), ink),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("BOX", (0, 0), (-1, -1), 0.6, line),
+                ("INNERGRID", (0, 0), (-1, -1), 0.35, line),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("TOPPADDING", (0, 0), (-1, -1), 7),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+            ]
+        )
+    )
+    story.extend([sentiment_table, paragraph("Emotion estimates", "MoodSection")])
+    if no_emotion_signal:
+        story.append(
+            paragraph(
+                "No fine-grained emotion estimate was produced because no supported "
+                "emotion cue matched."
+            )
+        )
+    elif report.emotion_scores:
+        emotion_rows = [["Emotion", "Score"]]
+        emotion_rows.extend(
+            [safe_text(emotion.capitalize()), f"{score:.1%}"]
+            for emotion, score in sorted(
+                report.emotion_scores.items(), key=lambda item: item[1], reverse=True
+            )
+        )
+        emotion_table = Table(
+            emotion_rows,
+            colWidths=[content_width * 0.68, content_width * 0.32],
+            repeatRows=1,
+            hAlign="LEFT",
+        )
+        emotion_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), pale),
+                    ("TEXTCOLOR", (0, 0), (-1, -1), ink),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 9),
+                    ("BOX", (0, 0), (-1, -1), 0.6, line),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.35, line),
+                    ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 6),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ]
+            )
+        )
+        story.append(emotion_table)
+        if report.emotion_method == "lexical_fallback":
+            story.append(
+                paragraph(
+                    "Lexical scores are heuristic indicators, not model confidence values.",
+                    "MoodSmall",
+                )
+            )
+    else:
+        story.append(paragraph("No emotion scores were returned."))
+
+    story.extend(
+        [
+            paragraph("Suggested next steps", "MoodSection"),
+            paragraph(recommendation.get("title", "Well-being reflection")),
+            paragraph(recommendation.get("summary", "")),
+        ]
+    )
+    for path in recommendation.get("action_paths", []):
+        path_title = path.get("title", "A way forward")
+        duration = path.get("duration", "Flexible")
+        story.append(paragraph(f"{path_title} - {duration}"))
+        if path.get("description"):
+            story.append(paragraph(path["description"]))
+        for step in path.get("steps", []):
+            story.append(paragraph(f"- {step}"))
+        story.append(Spacer(1, 2 * mm))
+
+    action_items = recommendation.get("action_items", [])
+    if action_items:
+        story.append(paragraph("Other quick ideas", "MoodSection"))
+        for item in action_items:
+            story.append(paragraph(f"- {item}"))
+
+    story.extend(
+        [
+            paragraph("Journal entry", "MoodSection"),
+            paragraph(report.original_text or "No journal text was supplied."),
+            Spacer(1, 4 * mm),
+            paragraph(
+                "MoodMentor supports self-reflection. Its estimates and suggestions are "
+                "not a medical diagnosis or a replacement for professional care.",
+                "MoodSmall",
+            ),
+        ]
+    )
+
+    def draw_footer(canvas, document) -> None:
+        canvas.saveState()
+        canvas.setStrokeColor(line)
+        canvas.setLineWidth(0.5)
+        canvas.line(18 * mm, 13 * mm, page_width - 18 * mm, 13 * mm)
+        canvas.setFont("Helvetica", 7.5)
+        canvas.setFillColor(muted)
+        canvas.drawString(18 * mm, 8 * mm, "MoodMentor | Personal reflection")
+        canvas.drawRightString(page_width - 18 * mm, 8 * mm, f"Page {document.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=draw_footer, onLaterPages=draw_footer)
+    return buffer.getvalue()
 
 
 def _render_mood_trend() -> None:
@@ -644,13 +937,24 @@ def render_workspace():
                     st.markdown("---")
                     st.markdown("### 📈 Mood trend over time")
                     _render_mood_trend()
-                    st.download_button(
-                        "📥 Download this mood report (.md)",
-                        data=_build_analysis_report_markdown(report),
-                        file_name=f"moodmentor-report-{datetime.now(timezone.utc):%Y%m%d-%H%M%S}.md",
-                        mime="text/markdown",
-                        use_container_width=True,
-                    )
+                    report_stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+                    markdown_col, pdf_col = st.columns(2)
+                    with markdown_col:
+                        st.download_button(
+                            "📥 Download report (.md)",
+                            data=_build_analysis_report_markdown(report),
+                            file_name=f"moodmentor-report-{report_stamp}.md",
+                            mime="text/markdown",
+                            use_container_width=True,
+                        )
+                    with pdf_col:
+                        st.download_button(
+                            "📄 Download report (.pdf)",
+                            data=_build_analysis_report_pdf(report),
+                            file_name=f"moodmentor-report-{report_stamp}.pdf",
+                            mime="application/pdf",
+                            use_container_width=True,
+                        )
 
                     # Deep NLP Inspector
                     st.markdown("---")

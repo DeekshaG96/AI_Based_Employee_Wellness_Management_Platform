@@ -29,7 +29,7 @@ The API owns authentication, analysis, and persistence. The dashboard does not o
    ```
 
 4. Open the dashboard at [http://localhost:8501](http://localhost:8501) and sign in or create an account.
-5. In **Mood Journal**, write a reflection and select **Analyze my mood**. The result includes a mood trend chart and a downloadable Markdown report; longer-term history is available in **Longitudinal Trends & Analytics**.
+5. In **Mood Journal**, write a reflection and select **Analyze my mood**. The result includes a mood trend chart and downloadable PDF and Markdown reports; longer-term history is available in **Longitudinal Trends & Analytics**.
 6. Explore the API and its interactive documentation at [http://localhost:8000/docs](http://localhost:8000/docs). Its health endpoint is [http://localhost:8000/health](http://localhost:8000/health).
 
 The first build installs the NLP dependencies and downloads NLTK resources. The first emotion analysis may also download the Hugging Face model, so it can take longer than later requests. Compose binds the web services and database to loopback for local development.
