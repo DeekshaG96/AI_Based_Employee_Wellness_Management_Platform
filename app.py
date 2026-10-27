@@ -127,7 +127,7 @@ EMOTION_PALETTE = {
 EMOTION_ESTIMATOR_LABELS = {
     "transformer": "Hugging Face transformer",
     "transformer_multilabel": "Hugging Face GoEmotions multi-label model",
-    "lexical_fallback": "lexical keyword heuristic",
+    "lexical_fallback": "keyword-based emotion cues (lightweight fallback)",
     "no_emotion_signal": "no clear emotion cue matched",
     "legacy_unknown": "legacy record (method not stored)",
     "legacy_import": "imported legacy record (method not stored)",
@@ -846,7 +846,8 @@ def render_workspace():
                                 score_note = "Model estimates are indicators, not a diagnosis."
                             else:
                                 score_note = (
-                                    "Relative shares of matched emotion words, not model confidence values."
+                                    "This result used keyword matching. Scores show relative matched-word shares, "
+                                    "not DistilBERT predictions or model confidence values."
                                 )
                             st.caption(f"Estimator: {estimator}. {score_note}")
                             emo_df = pd.DataFrame(
@@ -1363,13 +1364,19 @@ def render_workspace():
                    ├─(Tokens / Lemmatization)─> [Keywords]       ▼
                    │                                     [Strict Threshold Logic]
                    ▼                                     (> +0.05, < -0.05, Neu)
-            [Hugging Face DistilBERT]                            │
-            (GoEmotions Multi-Label Model)                        ▼
-                   │                                 [Recommendations Engine]
-                   └──(28 independent signals)──────> (Actionable Self-Care)
-                                                                 │
-                                                                 ▼
-                                                    [FastAPI + PostgreSQL]
+                   ┌──────────────────────────────────┐
+                   │                                  │
+                   ▼                                  ▼
+            [Local Compose]                    [Render Free Demo]
+            [DistilBERT GoEmotions]             [Keyword Emotion Cues]
+            [28 independent signals]            [Relative cue shares]
+                   │                                  │
+                   └──────────────┬───────────────────┘
+                                  ▼
+                       [Recommendations Engine]
+                                  │
+                                  ▼
+                       [FastAPI + PostgreSQL]
                                           (users, mood_logs, recommendations)
             ```
             """
