@@ -16,7 +16,7 @@ FastAPI service :8000 ── NLTK preprocessing + VADER + Hugging Face emotion m
 PostgreSQL :5432 (host port :5433 in local Compose)
 ```
 
-The API owns authentication, analysis, and persistence. The dashboard does not open the database directly. Analysis requests run the NLP pipeline; the service stores each result and its recommendation in one transaction. Preprocessing uses spaCy's `en_core_web_sm` for tokenization and lemmatization when installed, with NLTK POS tagging and WordNet lemmatization as a fallback. The emotion classifier uses `j-hartmann/emotion-english-distilroberta-base` by default. Each result identifies its estimator. If the model cannot load, a simple lexical fallback keeps the demo responsive; those scores are heuristic indicators, not transformer confidence scores. When no supported emotion keyword matches, MoodMentor marks the fine-grained result unclassified instead of showing an artificial even split.
+The API owns authentication, analysis, and persistence. The dashboard does not open the database directly. Analysis requests run the NLP pipeline; the service stores each result and its recommendation in one transaction. Preprocessing uses spaCy's `en_core_web_sm` for tokenization and lemmatization when installed, with NLTK POS tagging and WordNet lemmatization as a fallback. The local emotion classifier uses the Hugging Face GoEmotions DistilBERT checkpoint `bhadresh-savani/bert-base-go-emotion`. Its 28 outputs are independent multi-label signals, so they do not add up to 100%. MoodMentor retains those fine-grained scores and maps the strongest signal to a broad category for recommendations. Each result identifies its estimator. If the model cannot load, a simple lexical fallback keeps the demo responsive; those scores are heuristic indicators, not transformer confidence scores. When no supported emotion keyword matches, MoodMentor marks the fine-grained result unclassified instead of showing an artificial even split.
 
 ## Run the full application with Docker Compose
 
@@ -32,7 +32,7 @@ The API owns authentication, analysis, and persistence. The dashboard does not o
 5. In **Mood Journal**, write a reflection and select **Analyze my mood**. The result includes a mood trend chart and downloadable PDF and Markdown reports; longer-term history is available in **Longitudinal Trends & Analytics**.
 6. Explore the API and its interactive documentation at [http://localhost:8000/docs](http://localhost:8000/docs). Its health endpoint is [http://localhost:8000/health](http://localhost:8000/health).
 
-The first build installs the NLP dependencies and downloads NLTK resources. The first emotion analysis may also download the Hugging Face model, so it can take longer than later requests. Compose binds the web services and database to loopback for local development.
+The first build installs the NLP dependencies and downloads NLTK resources. The first emotion analysis downloads the Hugging Face model, so it can take longer than later requests. Compose binds the web services and database to loopback for local development. The free hosted demo disables the transformer to stay within its memory limit and reports that it is using a lexical fallback.
 
 ## Run the API and dashboard directly
 
@@ -84,6 +84,22 @@ Example analysis request:
 ```
 
 The response includes the VADER scores, polarity label, token and preprocessing information, emotion scores, recommendation, record ID, and timestamp. CSV uploads accept a `text_column` query parameter; without it, MoodMentor looks for a common header such as `text`, `feedback`, `comment`, `message`, or `content`. Uploads are limited to 2 MB.
+
+## GoEmotions dataset review and model evaluation
+
+The local archive is kept out of Git because it contains raw Reddit-derived text. Review its split shape and label frequencies without exposing text:
+
+```powershell
+python -m scripts.analyze_goemotions
+```
+
+Evaluate the pretrained multi-label model on the held-out test split and save only aggregate metrics:
+
+```powershell
+python -m scripts.evaluate_goemotions_model --output docs/goemotions-distilbert-evaluation.json
+```
+
+The evaluation reports micro/macro precision, recall, and F1, exact-match accuracy, per-label metrics, and the 0.5 decision threshold. The published dataset is not workplace-specific, so treat these metrics as a benchmark rather than proof of accuracy on employee reflections. See [docs/GOEMOTIONS_DATASET_REVIEW.md](docs/GOEMOTIONS_DATASET_REVIEW.md).
 
 ## PostgreSQL data model
 

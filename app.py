@@ -126,6 +126,7 @@ EMOTION_PALETTE = {
 
 EMOTION_ESTIMATOR_LABELS = {
     "transformer": "Hugging Face transformer",
+    "transformer_multilabel": "Hugging Face GoEmotions multi-label model",
     "lexical_fallback": "lexical keyword heuristic",
     "no_emotion_signal": "no clear emotion cue matched",
     "legacy_unknown": "legacy record (method not stored)",
@@ -190,6 +191,11 @@ def _build_analysis_report_markdown(report) -> str:
             "",
             "## Emotion estimates",
             *(emotion_lines or ["- No emotion scores were returned."]),
+            *(
+                ["Note: GoEmotions scores are independent signals and do not add up to 100%."]
+                if report.emotion_method == "transformer_multilabel"
+                else []
+            ),
             "",
             "## Suggested next steps",
             f"**{rec.get('title', 'Well-being reflection')}**",
@@ -815,7 +821,7 @@ def render_workspace():
                         st.plotly_chart(fig_gauge, use_container_width=True)
 
                     with col_emotions:
-                        st.markdown("##### Fine-Grained Emotion Distribution")
+                        st.markdown("##### Fine-Grained Emotion Signals")
                         if report.emotion_method == "no_emotion_signal":
                             st.info(
                                 "No clear emotion keywords matched, so MoodMentor is leaving "
@@ -826,16 +832,22 @@ def render_workspace():
                             estimator = EMOTION_ESTIMATOR_LABELS.get(
                                 report.emotion_method, report.emotion_method
                             )
-                            score_label = (
-                                "Model score"
-                                if report.emotion_method == "transformer"
-                                else "Relative cue share"
-                            )
-                            score_note = (
-                                "Model estimates are indicators, not a diagnosis."
-                                if report.emotion_method == "transformer"
-                                else "Relative shares of matched emotion words, not model confidence values."
-                            )
+                            is_multilabel = report.emotion_method == "transformer_multilabel"
+                            is_transformer = report.emotion_method in {
+                                "transformer", "transformer_multilabel"
+                            }
+                            score_label = "Model score" if is_transformer else "Relative cue share"
+                            if is_multilabel:
+                                score_note = (
+                                    "Showing the strongest signals. GoEmotions scores are independent, "
+                                    "so they do not add up to 100%; this is not a diagnosis."
+                                )
+                            elif is_transformer:
+                                score_note = "Model estimates are indicators, not a diagnosis."
+                            else:
+                                score_note = (
+                                    "Relative shares of matched emotion words, not model confidence values."
+                                )
                             st.caption(f"Estimator: {estimator}. {score_note}")
                             emo_df = pd.DataFrame(
                                 [
@@ -847,6 +859,8 @@ def render_workspace():
                                     for emo, prob in report.emotion_scores.items()
                                 ]
                             ).sort_values("Score", ascending=True)
+                            if len(emo_df) > 8:
+                                emo_df = emo_df.nlargest(8, "Score").sort_values("Score")
 
                             fig_bar = px.bar(
                                 emo_df,
@@ -1349,10 +1363,10 @@ def render_workspace():
                    ├─(Tokens / Lemmatization)─> [Keywords]       ▼
                    │                                     [Strict Threshold Logic]
                    ▼                                     (> +0.05, < -0.05, Neu)
-            [Hugging Face Transformer]                           │
-            (DistilRoBERTa Emotion Model)                        ▼
+            [Hugging Face DistilBERT]                            │
+            (GoEmotions Multi-Label Model)                        ▼
                    │                                 [Recommendations Engine]
-                   └───────(7 Probabilities)────────> (Actionable Self-Care)
+                   └──(28 independent signals)──────> (Actionable Self-Care)
                                                                  │
                                                                  ▼
                                                     [FastAPI + PostgreSQL]

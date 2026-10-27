@@ -70,3 +70,6 @@ Thumbs.db
 
 # Streamlit config / cache
 .streamlit/
+
+# Local GoEmotions dataset archive (contains raw Reddit-derived text)
+/archive (1)/

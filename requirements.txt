@@ -1,4 +1,4 @@
 # Full local environment. Containers use the smaller API and UI requirement sets.
 -r requirements-dev.txt
-transformers>=4.38
+transformers>=4.38,<5
 torch>=2.0

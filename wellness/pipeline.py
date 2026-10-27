@@ -19,8 +19,33 @@ from .preprocessing import (
 )
 from .report import AnalysisReport, InputSummary, SentimentLabel, SentimentScores
 
-# The transformer's seven classes; the lexical fallback can also flag fatigue.
+# Broad recommendation categories; GoEmotions also supplies fine-grained labels.
 EMOTIONS: tuple[str, ...] = ("joy", "sadness", "anger", "fear", "surprise", "disgust", "neutral")
+
+_GOEMOTIONS_GROUPS: dict[str, tuple[str, ...]] = {
+    "anger": ("anger", "annoyance", "disapproval"),
+    "disgust": ("disgust",),
+    "fear": ("fear", "nervousness"),
+    "joy": (
+        "joy", "amusement", "approval", "excitement", "gratitude", "love",
+        "optimism", "relief", "pride", "admiration", "desire", "caring",
+    ),
+    "sadness": ("sadness", "disappointment", "embarrassment", "grief", "remorse"),
+    "surprise": ("surprise", "realization", "confusion", "curiosity"),
+}
+_GOEMOTIONS_FINE_LABELS = {
+    label for labels in _GOEMOTIONS_GROUPS.values() for label in labels
+} - set(EMOTIONS)
+
+
+def _dominant_goemotions_category(scores: dict[str, float]) -> str:
+    """Map independent GoEmotions scores to a broad recommendation category."""
+    grouped = {
+        category: max((scores.get(label, 0.0) for label in labels), default=0.0)
+        for category, labels in _GOEMOTIONS_GROUPS.items()
+    }
+    grouped["neutral"] = scores.get("neutral", 0.0)
+    return max(grouped, key=grouped.get)
 
 _EMOTION_KEYWORDS: dict[str, list[str]] = {
     "joy": [
@@ -151,12 +176,16 @@ def _get_emotion_pipeline() -> Any:
     try:
         from transformers import pipeline
 
+        model_name = os.getenv("MODEL_NAME", "bhadresh-savani/bert-base-go-emotion")
         _EMOTION_CLF = pipeline(
             "text-classification",
-            model=os.getenv("MODEL_NAME", "j-hartmann/emotion-english-distilroberta-base"),
+            model=model_name,
             top_k=None,
             device=-1,
         )
+        if model_name.rstrip("/").lower() == "bhadresh-savani/bert-base-go-emotion":
+            # The published checkpoint omits problem_type; its GoEmotions head is multi-label.
+            _EMOTION_CLF.model.config.problem_type = "multi_label_classification"
     except Exception:
         _EMOTION_CLF = None
 
@@ -170,7 +199,15 @@ def classify_emotions_with_method(text: str) -> tuple[dict[str, float], str, str
     if clf is not None:
         try:
             preds = clf(text[:512])[0]
-            scores = {item["label"].lower(): float(item["score"]) for item in preds}
+            scores = {item["label"].strip().lower(): float(item["score"]) for item in preds}
+            if not scores:
+                raise ValueError("The emotion model returned no labels.")
+
+            # GoEmotions is multi-label: preserve all 28 independent scores for
+            # the report, but map its strongest broad family for recommendations.
+            if set(scores).intersection(_GOEMOTIONS_FINE_LABELS):
+                return scores, _dominant_goemotions_category(scores), "transformer_multilabel"
+
             for emo in EMOTIONS:
                 scores.setdefault(emo, 0.0)
             dominant = max(scores, key=scores.get)

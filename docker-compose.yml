@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile.api
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://moodmentor:change-this-local-password@db:5432/moodmentor}
-      MODEL_NAME: ${MODEL_NAME:-j-hartmann/emotion-english-distilroberta-base}
+      MODEL_NAME: ${MODEL_NAME:-bhadresh-savani/bert-base-go-emotion}
       SPACY_MODEL: ${SPACY_MODEL:-en_core_web_sm}
       HF_HOME: /var/cache/huggingface
     ports:
