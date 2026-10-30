@@ -16,7 +16,7 @@ FastAPI service :8000 ── NLTK preprocessing + VADER + Hugging Face emotion m
 PostgreSQL :5432 (host port :5433 in local Compose)
 ```
 
-The API owns authentication, analysis, and persistence. The dashboard does not open the database directly. Analysis requests run the NLP pipeline; the service stores each result and its recommendation in one transaction. Preprocessing uses spaCy's `en_core_web_sm` for tokenization and lemmatization when installed, with NLTK POS tagging and WordNet lemmatization as a fallback. The local emotion classifier uses the Hugging Face GoEmotions DistilBERT checkpoint `bhadresh-savani/bert-base-go-emotion`. Its 28 outputs are independent multi-label signals, so they do not add up to 100%. MoodMentor retains those fine-grained scores and maps the strongest signal to a broad category for recommendations. Each result identifies its estimator. If the model cannot load, a simple lexical fallback keeps the demo responsive; those scores are heuristic indicators, not transformer confidence scores. When no supported emotion keyword matches, MoodMentor marks the fine-grained result unclassified instead of showing an artificial even split.
+The API owns authentication, analysis, and persistence. The dashboard does not open the database directly. Analysis requests run the NLP pipeline; the service stores each result and its recommendation in one transaction. Preprocessing uses spaCy's `en_core_web_sm` for tokenization and lemmatization when installed, with NLTK POS tagging and WordNet lemmatization as a fallback. The local emotion classifier first loads a MoodMentor-fine-tuned model from models/goemotions-distilbert when present; otherwise it uses the public GoEmotions checkpoint `bhadresh-savani/bert-base-go-emotion`. Its 28 outputs are independent multi-label signals, so they do not add up to 100%. MoodMentor retains those fine-grained scores and maps the strongest signal to a broad category for recommendations. Each result identifies its estimator. If the model cannot load, a simple lexical fallback keeps the demo responsive; those scores are heuristic indicators, not transformer confidence scores. When no supported emotion keyword matches, MoodMentor marks the fine-grained result unclassified instead of showing an artificial even split.
 
 ## Run the full application with Docker Compose
 
@@ -85,6 +85,29 @@ Example analysis request:
 
 The response includes the VADER scores, polarity label, token and preprocessing information, emotion scores, recommendation, record ID, and timestamp. CSV uploads accept a `text_column` query parameter; without it, MoodMentor looks for a common header such as `text`, `feedback`, `comment`, `message`, or `content`. Uploads are limited to 2 MB.
 
+
+## Fine-tune a MoodMentor GoEmotions model
+
+The project contains separate GoEmotions train, validation, and test CSV files under data/goemotions. Each record preserves every applicable emotion because GoEmotions is a 28-label multi-label dataset. The raw dataset files are excluded from Git. Recreate the prepared CSV files from the included local archive with:
+
+    python -m scripts.prepare_goemotions_csv
+
+Fine-tuning starts from DistilBERT and uses capped positive-label weights to reduce the effect of sparse GoEmotions labels. It reports step/loss progress, evaluates on validation data after each epoch, keeps the best validation checkpoint, and evaluates that checkpoint once on the held-out test split.
+
+### Screenshot-sized development run
+
+This run uses the first 2,000 rows from each split with batch size 8, producing 250 training updates. It checks the full training/evaluation flow and gives progress similar to the example screenshots. Since it uses only part of each split, treat its scores as development diagnostics, not as final model performance. It saves outside the app's model directory so the API will not load an unverified checkpoint:
+
+    python -m scripts.train_goemotions_model --limit 2000 --epochs 1 --batch-size 8 --max-length 64 --threshold 0.25 --positive-weight-cap 8 --output-dir .venv-training/goemotions-balanced-250 --metrics-output .venv-training/goemotions-balanced-250-metrics.json
+
+### Full dataset training
+
+Install local dependencies and train on all 43,410 training records. The full validation split is used for checkpoint selection, and the test split is held out for the final evaluation:
+
+    python -m pip install -r requirements.txt
+    python -m scripts.train_goemotions_model --epochs 3 --batch-size 8 --output-dir .venv-training/goemotions-full --metrics-output .venv-training/goemotions-full-metrics.json
+
+The candidate model and aggregate results are saved under .venv-training/goemotions-full and .venv-training/goemotions-full-metrics.json. Only aggregate metrics are reported; raw text and model weights are excluded from Git. Review validation and test metrics first. Copy a suitable candidate to models/goemotions-distilbert, then restart the local API to load it. CPU training can take many hours; a CUDA-enabled GPU is recommended. The optional local Colab bundle is not committed because it contains raw Reddit-derived text. Follow [COLAB_README.txt](COLAB_README.txt); the bundle prepares its CSV splits before starting the full training job. Lower the batch size if GPU memory is limited. Do not report metrics from a --limit run as full-dataset results. See the measured limited-run results and checkpoint decision in [docs/GOEMOTIONS_DEVELOPMENT_RUN.md](docs/GOEMOTIONS_DEVELOPMENT_RUN.md).
 ## GoEmotions dataset review and model evaluation
 
 The local archive is kept out of Git because it contains raw Reddit-derived text. Review its split shape and label frequencies without exposing text:
@@ -149,10 +172,11 @@ wellness_api/                  FastAPI routes, schemas, security, and SQLAlchemy
 scripts/migrate_sqlite_to_postgres.py
 tests/                         Pipeline, legacy storage, and API contract tests
 Dockerfile.api                 Full FastAPI and transformer runtime for local Compose
-Dockerfile.api.render          Lightweight FastAPI runtime for the hosted free demo
-requirements-api-render.txt    API dependencies without PyTorch/Transformers
 Dockerfile.ui                  Streamlit runtime
 docker-compose.yml             PostgreSQL, API, dashboard, and model cache
+streamlit_cloud/app.py         Streamlit Community Cloud showcase entrypoint
+streamlit_cloud/requirements.txt  Lightweight hosted-app dependencies
+streamlit_cloud/README.md      Deployment and privacy notes
 docs/PROJECT_REPORT.md         Canonical mentor-facing report and presentation outline
 ```
 
@@ -160,10 +184,8 @@ docs/PROJECT_REPORT.md         Canonical mentor-facing report and presentation o
 
 MoodMentor is a learning and self-reflection tool, not a clinical assessment, diagnosis, or emergency service. Text classifiers can misread context, sarcasm, dialect, and individual communication styles. Do not use these outputs to make employment, performance, or other high-impact decisions. Journal text can contain sensitive personal information: use consent, restricted access, a retention policy, encrypted transport, and production-grade secret management before any real deployment. The Compose credentials are for local development only.
 
-## Deploy the hosted review demo
+## Deploy the Streamlit Community Cloud showcase
 
-The Render Blueprint in render.yaml defines three connected services: the Streamlit dashboard, a FastAPI service, and PostgreSQL. Connect this repository to Render as a Blueprint and apply the proposed changes. Render supplies the API's public URL to the dashboard and the database connection string to the API; no credentials belong in GitHub.
+The repository includes a separate cloud entrypoint at `streamlit_cloud/app.py`; do not select the root `app.py`, which is the full authenticated dashboard and requires FastAPI and PostgreSQL. The Cloud showcase runs VADER and the lightweight emotion-cue fallback in the Streamlit process. It has no account system or persistent database. Check-ins stay in temporary session memory, and the page tells visitors their writing is processed by the hosted app and should not include sensitive or identifying details.
 
-The hosted free demo uses a lightweight API image and a lexical emotion fallback so it stays within the free service memory limit. If no supported emotion cue matches, it records an unclassified result instead of inventing an even emotion distribution. The full transformer classifier remains available in the local Docker Compose setup. Free services can sleep after inactivity, so the first visit may take about a minute to wake. Render's free PostgreSQL instance expires 30 days after it is created; treat hosted records as temporary demo data, not durable storage. Upgrade the database plan before relying on it for longer-term data.
-
-The project landing page is published from docs/index.html. It links to the hosted dashboard and the canonical mentor report in docs/PROJECT_REPORT.md. If Render shows a Service Suspended page, the service owner must reactivate it in the Render Dashboard; sync this Blueprint afterward if the services are not managed by it.
+Deploy from the MoodMentor GitHub repository using branch `streamlit-cloud`, entrypoint `streamlit_cloud/app.py`, Python 3.12, and the adjacent `streamlit_cloud/requirements.txt`. No secrets are required. See [streamlit_cloud/README.md](streamlit_cloud/README.md) for the setup steps. Streamlit Community Cloud connects apps to GitHub repositories and uses the selected repository, branch, entrypoint, dependencies, and optional secrets during deployment ([deployment guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy), [dependency guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies)).

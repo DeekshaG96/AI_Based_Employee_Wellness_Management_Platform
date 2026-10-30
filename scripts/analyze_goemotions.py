@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_DIR = ROOT / "archive (1)" / "data"
-SPLITS = ("train.tsv", "dev.tsv", "test.tsv")
+DEFAULT_DATA_DIR = ROOT / "data" / "goemotions"
+SPLITS = ("train.csv", "validation.csv", "test.csv")
 
 
 def profile_split(data_dir: Path, split_name: str, labels: list[str]) -> dict[str, Any]:
@@ -23,17 +23,22 @@ def profile_split(data_dir: Path, split_name: str, labels: list[str]) -> dict[st
     total_labels = 0
     row_count = 0
 
+    delimiter = "," if path.suffix.lower() == ".csv" else "\t"
+    has_record_ids = path.suffix.lower() != ".csv"
     with path.open(encoding="utf-8", newline="") as handle:
-        for row in csv.reader(handle, delimiter="\t"):
+        for row_number, row in enumerate(csv.reader(handle, delimiter=delimiter), start=1):
+            if row and row_number == 1 and row[0].strip().lower() == "text":
+                continue
             row_count += 1
             if len(row) != 3:
                 malformed_rows += 1
                 continue
-            text, raw_labels, comment_id = row
+            text, raw_labels, record_id = row
             empty_text_rows += not bool(text.strip())
-            if comment_id in ids:
+            if has_record_ids and record_id in ids:
                 duplicate_ids += 1
-            ids.add(comment_id)
+            if has_record_ids:
+                ids.add(record_id)
             row_ids = [part.strip() for part in raw_labels.split(",") if part.strip()]
             total_labels += len(row_ids)
             for raw_id in row_ids:
@@ -50,7 +55,7 @@ def profile_split(data_dir: Path, split_name: str, labels: list[str]) -> dict[st
         "rows": row_count,
         "malformed_rows": malformed_rows,
         "empty_text_rows": empty_text_rows,
-        "duplicate_comment_ids": duplicate_ids,
+        "duplicate_comment_ids": duplicate_ids if has_record_ids else None,
         "invalid_label_ids": invalid_label_ids,
         "average_labels_per_row": round(total_labels / row_count, 3) if row_count else 0,
         "label_counts": dict(sorted(label_counts.items(), key=lambda item: (-item[1], item[0]))),

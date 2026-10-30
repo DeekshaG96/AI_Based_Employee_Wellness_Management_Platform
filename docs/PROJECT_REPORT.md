@@ -40,7 +40,7 @@ The UI handles presentation and sends requests to FastAPI. The API validates inp
 ## Implementation modules
 
 - `wellness/preprocessing.py`: URL/HTML/email cleanup, contraction expansion, negation-preserving preprocessing, and spaCy tokenization/lemmatization with an NLTK POS/WordNet fallback.
-- `wellness/pipeline.py`: VADER scores and polarity labels; lazy inference with the pretrained GoEmotions DistilBERT model; broad-family mapping for recommendation rules; keyword fallback for offline and low-resource hosting. When no supported cue matches, the result is marked unclassified.
+- `wellness/pipeline.py`: VADER scores and polarity labels; lazy inference with the local MoodMentor-fine-tuned model when available, otherwise the public GoEmotions-trained DistilBERT checkpoint; broad-family mapping for recommendation rules; keyword fallback for offline and low-resource hosting. When no supported cue matches, the result is marked unclassified.
 - `wellness/report.py`: Typed analysis result and JSON conversion.
 - `wellness_api/main.py`: health, authentication, analysis, file-upload, history, and delete routes.
 - `wellness_api/schemas.py`: API payload and response validation.
@@ -65,14 +65,14 @@ Each mood log belongs to a user. History queries require a valid bearer token an
 2. The dashboard sends it to an authenticated FastAPI endpoint.
 3. Input validation rejects empty or oversized content. CSV processing detects a likely feedback column or uses the supplied column name.
 4. The NLP pipeline keeps a sentiment-safe text form, preprocesses a token form, and computes VADER's negative, neutral, positive, and compound values.
-5. The pretrained Hugging Face model produces 28 independent GoEmotions scores. MoodMentor keeps these fine-grained signals and maps the strongest one to a broad category for recommendations. If the model is unavailable, a deterministic keyword fallback is used and treated as a heuristic. When no supported cue matches, the system reports an unclassified result rather than fabricating an even distribution. Each saved result records which estimator produced it.
+5. The local fine-tuned checkpoint is preferred when available; otherwise the application uses the published Hugging Face checkpoint already trained on GoEmotions. The active model produces 28 independent emotion scores. MoodMentor keeps these fine-grained signals and maps the strongest one to a broad category for recommendations. If the model is unavailable, a deterministic keyword fallback is used and treated as a heuristic. When no supported cue matches, the system reports an unclassified result rather than fabricating an even distribution. Each saved result records which estimator produced it.
 6. A small ruleset selects a general well-being recommendation.
 7. The API commits the mood log and its recommendation. The response returns the result for charts and user review.
 8. History and exports use the authenticated user's stored records.
 
 ## Dataset and model evaluation
 
-The archived GoEmotions simplified agree-2 dataset has 54,263 examples (43,410 train, 5,426 development, and 5,427 test) and 28 labels. The profile found no malformed records, empty text, repeated IDs within a split, or invalid label IDs. The archive contains Reddit-derived text, is not committed to Git, and is not representative of employee journals.
+The archived GoEmotions simplified agree-2 dataset has 54,263 examples (43,410 train, 5,426 development, and 5,427 test) and 28 labels. The project fine-tuning script starts from general-purpose DistilBERT, trains on the train split, selects a checkpoint using the development split, and evaluates on the held-out test split. The profile found no malformed records, empty text, repeated IDs within a split, or invalid label IDs. The archive contains Reddit-derived text, is not committed to Git, and is not representative of employee journals.
 
 The GoEmotions DistilBERT checkpoint was evaluated on all 5,427 held-out test entries with independent sigmoid scores and a 0.5 decision threshold. It reached micro precision 0.8618, micro recall 0.3321, micro F1 0.4795, macro F1 0.2980, and exact-match accuracy 0.3243. This conservative threshold misses many labels, especially rare classes. These are benchmark results for the public dataset, not an accuracy claim for workplace writing. Threshold calibration should use the development split before any consequential use. Detailed label metrics and runtime versions are saved in `docs/goemotions-distilbert-evaluation.json`; see `docs/GOEMOTIONS_DATASET_REVIEW.md` for the privacy-preserving profile and limitations.
 

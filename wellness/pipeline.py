@@ -176,7 +176,14 @@ def _get_emotion_pipeline() -> Any:
     try:
         from transformers import pipeline
 
-        model_name = os.getenv("MODEL_NAME", "bhadresh-savani/bert-base-go-emotion")
+        configured_model = os.getenv("MODEL_NAME")
+        local_model = Path(__file__).resolve().parents[1] / "models" / "goemotions-distilbert"
+        if configured_model:
+            model_name = configured_model
+        elif (local_model / "config.json").is_file():
+            model_name = str(local_model)
+        else:
+            model_name = "bhadresh-savani/bert-base-go-emotion"
         _EMOTION_CLF = pipeline(
             "text-classification",
             model=model_name,

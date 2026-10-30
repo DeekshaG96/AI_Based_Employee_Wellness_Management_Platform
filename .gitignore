@@ -72,4 +72,8 @@ Thumbs.db
 .streamlit/
 
 # Local GoEmotions dataset archive (contains raw Reddit-derived text)
+/data/goemotions/
 /archive (1)/
+/models/goemotions-distilbert/
+.venv-training/
+goemotions_colab_bundle_codex.zip

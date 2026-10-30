@@ -11,17 +11,21 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_DIR = ROOT / "archive (1)" / "data"
+DEFAULT_DATA_DIR = ROOT / "data" / "goemotions"
 DEFAULT_MODEL = "bhadresh-savani/bert-base-go-emotion"
 
 
 def read_split(data_dir: Path, split: str) -> tuple[list[str], list[set[int]]]:
     texts: list[str] = []
     targets: list[set[int]] = []
-    with (data_dir / split).open(encoding="utf-8", newline="") as handle:
-        for row in csv.reader(handle, delimiter="\t"):
+    split_path = data_dir / split
+    delimiter = "," if split_path.suffix.lower() == ".csv" else "\t"
+    with split_path.open(encoding="utf-8", newline="") as handle:
+        for row_number, row in enumerate(csv.reader(handle, delimiter=delimiter), start=1):
+            if row and row_number == 1 and row[0].strip().lower() == "text":
+                continue
             if len(row) != 3 or not row[0].strip():
-                raise ValueError(f"Malformed row in {data_dir / split}.")
+                raise ValueError(f"Malformed row in {split_path}.")
             texts.append(row[0])
             targets.append({int(value.strip()) for value in row[1].split(",") if value.strip()})
     return texts, targets
@@ -92,12 +96,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--split", default="test.tsv")
+    parser.add_argument("--split", default="test.csv")
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--limit", type=int, help="Optional quick run; omit to evaluate the full split.")
     parser.add_argument("--output", type=Path, help="Optional JSON path for aggregate metrics only.")
     args = parser.parse_args()
+    if not (args.data_dir / args.split).is_file() and args.split == "test.csv" and (args.data_dir / "test.tsv").is_file():
+        args.split = "test.tsv"
     labels = [line.strip() for line in (args.data_dir / "emotions.txt").read_text(encoding="utf-8").splitlines() if line.strip()]
     texts, targets = read_split(args.data_dir, args.split)
     if args.limit is not None:
