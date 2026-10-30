@@ -202,7 +202,7 @@ with st.sidebar:
     st.markdown('<div class="brand"><div class="mark">m</div><div><div class="brand-name" style="color:white">MoodMentor</div><div class="brand-caption" style="color:#b5d0c0">Your mindful space</div></div></div>', unsafe_allow_html=True)
     st.markdown("### This session")
     st.metric("Saved check-ins", len(st.session_state.records))
-    st.caption("This Streamlit showcase keeps history only for the current browser session. It does not use accounts or save entries to a database.")
+    st.caption("Your check-ins stay available for this session only. This hosted showcase has no account or permanent journal; the full local version supports saved history.")
     if st.button("Clear this session's history", use_container_width=True, disabled=not st.session_state.records):
         st.session_state.records = []
         st.session_state.selected_record_id = None
@@ -214,7 +214,7 @@ st.markdown(
     '<div class="hero"><div class="eyebrow">A gentler way to check in</div><h1>Make space for how you feel.</h1><p>Write a few honest lines, notice the emotional signals, then choose a small next step that feels right for you.</p></div>',
     unsafe_allow_html=True,
 )
-st.info("Privacy note: entries are processed by this hosted app and held temporarily in its session memory. This demo does not provide persistent private journaling; do not enter sensitive or identifying details.", icon="🔒")
+st.info("Your check-ins are processed by MoodMentor on Streamlit Cloud and kept only for this session. They are not saved to an account or permanent journal. Please avoid names or other details that identify you.", icon="ℹ️")
 
 journal_tab, file_tab, trends_tab = st.tabs(["📝 Mood journal", "📄 Import a file", "📈 Trends & history"])
 with journal_tab:
