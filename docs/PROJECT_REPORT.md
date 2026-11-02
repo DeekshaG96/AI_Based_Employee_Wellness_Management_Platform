@@ -2,7 +2,7 @@
 
 ## Abstract
 
-MoodMentor is a web application for exploring how natural-language processing can summarize the emotional tone of short written reflections and provide general well-being suggestions. It combines text preprocessing, VADER sentiment scoring, a 28-label multi-label GoEmotions DistilBERT classifier, a recommendation ruleset, authenticated REST endpoints, PostgreSQL persistence, and an interactive Streamlit dashboard. The result is intended for learning and personal reflection; it is not a mental-health assessment or an employee evaluation system.
+MoodMentor is a web application for exploring how natural-language processing can summarize the emotional tone of short written reflections and provide general well-being suggestions. It combines text preprocessing, VADER sentiment scoring, a 28-label multi-label GoEmotions transformer classifier, a recommendation ruleset, authenticated REST endpoints, PostgreSQL persistence, and an interactive Streamlit dashboard. The result is intended for learning and personal reflection; it is not a mental-health assessment or an employee evaluation system.
 
 ## Problem statement
 
@@ -40,7 +40,7 @@ The UI handles presentation and sends requests to FastAPI. The API validates inp
 ## Implementation modules
 
 - `wellness/preprocessing.py`: URL/HTML/email cleanup, contraction expansion, negation-preserving preprocessing, and spaCy tokenization/lemmatization with an NLTK POS/WordNet fallback.
-- `wellness/pipeline.py`: VADER scores and polarity labels; lazy inference with the local MoodMentor-fine-tuned model when available, otherwise the public GoEmotions-trained DistilBERT checkpoint; broad-family mapping for recommendation rules; keyword fallback for offline and low-resource hosting. When no supported cue matches, the result is marked unclassified.
+- `wellness/pipeline.py`: VADER scores and polarity labels; lazy inference with the local MoodMentor-fine-tuned model when available, otherwise the published GoEmotions checkpoint; broad-family mapping for recommendation rules; keyword fallback for offline and low-resource hosting. When no supported cue matches, the result is marked unclassified.
 - `wellness/report.py`: Typed analysis result and JSON conversion.
 - `wellness_api/main.py`: health, authentication, analysis, file-upload, history, and delete routes.
 - `wellness_api/schemas.py`: API payload and response validation.
@@ -74,7 +74,7 @@ Each mood log belongs to a user. History queries require a valid bearer token an
 
 The archived GoEmotions simplified agree-2 dataset has 54,263 examples (43,410 train, 5,426 development, and 5,427 test) and 28 labels. The project fine-tuning script starts from general-purpose DistilBERT, trains on the train split, selects a checkpoint using the development split, and evaluates on the held-out test split. The profile found no malformed records, empty text, repeated IDs within a split, or invalid label IDs. The archive contains Reddit-derived text, is not committed to Git, and is not representative of employee journals.
 
-The GoEmotions DistilBERT checkpoint was evaluated on all 5,427 held-out test entries with independent sigmoid scores and a 0.5 decision threshold. It reached micro precision 0.8618, micro recall 0.3321, micro F1 0.4795, macro F1 0.2980, and exact-match accuracy 0.3243. This conservative threshold misses many labels, especially rare classes. These are benchmark results for the public dataset, not an accuracy claim for workplace writing. Threshold calibration should use the development split before any consequential use. Detailed label metrics and runtime versions are saved in `docs/goemotions-distilbert-evaluation.json`; see `docs/GOEMOTIONS_DATASET_REVIEW.md` for the privacy-preserving profile and limitations.
+The published GoEmotions checkpoint was evaluated on all 5,427 held-out test entries with independent sigmoid scores and a 0.5 decision threshold. It reached micro precision 0.8618, micro recall 0.3321, micro F1 0.4795, macro F1 0.2980, and exact-match accuracy 0.3243. This conservative threshold misses many labels, especially rare classes. These are benchmark results for the public dataset, not an accuracy claim for workplace writing. Threshold calibration should use the development split before any consequential use. Detailed label metrics and runtime versions are saved in `docs/goemotions-distilbert-evaluation.json`; see `docs/GOEMOTIONS_DATASET_REVIEW.md` for the privacy-preserving profile and limitations.
 
 ## Local deployment
 
@@ -106,17 +106,21 @@ The project includes tests for preprocessing, VADER behavior, legacy SQLite util
 1. **Title and motivation** — MoodMentor and the challenge of reflecting on unstructured feedback.
 2. **Problem and scope** — the prototype's user need, intended audience, and boundaries.
 3. **Architecture** — Streamlit, FastAPI, NLP pipeline, SQLAlchemy, and PostgreSQL.
-4. **Analysis pipeline** — preprocessing, VADER, the multi-label DistilBERT GoEmotions model, broad-category recommendations, and fallback; explain that model scores are independent.
+4. **Analysis pipeline** — preprocessing, VADER, the multi-label GoEmotions transformer model, broad-category recommendations, and fallback; explain that model scores are independent.
 5. **Data and API design** — account-scoped history, relational schema, and key endpoints.
 6. **Live walkthrough and verification** — sign in, analyze, inspect charts, upload a CSV, and show ownership checks.
 7. **Limitations and next steps** — evaluate on consented labeled data, improve calibration and accessibility, and add production privacy/security controls.
 
 ## Short mentor summary
 
-> MoodMentor is a full-stack NLP prototype that processes short written reflections with NLTK preprocessing, VADER sentiment analysis, and a pretrained multi-label DistilBERT model trained on GoEmotions. A FastAPI service validates requests, authenticates users, stores analysis history and recommendations in PostgreSQL, and powers a Streamlit dashboard with interactive trends. The outputs are informational and intended for personal reflection, not clinical or employment decisions.
+> MoodMentor is a full-stack NLP prototype that processes short written reflections with NLTK preprocessing, VADER sentiment analysis, and a pretrained multi-label GoEmotions checkpoint; local fine-tuning uses DistilBERT. A FastAPI service validates requests, authenticates users, stores analysis history and recommendations in PostgreSQL, and powers a Streamlit dashboard with interactive trends. The outputs are informational and intended for personal reflection, not clinical or employment decisions.
 
-## Hosted review deployment
+## Streamlit-hosted showcase
 
-The Render Blueprint defines a Streamlit web service, a FastAPI web service, and a PostgreSQL database. The API receives its database connection string through a Render service reference, while the dashboard receives the API's public URL dynamically. Both containers listen on Render's assigned port. No passwords or database URLs are committed to the repository.
+The public showcase is deployed from the `streamlit-cloud` branch with `streamlit_cloud/app.py`. It runs without a separate API or database and keeps check-ins in session memory only. To fit the hosted environment, it uses VADER with a lexical emotion heuristic; the interface labels those emotion values as heuristic scores, not model confidence. The hosted showcase does not provide persistent private journaling.
 
-The free hosted review uses a lean API image without PyTorch or Transformers. In that environment, sentiment uses VADER and emotion estimates use the documented lexical heuristic. The full Hugging Face classifier is available through the local Docker Compose setup. The public free web services can sleep after inactivity, and Render's free PostgreSQL databases expire 30 days after creation. The hosted version is suitable for review and demonstration only; it is not a durable or production deployment.
+The full local application remains the reference for the complete pipeline: Streamlit, FastAPI, PostgreSQL, and the optional GoEmotions transformer. Use the local full app for an end-to-end transformer demonstration and use the hosted showcase only for its session-based UI flow.
+
+## Milestone 2 execution package
+
+See [MILESTONE_2_EXECUTION.md](MILESTONE_2_EXECUTION.md) for the mentor criteria, current verified status, full-data BERT/DistilBERT run commands, validation-only threshold calibration, SemEval/ISEAR evaluation adapters, and live demo sequence. The 0.82 macro-F1 and 0.90 binary-polarity targets remain targets until full-dataset results are measured.

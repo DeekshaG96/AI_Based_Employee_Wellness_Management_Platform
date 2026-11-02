@@ -10,7 +10,7 @@ The data quality scan found no malformed rows, empty text, repeated comment IDs 
 
 ## Multi-label handling
 
-GoEmotions is multi-label: one text may have several emotion labels. MoodMentor therefore uses a multi-label DistilBERT model and evaluates every label independently. It retains all fine-grained signals for analysis and maps the strongest signal to a broad emotion family for recommendations. The independent model scores are not normalized to sum to 100%.
+GoEmotions is multi-label: one text may have several emotion labels. MoodMentor uses a multi-label GoEmotions transformer checkpoint and evaluates every label independently. The optional local training workflow fine-tunes DistilBERT. It retains all fine-grained signals for analysis and maps the strongest signal to a broad emotion family for recommendations. The independent model scores are not normalized to sum to 100%.
 
 ## Reproducible review and evaluation
 
@@ -22,7 +22,7 @@ The local archive can also be read from another location by passing its `data` d
 
 GoEmotions was collected from English-language Reddit comments, not employee journals. Its label balance and writing style may not represent a workplace population. Emotion classification is an uncertain language signal; sarcasm, context, dialect, and cultural differences can affect results. MoodMentor is for reflection and learning, not diagnosis or workplace decisions. Do not include private journal text in public dataset reports.
 
-Source: [GoEmotions dataset card](https://huggingface.co/datasets/google-research-datasets/go_emotions). Model: [GoEmotions DistilBERT checkpoint](https://huggingface.co/bhadresh-savani/bert-base-go-emotion).
+Source: [GoEmotions dataset card](https://huggingface.co/datasets/google-research-datasets/go_emotions). Model: [published GoEmotions transformer checkpoint](https://huggingface.co/bhadresh-savani/bert-base-go-emotion).
 ## Training a local MoodMentor checkpoint
 
 Run python -m scripts.train_goemotions_model to fine-tune the DistilBERT base model on the archived training split. The script uses the development split for checkpoint selection and the test split only for final reporting. It writes model weights under models/goemotions-distilbert and aggregate metrics to docs/goemotions-distilbert-training.json. Raw comment text is not saved in the output. The local Compose API automatically uses the fine-tuned artifact when it exists.

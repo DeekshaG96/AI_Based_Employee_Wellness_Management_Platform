@@ -292,7 +292,7 @@ def main() -> None:
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    best_dev_f1 = -1.0
+    best_dev_macro_f1 = -1.0
     best_epoch = 0
     started = time.monotonic()
     for epoch in range(1, args.epochs + 1):
@@ -329,8 +329,8 @@ def main() -> None:
             f"micro_f1={dev_metrics['micro_f1']:.4f}, "
             f"macro_f1={dev_metrics['macro_f1']:.4f}"
         )
-        if dev_metrics["micro_f1"] > best_dev_f1:
-            best_dev_f1 = dev_metrics["micro_f1"]
+        if dev_metrics["macro_f1"] > best_dev_macro_f1:
+            best_dev_macro_f1 = dev_metrics["macro_f1"]
             best_epoch = epoch
             model.save_pretrained(args.output_dir, safe_serialization=True)
             tokenizer.save_pretrained(args.output_dir)
@@ -345,8 +345,9 @@ def main() -> None:
         "multi_label": True,
         "base_model": args.base_model,
         "fine_tuned_model_path": str(args.output_dir),
-        "best_epoch_by_validation_micro_f1": best_epoch,
-        "validation_micro_f1": round(best_dev_f1, 4),
+        "best_epoch_by_validation_macro_f1": best_epoch,
+        "validation_macro_f1_at_fixed_threshold": round(best_dev_macro_f1, 4),
+        "checkpoint_selection_metric": "validation_macro_f1_at_fixed_threshold",
         "test_metrics": test_metrics,
         "training": {
             "epochs": args.epochs,
