@@ -38,6 +38,7 @@ from wellness.api_client import (
     register as api_register,
 )
 from wellness.preprocessing import get_preprocessing_breakdown
+from wellness.pipeline import analyze_text
 from wellness.report import SentimentLabel
 
 # Page configuration
@@ -610,7 +611,7 @@ def render_landing_and_auth():
             unsafe_allow_html=True,
         )
         with st.container(border=True):
-            sign_in_tab, register_tab = st.tabs(["Sign in", "Create account"])
+            sign_in_tab, register_tab, guest_tab = st.tabs(["Sign in", "Create account", "🌿 Guest Access"])
             with sign_in_tab:
                 st.markdown("##### Pick up where you left off")
                 with st.form("login_form"):
@@ -625,6 +626,23 @@ def render_landing_and_auth():
                     else:
                         try:
                             auth = api_login(login_email, login_password)
+                            _apply_auth(auth)
+                            st.rerun()
+                        except ApiError as exc:
+                            st.error(str(exc))
+
+                st.markdown(
+                    "<div style='text-align: center; margin: 16px 0 10px; font-size: 0.8rem; color: #657b71; font-weight: 600;'>— OR INSTANT DEMO ACCESS —</div>",
+                    unsafe_allow_html=True,
+                )
+                if st.button("🚀 Explore Demo Account (1-Click)", use_container_width=True, help="Instantly signs into a preloaded account with 60+ benchmark reflections"):
+                    try:
+                        auth = api_login("alex@example.com", "Password123!")
+                        _apply_auth(auth)
+                        st.rerun()
+                    except ApiError:
+                        try:
+                            auth = api_register("Alex Rivera (Demo)", "alex@example.com", "Password123!")
                             _apply_auth(auth)
                             st.rerun()
                         except ApiError as exc:
@@ -647,6 +665,16 @@ def render_landing_and_auth():
                         st.rerun()
                     except ApiError as exc:
                         st.error(str(exc))
+            with guest_tab:
+                st.markdown("##### Reflect Without an Account")
+                st.write(
+                    "Prefer to explore MoodMentor privately without signing in? "
+                    "You can run the full NLP sentiment analysis, explore fine-grained emotion signals, "
+                    "and download PDF reports directly in this browser session."
+                )
+                if st.button("✨ Launch Guest Reflection Space", type="primary", use_container_width=True):
+                    st.session_state.guest_mode = True
+                    st.rerun()
 
 
 def render_sidebar():
@@ -863,31 +891,58 @@ def render_workspace():
                             if len(emo_df) > 8:
                                 emo_df = emo_df.nlargest(8, "Score").sort_values("Score")
 
-                            fig_bar = px.bar(
-                                emo_df,
-                                x="Score",
-                                y="Emotion",
-                                orientation="h",
-                                text="Score",
-                                color="Emotion",
-                                color_discrete_map={
-                                    row["Emotion"]: row["Color"] for _, row in emo_df.iterrows()
-                                },
-                            )
-                            fig_bar.update_traces(texttemplate="%{text:.1%}", textposition="outside")
-                            fig_bar.update_layout(
-                                showlegend=False,
-                                height=280,
-                                margin={"l": 10, "r": 30, "t": 10, "b": 10},
-                                xaxis={
-                                    "range": [0, 1.1],
-                                    "tickformat": ".0%",
-                                    "title": score_label,
-                                },
-                                paper_bgcolor="rgba(0,0,0,0)",
-                                plot_bgcolor="rgba(0,0,0,0)",
-                            )
-                            st.plotly_chart(fig_bar, use_container_width=True)
+                            chart_tabs = st.tabs(["📊 Bar Ranking", "🕸️ Radar Topology"])
+                            with chart_tabs[0]:
+                                fig_bar = px.bar(
+                                    emo_df,
+                                    x="Score",
+                                    y="Emotion",
+                                    orientation="h",
+                                    text="Score",
+                                    color="Emotion",
+                                    color_discrete_map={
+                                        row["Emotion"]: row["Color"] for _, row in emo_df.iterrows()
+                                    },
+                                )
+                                fig_bar.update_traces(texttemplate="%{text:.1%}", textposition="outside")
+                                fig_bar.update_layout(
+                                    showlegend=False,
+                                    height=260,
+                                    margin={"l": 10, "r": 30, "t": 10, "b": 10},
+                                    xaxis={
+                                        "range": [0, 1.1],
+                                        "tickformat": ".0%",
+                                        "title": score_label,
+                                    },
+                                    paper_bgcolor="rgba(0,0,0,0)",
+                                    plot_bgcolor="rgba(0,0,0,0)",
+                                )
+                                st.plotly_chart(fig_bar, use_container_width=True)
+                            with chart_tabs[1]:
+                                top_radar_df = emo_df.sort_values("Score", ascending=False).head(8)
+                                r_vals = top_radar_df["Score"].tolist()
+                                theta_vals = top_radar_df["Emotion"].tolist()
+                                if r_vals:
+                                    r_vals.append(r_vals[0])
+                                    theta_vals.append(theta_vals[0])
+                                fig_radar = go.Figure(
+                                    go.Scatterpolar(
+                                        r=r_vals,
+                                        theta=theta_vals,
+                                        fill="toself",
+                                        line_color="#155c49",
+                                        fillcolor="rgba(21, 92, 73, 0.25)",
+                                    )
+                                )
+                                fig_radar.update_layout(
+                                    polar={"radialaxis": {"visible": True, "range": [0, max(r_vals) * 1.15 if r_vals else 1]}},
+                                    showlegend=False,
+                                    height=260,
+                                    margin={"l": 30, "r": 30, "t": 20, "b": 20},
+                                    paper_bgcolor="rgba(0,0,0,0)",
+                                    plot_bgcolor="rgba(0,0,0,0)",
+                                )
+                                st.plotly_chart(fig_radar, use_container_width=True)
 
                     # Give these values the full content width so narrow columns cannot clip them.
                     score_cols = st.columns(4, gap="small")
@@ -1161,18 +1216,34 @@ def render_workspace():
             df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce", utc=True)
             total_recs = len(df)
 
-            # High-Level KPIs
+            # High-Level KPIs & Well-Being Index
             pos_count = (df["sentiment_label"] == "positive").sum()
             neu_count = (df["sentiment_label"] == "neutral").sum()
             neg_count = (df["sentiment_label"] == "negative").sum()
-            avg_comp = df["compound_score"].mean()
+            avg_comp = float(df["compound_score"].mean()) if not df.empty else 0.0
+            wellbeing_score = round(max(0.0, min(100.0, ((avg_comp + 1.0) / 2.0) * 100)), 1)
 
-            kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
+            kpi1, kpi2, kpi3, kpi4, kpi5, kpi6 = st.columns(6)
             kpi1.metric("Total Records", total_recs)
-            kpi2.metric("Positive", f"{(pos_count / total_recs) * 100:.1f}%", f"{pos_count} logs")
-            kpi3.metric("Neutral", f"{(neu_count / total_recs) * 100:.1f}%", f"{neu_count} logs")
-            kpi4.metric("Negative", f"{(neg_count / total_recs) * 100:.1f}%", f"{neg_count} logs")
-            kpi5.metric("Avg Polarity", f"{avg_comp:.3f}")
+            kpi2.metric("Well-Being Index", f"{wellbeing_score}/100", f"{avg_comp:+.2f} compound")
+            kpi3.metric("Positive", f"{(pos_count / total_recs) * 100:.1f}%", f"{pos_count} logs")
+            kpi4.metric("Neutral", f"{(neu_count / total_recs) * 100:.1f}%", f"{neu_count} logs")
+            kpi5.metric("Negative", f"{(neg_count / total_recs) * 100:.1f}%", f"{neg_count} logs")
+            kpi6.metric("Avg Polarity", f"{avg_comp:.3f}")
+
+            # Burnout & Resilience Early-Warning Intelligence
+            df_recent = df.sort_values("created_at", ascending=False).head(5)
+            recent_neg_count = (df_recent["sentiment_label"] == "negative").sum()
+            if recent_neg_count >= 3:
+                st.warning(
+                    "⚠️ **Burnout & Strain Advisory**: Multiple recent check-ins reflect elevated strain or fatigue. "
+                    "Consider taking a scheduled micro-break, reviewing workload expectations, or scheduling 1-on-1 support."
+                )
+            elif (df_recent["sentiment_label"] == "positive").sum() >= 4:
+                st.info(
+                    "🌟 **Resilience & Morale Momentum**: Your recent check-ins reflect strong momentum and positive sentiment. "
+                    "This is a great window to capture creative ideas and celebrate milestones!"
+                )
 
             # Charts Row
             st.markdown("---")
@@ -1230,6 +1301,33 @@ def render_workspace():
                         paper_bgcolor="rgba(0,0,0,0)",
                     )
                     st.plotly_chart(fig_pie, use_container_width=True)
+
+            with st.expander("📅 Weekly Mood Rhythm & Day-of-Week Cadence", expanded=False):
+                df_day = df.copy()
+                df_day["day_name"] = df_day["created_at"].dt.day_name()
+                day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+                day_stats = df_day.groupby("day_name")["compound_score"].agg(["mean", "count"]).reindex(day_order).dropna()
+                if not day_stats.empty:
+                    day_df = day_stats.reset_index()
+                    day_df.columns = ["Day", "Avg Sentiment", "Count"]
+                    fig_day = px.bar(
+                        day_df,
+                        x="Day",
+                        y="Avg Sentiment",
+                        color="Avg Sentiment",
+                        color_continuous_scale=["#f87171", "#fcd34d", "#34d399"],
+                        text="Avg Sentiment",
+                        range_y=[-1.0, 1.0],
+                    )
+                    fig_day.update_traces(texttemplate="%{text:.2f}", textposition="outside")
+                    fig_day.update_layout(
+                        height=260,
+                        margin={"l": 20, "r": 20, "t": 20, "b": 20},
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                    )
+                    st.plotly_chart(fig_day, use_container_width=True)
+                    st.caption("Average text sentiment by day of check-in, helping identify weekly morale cycles.")
 
             # Data Table Filters
             st.markdown("---")
@@ -1408,6 +1506,178 @@ def render_workspace():
         st.dataframe(eval_df, use_container_width=True, hide_index=True)
 
 
+
+
+def render_guest_workspace():
+    """Render a fully functional in-memory reflection workspace without requiring an API or database."""
+    with st.sidebar:
+        st.markdown(
+            '<div class="sidebar-brand"><div class="sidebar-brand-mark">m</div>'
+            '<div><strong>MoodMentor</strong><small>Guest reflection space</small></div></div>'
+            '<div class="sidebar-section-label">MODE</div>'
+            '<div class="sidebar-account"><div class="sidebar-avatar">🌿</div>'
+            '<div><strong>Guest Session</strong><small>Private in-memory reflection</small></div></div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div class="sidebar-note">You are using MoodMentor in standalone guest mode. Reflections are analyzed directly in-memory and are not sent to any database.</div>',
+            unsafe_allow_html=True,
+        )
+        if st.button("🔑 Account Sign In / Register", use_container_width=True):
+            st.session_state.guest_mode = False
+            st.rerun()
+
+    st.markdown(
+        '<div class="workspace-heading"><div><span class="eyebrow">YOUR MINDFUL REFLECTION SPACE</span>'
+        '<h1 class="workspace-title">Welcome to your check-in.</h1>'
+        '<p class="workspace-copy">Write freely. Explore the emotional patterns in your words and take a small supportive next step.</p></div></div>',
+        unsafe_allow_html=True,
+    )
+
+    guest_tab1, guest_tab2, guest_tab3 = st.tabs(["📝 Mood Journal", "📄 File Ingestion", "🏗️ Architecture"])
+
+    with guest_tab1:
+        with st.container(border=True):
+            st.markdown(
+                '<div class="editor-heading"><span class="eyebrow">A MOMENT FOR YOU</span>'
+                '<h3>What is on your mind?</h3>'
+                '<p>There is no right or wrong way to write. Start wherever you are.</p></div>',
+                unsafe_allow_html=True,
+            )
+            st.selectbox(
+                "Optional writing prompt",
+                list(PRESET_SCENARIOS.keys()),
+                key="guest_journal_example",
+                on_change=lambda: st.session_state.update(
+                    {"guest_journal_entry": PRESET_SCENARIOS.get(st.session_state.get("guest_journal_example", ""), ""),
+                     "guest_last_report": None}
+                ),
+            )
+            guest_text = st.text_area(
+                "Your journal entry",
+                height=210,
+                placeholder="Write freely about how you feel, what happened, or what is on your mind...",
+                key="guest_journal_entry",
+                label_visibility="collapsed",
+            )
+            guest_btn = st.button("Analyze my mood", type="primary", use_container_width=True, key="guest_analyze_btn")
+
+        if guest_btn or st.session_state.get("guest_last_report"):
+            text_to_eval = guest_text.strip()
+            if guest_btn and not text_to_eval:
+                st.warning("Please write a reflection or select an example above before analyzing.")
+            else:
+                try:
+                    if guest_btn:
+                        with st.spinner("Analyzing reflection..."):
+                            rep = analyze_text(text_to_eval, source_name="Guest Journal")
+                        st.session_state.guest_last_report = rep.to_dict()
+                    else:
+                        rep = analysis_report_from_dict(st.session_state.guest_last_report)
+
+                    st.markdown("---")
+                    st.markdown("### 📊 Your mood analysis")
+                    cg1, cg2 = st.columns([1, 1.2], gap="medium")
+
+                    with cg1:
+                        st.markdown("##### Sentiment tone (VADER)")
+                        fig_g = go.Figure(
+                            go.Indicator(
+                                mode="gauge+number",
+                                value=rep.sentiment_scores.compound,
+                                domain={"x": [0, 1], "y": [0, 1]},
+                                title={"text": f"Polarity: {rep.sentiment_label.value.upper()}", "font": {"size": 20}},
+                                gauge={
+                                    "axis": {"range": [-1.0, 1.0]},
+                                    "bar": {"color": "#155c49"},
+                                    "steps": [
+                                        {"range": [-1.0, -0.05], "color": "rgba(239, 68, 68, 0.25)"},
+                                        {"range": [-0.05, 0.05], "color": "rgba(245, 158, 11, 0.25)"},
+                                        {"range": [0.05, 1.0], "color": "rgba(16, 185, 129, 0.25)"},
+                                    ],
+                                },
+                            )
+                        )
+                        fig_g.update_layout(height=240, margin={"l": 20, "r": 20, "t": 40, "b": 20}, paper_bgcolor="rgba(0,0,0,0)")
+                        st.plotly_chart(fig_g, use_container_width=True)
+
+                    with cg2:
+                        st.markdown("##### Fine-Grained Emotion Signals")
+                        if rep.emotion_scores:
+                            df_emo = pd.DataFrame(
+                                [{"Emotion": e.capitalize(), "Score": s, "Color": EMOTION_PALETTE.get(e, "#94a3b8")} for e, s in rep.emotion_scores.items()]
+                            ).sort_values("Score", ascending=True)
+                            if len(df_emo) > 8:
+                                df_emo = df_emo.nlargest(8, "Score").sort_values("Score")
+                            g_tabs = st.tabs(["📊 Bar Ranking", "🕸️ Radar Topology"])
+                            with g_tabs[0]:
+                                fb = px.bar(df_emo, x="Score", y="Emotion", orientation="h", text="Score", color="Emotion",
+                                            color_discrete_map={r["Emotion"]: r["Color"] for _, r in df_emo.iterrows()})
+                                fb.update_traces(texttemplate="%{text:.1%}", textposition="outside")
+                                fb.update_layout(showlegend=False, height=260, margin={"l": 10, "r": 30, "t": 10, "b": 10},
+                                                 xaxis={"range": [0, 1.1], "tickformat": ".0%"}, paper_bgcolor="rgba(0,0,0,0)")
+                                st.plotly_chart(fb, use_container_width=True)
+                            with g_tabs[1]:
+                                rad_df = df_emo.sort_values("Score", ascending=False).head(8)
+                                r_v = rad_df["Score"].tolist()
+                                t_v = rad_df["Emotion"].tolist()
+                                if r_v:
+                                    r_v.append(r_v[0])
+                                    t_v.append(t_v[0])
+                                fr = go.Figure(go.Scatterpolar(r=r_v, theta=t_v, fill="toself", line_color="#155c49", fillcolor="rgba(21, 92, 73, 0.25)"))
+                                fr.update_layout(polar={"radialaxis": {"visible": True, "range": [0, max(r_v) * 1.15 if r_v else 1]}},
+                                                 showlegend=False, height=260, margin={"l": 30, "r": 30, "t": 20, "b": 20}, paper_bgcolor="rgba(0,0,0,0)")
+                                st.plotly_chart(fr, use_container_width=True)
+
+                    g_rec = rep.recommendations
+                    st.markdown("---")
+                    st.markdown(f"### 🌱 A few ways forward: **{g_rec.get('title', 'Self-Care Focus')}**")
+                    st.write(g_rec.get("summary", ""))
+                    for p in g_rec.get("action_paths", []):
+                        with st.container(border=True):
+                            st.markdown(f"#### {p.get('title')} · {p.get('duration', 'Flexible')}")
+                            st.write(p.get("description", ""))
+                            for s in p.get("steps", []):
+                                st.markdown(f"- {s}")
+
+                    st.markdown("---")
+                    c_md, c_pdf = st.columns(2)
+                    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+                    with c_md:
+                        st.download_button("📥 Download report (.md)", _build_analysis_report_markdown(rep), f"moodmentor-guest-{stamp}.md", "text/markdown", use_container_width=True)
+                    with c_pdf:
+                        st.download_button("📄 Download report (.pdf)", _build_analysis_report_pdf(rep), f"moodmentor-guest-{stamp}.pdf", "application/pdf", use_container_width=True)
+
+                    with st.expander("🔍 Deep NLP Preprocessing Pipeline Inspector"):
+                        bk = get_preprocessing_breakdown(rep.original_text)
+                        st.markdown(f"**Cleaned text:** `{bk['cleaned_text']}`")
+                        st.markdown(f"**Lemmas:** `{bk['lemmas']}`")
+                except Exception as exc:
+                    st.error(f"Analysis error: {exc}")
+
+    with guest_tab2:
+        st.markdown("#### Document Ingestion (TXT / CSV)")
+        g_file = st.file_uploader("Upload journal file", type=["txt", "csv"], key="guest_file_upload")
+        if g_file:
+            st.info(f"Loaded: `{g_file.name}` ({g_file.size} bytes)")
+            if g_file.name.endswith(".txt"):
+                txt_content = g_file.getvalue().decode("utf-8", errors="replace")
+                st.text_area("File preview", txt_content[:400], height=120)
+                if st.button("🚀 Analyze Text Document", type="primary", key="guest_eval_txt"):
+                    rep = analyze_text(txt_content, source_name=g_file.name)
+                    st.success(f"Analyzed! Sentiment: {rep.sentiment_label.value.upper()} (compound: {rep.sentiment_scores.compound:.3f})")
+
+    with guest_tab3:
+        st.markdown("#### System Architecture")
+        st.markdown("""
+        MoodMentor Guest Mode runs the complete NLP & sentiment pipeline directly in memory.
+        - **VADER Sentiment Engine**: Compound score evaluation with strict boundaries (> +0.05, < -0.05, neutral).
+        - **Emotion Telemetry**: Multi-label classification with fallback support.
+        - **Evidence-Based Recommendations**: Structured CBT-inspired action paths.
+        - **Report Generation**: On-the-fly PDF and Markdown downloads.
+        """)
+
+
 def main():
     """Application entry point."""
     if "logged_in" not in st.session_state:
@@ -1423,7 +1693,12 @@ def main():
     if "last_analysis_report" not in st.session_state:
         st.session_state.last_analysis_report = None
 
-    if not st.session_state.logged_in:
+    if "guest_mode" not in st.session_state:
+        st.session_state.guest_mode = False
+
+    if st.session_state.guest_mode:
+        render_guest_workspace()
+    elif not st.session_state.logged_in:
         render_landing_and_auth()
     else:
         render_workspace()

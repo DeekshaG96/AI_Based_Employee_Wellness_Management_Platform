@@ -22,13 +22,14 @@ services:
       dockerfile: Dockerfile.api
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://moodmentor:change-this-local-password@db:5432/moodmentor}
-      MODEL_NAME: ${MODEL_NAME:-bhadresh-savani/bert-base-go-emotion}
+      MODEL_NAME: ${MODEL_NAME:-}
       SPACY_MODEL: ${SPACY_MODEL:-en_core_web_sm}
       HF_HOME: /var/cache/huggingface
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
       - moodmentor-model-cache:/var/cache/huggingface
+      - ./models:/app/models:ro
     depends_on:
       db:
         condition: service_healthy
@@ -56,4 +57,8 @@ services:
 
 volumes:
   moodmentor-postgres:
+    external: true
+    name: ai_based_employee_wellness_management_platform_moodmentor-postgres
   moodmentor-model-cache:
+    external: true
+    name: ai_based_employee_wellness_management_platform_moodmentor-model-cache

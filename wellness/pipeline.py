@@ -615,9 +615,12 @@ def generate_recommendations(
 def _vader_analyzer() -> Any:
     """Use bundled VADER data in hosted mode; preserve the NLTK implementation locally."""
     if os.getenv("WELLNESS_BUNDLED_VADER") == "1":
-        from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer as BundledVader
+        try:
+            from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer as BundledVader
 
-        return BundledVader()
+            return BundledVader()
+        except ImportError:
+            pass
     return SentimentIntensityAnalyzer()
 
 

@@ -8,6 +8,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -31,18 +33,20 @@ from .schemas import (
 )
 from .security import current_user, hash_password, issue_session, token_digest, verify_password
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if os.getenv("MOODMENTOR_SKIP_CREATE_TABLES") != "1":
+        create_tables()
+    yield
+
+
 app = FastAPI(
     title="MoodMentor API",
     description="Authenticated API for emotional tone analysis, recommendations, and history.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 MAX_UPLOAD_BYTES = 2_000_000
-
-
-@app.on_event("startup")
-def initialize_database() -> None:
-    if os.getenv("MOODMENTOR_SKIP_CREATE_TABLES") != "1":
-        create_tables()
 
 
 @app.get("/", tags=["service"])
