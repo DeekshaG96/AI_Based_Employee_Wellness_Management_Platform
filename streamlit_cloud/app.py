@@ -39,15 +39,14 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
     :root { --ink:#19352d; --muted:#657b71; --paper:#f4f7f3; --line:#e0e9e1; --forest:#155c49; --leaf:#c9ebad; }
-    html,body,[class*="css"] { font-family:'DM Sans',sans-serif; color:var(--ink); }
+    html,body,[class*="css"] { font-family:'Segoe UI',system-ui,sans-serif; color:var(--ink); }
     .stApp { background:radial-gradient(850px circle at 86% 3%,rgba(206,231,211,.48),transparent 48%),var(--paper); }
     .block-container { max-width:1320px; padding:2rem 2.5rem 4rem; }
-    h1,h2,h3 { font-family:'Manrope',sans-serif !important; color:var(--ink); letter-spacing:-.035em; }
+    h1,h2,h3 { font-family:'Segoe UI',system-ui,sans-serif !important; color:var(--ink); letter-spacing:-.035em; }
     .brand { display:flex;align-items:center;gap:12px;margin:0 0 20px; }
-    .mark { display:grid;place-items:center;width:46px;height:46px;border-radius:16px;background:var(--forest);color:white;font:800 25px Manrope,sans-serif; }
-    .brand-name { font:800 1.3rem Manrope,sans-serif;color:var(--ink); }
+    .mark { display:grid;place-items:center;width:46px;height:46px;border-radius:16px;background:var(--forest);color:white;font:800 25px 'Segoe UI',system-ui,sans-serif; }
+    .brand-name { font:800 1.3rem 'Segoe UI',system-ui,sans-serif;color:var(--ink); }
     .brand-caption { color:var(--muted);font-size:.8rem; }
     .hero { padding:30px 34px;border-radius:24px;color:#f3f8f2;background:linear-gradient(128deg,#103e34,#155b48 65%,#26745a);box-shadow:0 18px 44px #1848391c;margin-bottom:18px; }
     .eyebrow { color:#a9d9bb;text-transform:uppercase;font-size:.7rem;font-weight:800;letter-spacing:.15em; }
@@ -232,7 +231,7 @@ with st.sidebar:
     st.markdown("### This session")
     st.metric("Saved check-ins", len(st.session_state.records))
     st.caption("Your check-ins stay available for this session only. This hosted showcase has no account or permanent journal; the full local version supports saved history.")
-    if st.button("Clear this session's history", use_container_width=True, disabled=not st.session_state.records):
+    if st.button("Clear this session's history", width="stretch", disabled=not st.session_state.records):
         st.session_state.records = []
         st.session_state.selected_record_id = None
         st.rerun()
@@ -261,7 +260,7 @@ st.markdown(
     '<div class="hero"><div class="eyebrow">A gentler way to check in</div><h1>Make space for how you feel.</h1><p>Write a few honest lines, notice the emotional signals, then choose a small next step that feels right for you.</p></div>',
     unsafe_allow_html=True,
 )
-st.info("Your check-ins are processed by MoodMentor on Streamlit Cloud and kept only for this session. They are not saved to an account or permanent journal. Please avoid names or other details that identify you.", icon="ℹ️")
+st.info("This public demo keeps check-ins in temporary session memory only. They may disappear when the session ends; there is no account or permanent journal. Text is processed by this hosted app, so avoid names or identifying details.", icon="ℹ️")
 
 journal_tab, file_tab, trends_tab, evaluation_tab = st.tabs(["📝 Mood journal", "📄 Import a file", "📈 Trends & history", "🧪 Model evaluation"])
 with journal_tab:
@@ -297,7 +296,7 @@ with journal_tab:
                 key="cloud_journal",
             )
             submitted = st.form_submit_button(
-                "Analyze my mood", type="primary", use_container_width=True
+                "Analyze my mood", type="primary", width="stretch"
             )
         if submitted:
             if not entry.strip():
@@ -326,7 +325,7 @@ with journal_tab:
 with file_tab:
     st.markdown("### Bring in a text or CSV journal")
     st.caption("Accepted files: UTF-8 .txt or .csv up to 1 MB. CSV files need a text, feedback, comment, message, or content column. Up to 25 non-empty rows are analyzed per upload.")
-    uploaded = st.file_uploader("Choose a journal file", type=["txt", "csv"], key="cloud_upload")
+    uploaded = st.file_uploader("Choose a journal file", type=["txt", "csv"], key="cloud_upload", max_upload_size=1)
     if uploaded is not None:
         data = uploaded.getvalue()
         if len(data) > 1_000_000:
@@ -338,16 +337,36 @@ with file_tab:
                     file_items = [(decoded.strip(), uploaded.name)] if decoded.strip() else []
                 else:
                     reader = csv.DictReader(StringIO(decoded))
-                    columns = [name.strip() for name in (reader.fieldnames or []) if name and name.strip()]
+                    raw_columns = reader.fieldnames or []
+                    columns = [str(name or "").strip() for name in raw_columns]
+                    duplicate_columns = []
+                    seen_columns = set()
+                    for column in columns:
+                        normalized = column.casefold()
+                        if normalized in seen_columns and normalized not in duplicate_columns:
+                            duplicate_columns.append(normalized)
+                        seen_columns.add(normalized)
                     if not columns:
                         st.error("The CSV needs a header row.")
                         file_items = []
+                    elif any(not column for column in columns):
+                        st.error("Every CSV column needs a non-empty header.")
+                        file_items = []
+                    elif duplicate_columns:
+                        st.error("The CSV has repeated column names. Rename them and upload again.")
+                        file_items = []
                     else:
-                        preferred = next((c for c in columns if c.lower() in {"text", "feedback", "comment", "message", "content"}), columns[0])
+                        reader.fieldnames = columns
+                        preferred = next((c for c in columns if c.casefold() in {"text", "feedback", "comment", "message", "content"}), columns[0])
                         text_column = st.selectbox("Text column", columns, index=columns.index(preferred), key="cloud_csv_column")
                         file_items = [(str(row.get(text_column, "")).strip(), f"{uploaded.name} · row {index}") for index, row in enumerate(reader, start=2) if str(row.get(text_column, "")).strip()][:25]
                 if file_items:
-                    st.caption(f"Ready to analyze {len(file_items)} entr{'y' if len(file_items) == 1 else 'ies'}.")
+                    st.caption(f"Ready to analyze {len(file_items)} entr{'y' if len(file_items) == 1 else 'ies'}. Review the preview before continuing.")
+                    st.dataframe(
+                        [{"Source": source, "Text preview": text.replace("\n", " ")[:240]} for text, source in file_items[:5]],
+                        width="stretch",
+                        hide_index=True,
+                    )
                     if st.button("Analyze file entries", type="primary", key="analyze_cloud_file"):
                         _analyze_many(file_items)
                 elif uploaded.name.lower().endswith(".txt"):
@@ -395,23 +414,23 @@ with trends_tab:
             )
             chart_col, count_col = st.columns([1.5, 1], gap="large")
             with chart_col:
-                st.plotly_chart(
-                    px.line(
-                        frame,
-                        x="Date",
-                        y="VADER compound",
-                        color="Sentiment",
-                        markers=True,
-                        range_y=[-1, 1],
-                        title="Text sentiment across check-ins",
-                    ),
-                    use_container_width=True,
+                sentiment_figure = px.line(
+                    frame,
+                    x="Date",
+                    y="VADER compound",
+                    markers=True,
+                    range_y=[-1, 1],
+                    title="Text sentiment across check-ins",
+                    labels={"VADER compound": "Text tone (−1 to +1)"},
                 )
+                sentiment_figure.update_traces(line={"color": "#155c49"}, marker={"size": 9})
+                sentiment_figure.add_hline(y=0, line_dash="dot", line_color="#7b8b82")
+                st.plotly_chart(sentiment_figure, width="stretch")
             with count_col:
                 counts = frame["Dominant emotion"].value_counts().rename_axis("Emotion").reset_index(name="Check-ins")
                 st.plotly_chart(
                     px.bar(counts, x="Emotion", y="Check-ins", color="Emotion", title="Detected emotion signals"),
-                    use_container_width=True,
+                    width="stretch",
                 )
 
             mood_frame = frame.dropna(subset=["Mood score"]).copy().sort_values("Date")
@@ -428,7 +447,7 @@ with trends_tab:
                             title="Your self-reported mood",
                             labels={"Mood score": "Mood (1–5)"},
                         ),
-                        use_container_width=True,
+                        width="stretch",
                     )
                 daily_mood = (
                     mood_frame.assign(Day=mood_frame["Date"].dt.date)
@@ -439,7 +458,7 @@ with trends_tab:
                 first_day = daily_mood["Date"].min()
                 first_week = first_day - pd.to_timedelta(first_day.weekday(), unit="D")
                 week_start = daily_mood["Date"] - pd.to_timedelta(
-                    daily_mood["Date"].dt.weekday, unit="D"
+                    daily_mood["Date"].dt.day_of_week, unit="D"
                 )
                 daily_mood["Week"] = ((week_start - first_week).dt.days // 7) + 1
                 daily_mood["Weekday"] = daily_mood["Date"].dt.day_name()
@@ -457,7 +476,7 @@ with trends_tab:
                 )
                 calendar.update_traces(marker={"size": 18, "symbol": "square"})
                 calendar.update_layout(height=300, xaxis_title="Calendar weeks", yaxis_title="")
-                st.plotly_chart(calendar, use_container_width=True)
+                st.plotly_chart(calendar, width="stretch")
                 st.caption("Each square is the average self-reported mood for that day. Blank days mean no check-in was logged.")
             else:
                 st.info("Add an optional self-rated mood to build your personal mood calendar.")
@@ -477,7 +496,7 @@ with trends_tab:
                                 range_y=[1, 5],
                                 title="Your energy level",
                             ),
-                            use_container_width=True,
+                            width="stretch",
                         )
                 with sleep_col:
                     if not sleep_frame.empty:
@@ -490,9 +509,9 @@ with trends_tab:
                                 range_y=[0, 16],
                                 title="Your sleep hours",
                             ),
-                            use_container_width=True,
+                            width="stretch",
                         )
-            st.dataframe(frame, use_container_width=True, hide_index=True)
+            st.dataframe(frame, width="stretch", hide_index=True)
             st.download_button(
                 "Download filtered history (CSV)",
                 frame.to_csv(index=False).encode("utf-8"),
@@ -562,7 +581,7 @@ with evaluation_tab:
                     "Hamming loss ↓": f"{calibrated['hamming_loss']:.2%}",
                 },
             ]
-            st.dataframe(rows, use_container_width=True, hide_index=True)
+            st.dataframe(rows, width="stretch", hide_index=True)
             chart_rows = [
                 {"Metric": metric, "Score": scores[metric], "Threshold setup": setup}
                 for setup, scores in [
@@ -587,7 +606,7 @@ with evaluation_tab:
                     range_y=[0, 1],
                     title="Held-out test scores",
                 ),
-                use_container_width=True,
+                width="stretch",
             )
             with st.expander("What do these evaluation metrics mean?"):
                 st.markdown(
@@ -643,13 +662,13 @@ if selected:
     with emotion_col:
         if report.emotion_scores:
             emotion_frame = [{"Emotion": key.title(), "Signal": value} for key, value in sorted(report.emotion_scores.items(), key=lambda pair: pair[1], reverse=True)]
-            st.plotly_chart(px.bar(emotion_frame, x="Signal", y="Emotion", orientation="h", title="Emotion signal distribution", range_x=[0, 1]), use_container_width=True)
+            st.plotly_chart(px.bar(emotion_frame, x="Signal", y="Emotion", orientation="h", title="Emotion signal distribution", range_x=[0, 1]), width="stretch")
         else:
             st.info("No supported emotion cue matched this text. That does not mean the reflection is neutral.")
 
     download_col, details_col = st.columns([1, 2])
     with download_col:
-        st.download_button("Download this check-in as PDF", _make_pdf(selected), f"moodmentor-check-in-{selected['created_at'].strftime('%Y%m%d-%H%M')}.pdf", "application/pdf", use_container_width=True)
+        st.download_button("Download this check-in as PDF", _make_pdf(selected), f"moodmentor-check-in-{selected['created_at'].strftime('%Y%m%d-%H%M')}.pdf", "application/pdf", width="stretch")
     with details_col:
         with st.expander("See the language-processing details"):
             try:

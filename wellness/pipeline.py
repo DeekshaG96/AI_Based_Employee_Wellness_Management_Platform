@@ -488,7 +488,8 @@ def generate_recommendations(
             ),
             "action_items": [
                 "If you may act on these thoughts or are in immediate danger, call your local emergency number or go to the nearest emergency department.",
-                "Call or text 988 (Suicide & Crisis Lifeline - 24/7, free, confidential) or text HOME to 741741 (Crisis Text Line).",
+                "In the United States and its territories, call or text 988 for the 988 Lifeline. Elsewhere, find local support at https://findahelpline.com/.",
+                "In the United States, text CONNECT to 741741 to reach Crisis Text Line.",
                 "Contact a local crisis support service or a trusted person and ask them to stay with you.",
                 "Reach out to a licensed mental health professional or your organization's employee assistance program.",
             ],
@@ -502,8 +503,8 @@ def generate_recommendations(
             "category": "Stress Management",
             "urgency": "Medium",
             "summary": (
-                "Elevated anxiety and stress indicators detected. Prioritize nervous system "
-                "regulation and workload compartmentalization."
+                "Some wording here can be associated with stress or worry. This text-based cue is not an assessment; "
+                "if it fits how you feel, choose one small support step."
             ),
             "action_items": [
                 "Practice the 4-7-8 diaphragmatic breathing cycle for 3 minutes.",
@@ -543,8 +544,8 @@ def generate_recommendations(
             "category": "Emotional Well-Being",
             "urgency": "Medium",
             "summary": (
-                "Signals of fatigue and low valence detected. Gentle boundary-setting and "
-                "restorative micro-breaks are strongly advised."
+                "The wording in this entry leans negative, but text scores can miss context and mixed feelings. "
+                "If this matches how you feel, a small pause or reaching out may help."
             ),
             "action_items": [
                 "Take a deliberate 10-minute micro-break away from work stations.",
@@ -562,8 +563,8 @@ def generate_recommendations(
             "category": "Emotional Regulation",
             "urgency": "Medium",
             "summary": (
-                "Frustration markers identified. Avoid reactive communications until baseline "
-                "composure is restored."
+                "Some frustration-related words appeared. If that fits, a pause may give you room "
+                "to decide how you want to respond."
             ),
             "action_items": [
                 "Implement a 10-minute pause before sending challenging emails or Slack responses.",
@@ -580,8 +581,8 @@ def generate_recommendations(
             "category": "Thriving & Growth",
             "urgency": "Low",
             "summary": (
-                "Excellent morale and positive momentum detected! Harness this state to build "
-                "resilience and uplift teammates."
+                "Some positive words appeared. If they reflect your experience, take a moment "
+                "to notice what felt meaningful to you."
             ),
             "action_items": [
                 "Log this positive milestone in your personal achievement journal.",
@@ -598,7 +599,8 @@ def generate_recommendations(
         "category": "Productive Balance",
         "urgency": "Low",
         "summary": (
-            "Steady, balanced emotional baseline observed. Maintain consistent pacing and ergonomic habits."
+            "No strong positive or negative text signal appeared. That does not tell us your mood; "
+            "choose whichever next step fits you."
         ),
         "action_items": [
             "Maintain regular hydration and eye-rest intervals (20-20-20 rule).",
