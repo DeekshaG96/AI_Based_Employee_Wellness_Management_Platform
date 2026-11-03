@@ -24,12 +24,30 @@ The SemEval paper describes multiple affect tasks. The deck does not identify wh
 | Training workflow | `scripts/train_goemotions_model.py` supports full splits; checkpoint selection now follows validation macro F1 | Ready to run |
 | Validation-only calibration and confusion counts | `scripts/calibrate_goemotions.py` selects thresholds on validation, then reports untouched test metrics and per-class TP/FP/FN/TN | Implemented |
 | Full-data fine-tuning evidence | The recorded local run used 2,000 rows from each split, one epoch, and 250 optimizer updates on CPU | Not complete |
-| GoEmotions target | The public checkpoint's measured held-out test macro F1 is 0.2980 at threshold 0.5. The limited local run's validation macro F1 is 0.0322. Neither meets the 0.82 target, and neither is a result from full-data fine-tuning | Not met |
+| GoEmotions target | BruceIC/emoticare scored validation macro F1 0.4019 at threshold 0.5; validation-only calibration reached 0.4981, with untouched test macro F1 0.4872. See docs/goemotions-bruceic-calibration.json. The 0.82 target remains unmet | Not met |
 | SemEval polarity score | No SemEval file is present. `scripts/evaluate_semeval_binary.py` now evaluates an explicitly labelled positive/negative export with VADER and reports accuracy, precision, recall, F1, and a confusion matrix | Awaiting the agreed dataset export and run |
 | ISEAR holdout | No ISEAR file is present. `scripts/evaluate_isear.py` evaluates a separate local test file and saves aggregate results only | Awaiting licensed data and run |
 | Streamlit hosted demo | The free hosted showcase uses a lexical fallback to stay within its memory limit. Its scores are marked as heuristics, not model confidence. The transformer comparison must use the full local app/model | Demo limitation |
 
 The source GoEmotions profile contains 54,263 examples: 43,410 train, 5,426 development, and 5,427 held-out test. The full local model weights are excluded from Git. Do not commit model checkpoints, raw datasets, or user journal text.
+
+### Screenshot-derived public GoEmotions checkpoint
+
+Screenshots 657–664 show the GoEmotions label mapping, a public checkpoint, split sizes, and a final report. The project now reproduces the useful workflow with its own label-checked evaluator and validation-only calibration.
+
+On the same validation split at threshold 0.5, BruceIC/emoticare scored macro F1 0.4019 versus 0.2962 for the previous Bhadresh baseline. MoodMentor therefore selects BruceIC as its default local public checkpoint when no fine-tuned model is present. This selection is based on validation macro F1; it does not mean the checkpoint was trained by this project.
+
+Calibration chose thresholds using validation only. On the untouched 5,427-example test split, the calibrated BruceIC result is macro F1 0.4872, micro precision 0.5625, micro recall 0.6473, micro F1 0.6019, exact-match accuracy 0.4238, and Hamming loss 0.0357. The report with per-emotion confusion counts and thresholds is docs/goemotions-bruceic-calibration.json. The screenshot's micro F1 and exact-match accuracy are reproduced; its macro F1 0.4979 is not, so use the saved project report as the source of truth.
+
+The target validation macro F1 0.82 is still unmet. Full BERT and DistilBERT fine-tuning and comparison remain required for that milestone. Model card: https://huggingface.co/BruceIC/emoticare
+
+### Evaluation metrics in plain language
+
+- Accuracy is reported as exact-match accuracy for this multi-label task: an example counts as correct only when all 28 emotion decisions match.
+- Precision asks how many of the model's predicted labels were correct.
+- Recall asks how many of the true labels the model found.
+- F1 balances precision and recall. Macro F1 gives each emotion equal weight; micro F1 combines the counts across all emotions.
+- Hamming loss is the fraction of individual label decisions that were wrong. Lower is better.
 
 ## Reproducible run guide
 

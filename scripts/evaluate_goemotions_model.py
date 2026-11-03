@@ -12,7 +12,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA_DIR = ROOT / "data" / "goemotions"
-DEFAULT_MODEL = "bhadresh-savani/bert-base-go-emotion"
+DEFAULT_MODEL = "BruceIC/emoticare"
 
 
 def read_split(data_dir: Path, split: str) -> tuple[list[str], list[set[int]]]:
@@ -43,7 +43,7 @@ def evaluate(
 ) -> dict[str, Any]:
     if len(predictions) != len(targets):
         raise ValueError("Prediction and target counts do not match.")
-    tp = fp = fn = exact = 0
+    tp = fp = fn = exact = hamming_errors = 0
     per_label: dict[str, dict[str, float | int]] = {}
     macro_precision = macro_recall = macro_f1 = 0.0
     for index, label in enumerate(labels):
@@ -75,6 +75,7 @@ def evaluate(
             if prediction.get(label.lower(), 0.0) >= threshold
         }
         exact += predicted_ids == target
+        hamming_errors += len(predicted_ids.symmetric_difference(target))
 
     micro_precision = divide(tp, tp + fp)
     micro_recall = divide(tp, tp + fn)
@@ -88,6 +89,9 @@ def evaluate(
         "macro_recall": round(macro_recall / len(labels), 4),
         "macro_f1": round(macro_f1 / len(labels), 4),
         "exact_match_accuracy": round(exact / len(targets), 4) if targets else 0.0,
+        "hamming_loss": (
+            round(hamming_errors / (len(targets) * len(labels)), 4) if targets else 0.0
+        ),
         "per_label": per_label,
     }
 

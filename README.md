@@ -16,7 +16,7 @@ FastAPI service :8000 ── NLTK preprocessing + VADER + Hugging Face emotion m
 PostgreSQL :5432 (host port :5433 in local Compose)
 ```
 
-The API owns authentication, analysis, and persistence. The dashboard does not open the database directly. Analysis requests run the NLP pipeline; the service stores each result and its recommendation in one transaction. Preprocessing uses spaCy's `en_core_web_sm` for tokenization and lemmatization when installed, with NLTK POS tagging and WordNet lemmatization as a fallback. The local emotion classifier first loads a MoodMentor-fine-tuned model from models/goemotions-distilbert when present; otherwise it uses the public GoEmotions checkpoint `bhadresh-savani/bert-base-go-emotion`. Its 28 outputs are independent multi-label signals, so they do not add up to 100%. MoodMentor retains those fine-grained scores and maps the strongest signal to a broad category for recommendations. Each result identifies its estimator. If the model cannot load, a simple lexical fallback keeps the demo responsive; those scores are heuristic indicators, not transformer confidence scores. When no supported emotion keyword matches, MoodMentor marks the fine-grained result unclassified instead of showing an artificial even split.
+The API owns authentication, analysis, and persistence. The dashboard does not open the database directly. Analysis requests run the NLP pipeline; the service stores each result and its recommendation in one transaction. Preprocessing uses spaCy's `en_core_web_sm` for tokenization and lemmatization when installed, with NLTK POS tagging and WordNet lemmatization as a fallback. The local emotion classifier first loads a MoodMentor-fine-tuned model from models/goemotions-distilbert when present; otherwise it uses the public GoEmotions checkpoint `BruceIC/emoticare`. Its 28 outputs are independent multi-label signals, so they do not add up to 100%. MoodMentor retains those fine-grained scores and maps the strongest signal to a broad category for recommendations. Each result identifies its estimator. If the model cannot load, a simple lexical fallback keeps the demo responsive; those scores are heuristic indicators, not transformer confidence scores. When no supported emotion keyword matches, MoodMentor marks the fine-grained result unclassified instead of showing an artificial even split.
 
 ## Run the full application with Docker Compose
 
@@ -110,20 +110,33 @@ Install local dependencies and train on all 43,410 training records. The full va
 The candidate model and aggregate results are saved under .venv-training/goemotions-full and .venv-training/goemotions-full-metrics.json. Only aggregate metrics are reported; raw text and model weights are excluded from Git. Review validation and test metrics first. Copy a suitable candidate to models/goemotions-distilbert, then restart the local API to load it. CPU training can take many hours; a CUDA-enabled GPU is recommended. The optional local Colab bundle is not committed because it contains raw Reddit-derived text. Follow [COLAB_README.txt](COLAB_README.txt); the bundle prepares its CSV splits before starting the full training job. Lower the batch size if GPU memory is limited. Do not report metrics from a --limit run as full-dataset results. See the measured limited-run results and checkpoint decision in [docs/GOEMOTIONS_DEVELOPMENT_RUN.md](docs/GOEMOTIONS_DEVELOPMENT_RUN.md).
 ## GoEmotions dataset review and model evaluation
 
-The local archive is kept out of Git because it contains raw Reddit-derived text. Review its split shape and label frequencies without exposing text:
+Review the local split sizes and label frequencies without exposing source text:
 
-```powershell
-python -m scripts.analyze_goemotions
-```
+    python -m scripts.analyze_goemotions
 
-Evaluate the pretrained multi-label model on the held-out test split and save only aggregate metrics:
 
-```powershell
-python -m scripts.evaluate_goemotions_model --output docs/goemotions-distilbert-evaluation.json
-```
 
-The evaluation reports micro/macro precision, recall, and F1, exact-match accuracy, per-label metrics, and the 0.5 decision threshold. The published dataset is not workplace-specific, so treat these metrics as a benchmark rather than proof of accuracy on employee reflections. See [docs/GOEMOTIONS_DATASET_REVIEW.md](docs/GOEMOTIONS_DATASET_REVIEW.md).
+The local full app defaults to BruceIC/emoticare, a public multi-label GoEmotions checkpoint, unless a MoodMentor-fine-tuned checkpoint exists or MODEL_NAME overrides it. The hosted Streamlit showcase still uses its documented lightweight fallback.
 
+Reproduce the fixed-threshold baseline on the held-out test split:
+
+    python -m scripts.evaluate_goemotions_model --model BruceIC/emoticare --split test.csv --threshold 0.5 --batch-size 8 --output .venv-training/bruceic-goemotions-test.json
+
+The project-selected checkpoint reached validation macro F1 0.4019 at threshold 0.5, compared with 0.2962 for the previous public baseline, so BruceIC is selected for local inference by validation performance. It is still below the milestone's 0.82 target.
+
+For validation-only threshold calibration and a final untouched test score:
+
+    python -m scripts.calibrate_goemotions --model BruceIC/emoticare --data-dir data/goemotions --output docs/goemotions-bruceic-calibration.json
+
+### How to explain the evaluation metrics
+
+- Accuracy is reported as exact-match accuracy for this multi-label task: all 28 emotion decisions for an example must match.
+- Precision asks: among the labels the model predicted, how many were correct?
+- Recall asks: among the true labels, how many did the model find?
+- F1 balances precision and recall. Macro F1 averages each emotion equally; micro F1 combines counts across all labels.
+- Hamming loss is the fraction of individual label decisions that were wrong; lower is better.
+
+The reports include per-emotion precision, recall, F1, support, and confusion counts. GoEmotions is Reddit-derived, not workplace-specific, so these results are benchmarks rather than proof of accuracy on employee reflections. See docs/GOEMOTIONS_DATASET_REVIEW.md and docs/MILESTONE_2_EXECUTION.md.
 ## PostgreSQL data model
 
 - `users`: account name, unique email, password hash, and creation time.

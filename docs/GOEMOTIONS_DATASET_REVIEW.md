@@ -14,15 +14,16 @@ GoEmotions is multi-label: one text may have several emotion labels. MoodMentor 
 
 ## Reproducible review and evaluation
 
-Run `python -m scripts.analyze_goemotions` to inspect split sizes, label frequencies, malformed rows, empty text, duplicate IDs, and average labels per example. The script never prints or saves source text. Run `python -m scripts.evaluate_goemotions_model --output docs/goemotions-distilbert-evaluation.json` to evaluate the pretrained model on the held-out test split. It reports per-label and macro/micro precision, recall, and F1, plus exact-match accuracy at the 0.5 threshold. The measured held-out result was micro precision **0.8618**, recall **0.3321**, F1 **0.4795**, macro F1 **0.2980**, and exact-match accuracy **0.3243**. This is a conservative model with weak recall on several rare classes; use its results as reflective signals, and calibrate thresholds on the development split before relying on it for decisions. The script saves aggregate metrics only, with runtime versions recorded.
+Run python -m scripts.analyze_goemotions to inspect split sizes, label frequencies, malformed rows, empty text, duplicate IDs, and average labels per example. The script never prints or saves source text.
 
-The local archive can also be read from another location by passing its `data` directory with `--data-dir`.
+The fixed-threshold validation comparison selected BruceIC/emoticare for local inference: its macro F1 was 0.4019 versus 0.2962 for the previous Bhadresh baseline. The screenshot model's calibration report at docs/goemotions-bruceic-calibration.json records thresholds selected only on validation and the untouched test results: macro F1 0.4872, micro F1 0.6019, exact-match accuracy 0.4238, and Hamming loss 0.0357. It also contains per-emotion confusion counts. The screenshot's macro F1 0.4979 was not reproduced, so do not report that number as verified.
 
+The earlier Bhadresh held-out test report remains a historical comparison: macro F1 0.2980, micro precision 0.8618, micro recall 0.3321, micro F1 0.4795, and exact-match accuracy 0.3243 at threshold 0.5. The selected BruceIC checkpoint still does not meet the milestone's 0.82 validation macro-F1 target. The reports contain aggregate metrics only, with runtime versions recorded.
 ## Interpretation and limitations
 
 GoEmotions was collected from English-language Reddit comments, not employee journals. Its label balance and writing style may not represent a workplace population. Emotion classification is an uncertain language signal; sarcasm, context, dialect, and cultural differences can affect results. MoodMentor is for reflection and learning, not diagnosis or workplace decisions. Do not include private journal text in public dataset reports.
 
-Source: [GoEmotions dataset card](https://huggingface.co/datasets/google-research-datasets/go_emotions). Model: [published GoEmotions transformer checkpoint](https://huggingface.co/bhadresh-savani/bert-base-go-emotion).
+Source: [GoEmotions dataset card](https://huggingface.co/datasets/google-research-datasets/go_emotions). Selected local model: [BruceIC/emoticare](https://huggingface.co/BruceIC/emoticare). The previous Bhadresh checkpoint remains a comparison baseline.
 ## Training a local MoodMentor checkpoint
 
 Run python -m scripts.train_goemotions_model to fine-tune the DistilBERT base model on the archived training split. The script uses the development split for checkpoint selection and the test split only for final reporting. It writes model weights under models/goemotions-distilbert and aggregate metrics to docs/goemotions-distilbert-training.json. Raw comment text is not saved in the output. The local Compose API automatically uses the fine-tuned artifact when it exists.

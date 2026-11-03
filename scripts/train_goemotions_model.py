@@ -129,6 +129,9 @@ def calculate_metrics(probabilities: Any, targets: Any, labels: list[str], thres
         "exact_match_accuracy": round(
             float((predicted == actual).all(dim=1).float().mean().item()), 4
         ),
+        "hamming_loss": round(
+            float((predicted != actual).float().mean().item()), 4
+        ),
         "per_label": per_label,
     }
 

@@ -183,15 +183,19 @@ def _get_emotion_pipeline() -> Any:
         elif (local_model / "config.json").is_file():
             model_name = str(local_model)
         else:
-            model_name = "bhadresh-savani/bert-base-go-emotion"
+            model_name = "BruceIC/emoticare"
         _EMOTION_CLF = pipeline(
             "text-classification",
             model=model_name,
             top_k=None,
             device=-1,
         )
-        if model_name.rstrip("/").lower() == "bhadresh-savani/bert-base-go-emotion":
-            # The published checkpoint omits problem_type; its GoEmotions head is multi-label.
+        if model_name.rstrip("/").lower() in {
+            "bhadresh-savani/bert-base-go-emotion",
+            "bruceic/emoticare",
+        }:
+            # These published GoEmotions checkpoints have 28 independent labels.
+            # Set the task type when a model config omits it so Transformers uses sigmoid.
             _EMOTION_CLF.model.config.problem_type = "multi_label_classification"
     except Exception:
         _EMOTION_CLF = None

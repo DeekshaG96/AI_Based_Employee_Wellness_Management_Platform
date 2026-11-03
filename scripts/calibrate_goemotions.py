@@ -42,72 +42,92 @@ def read_split(path: Path, limit: int | None) -> tuple[list[str], list[set[int]]
     return texts, targets
 
 
+def _metric_arrays(
+    predictions: list[dict[str, float]],
+    targets: list[set[int]],
+    labels: list[str],
+) -> tuple[Any, Any]:
+    import numpy as np
+
+    scores = np.asarray(
+        [[row.get(label.lower(), 0.0) for label in labels] for row in predictions],
+        dtype=np.float32,
+    )
+    actual = np.zeros(scores.shape, dtype=np.bool_)
+    for row_index, label_ids in enumerate(targets):
+        actual[row_index, list(label_ids)] = True
+    return scores, actual
+
+
 def metrics(
     predictions: list[dict[str, float]],
     targets: list[set[int]],
     labels: list[str],
     thresholds: dict[str, float],
 ) -> dict[str, Any]:
+    import numpy as np
+
+    scores, actual = _metric_arrays(predictions, targets, labels)
+    threshold_values = np.asarray([thresholds[label] for label in labels], dtype=np.float32)
+    predicted = scores >= threshold_values[None, :]
+    true_positive = np.logical_and(predicted, actual).sum(axis=0)
+    false_positive = np.logical_and(predicted, np.logical_not(actual)).sum(axis=0)
+    false_negative = np.logical_and(np.logical_not(predicted), actual).sum(axis=0)
+    true_negative = np.logical_and(np.logical_not(predicted), np.logical_not(actual)).sum(axis=0)
+
+    precisions = np.divide(
+        true_positive,
+        true_positive + false_positive,
+        out=np.zeros(len(labels), dtype=np.float64),
+        where=(true_positive + false_positive) != 0,
+    )
+    recalls = np.divide(
+        true_positive,
+        true_positive + false_negative,
+        out=np.zeros(len(labels), dtype=np.float64),
+        where=(true_positive + false_negative) != 0,
+    )
+    f1_scores = np.divide(
+        2 * precisions * recalls,
+        precisions + recalls,
+        out=np.zeros(len(labels), dtype=np.float64),
+        where=(precisions + recalls) != 0,
+    )
+
     per_label: dict[str, dict[str, float | int]] = {}
-    total_tp = total_fp = total_fn = 0
-    exact = 0
-    p_values: list[float] = []
-    r_values: list[float] = []
-    f_values: list[float] = []
     for index, label in enumerate(labels):
-        threshold = thresholds[label]
-        tp = fp = fn = tn = 0
-        for row, actual_ids in zip(predictions, targets, strict=True):
-            predicted = row.get(label.lower(), 0.0) >= threshold
-            actual = index in actual_ids
-            if predicted and actual:
-                tp += 1
-            elif predicted:
-                fp += 1
-            elif actual:
-                fn += 1
-            else:
-                tn += 1
-        precision = tp / (tp + fp) if tp + fp else 0.0
-        recall = tp / (tp + fn) if tp + fn else 0.0
-        f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
         per_label[label] = {
-            "threshold": round(threshold, 4),
-            "precision": round(precision, 4),
-            "recall": round(recall, 4),
-            "f1": round(f1, 4),
-            "support": tp + fn,
-            "tp": tp,
-            "fp": fp,
-            "fn": fn,
-            "tn": tn,
+            "threshold": round(float(threshold_values[index]), 4),
+            "precision": round(float(precisions[index]), 4),
+            "recall": round(float(recalls[index]), 4),
+            "f1": round(float(f1_scores[index]), 4),
+            "support": int(actual[:, index].sum()),
+            "tp": int(true_positive[index]),
+            "fp": int(false_positive[index]),
+            "fn": int(false_negative[index]),
+            "tn": int(true_negative[index]),
         }
-        p_values.append(precision)
-        r_values.append(recall)
-        f_values.append(f1)
-        total_tp += tp
-        total_fp += fp
-        total_fn += fn
 
-    for row, actual_ids in zip(predictions, targets, strict=True):
-        predicted_ids = {
-            index for index, label in enumerate(labels)
-            if row.get(label.lower(), 0.0) >= thresholds[label]
-        }
-        exact += predicted_ids == actual_ids
-
-    micro_p = total_tp / (total_tp + total_fp) if total_tp + total_fp else 0.0
-    micro_r = total_tp / (total_tp + total_fn) if total_tp + total_fn else 0.0
-    micro_f1 = 2 * micro_p * micro_r / (micro_p + micro_r) if micro_p + micro_r else 0.0
+    micro_tp = int(true_positive.sum())
+    micro_fp = int(false_positive.sum())
+    micro_fn = int(false_negative.sum())
+    micro_precision = micro_tp / (micro_tp + micro_fp) if micro_tp + micro_fp else 0.0
+    micro_recall = micro_tp / (micro_tp + micro_fn) if micro_tp + micro_fn else 0.0
+    micro_f1 = (
+        2 * micro_precision * micro_recall / (micro_precision + micro_recall)
+        if micro_precision + micro_recall
+        else 0.0
+    )
     return {
         "examples": len(targets),
-        "macro_precision": round(sum(p_values) / len(labels), 4),
-        "macro_recall": round(sum(r_values) / len(labels), 4),
-        "macro_f1": round(sum(f_values) / len(labels), 4),
-        "micro_precision": round(micro_p, 4),
-        "micro_recall": round(micro_r, 4),
+        "macro_precision": round(float(precisions.mean()), 4),
+        "macro_recall": round(float(recalls.mean()), 4),
+        "macro_f1": round(float(f1_scores.mean()), 4),
+        "micro_precision": round(micro_precision, 4),
+        "micro_recall": round(micro_recall, 4),
         "micro_f1": round(micro_f1, 4),
-        "exact_match_accuracy": round(exact / len(targets), 4),
+        "exact_match_accuracy": round(float(np.all(predicted == actual, axis=1).mean()), 4),
+        "hamming_loss": round(float(np.mean(predicted != actual)), 4),
         "per_label_confusion": per_label,
     }
 
@@ -118,29 +138,57 @@ def tune_thresholds(
     labels: list[str],
     min_support: int,
 ) -> tuple[float, dict[str, float]]:
+    import numpy as np
+
+    scores, actual = _metric_arrays(predictions, targets, labels)
     candidates = [round(value / 100, 2) for value in range(5, 96, 5)]
-    global_threshold = max(
-        candidates,
-        key=lambda value: metrics(
-            predictions, targets, labels, {label: value for label in labels}
-        )["macro_f1"],
-    )
+    supports = actual.sum(axis=0)
+    global_threshold = candidates[0]
+    best_macro_f1 = -1.0
+
+    for candidate in candidates:
+        predicted = scores >= candidate
+        true_positive = np.logical_and(predicted, actual).sum(axis=0)
+        false_positive = np.logical_and(predicted, np.logical_not(actual)).sum(axis=0)
+        false_negative = np.logical_and(np.logical_not(predicted), actual).sum(axis=0)
+        precision = np.divide(
+            true_positive,
+            true_positive + false_positive,
+            out=np.zeros(len(labels), dtype=np.float64),
+            where=(true_positive + false_positive) != 0,
+        )
+        recall = np.divide(
+            true_positive,
+            true_positive + false_negative,
+            out=np.zeros(len(labels), dtype=np.float64),
+            where=(true_positive + false_negative) != 0,
+        )
+        f1 = np.divide(
+            2 * precision * recall,
+            precision + recall,
+            out=np.zeros(len(labels), dtype=np.float64),
+            where=(precision + recall) != 0,
+        )
+        macro_f1 = float(f1.mean())
+        if macro_f1 > best_macro_f1:
+            best_macro_f1 = macro_f1
+            global_threshold = candidate
+
     thresholds: dict[str, float] = {}
     for index, label in enumerate(labels):
-        support = sum(index in row for row in targets)
-        if support < min_support:
+        if supports[index] < min_support:
             thresholds[label] = global_threshold
             continue
+
+        class_scores = scores[:, index]
+        class_actual = actual[:, index]
         best_threshold = global_threshold
         best_f1 = -1.0
         for candidate in candidates:
-            tp = fp = fn = 0
-            for scores, actual_ids in zip(predictions, targets, strict=True):
-                predicted = scores.get(label.lower(), 0.0) >= candidate
-                actual = index in actual_ids
-                tp += predicted and actual
-                fp += predicted and not actual
-                fn += actual and not predicted
+            predicted = class_scores >= candidate
+            tp = int(np.logical_and(predicted, class_actual).sum())
+            fp = int(np.logical_and(predicted, np.logical_not(class_actual)).sum())
+            fn = int(np.logical_and(np.logical_not(predicted), class_actual).sum())
             precision = tp / (tp + fp) if tp + fp else 0.0
             recall = tp / (tp + fn) if tp + fn else 0.0
             f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
