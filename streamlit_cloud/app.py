@@ -56,10 +56,14 @@ st.markdown(
     [data-testid="stMetric"] { padding:15px 18px;border:1px solid var(--line);border-radius:16px;background:white; }
     [data-testid="stVerticalBlockBorderWrapper"] { border:1px solid var(--line)!important;border-radius:18px!important;background:#ffffffcc; }
     [data-testid="stTextArea"] textarea { min-height:190px;border-radius:14px;line-height:1.65; }
-    .stButton>button,.stDownloadButton>button { min-height:43px;border-radius:12px;font-weight:700; }
-    .stButton>button[kind="primary"] { background:var(--forest);border-color:var(--forest); }
+    .stButton>button,.stDownloadButton>button,[data-testid="stFormSubmitButton"] button { min-height:43px;border-radius:12px;font-weight:700; }
+    .stButton>button[kind="primary"], [data-testid="stFormSubmitButton"] button[kind="primary"] { background:var(--forest);border-color:var(--forest); }
+    .stButton>button:hover,.stDownloadButton>button:hover { border-color:var(--forest);color:var(--forest); }
+    button[data-baseweb="tab"][aria-selected="true"] { color:var(--forest);border-bottom-color:var(--forest); }
+    :focus-visible { outline:3px solid #2d8467 !important; outline-offset:2px; }
     [data-testid="stSidebar"] { background:linear-gradient(180deg,#103d33,#12382f); }
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color:#d0e1d5; }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
     @media(max-width:800px){.block-container{padding:1rem}.hero{padding:24px}}
     </style>
     """,
@@ -97,6 +101,10 @@ def prepare_nltk() -> bool:
         if not nltk.download(package, download_dir=str(NLTK_DATA_DIR), quiet=True):
             raise RuntimeError(f"Could not download the required language resource: {package}")
     return True
+
+
+def _clear_journal_draft() -> None:
+    st.session_state.cloud_journal = ""
 
 
 def _new_record(
@@ -302,23 +310,36 @@ with journal_tab:
         prompt = st.selectbox("Optional writing prompt", list(PROMPTS), key="cloud_prompt")
         if st.button("Use this prompt", key="apply_prompt", disabled=not PROMPTS[prompt]):
             st.session_state.cloud_journal = PROMPTS[prompt]
-        entry = st.text_area(
-            "Your reflection",
-            placeholder="What felt heavy, hopeful, or important today? A few sentences are enough to begin.",
-            height=220,
-            max_chars=6000,
-            key="cloud_journal",
-        )
-        if st.button("Analyze my mood", type="primary", use_container_width=True, disabled=not entry.strip()):
-            checkin_details = {
-                "self_reported_mood": (
-                    None if self_reported_mood == "Prefer not to say" else self_reported_mood
-                ),
-                "context_tags": context_tags,
-                "energy": energy if include_wellbeing_details else None,
-                "sleep_hours": sleep_hours if include_wellbeing_details else None,
-            }
-            _analyze_many([(entry.strip(), "Journal Entry")], checkin_details)
+        with st.form("journal_entry_form", clear_on_submit=False):
+            entry = st.text_area(
+                "Your reflection",
+                placeholder="What felt heavy, hopeful, or important today? A few sentences are enough to begin.",
+                height=220,
+                max_chars=6000,
+                key="cloud_journal",
+            )
+            submitted = st.form_submit_button(
+                "Analyze my mood", type="primary", use_container_width=True
+            )
+        if submitted:
+            if not entry.strip():
+                st.info("Write a few words first. Your mood rating can also be recorded without sharing personal details in the text.")
+            else:
+                checkin_details = {
+                    "self_reported_mood": (
+                        None if self_reported_mood == "Prefer not to say" else self_reported_mood
+                    ),
+                    "context_tags": context_tags,
+                    "energy": energy if include_wellbeing_details else None,
+                    "sleep_hours": sleep_hours if include_wellbeing_details else None,
+                }
+                _analyze_many([(entry.strip(), "Journal Entry")], checkin_details)
+        if entry.strip():
+            st.button(
+                "Clear draft",
+                key="clear_journal_draft",
+                on_click=_clear_journal_draft,
+            )
     with col_prompt:
         st.markdown("### A small reminder")
         st.write("There is no right way to write this. Describe a moment, a conversation, or simply how you feel right now.")
@@ -364,65 +385,142 @@ with trends_tab:
         st.info("Your check-ins will appear here for this browser session. Analyze a journal entry or import a file to begin.")
     else:
         frame = _history_frame(records)
-        st.markdown("### Your emotional pattern over time")
-        chart_col, count_col = st.columns([1.5, 1], gap="large")
-        with chart_col:
-            st.plotly_chart(
-                px.line(frame.iloc[::-1], x="Date", y="VADER compound", color="Sentiment", markers=True, range_y=[-1, 1], title="Sentiment tone across check-ins"),
-                use_container_width=True,
-            )
-        with count_col:
-            counts = frame["Dominant emotion"].value_counts().rename_axis("Emotion").reset_index(name="Check-ins")
-            st.plotly_chart(px.bar(counts, x="Emotion", y="Check-ins", color="Emotion", title="Dominant emotion signals"), use_container_width=True)
-        mood_frame = frame.dropna(subset=["Mood score"]).copy()
-        if not mood_frame.empty:
-            mood_frame["Date"] = pd.to_datetime(mood_frame["Date"])
-            mood_frame = mood_frame.sort_values("Date")
-            st.plotly_chart(
-                px.line(
-                    mood_frame,
-                    x="Date",
-                    y="Mood score",
-                    markers=True,
-                    range_y=[1, 5],
-                    title="Your self-reported mood",
-                    labels={"Mood score": "Mood (1–5)"},
-                ),
-                use_container_width=True,
-            )
-            daily_mood = (
-                mood_frame.assign(Day=mood_frame["Date"].dt.date)
-                .groupby("Day", as_index=False)
-                .agg({"Mood score": "mean"})
-            )
-            daily_mood["Date"] = pd.to_datetime(daily_mood["Day"])
-            first_day = daily_mood["Date"].min()
-            first_week = first_day - pd.to_timedelta(first_day.weekday(), unit="D")
-            week_start = daily_mood["Date"] - pd.to_timedelta(
-                daily_mood["Date"].dt.weekday, unit="D"
-            )
-            daily_mood["Week"] = ((week_start - first_week).dt.days // 7) + 1
-            daily_mood["Weekday"] = daily_mood["Date"].dt.day_name()
-            daily_mood["Day of month"] = daily_mood["Date"].dt.day
-            calendar = px.scatter(
-                daily_mood,
-                x="Week",
-                y="Weekday",
-                color="Mood score",
-                color_continuous_scale="RdYlGn",
-                range_color=[1, 5],
-                hover_data={"Date": True, "Day of month": True, "Week": False, "Weekday": False},
-                title="Your mood in pixels",
-                category_orders={"Weekday": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]},
-            )
-            calendar.update_traces(marker={"size": 18, "symbol": "square"})
-            calendar.update_layout(height=300, xaxis_title="Weeks since first check-in", yaxis_title="")
-            st.plotly_chart(calendar, use_container_width=True)
-            st.caption("Each square is the average self-reported mood for that day. Blank days mean no check-in was logged.")
+        frame["Date"] = pd.to_datetime(frame["Date"])
+        time_window = st.selectbox(
+            "Trend period",
+            ["All check-ins", "Last 7 days", "Last 30 days", "Last 90 days"],
+            key="trend_period",
+        )
+        window_days = {"Last 7 days": 7, "Last 30 days": 30, "Last 90 days": 90}.get(time_window)
+        if window_days:
+            start_date = pd.Timestamp.now().normalize() - pd.Timedelta(days=window_days - 1)
+            frame = frame[frame["Date"] >= start_date]
+        if frame.empty:
+            st.info(f"No check-ins found for {time_window.lower()}. Choose a wider period or add a new check-in.")
         else:
-            st.info("Add an optional self-rated mood to journal check-ins to build your personal mood calendar.")
-        st.dataframe(frame, use_container_width=True, hide_index=True)
-        st.download_button("Download session trends (CSV)", frame.to_csv(index=False).encode("utf-8"), "moodmentor-session-trends.csv", "text/csv")
+            frame = frame.sort_values("Date")
+            st.markdown("### Your emotional pattern over time")
+            st.caption("Text sentiment, predicted emotion, and your own ratings are shown as separate signals.")
+            summary_columns = st.columns(4)
+            summary_columns[0].metric("Check-ins", len(frame))
+            summary_columns[1].metric("Most common signal", frame["Dominant emotion"].mode().iloc[0])
+            summary_columns[2].metric(
+                "Average text tone",
+                f"{frame['VADER compound'].mean():+.2f}",
+                help="VADER compound ranges from −1 (negative) to +1 (positive).",
+            )
+            mood_average = frame["Mood score"].dropna().mean()
+            summary_columns[3].metric(
+                "Your mood average",
+                f"{mood_average:.1f}/5" if pd.notna(mood_average) else "Not added",
+                help="Average of your optional self-ratings in the selected period.",
+            )
+            chart_col, count_col = st.columns([1.5, 1], gap="large")
+            with chart_col:
+                st.plotly_chart(
+                    px.line(
+                        frame,
+                        x="Date",
+                        y="VADER compound",
+                        color="Sentiment",
+                        markers=True,
+                        range_y=[-1, 1],
+                        title="Text sentiment across check-ins",
+                    ),
+                    use_container_width=True,
+                )
+            with count_col:
+                counts = frame["Dominant emotion"].value_counts().rename_axis("Emotion").reset_index(name="Check-ins")
+                st.plotly_chart(
+                    px.bar(counts, x="Emotion", y="Check-ins", color="Emotion", title="Detected emotion signals"),
+                    use_container_width=True,
+                )
+
+            mood_frame = frame.dropna(subset=["Mood score"]).copy().sort_values("Date")
+            if not mood_frame.empty:
+                mood_col, _ = st.columns(2, gap="large")
+                with mood_col:
+                    st.plotly_chart(
+                        px.line(
+                            mood_frame,
+                            x="Date",
+                            y="Mood score",
+                            markers=True,
+                            range_y=[1, 5],
+                            title="Your self-reported mood",
+                            labels={"Mood score": "Mood (1–5)"},
+                        ),
+                        use_container_width=True,
+                    )
+                daily_mood = (
+                    mood_frame.assign(Day=mood_frame["Date"].dt.date)
+                    .groupby("Day", as_index=False)
+                    .agg({"Mood score": "mean"})
+                )
+                daily_mood["Date"] = pd.to_datetime(daily_mood["Day"])
+                first_day = daily_mood["Date"].min()
+                first_week = first_day - pd.to_timedelta(first_day.weekday(), unit="D")
+                week_start = daily_mood["Date"] - pd.to_timedelta(
+                    daily_mood["Date"].dt.weekday, unit="D"
+                )
+                daily_mood["Week"] = ((week_start - first_week).dt.days // 7) + 1
+                daily_mood["Weekday"] = daily_mood["Date"].dt.day_name()
+                daily_mood["Day of month"] = daily_mood["Date"].dt.day
+                calendar = px.scatter(
+                    daily_mood,
+                    x="Week",
+                    y="Weekday",
+                    color="Mood score",
+                    color_continuous_scale="RdYlGn",
+                    range_color=[1, 5],
+                    hover_data={"Date": True, "Day of month": True, "Week": False, "Weekday": False},
+                    title="Your mood in pixels",
+                    category_orders={"Weekday": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]},
+                )
+                calendar.update_traces(marker={"size": 18, "symbol": "square"})
+                calendar.update_layout(height=300, xaxis_title="Calendar weeks", yaxis_title="")
+                st.plotly_chart(calendar, use_container_width=True)
+                st.caption("Each square is the average self-reported mood for that day. Blank days mean no check-in was logged.")
+            else:
+                st.info("Add an optional self-rated mood to build your personal mood calendar.")
+
+            energy_frame = frame.dropna(subset=["Energy (1–5)"]).sort_values("Date")
+            sleep_frame = frame.dropna(subset=["Sleep (hours)"]).sort_values("Date")
+            if not energy_frame.empty or not sleep_frame.empty:
+                energy_col, sleep_col = st.columns(2, gap="large")
+                with energy_col:
+                    if not energy_frame.empty:
+                        st.plotly_chart(
+                            px.line(
+                                energy_frame,
+                                x="Date",
+                                y="Energy (1–5)",
+                                markers=True,
+                                range_y=[1, 5],
+                                title="Your energy level",
+                            ),
+                            use_container_width=True,
+                        )
+                with sleep_col:
+                    if not sleep_frame.empty:
+                        st.plotly_chart(
+                            px.line(
+                                sleep_frame,
+                                x="Date",
+                                y="Sleep (hours)",
+                                markers=True,
+                                range_y=[0, 16],
+                                title="Your sleep hours",
+                            ),
+                            use_container_width=True,
+                        )
+            st.dataframe(frame, use_container_width=True, hide_index=True)
+            st.download_button(
+                "Download filtered history (CSV)",
+                frame.to_csv(index=False).encode("utf-8"),
+                "moodmentor-session-trends.csv",
+                "text/csv",
+            )
 
 with evaluation_tab:
     st.markdown("### GoEmotions model benchmark")
@@ -543,6 +641,17 @@ if selected:
     metric3.metric("VADER compound", f"{report.sentiment_scores.compound:+.2f}", help="A polarity score from −1 (negative) to +1 (positive).")
     metric4.metric("Words reflected", len(report.original_text.split()))
     st.caption(f"Emotion estimator: {report.emotion_method.replace('_', ' ')}. Keyword-based fallback signals are not model confidence values.")
+    if any(selected.get(key) for key in ("self_reported_mood", "energy", "sleep_hours", "context_tags")):
+        with st.container(border=True):
+            st.markdown("#### Your check-in details")
+            detail_columns = st.columns(4)
+            detail_columns[0].metric("Your mood", selected.get("self_reported_mood") or "Skipped")
+            detail_columns[1].metric("Energy", f"{selected['energy']}/5" if selected.get("energy") is not None else "Not added")
+            detail_columns[2].metric("Sleep", f"{selected['sleep_hours']} hrs" if selected.get("sleep_hours") is not None else "Not added")
+            detail_columns[3].metric("Context tags", len(selected.get("context_tags", [])))
+            if selected.get("context_tags"):
+                st.caption(" · ".join(selected["context_tags"]))
+            st.caption("These are your own check-in details; they are not inferred by the text analyzer.")
 
     result_col, emotion_col = st.columns([1, 1], gap="large")
     with result_col:
