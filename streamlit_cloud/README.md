@@ -10,6 +10,8 @@ Check-ins and imported file rows are held only in each browser session's Streaml
 
 The **Model evaluation** tab presents the saved aggregate GoEmotions benchmark, threshold comparison, and plain-language definitions for precision, recall, F1, exact-match accuracy, and Hamming loss. It reads `docs/goemotions-bruceic-calibration.json`; it does not load the transformer into the hosted demo or change live journal predictions.
 
+Journal check-ins also support optional self-rated mood, context tags, sleep, and energy. The trends view separates self-reported mood from text-based sentiment, includes a mood-in-pixels calendar, and supports revisiting and exporting session entries.
+
 ## Deploy
 
 1. Use the prepared GitHub branch named `streamlit-cloud` (it avoids the existing `main`-branch workflows).

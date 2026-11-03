@@ -20,6 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+import pandas as pd
 import plotly.express as px
 import streamlit as st
 
@@ -65,6 +66,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+MOOD_SCORE = {"Very low": 1, "Low": 2, "Okay": 3, "Good": 4, "Very good": 5}
+CONTEXT_TAGS = ["Work or study", "Relationships", "Health", "Rest", "Family", "Money", "Personal growth"]
+
 PROMPTS = {
     "Choose a gentle prompt (optional)": "",
     "What felt heavy, hopeful, or important today?": "What felt heavy, hopeful, or important today?",
@@ -95,13 +99,20 @@ def prepare_nltk() -> bool:
     return True
 
 
-def _new_record(text: str, source: str) -> dict[str, Any]:
+def _new_record(
+    text: str, source: str, checkin_details: dict[str, Any] | None = None
+) -> dict[str, Any]:
     report = analyze_text(text, source_name=source)
+    details = checkin_details or {}
     return {
         "id": uuid.uuid4().hex,
         "created_at": datetime.now(timezone.utc),
         "source": source,
         "report": report,
+        "self_reported_mood": details.get("self_reported_mood"),
+        "energy": details.get("energy"),
+        "sleep_hours": details.get("sleep_hours"),
+        "context_tags": details.get("context_tags", []),
     }
 
 
@@ -118,6 +129,11 @@ def _history_frame(records: list[dict[str, Any]]):
                 "VADER compound": report.sentiment_scores.compound,
                 "Dominant emotion": report.dominant_emotion.title(),
                 "Estimator": report.emotion_method.replace("_", " "),
+                "Self-reported mood": item.get("self_reported_mood") or "Not recorded",
+                "Mood score": MOOD_SCORE.get(item.get("self_reported_mood")),
+                "Energy (1–5)": item.get("energy"),
+                "Sleep (hours)": item.get("sleep_hours"),
+                "Context tags": ", ".join(item.get("context_tags", [])),
                 "Source": item["source"],
             }
         )
@@ -164,7 +180,23 @@ def _make_pdf(item: dict[str, Any]) -> bytes:
         ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
         ("FONTNAME", (2, 0), (2, -1), "Helvetica-Bold"),
     ]))
-    story.extend([table, Spacer(1, 16), Paragraph("Your reflection", styles["Heading2"])])
+    story.extend([table, Spacer(1, 16)])
+    checkin_details = []
+    if item.get("self_reported_mood"):
+        checkin_details.append(f"Self-rated mood: {item['self_reported_mood']}")
+    if item.get("energy") is not None:
+        checkin_details.append(f"Energy: {item['energy']}/5")
+    if item.get("sleep_hours") is not None:
+        checkin_details.append(f"Sleep: {item['sleep_hours']} hours")
+    if item.get("context_tags"):
+        checkin_details.append("Context: " + ", ".join(item["context_tags"]))
+    if checkin_details:
+        story.extend([
+            Paragraph("Your quick check-in", styles["Heading2"]),
+            Paragraph(escape(" · ".join(checkin_details)), styles["BodyText"]),
+            Spacer(1, 12),
+        ])
+    story.append(Paragraph("Your reflection", styles["Heading2"]))
     story.append(Paragraph(escape(report.original_text).replace("\n", "<br/>"), styles["BodyText"]))
     story.extend([Spacer(1, 14), Paragraph("Supportive next steps", styles["Heading2"])])
     rec = report.recommendations
@@ -179,11 +211,21 @@ def _make_pdf(item: dict[str, Any]) -> bytes:
     return buffer.getvalue()
 
 
-def _analyze_many(items: list[tuple[str, str]]) -> None:
+def _analyze_many(
+    items: list[tuple[str, str]], checkin_details: dict[str, Any] | None = None
+) -> None:
     try:
         prepare_nltk()
         with st.spinner(f"Reflecting on {len(items)} entr{'y' if len(items) == 1 else 'ies'}…"):
-            records = [_new_record(text, source) for text, source in items if text.strip()]
+            records = [
+                _new_record(
+                    text,
+                    source,
+                    checkin_details if source == "Journal Entry" else None,
+                )
+                for text, source in items
+                if text.strip()
+            ]
         st.session_state.records = records + st.session_state.records
         if records:
             st.session_state.selected_record_id = records[0]["id"]
@@ -208,6 +250,24 @@ with st.sidebar:
         st.session_state.records = []
         st.session_state.selected_record_id = None
         st.rerun()
+    if st.session_state.records:
+        saved_records = st.session_state.records
+        saved_ids = [item["id"] for item in saved_records]
+        current_id = st.session_state.selected_record_id
+        selected_index = saved_ids.index(current_id) if current_id in saved_ids else 0
+        record_labels = {
+            item["id"]: (
+                item["created_at"].astimezone().strftime("%b %d · %I:%M %p")
+                + f" · {item['report'].dominant_emotion.title()}"
+            )
+            for item in saved_records
+        }
+        st.session_state.selected_record_id = st.selectbox(
+            "Revisit a check-in",
+            saved_ids,
+            index=selected_index,
+            format_func=lambda record_id: record_labels[record_id],
+        )
     st.markdown("---")
     st.caption("For privacy, avoid names, contact details, or other identifying information in a public cloud demo.")
 
@@ -221,6 +281,24 @@ journal_tab, file_tab, trends_tab, evaluation_tab = st.tabs(["📝 Mood journal"
 with journal_tab:
     col_editor, col_prompt = st.columns([2.1, 0.9], gap="large")
     with col_editor:
+        st.markdown("### Start with how today feels")
+        mood_options = ["Prefer not to say", *MOOD_SCORE]
+        self_reported_mood = st.radio(
+            "Your mood (optional)", mood_options, horizontal=True, index=0,
+            help="This is your own check-in, shown separately from the language model's estimate.",
+        )
+        context_tags = st.multiselect(
+            "What has been shaping your day? (optional)", CONTEXT_TAGS,
+            help="Choose any context that feels relevant. These tags remain in this browser session.",
+        )
+        with st.expander("Add optional sleep and energy details"):
+            include_wellbeing_details = st.checkbox("Include sleep and energy in this check-in")
+            if include_wellbeing_details:
+                energy = st.slider("Energy level", 1, 5, 3, help="1 = very low · 5 = very high")
+                sleep_hours = st.slider("Hours of sleep", 0.0, 16.0, 7.0, 0.5)
+            else:
+                energy = None
+                sleep_hours = None
         prompt = st.selectbox("Optional writing prompt", list(PROMPTS), key="cloud_prompt")
         if st.button("Use this prompt", key="apply_prompt", disabled=not PROMPTS[prompt]):
             st.session_state.cloud_journal = PROMPTS[prompt]
@@ -232,7 +310,15 @@ with journal_tab:
             key="cloud_journal",
         )
         if st.button("Analyze my mood", type="primary", use_container_width=True, disabled=not entry.strip()):
-            _analyze_many([(entry.strip(), "Journal Entry")])
+            checkin_details = {
+                "self_reported_mood": (
+                    None if self_reported_mood == "Prefer not to say" else self_reported_mood
+                ),
+                "context_tags": context_tags,
+                "energy": energy if include_wellbeing_details else None,
+                "sleep_hours": sleep_hours if include_wellbeing_details else None,
+            }
+            _analyze_many([(entry.strip(), "Journal Entry")], checkin_details)
     with col_prompt:
         st.markdown("### A small reminder")
         st.write("There is no right way to write this. Describe a moment, a conversation, or simply how you feel right now.")
@@ -288,6 +374,53 @@ with trends_tab:
         with count_col:
             counts = frame["Dominant emotion"].value_counts().rename_axis("Emotion").reset_index(name="Check-ins")
             st.plotly_chart(px.bar(counts, x="Emotion", y="Check-ins", color="Emotion", title="Dominant emotion signals"), use_container_width=True)
+        mood_frame = frame.dropna(subset=["Mood score"]).copy()
+        if not mood_frame.empty:
+            mood_frame["Date"] = pd.to_datetime(mood_frame["Date"])
+            mood_frame = mood_frame.sort_values("Date")
+            st.plotly_chart(
+                px.line(
+                    mood_frame,
+                    x="Date",
+                    y="Mood score",
+                    markers=True,
+                    range_y=[1, 5],
+                    title="Your self-reported mood",
+                    labels={"Mood score": "Mood (1–5)"},
+                ),
+                use_container_width=True,
+            )
+            daily_mood = (
+                mood_frame.assign(Day=mood_frame["Date"].dt.date)
+                .groupby("Day", as_index=False)
+                .agg({"Mood score": "mean"})
+            )
+            daily_mood["Date"] = pd.to_datetime(daily_mood["Day"])
+            first_day = daily_mood["Date"].min()
+            first_week = first_day - pd.to_timedelta(first_day.weekday(), unit="D")
+            week_start = daily_mood["Date"] - pd.to_timedelta(
+                daily_mood["Date"].dt.weekday, unit="D"
+            )
+            daily_mood["Week"] = ((week_start - first_week).dt.days // 7) + 1
+            daily_mood["Weekday"] = daily_mood["Date"].dt.day_name()
+            daily_mood["Day of month"] = daily_mood["Date"].dt.day
+            calendar = px.scatter(
+                daily_mood,
+                x="Week",
+                y="Weekday",
+                color="Mood score",
+                color_continuous_scale="RdYlGn",
+                range_color=[1, 5],
+                hover_data={"Date": True, "Day of month": True, "Week": False, "Weekday": False},
+                title="Your mood in pixels",
+                category_orders={"Weekday": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]},
+            )
+            calendar.update_traces(marker={"size": 18, "symbol": "square"})
+            calendar.update_layout(height=300, xaxis_title="Weeks since first check-in", yaxis_title="")
+            st.plotly_chart(calendar, use_container_width=True)
+            st.caption("Each square is the average self-reported mood for that day. Blank days mean no check-in was logged.")
+        else:
+            st.info("Add an optional self-rated mood to journal check-ins to build your personal mood calendar.")
         st.dataframe(frame, use_container_width=True, hide_index=True)
         st.download_button("Download session trends (CSV)", frame.to_csv(index=False).encode("utf-8"), "moodmentor-session-trends.csv", "text/csv")
 
