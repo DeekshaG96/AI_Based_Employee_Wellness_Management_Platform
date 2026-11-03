@@ -610,6 +610,15 @@ def generate_recommendations(
     }
 
 
+def _vader_analyzer() -> Any:
+    """Use bundled VADER data in hosted mode; preserve the NLTK implementation locally."""
+    if os.getenv("WELLNESS_BUNDLED_VADER") == "1":
+        from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer as BundledVader
+
+        return BundledVader()
+    return SentimentIntensityAnalyzer()
+
+
 def analyze_text(text: str, source_name: str = "direct text") -> AnalysisReport:
     """Analyze text and return a typed AnalysisReport with strict thresholds and emotion telemetry."""
     original = validate_text(text)
@@ -620,7 +629,7 @@ def analyze_text(text: str, source_name: str = "direct text") -> AnalysisReport:
     cleaned, tokens = preprocess(original)
 
     # VADER Polarity Scoring
-    scores = SentimentIntensityAnalyzer().polarity_scores(vader_input)
+    scores = _vader_analyzer().polarity_scores(vader_input)
     compound = scores["compound"]
 
     # Strict Polarity Thresholds (Evaluation Fault #2 Resolution)

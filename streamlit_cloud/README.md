@@ -4,7 +4,7 @@ Entrypoint: `streamlit_cloud/app.py`
 Dependencies: `streamlit_cloud/requirements.txt`
 Suggested Python runtime: 3.12
 
-This lightweight showcase runs MoodMentor's existing VADER and preprocessing pipeline inside Streamlit. It deliberately disables the large transformer download and uses the clearly labeled keyword fallback for emotion signals. It does not call FastAPI, PostgreSQL, or Render.
+This lightweight showcase runs MoodMentor's VADER and preprocessing pipeline inside Streamlit. It deliberately disables the large transformer download and uses the clearly labeled keyword fallback for emotion signals. Hosted mode uses VADER's bundled lexicon and corpus-free token filtering, so analysis does not need to download NLTK datasets at request time. The full local app retains NLTK corpora and spaCy/WordNet preprocessing. It does not call FastAPI, PostgreSQL, or Render.
 
 Check-ins and imported file rows are held only in each browser session's Streamlit state. There is no account system or persistent database in this deployment. Visitors' text is processed by the hosted app, so the page warns them not to submit sensitive or identifying details. The full local Docker version remains available for authenticated accounts and persistent PostgreSQL history.
 

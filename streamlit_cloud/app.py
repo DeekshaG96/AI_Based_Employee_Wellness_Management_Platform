@@ -12,10 +12,10 @@ from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
 
-# This deployment is intentionally lightweight: no external model download and no DB/API.
+# Hosted mode uses bundled VADER and corpus-free tokenization, with no runtime downloads.
 os.environ["WELLNESS_DISABLE_TRANSFORMER"] = "1"
-NLTK_DATA_DIR = Path(os.getenv("NLTK_DATA", "/tmp/moodmentor-nltk"))
-os.environ["NLTK_DATA"] = str(NLTK_DATA_DIR)
+os.environ["WELLNESS_LIGHTWEIGHT_PREPROCESSING"] = "1"
+os.environ["WELLNESS_BUNDLED_VADER"] = "1"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -80,27 +80,6 @@ PROMPTS = {
     "What would help you feel a little more supported?": "What would help you feel a little more supported right now?",
     "What has been taking most of your energy?": "What has been taking most of your energy lately?",
 }
-
-
-@st.cache_resource(show_spinner="Preparing the language resources for the first check-in…")
-def prepare_nltk() -> bool:
-    import nltk
-
-    NLTK_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    nltk.data.path.insert(0, str(NLTK_DATA_DIR))
-    packages = (
-        "stopwords",
-        "wordnet",
-        "omw-1.4",
-        "punkt",
-        "punkt_tab",
-        "averaged_perceptron_tagger_eng",
-        "vader_lexicon",
-    )
-    for package in packages:
-        if not nltk.download(package, download_dir=str(NLTK_DATA_DIR), quiet=True):
-            raise RuntimeError(f"Could not download the required language resource: {package}")
-    return True
 
 
 def _clear_journal_draft() -> None:
@@ -223,7 +202,6 @@ def _analyze_many(
     items: list[tuple[str, str]], checkin_details: dict[str, Any] | None = None
 ) -> None:
     try:
-        prepare_nltk()
         with st.spinner(f"Reflecting on {len(items)} entr{'y' if len(items) == 1 else 'ies'}…"):
             records = [
                 _new_record(
@@ -677,7 +655,9 @@ if selected:
             try:
                 breakdown = get_preprocessing_breakdown(report.original_text)
                 st.write("Cleaned text", breakdown["cleaned_text"])
-                st.write("Lemmatized tokens", ", ".join(breakdown["lemmas"]) or "No tokens")
+                st.write("Tokenization", breakdown["tokenization_method"])
+                st.write("Lemmatization", breakdown["lemmatization_method"])
+                st.write("Processed tokens", ", ".join(breakdown["lemmas"]) or "No tokens")
             except (InputValidationError, NLTKResourceError) as exc:
                 st.warning(str(exc))
 

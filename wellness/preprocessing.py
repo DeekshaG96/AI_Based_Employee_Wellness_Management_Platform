@@ -5,7 +5,7 @@ Provides two dedicated paths:
    capitalization, punctuation, intensifiers, and negations for VADER.
 2. `preprocess(text)` / `get_preprocessing_breakdown(text)` — Full sequential
    NLP breakdown (Normalization -> Tokenization -> Negation-Preserved Stopwords
-   -> spaCy tokenization/lemmatization (or NLTK POS/WordNet fallback) for transparency.
+   -> spaCy/WordNet locally, or corpus-free token filtering in the hosted showcase).
 """
 
 from __future__ import annotations
@@ -46,6 +46,22 @@ _NEGATIONS: frozenset[str] = frozenset(
     {"no", "not", "nor", "never", "n't", "nothing", "none", "neither", "cannot"}
 )
 
+# Small dependency-free list used only by the hosted showcase. The full local app
+# continues to use the complete NLTK stopword corpus and spaCy/WordNet pipeline.
+_HOSTED_STOP_WORDS: frozenset[str] = frozenset(
+    "a an the and or but if while is am are was were be been being do does did "
+    "have has had i me my we our you your he she it they them their this that "
+    "these those what which who when where why how as at by for from in into "
+    "of on to with about between through before after above below up down out "
+    "off over under again then once here there all any both each few more most "
+    "other some such can could would should will may might must also just very"
+    .split()
+)
+
+
+def _lightweight_preprocessing_enabled() -> bool:
+    return os.getenv("WELLNESS_LIGHTWEIGHT_PREPROCESSING") == "1"
+
 _REQUIRED_RESOURCES = (
     (("corpora/stopwords",), "stopwords"),
     (("corpora/wordnet", "corpora/wordnet.zip"), "wordnet"),
@@ -74,7 +90,10 @@ def _get_spacy_pipeline() -> Any:
 
 
 def validate_nltk_resources() -> None:
-    """Raise a clear setup error if required NLTK data is unavailable."""
+    """Raise a setup error locally; the hosted showcase intentionally needs no corpora."""
+    if _lightweight_preprocessing_enabled():
+        return
+
     import nltk
 
     missing: list[str] = []
@@ -157,7 +176,15 @@ def _wordnet_pos(tag: str) -> str:
 def _tokenize_and_lemmatize(
     cleaned: str,
 ) -> tuple[list[str], list[str], list[tuple[str, str]], tuple[str, ...]]:
-    """Use spaCy model tokens and lemmas where available, with NLTK as a fallback."""
+    """Use corpus-free filtering in hosted mode, else spaCy or the NLTK fallback."""
+    if _lightweight_preprocessing_enabled():
+        raw_tokens = re.findall(r"[a-z]+", cleaned.lower())
+        stop_words = _HOSTED_STOP_WORDS - _NEGATIONS
+        filtered = [token for token in raw_tokens if token not in stop_words]
+        tagged = [(token, "TOKEN") for token in filtered]
+        # Keep surface forms here; without a corpus, do not claim lemmatization.
+        return raw_tokens, filtered, tagged, tuple(filtered)
+
     stop_words = set(stopwords.words("english")) - _NEGATIONS
     nlp = _get_spacy_pipeline()
     if nlp is not None:
@@ -202,4 +229,14 @@ def get_preprocessing_breakdown(text: str) -> dict[str, Any]:
         "pos_tags": tagged,
         "lemmas": lemmas,
         "processed_text": " ".join(lemmas),
+        "tokenization_method": (
+            "Lightweight word tokenization"
+            if _lightweight_preprocessing_enabled()
+            else "spaCy or NLTK tokenization"
+        ),
+        "lemmatization_method": (
+            "Surface-form tokens (corpus-free hosted mode)"
+            if _lightweight_preprocessing_enabled()
+            else "spaCy or WordNet lemmatization"
+        ),
     }
