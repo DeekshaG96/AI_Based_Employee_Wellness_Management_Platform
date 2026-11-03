@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import os
 import sys
 import uuid
@@ -216,7 +217,7 @@ st.markdown(
 )
 st.info("Your check-ins are processed by MoodMentor on Streamlit Cloud and kept only for this session. They are not saved to an account or permanent journal. Please avoid names or other details that identify you.", icon="ℹ️")
 
-journal_tab, file_tab, trends_tab = st.tabs(["📝 Mood journal", "📄 Import a file", "📈 Trends & history"])
+journal_tab, file_tab, trends_tab, evaluation_tab = st.tabs(["📝 Mood journal", "📄 Import a file", "📈 Trends & history", "🧪 Model evaluation"])
 with journal_tab:
     col_editor, col_prompt = st.columns([2.1, 0.9], gap="large")
     with col_editor:
@@ -289,6 +290,113 @@ with trends_tab:
             st.plotly_chart(px.bar(counts, x="Emotion", y="Check-ins", color="Emotion", title="Dominant emotion signals"), use_container_width=True)
         st.dataframe(frame, use_container_width=True, hide_index=True)
         st.download_button("Download session trends (CSV)", frame.to_csv(index=False).encode("utf-8"), "moodmentor-session-trends.csv", "text/csv")
+
+with evaluation_tab:
+    st.markdown("### GoEmotions model benchmark")
+    st.caption(
+        "Offline evaluation of a public 28-label emotion model against the GoEmotions dataset. "
+        "These benchmark scores are separate from this hosted showcase's lightweight keyword estimator."
+    )
+    benchmark_path = PROJECT_ROOT / "docs" / "goemotions-bruceic-calibration.json"
+    if not benchmark_path.is_file():
+        st.warning("The saved benchmark report is not available in this deployment.")
+    else:
+        try:
+            benchmark = json.loads(benchmark_path.read_text(encoding="utf-8"))
+            st.write(
+                f"**Model:** `{benchmark['model']}` · **Labels:** {benchmark['label_count']} "
+                f"· **Test examples:** {benchmark['held_out_test_calibrated_metrics']['examples']:,}"
+            )
+            st.info(
+                "Per-emotion thresholds were chosen using the validation split only. "
+                "The held-out test split was kept separate for the final evaluation."
+            )
+            fixed = benchmark["held_out_test_fixed_threshold_metrics"]
+            calibrated = benchmark["held_out_test_calibrated_metrics"]
+            detail_setup = st.radio(
+                "View detailed test scores",
+                ["Validation-calibrated", "Fixed threshold (0.50)"],
+                horizontal=True,
+                key="benchmark_test_setup",
+            )
+            active = calibrated if detail_setup == "Validation-calibrated" else fixed
+            st.markdown(f"#### {detail_setup} results")
+            metric_groups = [
+                ("Macro precision", "macro_precision", ".1%"),
+                ("Macro recall", "macro_recall", ".1%"),
+                ("Macro F1", "macro_f1", ".1%"),
+                ("Exact-match accuracy", "exact_match_accuracy", ".1%"),
+                ("Micro precision", "micro_precision", ".1%"),
+                ("Micro recall", "micro_recall", ".1%"),
+                ("Micro F1", "micro_f1", ".1%"),
+                ("Hamming loss ↓", "hamming_loss", ".2%"),
+            ]
+            for start in (0, 4):
+                metric_columns = st.columns(4)
+                for column, (label, key, format_spec) in zip(
+                    metric_columns, metric_groups[start : start + 4]
+                ):
+                    column.metric(label, format(active[key], format_spec))
+            rows = [
+                {
+                    "Test setup": "Fixed threshold (0.50)",
+                    "Macro F1": f"{fixed['macro_f1']:.1%}",
+                    "Micro F1": f"{fixed['micro_f1']:.1%}",
+                    "Exact-match accuracy": f"{fixed['exact_match_accuracy']:.1%}",
+                    "Hamming loss ↓": f"{fixed['hamming_loss']:.2%}",
+                },
+                {
+                    "Test setup": "Validation-calibrated thresholds",
+                    "Macro F1": f"{calibrated['macro_f1']:.1%}",
+                    "Micro F1": f"{calibrated['micro_f1']:.1%}",
+                    "Exact-match accuracy": f"{calibrated['exact_match_accuracy']:.1%}",
+                    "Hamming loss ↓": f"{calibrated['hamming_loss']:.2%}",
+                },
+            ]
+            st.dataframe(rows, use_container_width=True, hide_index=True)
+            chart_rows = [
+                {"Metric": metric, "Score": scores[metric], "Threshold setup": setup}
+                for setup, scores in [
+                    ("Fixed 0.50", fixed),
+                    ("Validation-calibrated", calibrated),
+                ]
+                for metric in ("macro_f1", "micro_f1", "exact_match_accuracy")
+            ]
+            for row in chart_rows:
+                row["Metric"] = {
+                    "macro_f1": "Macro F1",
+                    "micro_f1": "Micro F1",
+                    "exact_match_accuracy": "Exact-match accuracy",
+                }[row["Metric"]]
+            st.plotly_chart(
+                px.bar(
+                    chart_rows,
+                    x="Metric",
+                    y="Score",
+                    color="Threshold setup",
+                    barmode="group",
+                    range_y=[0, 1],
+                    title="Held-out test scores",
+                ),
+                use_container_width=True,
+            )
+            with st.expander("What do these evaluation metrics mean?"):
+                st.markdown(
+                    """
+                    - **Precision:** Of the emotion labels the model predicted, how many were correct?
+                    - **Recall:** Of the emotion labels present in the data, how many did the model find?
+                    - **F1:** A balance between precision and recall. **Macro F1** gives each emotion equal weight; **micro F1** combines counts across emotions.
+                    - **Exact-match accuracy:** The fraction of entries where all 28 label decisions matched exactly. This is intentionally strict for a multi-label task.
+                    - **Hamming loss:** The fraction of individual label decisions that were wrong; lower is better.
+                    """
+                )
+            st.caption(
+                "The validation macro F1 at the fixed 0.50 threshold was 40.19%, compared with "
+                "29.62% for the previous public baseline. The milestone target of 82% is not yet met. "
+                "GoEmotions comes from Reddit and may not represent workplace journal language."
+            )
+        except (OSError, KeyError, TypeError, ValueError) as exc:
+            st.warning(f"Could not read the saved benchmark report: {exc}")
 
 records = st.session_state.records
 selected = next((item for item in records if item["id"] == st.session_state.selected_record_id), records[0] if records else None)

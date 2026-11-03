@@ -8,6 +8,8 @@ This lightweight showcase runs MoodMentor's existing VADER and preprocessing pip
 
 Check-ins and imported file rows are held only in each browser session's Streamlit state. There is no account system or persistent database in this deployment. Visitors' text is processed by the hosted app, so the page warns them not to submit sensitive or identifying details. The full local Docker version remains available for authenticated accounts and persistent PostgreSQL history.
 
+The **Model evaluation** tab presents the saved aggregate GoEmotions benchmark, threshold comparison, and plain-language definitions for precision, recall, F1, exact-match accuracy, and Hamming loss. It reads `docs/goemotions-bruceic-calibration.json`; it does not load the transformer into the hosted demo or change live journal predictions.
+
 ## Deploy
 
 1. Use the prepared GitHub branch named `streamlit-cloud` (it avoids the existing `main`-branch workflows).
