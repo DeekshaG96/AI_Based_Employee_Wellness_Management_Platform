@@ -5,7 +5,11 @@ import csv
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SOURCE = ROOT / "archive (1)" / "data"
+DEFAULT_SOURCE = (
+    ROOT / "archive" / "data"
+    if (ROOT / "archive" / "data").exists()
+    else ROOT / "archive (1)" / "data"
+)
 DEFAULT_OUTPUT = ROOT / "data" / "goemotions"
 
 def main() -> None:

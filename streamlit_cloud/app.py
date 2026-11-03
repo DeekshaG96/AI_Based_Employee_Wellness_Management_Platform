@@ -376,6 +376,29 @@ with file_tab:
             except csv.Error as exc:
                 st.error(f"Could not read this CSV: {exc}")
 
+    st.markdown("---")
+    st.markdown("### 📚 Explore GoEmotions Archive Dataset")
+    st.caption("Load a curated 20-entry slice from the held-out GoEmotions archive dataset (`data/goemotions/test.csv`) without uploading your own file.")
+    cloud_archive_path = PROJECT_ROOT / "data" / "goemotions" / "test.csv"
+    if not cloud_archive_path.is_file():
+        cloud_archive_path = PROJECT_ROOT / "archive" / "data" / "test.tsv"
+    if cloud_archive_path.is_file():
+        col_arch_btn, col_arch_info = st.columns([1, 1.5])
+        with col_arch_btn:
+            if st.button("📥 Load 20 GoEmotions Archive Entries", key="load_archive_cloud_sample", use_container_width=True):
+                try:
+                    sep = "," if cloud_archive_path.suffix == ".csv" else "\t"
+                    df_c = pd.read_csv(cloud_archive_path, sep=sep, nrows=20)
+                    c_col = "text" if "text" in df_c.columns else df_c.columns[0]
+                    items = [(str(row[c_col]).strip(), f"GoEmotions Archive · item {i}") for i, row in enumerate(df_c.to_dict(orient="records"), start=1) if str(row[c_col]).strip()]
+                    _analyze_many(items)
+                except Exception as ex:
+                    st.error(f"Could not load archive sample: {ex}")
+        with col_arch_info:
+            st.write(f"Archive file: `{cloud_archive_path.name}` (5,427 held-out evaluation examples, 28 emotions)")
+    else:
+        st.info("GoEmotions archive splits can be generated locally via `python -m scripts.prepare_goemotions_csv`.")
+
 with trends_tab:
     records = st.session_state.records
     if not records:

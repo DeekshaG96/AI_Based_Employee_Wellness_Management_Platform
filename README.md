@@ -88,7 +88,7 @@ The response includes the VADER scores, polarity label, token and preprocessing 
 
 ## Fine-tune a MoodMentor GoEmotions model
 
-The project contains separate GoEmotions train, validation, and test CSV files under data/goemotions. Each record preserves every applicable emotion because GoEmotions is a 28-label multi-label dataset. The raw dataset files are excluded from Git. Recreate the prepared CSV files from the included local archive with:
+The project contains the full GoEmotions archive dataset under `archive/` and prepared train, validation, and test CSV splits under `data/goemotions/`. Each record preserves every applicable emotion because GoEmotions is a 28-label multi-label dataset. The prepared CSV files can be refreshed or inspected from the included archive with:
 
     python -m scripts.prepare_goemotions_csv
 

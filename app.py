@@ -1163,37 +1163,107 @@ def render_workspace():
                             st.error(str(exc))
 
         with col_kaggle:
-            st.markdown("##### 🏆 1-Click Kaggle Benchmark Dataset")
-            st.write(
-                "Load the curated **60-row Kaggle workplace wellness benchmark** (`data/employee_wellness_dataset.csv`) "
-                "to evaluate multi-row sentiment accuracy, emotion distributions, and stress levels."
+            st.markdown("##### 🏆 Preloaded Benchmark & Archive Datasets")
+            dataset_choice = st.radio(
+                "Select Dataset to Ingest & Evaluate",
+                ["Workplace Wellness Benchmark (60 Rows)", "GoEmotions Archive Dataset (28 Emotions)"],
+                horizontal=True,
+                key="tab2_benchmark_choice",
             )
 
-            benchmark_path = Path("data/employee_wellness_dataset.csv")
-            if benchmark_path.exists():
+            if dataset_choice == "Workplace Wellness Benchmark (60 Rows)":
                 st.write(
-                    f"Benchmark File: `{benchmark_path.name}` ({benchmark_path.stat().st_size} bytes)"
+                    "Load the curated **60-row Kaggle workplace wellness benchmark** (`data/employee_wellness_dataset.csv`) "
+                    "to evaluate multi-row sentiment accuracy, emotion distributions, and stress levels."
                 )
-                if st.button(
-                    "📥 Load & Ingest Benchmark Dataset (60 Rows)",
-                    type="secondary",
-                    use_container_width=True,
-                ):
-                    try:
-                        with st.spinner("Ingesting benchmark records through the API..."):
-                            bench_reports = api_analyze_file(
-                                benchmark_path.read_bytes(),
-                                benchmark_path.name,
-                                st.session_state.api_token,
-                                "feedback",
+
+                benchmark_path = Path("data/employee_wellness_dataset.csv")
+                if benchmark_path.exists():
+                    st.write(
+                        f"Benchmark File: `{benchmark_path.name}` ({benchmark_path.stat().st_size:,} bytes)"
+                    )
+                    if st.button(
+                        "📥 Load & Ingest Workplace Benchmark (60 Rows)",
+                        type="secondary",
+                        use_container_width=True,
+                    ):
+                        try:
+                            with st.spinner("Ingesting workplace benchmark through the API..."):
+                                bench_reports = api_analyze_file(
+                                    benchmark_path.read_bytes(),
+                                    benchmark_path.name,
+                                    st.session_state.api_token,
+                                    "feedback",
+                                )
+                            st.success(
+                                f"Ingested {len(bench_reports)} benchmark records! View telemetry in Tab 3."
                             )
-                        st.success(
-                            f"Ingested {len(bench_reports)} benchmark records! View telemetry in Tab 3."
-                        )
-                    except ApiError as exc:
-                        st.error(str(exc))
+                        except ApiError as exc:
+                            st.error(str(exc))
+                else:
+                    st.warning("Benchmark dataset not found in data/ directory.")
+
             else:
-                st.warning("Benchmark dataset not found in data/ directory.")
+                st.write(
+                    "Ingest real records from the **GoEmotions Archive Dataset** (`data/goemotions/test.csv`) "
+                    "to stress-test multi-label classification across all 28 emotional dimensions."
+                )
+                archive_test_path = Path("data/goemotions/test.csv")
+                if not archive_test_path.exists():
+                    archive_test_path = Path("archive/data/test.tsv")
+
+                if archive_test_path.exists():
+                    st.write(
+                        f"Archive Source: `{archive_test_path.as_posix()}` ({archive_test_path.stat().st_size:,} bytes)"
+                    )
+                    sample_size = st.select_slider(
+                        "Number of GoEmotions Archive records to sample:",
+                        options=[10, 25, 50, 100],
+                        value=25,
+                        key="goemotions_sample_slider",
+                    )
+
+                    try:
+                        sep = "," if archive_test_path.suffix == ".csv" else "\t"
+                        df_archive = pd.read_csv(archive_test_path, sep=sep, nrows=sample_size)
+                        text_col = "text" if "text" in df_archive.columns else df_archive.columns[0]
+                        with st.expander("👀 Preview Selected Archive Sample"):
+                            st.dataframe(df_archive.head(5), use_container_width=True, hide_index=True)
+
+                        if st.button(
+                            f"📥 Load & Ingest {sample_size} GoEmotions Archive Records",
+                            type="primary",
+                            use_container_width=True,
+                        ):
+                            try:
+                                with st.spinner(f"Ingesting {sample_size} GoEmotions records through API..."):
+                                    csv_buffer = df_archive[[text_col]].to_csv(index=False).encode("utf-8")
+                                    arch_reports = api_analyze_file(
+                                        csv_buffer,
+                                        f"goemotions_archive_{sample_size}.csv",
+                                        st.session_state.api_token,
+                                        text_col,
+                                    )
+                                st.success(
+                                    f"Successfully ingested {len(arch_reports)} GoEmotions records into your longitudinal profile! Switch to Tab 3 to inspect radar and trends."
+                                )
+                            except ApiError as exc:
+                                st.error(str(exc))
+                    except Exception as ex:
+                        st.error(f"Error loading archive sample: {ex}")
+
+                    with st.expander("📊 GoEmotions Archive Dataset Architecture"):
+                        st.markdown(
+                            """
+                            - **Total Archive Size:** 54,263 multi-label examples
+                            - **Train Split:** 43,410 examples (`archive/data/train.tsv` / `data/goemotions/train.csv`)
+                            - **Validation Split:** 5,426 examples (`archive/data/dev.tsv` / `data/goemotions/validation.csv`)
+                            - **Held-Out Test Split:** 5,427 examples (`archive/data/test.tsv` / `data/goemotions/test.csv`)
+                            - **Taxonomy:** 28 discrete emotions mapped into 6 Ekman emotion clusters (Joy, Sadness, Anger, Fear, Surprise, Disgust) + Neutral
+                            """
+                        )
+                else:
+                    st.warning("GoEmotions archive dataset not found in data/goemotions or archive/.")
 
     # ---------------------------------------------------------------------------
     # TAB 3: LONGITUDINAL TRENDS & STORED ANALYTICS
@@ -1666,6 +1736,36 @@ def render_guest_workspace():
                 if st.button("🚀 Analyze Text Document", type="primary", key="guest_eval_txt"):
                     rep = analyze_text(txt_content, source_name=g_file.name)
                     st.success(f"Analyzed! Sentiment: {rep.sentiment_label.value.upper()} (compound: {rep.sentiment_scores.compound:.3f})")
+            elif g_file.name.endswith(".csv"):
+                try:
+                    df_guest = pd.read_csv(g_file)
+                    st.dataframe(df_guest.head(3), use_container_width=True)
+                    col_opts = [c for c in df_guest.columns if c.lower() in ("text", "feedback", "comment", "message", "content")]
+                    sel_col = col_opts[0] if col_opts else df_guest.columns[0]
+                    if st.button("🚀 Analyze First 5 CSV Rows", type="primary", key="guest_csv_btn"):
+                        for idx, r in df_guest.head(5).iterrows():
+                            t = str(r[sel_col]).strip()
+                            if t:
+                                rep = analyze_text(t, source_name=f"{g_file.name} (row {idx+1})")
+                                st.write(f"Row {idx+1}: **{rep.sentiment_label.value}** ({rep.sentiment_scores.compound:.2f}) · {rep.dominant_emotion.value}")
+                except Exception as ex:
+                    st.error(f"Could not read CSV: {ex}")
+
+        st.divider()
+        st.markdown("##### 📚 Sample from GoEmotions Archive Dataset")
+        guest_arch_path = Path("data/goemotions/test.csv")
+        if not guest_arch_path.exists():
+            guest_arch_path = Path("archive/data/test.tsv")
+        if guest_arch_path.exists():
+            if st.button("📥 Load 5 Samples from GoEmotions Archive", key="guest_arch_sample"):
+                sep = "," if guest_arch_path.suffix == ".csv" else "\t"
+                df_ga = pd.read_csv(guest_arch_path, sep=sep, nrows=5)
+                t_col = "text" if "text" in df_ga.columns else df_ga.columns[0]
+                for idx, r in df_ga.iterrows():
+                    txt = str(r[t_col]).strip()
+                    if txt:
+                        rep = analyze_text(txt, source_name="GoEmotions Archive")
+                        st.write(f"Sample {idx+1}: *\"{txt[:100]}\"* ➔ **{rep.sentiment_label.value.upper()}** (Emotion: `{rep.dominant_emotion.value}`)")
 
     with guest_tab3:
         st.markdown("#### System Architecture")
