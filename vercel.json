@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "python -m pip install --no-cache-dir -r requirements-vercel-api.txt",
+  "functions": {
+    "vercel_api.py": {
+      "maxDuration": 60
+    }
+  }
+}
