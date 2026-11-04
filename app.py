@@ -611,6 +611,25 @@ def render_landing_and_auth():
             unsafe_allow_html=True,
         )
         with st.container(border=True):
+            # Graceful backend connectivity check
+            api_is_online = True
+            try:
+                import urllib.request
+                with urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=0.8) as _res:
+                    api_is_online = (_res.status == 200)
+            except Exception:
+                api_is_online = False
+
+            if not api_is_online:
+                st.info(
+                    "💡 **FastAPI Backend is offline.** "
+                    "Run `python run_moodmentor.py` to launch the full backend, or click below for instant standalone access."
+                )
+                if st.button("🌿 Continue in Standalone Guest Mode", use_container_width=True, type="secondary"):
+                    st.session_state.guest_mode = True
+                    st.rerun()
+                st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+
             sign_in_tab, register_tab, guest_tab = st.tabs(["Sign in", "Create account", "🌿 Guest Access"])
             with sign_in_tab:
                 st.markdown("##### Pick up where you left off")

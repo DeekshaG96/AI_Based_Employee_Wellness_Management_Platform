@@ -24,10 +24,10 @@ class Base(DeclarativeBase):
 
 
 def _database_url() -> str:
-    url = os.getenv("DATABASE_URL")
+    url = (os.getenv("DATABASE_URL") or "").strip()
     if not url:
         db_path = Path(__file__).resolve().parents[1] / "moodmentor.db"
-        return f"sqlite:///{db_path}"
+        return f"sqlite:///{db_path.as_posix()}"
     # Render supplies standard PostgreSQL URLs; this project uses psycopg 3.
     if url.startswith("postgres://"):
         return "postgresql+psycopg://" + url[len("postgres://") :]
