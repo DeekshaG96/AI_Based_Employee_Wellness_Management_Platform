@@ -46,6 +46,8 @@ htmlcov/
 
 # Environments & IDEs
 .env
+.env.*
+!.env.example
 .vscode/
 .idea/
 *.swp
@@ -77,3 +79,13 @@ goemotions_colab_bundle_codex.zip
 goemotions_milestone2_colab_bundle.zip
 goemotions_milestone2_colab_bundle/
 /archive (1)/
+.neon
+node_modules/
+
+.agents/
+.codex/
+hello.ts
+neon.ts
+package-lock.json
+package.json
+skills-lock.json
