@@ -1,23 +1,30 @@
 # Streamlit Community Cloud showcase
 
-Entrypoint: `streamlit_cloud/app.py`
-Dependencies: `streamlit_cloud/requirements.txt`
+Entrypoint: streamlit_cloud/app.py
+Dependencies: streamlit_cloud/requirements.txt
 Suggested Python runtime: 3.12
 
-This lightweight showcase runs MoodMentor's VADER and preprocessing pipeline inside Streamlit. Keyword-based emotion cues are the default so the app avoids loading large transformer weights. If the owner configures an `HF_TOKEN`, a visitor can explicitly opt in to send an individual journal entry to Hugging Face Inference using `SamLowe/roberta-base-go_emotions` (a RoBERTa model with 28 GoEmotions labels). The app falls back to its keyword estimator if the remote model is unavailable. Hosted mode uses VADER's bundled lexicon and corpus-free token filtering, so analysis does not need to download NLTK datasets at request time. The full local app retains NLTK corpora and spaCy/WordNet preprocessing. It does not call FastAPI, PostgreSQL, or Render.
+The showcase runs VADER and lightweight emotion cues inside Streamlit by default. If HF_TOKEN is configured, a guest can opt an individual journal entry into Hugging Face Inference with SamLowe/roberta-base-go_emotions (28 GoEmotions labels). Guest history and optional self-ratings are temporary and held in the Streamlit session.
 
-Check-ins and imported file rows are held only in each browser session's Streamlit state. There is no account system or persistent database in this deployment. Visitors' text is processed by the hosted app, so the page warns them not to submit sensitive or identifying details. The full local Docker version remains available for authenticated accounts and persistent PostgreSQL history.
+## Guest mode and account mode
 
-The **Model evaluation** tab presents the saved aggregate GoEmotions benchmark, threshold comparison, and plain-language definitions for precision, recall, F1, exact-match accuracy, and Hamming loss. It reads `docs/goemotions-bruceic-calibration.json`. That benchmark evaluates `BruceIC/emoticare`, not the optional live `SamLowe/roberta-base-go_emotions` model, and neither benchmark proves accuracy on workplace journals.
+The app starts in guest mode when no account API is configured. Guest check-ins can be cleared in the sidebar and are not durable. Do not enter sensitive or identifying information in guest mode.
 
-Journal check-ins also support optional self-rated mood, context tags, sleep, and energy. The trends view separates self-reported mood from text-based sentiment, includes a mood-in-pixels calendar, and supports revisiting and exporting session entries.
+For real sign-in, registration, sign-out, and persistent history, connect this app to a deployed MoodMentor FastAPI service backed by a persistent database. In Streamlit Community Cloud, open the app's **Settings → Secrets** and add the following line:
+
+    API_URL = "https://your-moodmentor-api.example.com"
+
+Use your own HTTPS API address. The API must expose MoodMentor's /auth/register, /auth/login, /auth/logout, /analyze, and /history/{user_id} endpoints and use a persistent database. The app does not contain or store account passwords. Authentication and saved journal history are handled by the API. If API_URL is missing, account access explains what is needed and guest mode remains available. No particular hosting provider is required.
+
+Account check-ins store the journal text, analysis, and recommendations in that account's database. Optional self-rated mood, sleep, energy, and context annotations are currently guest-only because the API schema does not persist those fields. Sign out revokes the server session and clears the active browser session when the API is reachable.
+
+## Model evaluation
+
+The Model evaluation tab presents the saved GoEmotions benchmark, threshold comparison, and definitions for precision, recall, F1, exact-match accuracy, and Hamming loss. It reads docs/goemotions-bruceic-calibration.json. That benchmark evaluates BruceIC/emoticare, not the optional live SamLowe/roberta-base-go_emotions model, and does not establish accuracy on workplace journal text.
 
 ## Deploy
 
-1. Use the prepared GitHub branch named `streamlit-cloud` (it avoids the existing `main`-branch workflows).
-2. At [share.streamlit.io](https://share.streamlit.io), create an app from that repository and the `streamlit-cloud` branch.
-3. Set the entrypoint to `streamlit_cloud/app.py` and select Python 3.12 in Advanced settings.
-4. Optional transformer setup: create a Hugging Face access token with Inference Providers permission and add it in the app's Streamlit **Settings → Secrets** as `HF_TOKEN = "hf_…"`. Never commit the token. Without this secret, the app continues to use the local lightweight estimator.
-5. Deploy, then check the app logs if dependency or NLTK resource setup reports an error. In the journal, transformer analysis remains off until the visitor checks the opt-in box for that entry.
-
-The requirements file is next to the entrypoint, which lets Community Cloud install only the smaller showcase dependencies instead of the full local API and transformer stack.
+1. Create or select the Streamlit app connected to this repository and the streamlit-cloud branch.
+2. Set the entrypoint to streamlit_cloud/app.py and select Python 3.12 in Advanced settings.
+3. Add API_URL to Settings → Secrets only if a persistent MoodMentor API is available. Add HF_TOKEN only if you want to offer optional guest-mode transformer inference. Never commit either secret.
+4. Deploy, then review the app logs if dependency installation reports an error.

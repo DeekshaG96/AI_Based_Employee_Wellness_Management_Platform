@@ -32,7 +32,20 @@ from wellness.pipeline import (
     classify_emotions_with_method,
 )
 from wellness.preprocessing import get_preprocessing_breakdown
-from wellness.report import AnalysisReport
+from wellness.api_client import (
+    ApiError,
+    analyze as api_analyze,
+    history as api_history,
+    login as api_login,
+    logout as api_logout,
+    register as api_register,
+)
+from wellness.report import (
+    AnalysisReport,
+    InputSummary,
+    SentimentLabel,
+    SentimentScores,
+)
 
 st.set_page_config(
     page_title="MoodMentor | Mindful Check-in",
@@ -88,6 +101,211 @@ PROMPTS = {
 
 def _clear_journal_draft() -> None:
     st.session_state.cloud_journal = ""
+
+
+def _configured_api_url() -> str | None:
+    """Return only an explicitly configured account API URL, never localhost fallback."""
+    try:
+        configured = st.secrets.get("API_URL", "")
+    except Exception:
+        configured = ""
+    value = str(configured or os.getenv("API_URL", "")).strip().rstrip("/")
+    return value or None
+
+
+API_URL = _configured_api_url()
+
+
+def _history_entry_to_record(entry: dict[str, Any]) -> dict[str, Any]:
+    """Adapt an authenticated API history row to the showcase report format."""
+    original_text = str(entry.get("original_text", ""))
+    tokens_value = entry.get("tokens") or ""
+    if isinstance(tokens_value, str):
+        tokens = tuple(part.strip() for part in tokens_value.split(",") if part.strip())
+    else:
+        tokens = tuple(str(part) for part in tokens_value)
+    timestamp_value = str(entry.get("created_at") or "")
+    try:
+        created_at = datetime.fromisoformat(timestamp_value.replace("Z", "+00:00"))
+    except ValueError:
+        created_at = datetime.now(timezone.utc)
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+
+    recommendation = entry.get("recommendation") or {}
+    scores = entry.get("emotion_scores") or {}
+    report = AnalysisReport(
+        input_summary=InputSummary(
+            source_type=str(entry.get("source_type") or "text"),
+            source_name=str(entry.get("source_name") or "Journal Entry"),
+            character_count=len(original_text),
+            line_count=len(original_text.splitlines()),
+            token_count=len(tokens),
+        ),
+        original_text=original_text,
+        cleaned_text=str(entry.get("cleaned_text") or ""),
+        processed_text=str(entry.get("processed_text") or ""),
+        tokens=tokens,
+        sentiment_scores=SentimentScores(
+            negative=float(entry.get("neg_score") or 0),
+            neutral=float(entry.get("neu_score") or 0),
+            positive=float(entry.get("pos_score") or 0),
+            compound=float(entry.get("compound_score") or 0),
+        ),
+        sentiment_label=SentimentLabel(str(entry.get("sentiment_label", "neutral"))),
+        counts=entry.get("counts") or {},
+        vader_input_text=str(entry.get("vader_input_text") or ""),
+        emotion_method=str(entry.get("emotion_method") or "unknown"),
+        dominant_emotion=str(entry.get("dominant_emotion") or "neutral"),
+        emotion_scores={str(k): float(v) for k, v in scores.items()},
+        recommendations=recommendation,
+    )
+    api_id = entry.get("id")
+    return {
+        "id": f"account:{api_id}",
+        "api_id": api_id,
+        "created_at": created_at,
+        "source": str(entry.get("source_name") or "Journal Entry"),
+        "report": report,
+    }
+
+
+def _refresh_account_records() -> None:
+    user = st.session_state.get("account_user") or {}
+    token = st.session_state.get("account_token")
+    if not user.get("id") or not token:
+        st.session_state.records = []
+        st.session_state.selected_record_id = None
+        return
+    entries = api_history(int(user["id"]), token, limit=500)
+    records = [_history_entry_to_record(entry) for entry in entries]
+    records.sort(key=lambda item: item["created_at"], reverse=True)
+    st.session_state.records = records
+    current = st.session_state.get("selected_record_id")
+    ids = {item["id"] for item in records}
+    st.session_state.selected_record_id = current if current in ids else (
+        records[0]["id"] if records else None
+    )
+
+
+def _apply_auth(auth: dict[str, Any]) -> None:
+    """Store a server-issued session and load that user's own saved history."""
+    st.session_state.account_token = auth["access_token"]
+    st.session_state.account_user = auth["user"]
+    st.session_state.guest_mode = False
+    st.session_state.records = []
+    st.session_state.selected_record_id = None
+    try:
+        _refresh_account_records()
+        st.session_state.account_flash = (
+            f"Welcome, {auth['user'].get('name', 'back')} — your saved check-ins are ready."
+        )
+    except ApiError as exc:
+        st.session_state.account_flash = (
+            f"You are signed in, but saved history could not be loaded: {exc}"
+        )
+
+
+def _render_auth_gate() -> None:
+    """Show a compact account screen when a visitor chooses account access."""
+    account_flash = st.session_state.pop("account_flash", None)
+    if account_flash:
+        if "could not confirm token revocation" in account_flash:
+            st.warning(account_flash)
+        else:
+            st.info(account_flash)
+    st.markdown(
+        '<div class="brand"><div class="mark">m</div><div><div class="brand-name">MoodMentor</div>'
+        '<div class="brand-caption">A thoughtful space for your daily check-in</div></div></div>',
+        unsafe_allow_html=True,
+    )
+    left, right = st.columns([1.1, 0.9], gap="large")
+    with left:
+        st.markdown(
+            '<div class="hero"><div class="eyebrow">YOUR REFLECTIONS, READY WHEN YOU ARE</div>'
+            '<h1>Make space for how you feel.</h1>'
+            '<p>Sign in to revisit saved check-ins and notice your patterns over time. '
+            'Your account is managed by the configured MoodMentor API.</p></div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            "#### Your account, your history\n"
+            "MoodMentor stores journal text and analysis in the connected account database. "
+            "Use a password you do not reuse elsewhere, and avoid writing identifying details."
+        )
+    with right:
+        if not API_URL:
+            st.markdown("### Account access is not connected yet")
+            st.info(
+                "The hosted app needs an HTTPS MoodMentor API with a persistent database before "
+                "it can create or verify accounts. Add API_URL in Streamlit Community Cloud "
+                "under App settings → Secrets. Example:"
+            )
+            st.code('API_URL = "https://your-moodmentor-api.example.com"', language="toml")
+            st.caption(
+                "Do not put a password or database credential here. API_URL should point to your "
+                "public HTTPS address for your FastAPI service. Keep database credentials on the API host, not in this setting."
+            )
+            if st.button("Continue as a guest", type="primary", width="stretch"):
+                st.session_state.guest_mode = True
+                st.rerun()
+            return
+
+        st.markdown("### Welcome in")
+        st.caption("Sign in to continue your reflections, or create an account to begin.")
+        sign_in_tab, register_tab, guest_tab = st.tabs(
+            ["Sign in", "Create account", "Guest"]
+        )
+        with sign_in_tab:
+            with st.form("cloud_login_form"):
+                email = st.text_input("Email address", placeholder="you@example.com", key="cloud_login_email")
+                password = st.text_input("Password", type="password", key="cloud_login_password")
+                submitted = st.form_submit_button(
+                    "Sign in to MoodMentor", type="primary", width="stretch"
+                )
+            if submitted:
+                if not email.strip() or not password:
+                    st.warning("Enter your email address and password to continue.")
+                else:
+                    try:
+                        with st.spinner("Signing in securely…"):
+                            _apply_auth(api_login(email.strip(), password))
+                        st.rerun()
+                    except ApiError as exc:
+                        st.error(str(exc))
+        with register_tab:
+            with st.form("cloud_register_form"):
+                name = st.text_input("Your name", placeholder="How should we address you?", key="cloud_register_name")
+                email = st.text_input("Email address", placeholder="you@example.com", key="cloud_register_email")
+                password = st.text_input(
+                    "Create password", type="password", help="Use at least 8 characters.", key="cloud_register_password"
+                )
+                confirm = st.text_input("Confirm password", type="password", key="cloud_register_confirm")
+                submitted = st.form_submit_button(
+                    "Create my account", type="primary", width="stretch"
+                )
+            if submitted:
+                if len(password) < 8:
+                    st.warning("Choose a password with at least 8 characters.")
+                elif password != confirm:
+                    st.warning("The passwords do not match.")
+                elif not name.strip() or not email.strip():
+                    st.warning("Enter your name and email address.")
+                else:
+                    try:
+                        with st.spinner("Creating your account…"):
+                            _apply_auth(api_register(name.strip(), email.strip(), password))
+                        st.rerun()
+                    except ApiError as exc:
+                        st.error(str(exc))
+        with guest_tab:
+            st.write(
+                "You can try the journal without creating an account. Guest check-ins stay in "
+                "this temporary browser session and are not added to account history."
+            )
+            if st.button("Continue as a guest", type="primary", width="stretch"):
+                st.session_state.guest_mode = True
+                st.rerun()
 
 
 def _hugging_face_token() -> str | None:
@@ -222,42 +440,127 @@ def _analyze_many(
     checkin_details: dict[str, Any] | None = None,
     emotion_classifier: EmotionClassifier | None = None,
 ) -> None:
+    valid_items = [(value, source) for value, source in items if value.strip()]
+    if not valid_items:
+        st.info("Add some text before starting an analysis.")
+        return
+
+    token = st.session_state.get("account_token")
+    if token:
+        saved = 0
+        try:
+            with st.spinner(
+                f"Analyzing and saving {len(valid_items)} entr"
+                f"{'y' if len(valid_items) == 1 else 'ies'} to your account…"
+            ):
+                for value, source in valid_items:
+                    api_analyze(value, token, source_name=source)
+                    saved += 1
+                _refresh_account_records()
+            st.success(
+                f"Saved {saved} check-in{'s' if saved != 1 else ''} to your account history."
+            )
+        except ApiError as exc:
+            try:
+                _refresh_account_records()
+            except ApiError:
+                pass
+            if saved:
+                st.warning(f"Saved {saved} of {len(valid_items)} entries before the API stopped: {exc}")
+            else:
+                st.error(f"Your entry could not be saved. {exc}")
+        return
+
     try:
-        with st.spinner(f"Reflecting on {len(items)} entr{'y' if len(items) == 1 else 'ies'}…"):
+        with st.spinner(f"Reflecting on {len(valid_items)} entr{'y' if len(valid_items) == 1 else 'ies'}…"):
             records = [
                 _new_record(
-                    text,
+                    value,
                     source,
                     checkin_details if source == "Journal Entry" else None,
                     emotion_classifier if source == "Journal Entry" else None,
                 )
-                for text, source in items
-                if text.strip()
+                for value, source in valid_items
             ]
         st.session_state.records = records + st.session_state.records
         if records:
             st.session_state.selected_record_id = records[0]["id"]
-            st.success(f"Saved {len(records)} check-in{'s' if len(records) != 1 else ''} to this browser session.")
+            st.success(
+                f"Saved {len(records)} check-in{'s' if len(records) != 1 else ''} "
+                "to this browser session."
+            )
     except (InputValidationError, NLTKResourceError, RuntimeError) as exc:
         st.error(str(exc))
     except Exception as exc:
         st.error(f"Analysis could not be completed: {exc}")
 
-
 if "records" not in st.session_state:
     st.session_state.records = []
 if "selected_record_id" not in st.session_state:
     st.session_state.selected_record_id = None
+if "account_token" not in st.session_state:
+    st.session_state.account_token = None
+if "account_user" not in st.session_state:
+    st.session_state.account_user = None
+if "guest_mode" not in st.session_state:
+    st.session_state.guest_mode = not bool(API_URL)
+
+if not st.session_state.get("account_token") and not st.session_state.guest_mode:
+    _render_auth_gate()
+    st.stop()
 
 with st.sidebar:
     st.markdown('<div class="brand"><div class="mark">m</div><div><div class="brand-name" style="color:white">MoodMentor</div><div class="brand-caption" style="color:#b5d0c0">Your mindful space</div></div></div>', unsafe_allow_html=True)
-    st.markdown("### This session")
-    st.metric("Saved check-ins", len(st.session_state.records))
-    st.caption("Your check-ins stay available for this session only. This hosted showcase has no account or permanent journal; the full local version supports saved history.")
-    if st.button("Clear this session's history", width="stretch", disabled=not st.session_state.records):
-        st.session_state.records = []
-        st.session_state.selected_record_id = None
-        st.rerun()
+    account_user = st.session_state.get("account_user")
+    if account_user and st.session_state.get("account_token"):
+        st.markdown("### Your account")
+        st.write(f"**{account_user.get('name', 'MoodMentor member')}**")
+        st.caption(account_user.get("email", ""))
+        st.metric("Recent saved check-ins", len(st.session_state.records))
+        if st.button("Refresh saved history", width="stretch"):
+            try:
+                _refresh_account_records()
+                st.success("Your saved history is up to date.")
+            except ApiError as exc:
+                st.error(f"History could not be refreshed: {exc}")
+        if st.button("Sign out", width="stretch", type="secondary"):
+            signout_error = None
+            try:
+                api_logout(st.session_state.account_token)
+            except ApiError as exc:
+                signout_error = str(exc)
+            st.session_state.account_token = None
+            st.session_state.account_user = None
+            st.session_state.records = []
+            st.session_state.selected_record_id = None
+            st.session_state.guest_mode = False
+            st.session_state.account_flash = (
+                "You have been signed out on this device."
+                if signout_error is None
+                else "You are signed out here. The server could not confirm token revocation; "
+                "sign in again if you continue using the account."
+            )
+            st.session_state.cloud_journal = ""
+            st.rerun()
+        st.caption("Your account history is stored by the connected MoodMentor API.")
+    else:
+        st.markdown("### Guest session")
+        st.metric("Saved check-ins", len(st.session_state.records))
+        st.caption("Guest check-ins stay in this temporary session and may disappear when it ends.")
+        if st.session_state.records and st.button(
+            "Clear this session's history", width="stretch"
+        ):
+            st.session_state.records = []
+            st.session_state.selected_record_id = None
+            st.rerun()
+        if st.button("Sign in / create account", width="stretch"):
+            st.session_state.guest_mode = False
+            st.rerun()
+
+    account_flash = st.session_state.pop("account_flash", None)
+    if account_flash:
+        st.info(account_flash)
+
     if st.session_state.records:
         saved_records = st.session_state.records
         saved_ids = [item["id"] for item in saved_records]
@@ -283,19 +586,29 @@ st.markdown(
     '<div class="hero"><div class="eyebrow">A gentler way to check in</div><h1>Make space for how you feel.</h1><p>Write a few honest lines, notice the emotional signals, then choose a small next step that feels right for you.</p></div>',
     unsafe_allow_html=True,
 )
-hf_token = _hugging_face_token()
-if hf_token:
+account_mode = bool(
+    st.session_state.get("account_token") and st.session_state.get("account_user")
+)
+hf_token = _hugging_face_token() if not account_mode else None
+if account_mode:
     st.info(
-        "This public demo keeps check-ins in temporary session memory only. Text is processed by this hosted app. "
-        "Keyword emotion cues are the default; if you opt in, that journal entry is also sent to Hugging Face "
-        "for transformer analysis. Avoid names or identifying details.",
+        "Account mode: your reflection is sent to the configured MoodMentor API for analysis "
+        "and saved with its results in your account history. Avoid sensitive or identifying details. "
+        "Use Sign out when you finish.",
+        icon="🔒",
+    )
+elif hf_token:
+    st.info(
+        "Guest mode keeps check-ins in temporary session memory. Text is processed by this hosted app. "
+        "If you opt in for a journal entry, it is also sent to Hugging Face for transformer analysis. "
+        "Avoid sensitive or identifying details.",
         icon="ℹ️",
     )
 else:
     st.info(
-        "This public demo keeps check-ins in temporary session memory only. Text is processed by this hosted app; "
-        "emotion cues currently use the lightweight keyword estimator because no remote transformer is configured. "
-        "Avoid names or identifying details.",
+        "Guest mode keeps check-ins in temporary session memory. Text is processed by this hosted app "
+        "using VADER and lightweight emotion cues. Avoid sensitive or identifying details. "
+        "To enable accounts and saved history, the app owner must configure API_URL in Streamlit Secrets.",
         icon="ℹ️",
     )
 
@@ -304,29 +617,40 @@ with journal_tab:
     col_editor, col_prompt = st.columns([2.1, 0.9], gap="large")
     with col_editor:
         st.markdown("### Start with how today feels")
-        mood_options = ["Prefer not to say", *MOOD_SCORE]
-        self_reported_mood = st.radio(
-            "Your mood (optional)", mood_options, horizontal=True, index=0,
-            help="This is your own check-in, shown separately from the language model's estimate.",
-        )
-        context_tags = st.multiselect(
-            "What has been shaping your day? (optional)", CONTEXT_TAGS,
-            help="Choose any context that feels relevant. These tags remain in this browser session.",
-        )
-        with st.expander("Add optional sleep and energy details"):
-            include_wellbeing_details = st.checkbox("Include sleep and energy in this check-in")
-            if include_wellbeing_details:
-                energy = st.slider("Energy level", 1, 5, 3, help="1 = very low · 5 = very high")
-                sleep_hours = st.slider("Hours of sleep", 0.0, 16.0, 7.0, 0.5)
-            else:
-                energy = None
-                sleep_hours = None
+        if account_mode:
+            self_reported_mood = "Prefer not to say"
+            context_tags = []
+            include_wellbeing_details = False
+            energy = None
+            sleep_hours = None
+            st.caption(
+                "Account history stores your reflection and its analysis. Optional mood, sleep, "
+                "energy, and context notes are available in guest mode only."
+            )
+        else:
+            mood_options = ["Prefer not to say", *MOOD_SCORE]
+            self_reported_mood = st.radio(
+                "Your mood (optional)", mood_options, horizontal=True, index=0,
+                help="This is your own check-in, shown separately from the language model's estimate.",
+            )
+            context_tags = st.multiselect(
+                "What has been shaping your day? (optional)", CONTEXT_TAGS,
+                help="Choose any context that feels relevant. These tags remain in this browser session.",
+            )
+            with st.expander("Add optional sleep and energy details"):
+                include_wellbeing_details = st.checkbox("Include sleep and energy in this check-in")
+                if include_wellbeing_details:
+                    energy = st.slider("Energy level", 1, 5, 3, help="1 = very low · 5 = very high")
+                    sleep_hours = st.slider("Hours of sleep", 0.0, 16.0, 7.0, 0.5)
+                else:
+                    energy = None
+                    sleep_hours = None
         prompt = st.selectbox("Optional writing prompt", list(PROMPTS), key="cloud_prompt")
         if st.button("Use this prompt", key="apply_prompt", disabled=not PROMPTS[prompt]):
             st.session_state.cloud_journal = PROMPTS[prompt]
         with st.form("journal_entry_form", clear_on_submit=False):
             use_remote_emotion_model = False
-            if hf_token:
+            if hf_token and not account_mode:
                 use_remote_emotion_model = st.checkbox(
                     "Use the GoEmotions transformer for this entry",
                     key="use_remote_emotion_model",
@@ -339,9 +663,13 @@ with journal_tab:
                     "Model: SamLowe/roberta-base-go_emotions · 28 labels. "
                     "Only checked entries are sent to Hugging Face."
                 )
-            else:
+            elif not account_mode:
                 st.caption(
                     "Transformer analysis is not connected on this deployment; the lightweight estimator is used."
+                )
+            else:
+                st.caption(
+                    "Your reflection will be sent to the configured MoodMentor API and saved to your account history."
                 )
             entry = st.text_area(
                 "Your reflection",
