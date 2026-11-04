@@ -34,6 +34,8 @@ The API owns authentication, analysis, and persistence. The dashboard does not o
 
 The first build installs the NLP dependencies and downloads NLTK resources. The first local emotion analysis downloads the Hugging Face model, so it can take longer than later requests. Compose binds the web services and database to loopback for local development. The free Streamlit showcase keeps keyword analysis as its private-by-default fallback. If its owner configures an `HF_TOKEN`, a visitor can explicitly opt in to send an individual journal entry to Hugging Face Inference using `SamLowe/roberta-base-go_emotions`; transformer weights stay off the Streamlit instance.
 
+If Compose reports that it cannot connect to `dockerDesktopLinuxEngine` or a Docker named pipe, start Docker Desktop and wait until its Linux engine is ready, then retry. `docker compose config` checks the YAML without starting containers; `docker compose up --build` needs the Docker engine running.
+
 ## Run the API and dashboard directly
 
 Use a Python 3.10+ environment and a reachable PostgreSQL server. Install the project dependencies:

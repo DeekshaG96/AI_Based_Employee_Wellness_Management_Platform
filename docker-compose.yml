@@ -57,8 +57,6 @@ services:
 
 volumes:
   moodmentor-postgres:
-    external: true
     name: ai_based_employee_wellness_management_platform_moodmentor-postgres
   moodmentor-model-cache:
-    external: true
     name: ai_based_employee_wellness_management_platform_moodmentor-model-cache

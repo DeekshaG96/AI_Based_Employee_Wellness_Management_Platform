@@ -1,0 +1,250 @@
+{
+  "dataset": "GoEmotions simplified agree-2",
+  "dataset_source": "Google Research GoEmotions",
+  "label_count": 28,
+  "labels": [
+    "admiration",
+    "amusement",
+    "anger",
+    "annoyance",
+    "approval",
+    "caring",
+    "confusion",
+    "curiosity",
+    "desire",
+    "disappointment",
+    "disapproval",
+    "disgust",
+    "embarrassment",
+    "excitement",
+    "fear",
+    "gratitude",
+    "grief",
+    "joy",
+    "love",
+    "nervousness",
+    "optimism",
+    "pride",
+    "realization",
+    "relief",
+    "remorse",
+    "sadness",
+    "surprise",
+    "neutral"
+  ],
+  "multi_label": true,
+  "base_model": "distilbert/distilbert-base-uncased",
+  "fine_tuned_model_path": ".venv-training\\goemotions-10k-1epoch",
+  "best_epoch_by_validation_macro_f1": 1,
+  "validation_macro_f1_at_fixed_threshold": 0.1741,
+  "checkpoint_selection_metric": "validation_macro_f1_at_fixed_threshold",
+  "test_metrics": {
+    "examples": 5427,
+    "threshold": 0.5,
+    "micro_precision": 0.626,
+    "micro_recall": 0.3414,
+    "micro_f1": 0.4419,
+    "macro_precision": 0.2275,
+    "macro_recall": 0.1556,
+    "macro_f1": 0.1692,
+    "exact_match_accuracy": 0.3258,
+    "hamming_loss": 0.0359,
+    "per_label": {
+      "admiration": {
+        "precision": 0.5172,
+        "recall": 0.4762,
+        "f1": 0.4959,
+        "support": 504
+      },
+      "amusement": {
+        "precision": 0.8533,
+        "recall": 0.2424,
+        "f1": 0.3776,
+        "support": 264
+      },
+      "anger": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 198
+      },
+      "annoyance": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 320
+      },
+      "approval": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 351
+      },
+      "caring": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 135
+      },
+      "confusion": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 153
+      },
+      "curiosity": {
+        "precision": 0.4839,
+        "recall": 0.6338,
+        "f1": 0.5488,
+        "support": 284
+      },
+      "desire": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 83
+      },
+      "disappointment": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 151
+      },
+      "disapproval": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 267
+      },
+      "disgust": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 123
+      },
+      "embarrassment": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 37
+      },
+      "excitement": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 103
+      },
+      "fear": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 78
+      },
+      "gratitude": {
+        "precision": 0.887,
+        "recall": 0.892,
+        "f1": 0.8895,
+        "support": 352
+      },
+      "grief": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 6
+      },
+      "joy": {
+        "precision": 0.6957,
+        "recall": 0.0994,
+        "f1": 0.1739,
+        "support": 161
+      },
+      "love": {
+        "precision": 0.7051,
+        "recall": 0.6933,
+        "f1": 0.6992,
+        "support": 238
+      },
+      "nervousness": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 23
+      },
+      "optimism": {
+        "precision": 0.7966,
+        "recall": 0.2527,
+        "f1": 0.3837,
+        "support": 186
+      },
+      "pride": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 16
+      },
+      "realization": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 145
+      },
+      "relief": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 11
+      },
+      "remorse": {
+        "precision": 0.4118,
+        "recall": 0.125,
+        "f1": 0.1918,
+        "support": 56
+      },
+      "sadness": {
+        "precision": 0.3955,
+        "recall": 0.3397,
+        "f1": 0.3655,
+        "support": 156
+      },
+      "surprise": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 141
+      },
+      "neutral": {
+        "precision": 0.625,
+        "recall": 0.6016,
+        "f1": 0.6131,
+        "support": 1787
+      }
+    }
+  },
+  "training": {
+    "epochs": 1,
+    "batch_size": 16,
+    "learning_rate": 2e-05,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "max_length": 64,
+    "decision_threshold": 0.5,
+    "positive_weight_cap": 8.0,
+    "seed": 42,
+    "examples_per_split": {
+      "train.csv": 10000,
+      "validation.csv": 5426,
+      "test.csv": 5427
+    },
+    "limit": 10000,
+    "device": "cpu"
+  },
+  "runtime": {
+    "python": "3.14.6",
+    "torch": "2.15.0+cpu",
+    "transformers": "4.57.6"
+  },
+  "trained_at_utc": "2026-11-04T14:29:57.042352+00:00",
+  "training_seconds": 1950.6,
+  "privacy": "Only aggregate metrics are recorded; source comments are not saved.",
+  "limitations": "Reddit text may not represent private journal or workplace writing."
+}

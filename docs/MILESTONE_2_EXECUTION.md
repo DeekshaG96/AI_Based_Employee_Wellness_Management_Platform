@@ -27,7 +27,7 @@ The SemEval paper describes multiple affect tasks. The deck does not identify wh
 | GoEmotions target | BruceIC/emoticare scored validation macro F1 0.4019 at threshold 0.5; validation-only calibration reached 0.4981, with untouched test macro F1 0.4872. See docs/goemotions-bruceic-calibration.json. The 0.82 target remains unmet | Not met |
 | SemEval polarity score | No SemEval file is present. `scripts/evaluate_semeval_binary.py` now evaluates an explicitly labelled positive/negative export with VADER and reports accuracy, precision, recall, F1, and a confusion matrix | Awaiting the agreed dataset export and run |
 | ISEAR holdout | No ISEAR file is present. `scripts/evaluate_isear.py` evaluates a separate local test file and saves aggregate results only | Awaiting licensed data and run |
-| Streamlit hosted demo | The free hosted showcase uses a lexical fallback to stay within its memory limit. Its scores are marked as heuristics, not model confidence. The transformer comparison must use the full local app/model | Demo limitation |
+| Streamlit hosted demo | Keyword cues are the default; when `HF_TOKEN` is configured, a visitor can opt a journal entry into remote `SamLowe/roberta-base-go_emotions` inference. The full local app can load the local fine-tuned checkpoint or `BruceIC/emoticare` | Optional remote transformer; default remains lightweight |
 
 The source GoEmotions profile contains 54,263 examples: 43,410 train, 5,426 development, and 5,427 held-out test. The full local model weights are excluded from Git. Do not commit model checkpoints, raw datasets, or user journal text.
 
@@ -126,3 +126,7 @@ For the mentor's question about accuracy: a majority-class or frequent-class bia
 - A live mixed-emotion walkthrough and one documented error/recovery example.
 
 Do not claim the numeric targets as passed until the corresponding untouched validation/test artifacts show them. The currently available evidence does not meet the 0.82 GoEmotions macro-F1 target or establish the SemEval 0.90 target.
+
+## DistilBERT fine-tuning pilot
+
+A CPU-only, one-epoch run trained on a deterministic 10,000-example sample and evaluated on all 5,426 validation and 5,427 held-out test examples. At threshold 0.5, macro F1 was 0.1741 on validation and 0.1692 on test; the existing BruceIC baseline scored 0.4019 and 0.4142 on those splits at the same threshold. The candidate is recorded in `docs/GOEMOTIONS_DEVELOPMENT_RUN.md` and its aggregate report is `docs/goemotions-distilbert-10k-cpu-pilot.json`. Because it underperformed, it was not installed as the app model. This completes a pilot, not the full-data training milestone; the 0.82 target remains unmet.

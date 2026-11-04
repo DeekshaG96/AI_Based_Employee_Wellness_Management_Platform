@@ -49,6 +49,18 @@ def read_split(data_dir: Path, split_name: str, labels: list[str]) -> tuple[list
     return texts, targets
 
 
+def limit_split(
+    texts: list[str], targets: list[list[float]], limit: int | None, seed: int
+) -> tuple[list[str], list[list[float]]]:
+    """Choose a deterministic random subset instead of a potentially biased file prefix."""
+    if len(texts) != len(targets):
+        raise ValueError("Texts and label targets must have equal lengths.")
+    if limit is None or len(texts) <= limit:
+        return texts, targets
+    indices = sorted(random.Random(seed).sample(range(len(texts)), limit))
+    return [texts[index] for index in indices], [targets[index] for index in indices]
+
+
 def set_seed(seed: int) -> None:
     import torch
 
@@ -213,10 +225,15 @@ def main() -> None:
     }
     if not all((args.data_dir / filename).is_file() for filename in split_files.values()):
         split_files = {name: name for name in ("train.tsv", "dev.tsv", "test.tsv")}
+    split_seed_offsets = {"train.tsv": 0, "dev.tsv": 1, "test.tsv": 2}
     for split_name, source_name in split_files.items():
         texts, targets = read_split(args.data_dir, source_name, labels)
-        if args.limit is not None:
-            texts, targets = texts[: args.limit], targets[: args.limit]
+        texts, targets = limit_split(
+            texts,
+            targets,
+            args.limit,
+            args.seed + split_seed_offsets[split_name],
+        )
         texts_by_split[split_name] = texts
         targets_by_split[split_name] = targets
         print(f"Loaded {source_name}: {len(texts):,} examples")
@@ -292,7 +309,7 @@ def main() -> None:
         num_training_steps=total_steps,
     )
     use_amp = device.type == "cuda"
-    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     best_dev_macro_f1 = -1.0
@@ -306,7 +323,7 @@ def main() -> None:
             model_inputs = {key: value.to(device) for key, value in batch.items()}
             optimizer.zero_grad(set_to_none=True)
             if use_amp:
-                with torch.cuda.amp.autocast():
+                with torch.amp.autocast(device_type="cuda"):
                     logits = model(**model_inputs).logits
                     loss = loss_function(logits, labels_batch)
             else:
