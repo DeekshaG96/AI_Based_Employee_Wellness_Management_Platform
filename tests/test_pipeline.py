@@ -1,4 +1,6 @@
 import csv
+import sys
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -9,6 +11,7 @@ from wellness.pipeline import (
     analyze_file,
     analyze_text,
     classify_emotions,
+    classify_emotions_with_hf_api,
     generate_recommendations,
 )
 from wellness.preprocessing import (
@@ -77,6 +80,52 @@ def test_fine_grained_emotion_classification():
     assert isinstance(scores, dict)
     assert "sadness" in scores
     assert dominant in ("sadness", "fear")
+
+
+def test_hugging_face_classifier_parses_goemotions_without_network(monkeypatch):
+    class FakeInferenceClient:
+        def __init__(self, **kwargs):
+            assert kwargs["provider"] == "hf-inference"
+            assert kwargs["api_key"] == "test-token"
+
+        def text_classification(self, text, **kwargs):
+            assert text == "I feel thankful and hopeful."
+            assert kwargs["top_k"] is None
+            assert kwargs["function_to_apply"] == "sigmoid"
+            return [
+                {"label": "gratitude", "score": 0.82},
+                {"label": "optimism", "score": 0.61},
+                {"label": "fear", "score": 0.25},
+                {"label": "LABEL_0", "score": 0.99},
+            ]
+
+    monkeypatch.setitem(
+        sys.modules,
+        "huggingface_hub",
+        SimpleNamespace(InferenceClient=FakeInferenceClient),
+    )
+    scores, dominant, method = classify_emotions_with_hf_api(
+        "I feel thankful and hopeful.", api_key="test-token"
+    )
+
+    assert scores == {"gratitude": 0.82, "optimism": 0.61, "fear": 0.25}
+    assert dominant == "joy"
+    assert method == "transformer_remote_api"
+
+
+def test_analysis_accepts_an_explicit_emotion_classifier():
+    report = analyze_text(
+        "I handled a difficult day.",
+        emotion_classifier=lambda _text: (
+            {"gratitude": 0.75, "sadness": 0.2},
+            "joy",
+            "transformer_remote_api",
+        ),
+    )
+
+    assert report.emotion_scores == {"gratitude": 0.75, "sadness": 0.2}
+    assert report.dominant_emotion == "joy"
+    assert report.emotion_method == "transformer_remote_api"
 
 
 def test_recommendation_engine():

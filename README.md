@@ -32,7 +32,7 @@ The API owns authentication, analysis, and persistence. The dashboard does not o
 5. In **Mood Journal**, write a reflection and select **Analyze my mood**. The result includes a mood trend chart and downloadable PDF and Markdown reports; longer-term history is available in **Longitudinal Trends & Analytics**.
 6. Explore the API and its interactive documentation at [http://localhost:8000/docs](http://localhost:8000/docs). Its health endpoint is [http://localhost:8000/health](http://localhost:8000/health).
 
-The first build installs the NLP dependencies and downloads NLTK resources. The first emotion analysis downloads the Hugging Face model, so it can take longer than later requests. Compose binds the web services and database to loopback for local development. The free hosted demo disables the transformer to stay within its memory limit and reports that it is using a lexical fallback.
+The first build installs the NLP dependencies and downloads NLTK resources. The first local emotion analysis downloads the Hugging Face model, so it can take longer than later requests. Compose binds the web services and database to loopback for local development. The free Streamlit showcase keeps keyword analysis as its private-by-default fallback. If its owner configures an `HF_TOKEN`, a visitor can explicitly opt in to send an individual journal entry to Hugging Face Inference using `SamLowe/roberta-base-go_emotions`; transformer weights stay off the Streamlit instance.
 
 ## Run the API and dashboard directly
 
@@ -116,7 +116,7 @@ Review the local split sizes and label frequencies without exposing source text:
 
 
 
-The local full app defaults to BruceIC/emoticare, a public multi-label GoEmotions checkpoint, unless a MoodMentor-fine-tuned checkpoint exists or MODEL_NAME overrides it. The hosted Streamlit showcase still uses its documented lightweight fallback.
+The local full app defaults to BruceIC/emoticare, a public multi-label GoEmotions checkpoint, unless a MoodMentor-fine-tuned checkpoint exists or MODEL_NAME overrides it. The hosted Streamlit showcase uses its lightweight fallback by default and can run an opt-in Hugging Face Inference model for journal entries when an owner adds `HF_TOKEN` to Streamlit secrets. The remote model is `SamLowe/roberta-base-go_emotions`; its output is not validated specifically for workplace journals.
 
 Reproduce the fixed-threshold baseline on the held-out test split:
 
@@ -199,6 +199,6 @@ MoodMentor is a learning and self-reflection tool, not a clinical assessment, di
 
 ## Deploy the Streamlit Community Cloud showcase
 
-The repository includes a separate cloud entrypoint at `streamlit_cloud/app.py`; do not select the root `app.py`, which is the full authenticated dashboard and requires FastAPI and PostgreSQL. The Cloud showcase runs VADER and the lightweight emotion-cue fallback in the Streamlit process. It has no account system or persistent database. Check-ins stay in temporary session memory, and the page tells visitors their writing is processed by the hosted app and should not include sensitive or identifying details.
+The repository includes a separate cloud entrypoint at `streamlit_cloud/app.py`; do not select the root `app.py`, which is the full authenticated dashboard and requires FastAPI and PostgreSQL. The Cloud showcase runs VADER and the lightweight emotion-cue fallback in the Streamlit process. Visitors may explicitly opt a journal entry into Hugging Face Inference if the owner configures `HF_TOKEN`. It has no account system or persistent database. Check-ins stay in temporary session memory, and the page tells visitors their writing is processed by the hosted app and should not include sensitive or identifying details.
 
-Deploy from the MoodMentor GitHub repository using branch `streamlit-cloud`, entrypoint `streamlit_cloud/app.py`, Python 3.12, and the adjacent `streamlit_cloud/requirements.txt`. No secrets are required. See [streamlit_cloud/README.md](streamlit_cloud/README.md) for the setup steps. Streamlit Community Cloud connects apps to GitHub repositories and uses the selected repository, branch, entrypoint, dependencies, and optional secrets during deployment ([deployment guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy), [dependency guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies)).
+Deploy from the MoodMentor GitHub repository using branch `streamlit-cloud`, entrypoint `streamlit_cloud/app.py`, Python 3.12, and the adjacent `streamlit_cloud/requirements.txt`. No secrets are required for the default fallback; an `HF_TOKEN` secret is needed only for the optional remote transformer. See [streamlit_cloud/README.md](streamlit_cloud/README.md) for the setup steps. Streamlit Community Cloud connects apps to GitHub repositories and uses the selected repository, branch, entrypoint, dependencies, and optional secrets during deployment ([deployment guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy), [dependency guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies)).

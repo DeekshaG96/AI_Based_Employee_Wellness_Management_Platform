@@ -6,7 +6,7 @@ import csv
 import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from nltk.sentiment import SentimentIntensityAnalyzer
 
@@ -37,6 +37,8 @@ _GOEMOTIONS_FINE_LABELS = {
     label for labels in _GOEMOTIONS_GROUPS.values() for label in labels
 } - set(EMOTIONS)
 
+EmotionClassifier = Callable[[str], tuple[dict[str, float], str, str]]
+
 
 def _dominant_goemotions_category(scores: dict[str, float]) -> str:
     """Map independent GoEmotions scores to a broad recommendation category."""
@@ -46,6 +48,48 @@ def _dominant_goemotions_category(scores: dict[str, float]) -> str:
     }
     grouped["neutral"] = scores.get("neutral", 0.0)
     return max(grouped, key=grouped.get)
+
+
+def classify_emotions_with_hf_api(
+    text: str,
+    *,
+    api_key: str,
+    model_name: str = "SamLowe/roberta-base-go_emotions",
+) -> tuple[dict[str, float], str, str]:
+    """Classify one explicitly opted-in reflection through Hugging Face Inference."""
+    if not api_key.strip():
+        raise ValueError("A Hugging Face Inference token is required.")
+
+    from huggingface_hub import InferenceClient
+
+    client = InferenceClient(provider="hf-inference", api_key=api_key, timeout=25)
+    predictions = client.text_classification(
+        text[:512],
+        model=model_name,
+        top_k=None,
+        function_to_apply="sigmoid",
+    )
+    if predictions and isinstance(predictions[0], list):
+        predictions = predictions[0]
+
+    scores: dict[str, float] = {}
+    known_labels = _GOEMOTIONS_FINE_LABELS | set(EMOTIONS)
+    for item in predictions or []:
+        label = item.get("label") if isinstance(item, dict) else getattr(item, "label", None)
+        score = item.get("score") if isinstance(item, dict) else getattr(item, "score", None)
+        normalized_label = str(label or "").strip().lower()
+        if normalized_label not in known_labels:
+            continue
+        try:
+            numeric_score = float(score)
+        except (TypeError, ValueError):
+            continue
+        if 0.0 <= numeric_score <= 1.0:
+            scores[normalized_label] = numeric_score
+
+    if not scores:
+        raise ValueError("The Hugging Face model returned no recognized GoEmotions labels.")
+    return scores, _dominant_goemotions_category(scores), "transformer_remote_api"
 
 _EMOTION_KEYWORDS: dict[str, list[str]] = {
     "joy": [
@@ -624,7 +668,12 @@ def _vader_analyzer() -> Any:
     return SentimentIntensityAnalyzer()
 
 
-def analyze_text(text: str, source_name: str = "direct text") -> AnalysisReport:
+def analyze_text(
+    text: str,
+    source_name: str = "direct text",
+    *,
+    emotion_classifier: EmotionClassifier | None = None,
+) -> AnalysisReport:
     """Analyze text and return a typed AnalysisReport with strict thresholds and emotion telemetry."""
     original = validate_text(text)
     validate_nltk_resources()
@@ -649,7 +698,8 @@ def analyze_text(text: str, source_name: str = "direct text") -> AnalysisReport:
         label = SentimentLabel.NEUTRAL
 
     # Fine-grained Transformer Emotion Classification
-    emotion_scores, dominant_emotion, emotion_method = classify_emotions_with_method(original)
+    classifier = emotion_classifier or classify_emotions_with_method
+    emotion_scores, dominant_emotion, emotion_method = classifier(original)
 
     # Personalized Well-Being Recommendations
     recs = generate_recommendations(dominant_emotion, label, compound, original)

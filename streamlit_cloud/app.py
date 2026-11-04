@@ -25,7 +25,12 @@ import plotly.express as px
 import streamlit as st
 
 from wellness.errors import InputValidationError, NLTKResourceError
-from wellness.pipeline import analyze_text
+from wellness.pipeline import (
+    EmotionClassifier,
+    analyze_text,
+    classify_emotions_with_hf_api,
+    classify_emotions_with_method,
+)
 from wellness.preprocessing import get_preprocessing_breakdown
 from wellness.report import AnalysisReport
 
@@ -85,10 +90,25 @@ def _clear_journal_draft() -> None:
     st.session_state.cloud_journal = ""
 
 
+def _hugging_face_token() -> str | None:
+    """Read the optional inference token without exposing it in the UI or logs."""
+    token = os.getenv("HF_TOKEN", "").strip()
+    try:
+        token = str(st.secrets.get("HF_TOKEN", token) or token).strip()
+    except Exception:
+        pass
+    return token or None
+
+
 def _new_record(
-    text: str, source: str, checkin_details: dict[str, Any] | None = None
+    text: str,
+    source: str,
+    checkin_details: dict[str, Any] | None = None,
+    emotion_classifier: EmotionClassifier | None = None,
 ) -> dict[str, Any]:
-    report = analyze_text(text, source_name=source)
+    report = analyze_text(
+        text, source_name=source, emotion_classifier=emotion_classifier
+    )
     details = checkin_details or {}
     return {
         "id": uuid.uuid4().hex,
@@ -198,7 +218,9 @@ def _make_pdf(item: dict[str, Any]) -> bytes:
 
 
 def _analyze_many(
-    items: list[tuple[str, str]], checkin_details: dict[str, Any] | None = None
+    items: list[tuple[str, str]],
+    checkin_details: dict[str, Any] | None = None,
+    emotion_classifier: EmotionClassifier | None = None,
 ) -> None:
     try:
         with st.spinner(f"Reflecting on {len(items)} entr{'y' if len(items) == 1 else 'ies'}…"):
@@ -207,6 +229,7 @@ def _analyze_many(
                     text,
                     source,
                     checkin_details if source == "Journal Entry" else None,
+                    emotion_classifier if source == "Journal Entry" else None,
                 )
                 for text, source in items
                 if text.strip()
@@ -260,7 +283,21 @@ st.markdown(
     '<div class="hero"><div class="eyebrow">A gentler way to check in</div><h1>Make space for how you feel.</h1><p>Write a few honest lines, notice the emotional signals, then choose a small next step that feels right for you.</p></div>',
     unsafe_allow_html=True,
 )
-st.info("This public demo keeps check-ins in temporary session memory only. They may disappear when the session ends; there is no account or permanent journal. Text is processed by this hosted app, so avoid names or identifying details.", icon="ℹ️")
+hf_token = _hugging_face_token()
+if hf_token:
+    st.info(
+        "This public demo keeps check-ins in temporary session memory only. Text is processed by this hosted app. "
+        "Keyword emotion cues are the default; if you opt in, that journal entry is also sent to Hugging Face "
+        "for transformer analysis. Avoid names or identifying details.",
+        icon="ℹ️",
+    )
+else:
+    st.info(
+        "This public demo keeps check-ins in temporary session memory only. Text is processed by this hosted app; "
+        "emotion cues currently use the lightweight keyword estimator because no remote transformer is configured. "
+        "Avoid names or identifying details.",
+        icon="ℹ️",
+    )
 
 journal_tab, file_tab, trends_tab, evaluation_tab = st.tabs(["📝 Mood journal", "📄 Import a file", "📈 Trends & history", "🧪 Model evaluation"])
 with journal_tab:
@@ -288,6 +325,24 @@ with journal_tab:
         if st.button("Use this prompt", key="apply_prompt", disabled=not PROMPTS[prompt]):
             st.session_state.cloud_journal = PROMPTS[prompt]
         with st.form("journal_entry_form", clear_on_submit=False):
+            use_remote_emotion_model = False
+            if hf_token:
+                use_remote_emotion_model = st.checkbox(
+                    "Use the GoEmotions transformer for this entry",
+                    key="use_remote_emotion_model",
+                    help=(
+                        "Optional. If selected, this reflection is sent to Hugging Face Inference "
+                        "for emotion analysis. Leave unchecked to use the in-app keyword estimator."
+                    ),
+                )
+                st.caption(
+                    "Model: SamLowe/roberta-base-go_emotions · 28 labels. "
+                    "Only checked entries are sent to Hugging Face."
+                )
+            else:
+                st.caption(
+                    "Transformer analysis is not connected on this deployment; the lightweight estimator is used."
+                )
             entry = st.text_area(
                 "Your reflection",
                 placeholder="What felt heavy, hopeful, or important today? A few sentences are enough to begin.",
@@ -310,7 +365,26 @@ with journal_tab:
                     "energy": energy if include_wellbeing_details else None,
                     "sleep_hours": sleep_hours if include_wellbeing_details else None,
                 }
-                _analyze_many([(entry.strip(), "Journal Entry")], checkin_details)
+                selected_classifier: EmotionClassifier | None = None
+                if use_remote_emotion_model and hf_token:
+                    def _remote_or_local_fallback(value: str):
+                        try:
+                            return classify_emotions_with_hf_api(
+                                value, api_key=hf_token
+                            )
+                        except Exception:
+                            st.warning(
+                                "The remote transformer could not complete this request. "
+                                "MoodMentor used its lightweight keyword estimator instead."
+                            )
+                            return classify_emotions_with_method(value)
+
+                    selected_classifier = _remote_or_local_fallback
+                _analyze_many(
+                    [(entry.strip(), "Journal Entry")],
+                    checkin_details,
+                    selected_classifier,
+                )
         if entry.strip():
             st.button(
                 "Clear draft",
@@ -545,8 +619,9 @@ with trends_tab:
 with evaluation_tab:
     st.markdown("### GoEmotions model benchmark")
     st.caption(
-        "Offline evaluation of a public 28-label emotion model against the GoEmotions dataset. "
-        "These benchmark scores are separate from this hosted showcase's lightweight keyword estimator."
+        "The table below is an offline benchmark of BruceIC/emoticare on GoEmotions. "
+        "When enabled, live transformer analysis uses SamLowe/roberta-base-go_emotions; "
+        "the benchmark below is not a measured evaluation of that live model or of workplace journal text."
     )
     benchmark_path = PROJECT_ROOT / "docs" / "goemotions-bruceic-calibration.json"
     if not benchmark_path.is_file():
