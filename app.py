@@ -38,9 +38,16 @@ from wellness.api_client import (
 from wellness.api_client import (
     register as api_register,
 )
+from wellness.comparator import compare_models
 from wellness.pipeline import analyze_text
 from wellness.preprocessing import get_preprocessing_breakdown
 from wellness.report import SentimentLabel
+from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
+from wellness.wellness_tools import (
+    get_cognitive_reframes,
+    get_guided_exercises,
+    render_box_breathing_widget,
+)
 
 # Page configuration
 st.set_page_config(
@@ -710,6 +717,161 @@ def render_landing_and_auth():
                     st.rerun()
 
 
+def render_wellness_tools_view():
+    st.markdown("### 🌬️ Somatic Micro-Interventions & Grounding Studio")
+    st.caption("Evidence-based workplace regulation exercises designed to reduce autonomic stress and restore focus.")
+
+    col_tools, col_reframe = st.columns([1, 1], gap="large")
+    with col_tools:
+        st.markdown("#### 1. Guided Breath Pacing")
+        st.components.v1.html(render_box_breathing_widget(), height=360)
+
+        with st.expander("🧘 View 4-7-8 Relaxing Breath Technique"):
+            st.markdown("""
+            **Purpose**: Stimulate the parasympathetic vagal brake to de-escalate acute anxiety.
+            - **Step 1**: Inhale quietly through your nose for **4 seconds**.
+            - **Step 2**: Gently hold your breath for **7 seconds**.
+            - **Step 3**: Exhale completely with a soft whoosh sound for **8 seconds**.
+            - *Repeat for 4 complete cycles.*
+            """)
+
+        with st.expander("⚡ View Physiological Sigh (60-Second Fast Reset)"):
+            st.markdown("""
+            **Purpose**: Rapidly re-inflate collapsed lung alveoli and trigger immediate autonomic calming (Stanford Medicine protocol).
+            - **Step 1**: Take a deep, smooth inhale through your nose.
+            - **Step 2**: At the very top, take a second, sharp sip of extra air.
+            - **Step 3**: Release a slow, extended exhale through your mouth for 6 seconds.
+            - *Repeat 3 times.*
+            """)
+
+    with col_reframe:
+        st.markdown("#### 2. CBT Cognitive Reframing Studio")
+        reframe_emo = st.selectbox(
+            "Select emotion to reframe:",
+            ["fear", "sadness", "anger", "annoyance", "disappointment", "joy", "neutral"],
+            format_func=lambda x: f"{x.capitalize()} {'(Acute Stress)' if x in ('fear','anger') else ''}",
+            key="reframe_select_box",
+        )
+        data = get_cognitive_reframes(reframe_emo)
+        st.info(f"🧠 **Underlying Cognitive Tendency**: {data['cognitive_distortion']}")
+        st.markdown(f"**💡 Reframing Perspective**: *\"{data['reframing_prompt']}\"*")
+        st.markdown("**🔍 Self-Inquiry Questions:**")
+        for q in data["self_inquiry_questions"]:
+            st.write(f"- {q}")
+        st.success(f"🌱 **Empowering Affirmation**: *\"{data['affirmation']}\"*")
+
+        st.markdown("#### 3. 5-4-3-2-1 Sensory Grounding")
+        with st.expander("👁️ Launch Sensory Grounding Checklist", expanded=False):
+            st.checkbox("👁️ Name 5 things you can SEE around you")
+            st.checkbox("✋ Notice 4 things you can physically FEEL")
+            st.checkbox("👂 Tune into 3 sounds you can HEAR")
+            st.checkbox("👃 Identify 2 things you can SMELL")
+            st.checkbox("👅 Notice 1 taste or sensation in your mouth")
+
+
+def render_team_health_view():
+    st.markdown("### 👥 Team Wellness Index & Burnout Risk Simulator")
+    st.caption("Aggregates employee reflection telemetry into enterprise health indicators while strictly protecting individual privacy.")
+
+    scenario = st.radio(
+        "Select Team Operating Scenario to Simulate:",
+        ["balanced", "thriving", "burnout"],
+        format_func=lambda x: {
+            "balanced": "⚖️ Balanced Sprint (Moderate stress with constructive recovery)",
+            "thriving": "🌟 Thriving Team (High psychological safety and gratitude)",
+            "burnout": "🔥 Overworked Team (Sustained negative sentiment & distress markers)",
+        }[x],
+        horizontal=True,
+    )
+
+    mock_data = generate_synthetic_team_data(days=14, team_size=8, scenario=scenario)
+    metrics = calculate_team_burnout_risk(mock_data)
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        score = metrics["burnout_risk_score"]
+        st.metric("Burnout Risk Score", f"{score}/100", delta=metrics["risk_level"], delta_color="inverse")
+    with col2:
+        st.metric("Team Resilience Index", f"{metrics['team_resilience_index']}/100")
+    with col3:
+        st.metric("Sentiment Compound", f"{metrics['sentiment_mean']:+.2f}")
+    with col4:
+        st.metric("Distress vs Flourish", f"{int(metrics['distress_ratio']*100)}% / {int(metrics['flourishing_ratio']*100)}%")
+
+    df_team = pd.DataFrame(mock_data)
+    df_agg = df_team.groupby("date")["sentiment_compound"].mean().reset_index()
+    fig = px.line(
+        df_agg,
+        x="date",
+        y="sentiment_compound",
+        markers=True,
+        title="14-Day Team Sentiment Moving Average",
+        labels={"sentiment_compound": "Average Sentiment Compound", "date": "Date"},
+    )
+    fig.add_hline(y=0.05, line_dash="dash", line_color="green", annotation_text="Positive Baseline")
+    fig.add_hline(y=-0.05, line_dash="dash", line_color="red", annotation_text="Distress Boundary")
+    fig.update_layout(height=320, margin=dict(l=20, r=20, t=40, b=20))
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("#### 📋 Recommended Management Interventions:")
+    for r in metrics["recommendations"]:
+        st.write(f"- {r}")
+
+
+def render_model_comparator_view():
+    st.markdown("##### 🔬 Live Multi-Model Inference Comparator")
+    st.caption("Demonstrate mixed emotions, rule-based baseline limitations, and fine-tuned DistilBERT contextual generalization in real-time.")
+
+    preset = st.selectbox(
+        "Choose a benchmark evaluation prompt or type your own:",
+        [
+            "Custom text...",
+            "I love working with my team, but this looming deadline is terrifying and exhausting.",
+            "I am definitely not happy with the recent management changes.",
+            "Thank you so much for the thorough code review and guidance!",
+            "I feel completely numb and detached from this project lately.",
+        ],
+    )
+
+    default_text = "" if preset == "Custom text..." else preset
+    eval_text = st.text_area("Input reflection for side-by-side comparison:", value=default_text, height=90, key="comparator_input_text")
+
+    if st.button("⚡ Run Multi-Model Comparison", type="primary"):
+        if not eval_text.strip():
+            st.warning("Please enter or select a reflection text to compare.")
+        else:
+            with st.spinner("Executing lexical rules and transformer inference..."):
+                result = compare_models(eval_text)
+                lex = result["lexical_baseline"]
+                trans = result["transformer_model"]
+                comp = result["comparative_analysis"]
+
+                c_left, c_right = st.columns(2)
+                with c_left:
+                    st.markdown("#### 1. Lexical Baseline (VADER + Keywords)")
+                    st.write(f"• **Polarity**: `{lex['polarity'].upper()}` (Compound: `{lex['compound_score']:.2f}`)")
+                    st.write(f"• **Dominant Emotion**: `{lex['dominant_emotion']}`")
+                    st.write(f"• **Matched Cues**: `{lex['matched_keyword_counts'] or 'None (Unclassified)'}`")
+                    st.caption("Method: Rule-based dictionary lookups and bag-of-words counting.")
+
+                with c_right:
+                    st.markdown("#### 2. Fine-Tuned DistilBERT Transformer")
+                    st.write(f"• **Dominant Category**: `{trans['dominant_emotion'].upper()}`")
+                    st.write(f"• **Active Estimator**: `{trans['method']}`")
+                    st.markdown("**Top Predicted Independent Probabilities:**")
+                    for item in trans["top_emotions"][:4]:
+                        st.progress(float(item["score"]), text=f"{item['label'].capitalize()}: {item['score']:.2%}")
+
+                st.markdown("---")
+                st.markdown("#### 💡 Comparative Analytical Delta & Generalization Defense")
+                st.info(comp["insight"])
+                if comp["subtle_emotions_detected"]:
+                    st.write("• **Subtle Contextual Signals Captured by Transformer (Missed by Lexicon):**")
+                    for se in comp["subtle_emotions_detected"]:
+                        st.write(f"  - `{se['label']}`: {se['score']:.1%} confidence")
+
+
+
 def render_sidebar():
     """Render the account panel and sign-out action."""
     with st.sidebar:
@@ -766,12 +928,14 @@ def render_workspace():
         unsafe_allow_html=True,
     )
 
-    tab_direct, tab_file, tab_trends, tab_arch = st.tabs(
+    tab_direct, tab_file, tab_trends, tab_tools, tab_team, tab_arch = st.tabs(
         [
             "📝 Mood Journal",
             "📂 File Ingestion & Benchmark",
             "📈 Longitudinal Trends & Analytics",
-            "🏗️ Architecture & Verification",
+            "🌬️ Somatic Wellness Tools",
+            "👥 Team Health & Burnout Simulator",
+            "⚖️ Milestone 2 Defense Hub",
         ]
     )
 
@@ -1549,15 +1713,28 @@ def render_workspace():
                 )
 
     # ---------------------------------------------------------------------------
-    # TAB 4: ARCHITECTURE & VERIFICATION
+    # TAB 4: SOMATIC WELLNESS TOOLS
+    # ---------------------------------------------------------------------------
+    with tab_tools:
+        render_wellness_tools_view()
+
+    # ---------------------------------------------------------------------------
+    # TAB 5: TEAM HEALTH & BURNOUT SIMULATOR
+    # ---------------------------------------------------------------------------
+    with tab_team:
+        render_team_health_view()
+
+    # ---------------------------------------------------------------------------
+    # TAB 6: MILESTONE 2 DEFENSE HUB
     # ---------------------------------------------------------------------------
     with tab_arch:
         st.markdown("#### 🏆 Milestone 2 Evaluation & Architecture Verification Hub")
         st.caption("Comprehensive technical audit, model benchmarks, rubric verification, and evaluator defense resources.")
 
-        m2_subtab1, m2_subtab2, m2_subtab3 = st.tabs([
+        m2_subtab1, m2_subtab2, m2_subtab3, m2_subtab4 = st.tabs([
             "📋 Milestone 2 Rubric Compliance",
             "📊 GoEmotions Model Benchmarks & Calibration",
+            "🔬 Live Multi-Model Comparator",
             "🎓 Viva Defense & Technical Q&A Guide",
         ])
 
@@ -1688,6 +1865,9 @@ def render_workspace():
                 )
 
         with m2_subtab3:
+            render_model_comparator_view()
+
+        with m2_subtab4:
             st.markdown("##### 🎓 Evaluator Viva Defense Guide (Top Questions & Answers)")
             with st.expander("❓ Q1: Why is exact-match accuracy ~42%, and why is Macro F1 the primary metric?"):
                 st.markdown(
@@ -1759,7 +1939,15 @@ def render_guest_workspace():
         unsafe_allow_html=True,
     )
 
-    guest_tab1, guest_tab2, guest_tab3 = st.tabs(["📝 Mood Journal", "📄 File Ingestion", "🏗️ Architecture"])
+    guest_tab1, guest_tab2, guest_tab3, guest_tab4, guest_tab5 = st.tabs(
+        [
+            "📝 Mood Journal",
+            "📄 File Ingestion",
+            "🌬️ Somatic Wellness Tools",
+            "👥 Team Health & Burnout Simulator",
+            "🏗️ Architecture",
+        ]
+    )
 
     with guest_tab1:
         with st.container(border=True):
@@ -1924,6 +2112,12 @@ def render_guest_workspace():
                     st.write(f"Sample {idx+1}: *\"{txt[:100]}\"* ➔ **{rep.sentiment_label.value.upper()}** (Emotion: `{rep.dominant_emotion}`)")
 
     with guest_tab3:
+        render_wellness_tools_view()
+
+    with guest_tab4:
+        render_team_health_view()
+
+    with guest_tab5:
         st.markdown("#### System Architecture")
         st.markdown("""
         MoodMentor Guest Mode runs the complete NLP & sentiment pipeline directly in memory.

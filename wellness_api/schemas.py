@@ -121,3 +121,15 @@ class HistoryResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class CompareRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=10000)
+
+
+class TeamBurnoutRequest(BaseModel):
+    entries: list[dict[str, Any]] = Field(default_factory=list)
+    scenario: str = Field(default="balanced")
+    days: int = Field(default=14, ge=3, le=90)
+    team_size: int = Field(default=8, ge=2, le=50)
+

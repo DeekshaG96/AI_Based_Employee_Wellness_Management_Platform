@@ -133,3 +133,30 @@ def analysis_report_from_dict(data: dict[str, Any]) -> AnalysisReport:
         emotion_scores=data.get("emotion_scores", {}),
         recommendations=data.get("recommendations", {}),
     )
+
+
+def compare_models_client(text: str) -> dict[str, Any]:
+    """Call the comparative analysis endpoint across baseline and transformer models."""
+    return _request("POST", "/analyze/compare", json={"text": text})
+
+
+def get_wellness_exercises_client() -> list[dict[str, Any]]:
+    """Fetch catalog of evidence-based somatic and cognitive micro-interventions."""
+    return _request("GET", "/wellness/exercises")
+
+
+def get_team_burnout_risk_client(
+    entries: list[dict[str, Any]] | None = None,
+    scenario: str = "balanced",
+    days: int = 14,
+    team_size: int = 8,
+) -> dict[str, Any]:
+    """Calculate team burnout risk score and resilience index via API."""
+    payload = {
+        "entries": entries or [],
+        "scenario": scenario,
+        "days": days,
+        "team_size": team_size,
+    }
+    return _request("POST", "/team/burnout-risk", json=payload)
+

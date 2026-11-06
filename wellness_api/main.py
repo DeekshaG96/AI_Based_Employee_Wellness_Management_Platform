@@ -17,6 +17,9 @@ from sqlalchemy.orm import Session, selectinload
 from wellness.errors import InputValidationError, WellnessError
 from wellness.pipeline import analyze_csv_records, analyze_text
 from wellness.report import AnalysisReport
+from wellness.comparator import compare_models
+from wellness.wellness_tools import get_cognitive_reframes, get_guided_exercises
+from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
 
 from .database import create_tables, get_session
 from .models import AuthSession, MoodLog, Recommendation, User, recommendation_dict
@@ -24,10 +27,12 @@ from .schemas import (
     AnalysisResponse,
     AnalyzeRequest,
     AuthResponse,
+    CompareRequest,
     HistoryResponse,
     LoginRequest,
     MessageResponse,
     RegisterRequest,
+    TeamBurnoutRequest,
     UserResponse,
 )
 from .security import current_user, hash_password, issue_session, token_digest, verify_password
@@ -339,3 +344,31 @@ def delete_history(
     db.delete(entry)
     db.commit()
     return MessageResponse(message="Record deleted.")
+
+
+@app.post("/analyze/compare", tags=["evaluation"])
+def compare_models_endpoint(payload: CompareRequest) -> dict[str, Any]:
+    """Compare lexical baseline against fine-tuned DistilBERT transformer for any input text."""
+    return compare_models(payload.text)
+
+
+@app.get("/wellness/exercises", tags=["wellness"])
+def get_exercises_endpoint() -> list[dict[str, Any]]:
+    """Return catalog of evidence-based somatic and cognitive micro-interventions."""
+    return get_guided_exercises()
+
+
+@app.get("/wellness/reframes/{emotion}", tags=["wellness"])
+def get_reframe_endpoint(emotion: str) -> dict[str, Any]:
+    """Return tailored CBT cognitive reframing prompt for a detected emotion."""
+    return get_cognitive_reframes(emotion)
+
+
+@app.post("/team/burnout-risk", tags=["wellness"])
+def team_burnout_risk_endpoint(payload: TeamBurnoutRequest) -> dict[str, Any]:
+    """Calculate aggregated Team Burnout Risk Score and Resilience Index."""
+    entries = payload.entries
+    if not entries:
+        entries = generate_synthetic_team_data(days=payload.days, team_size=payload.team_size, scenario=payload.scenario)
+    return calculate_team_burnout_risk(entries)
+

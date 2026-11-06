@@ -1,0 +1,119 @@
+"""Unit tests for newly added functions: Model Comparator, Wellness Tools, and Team Analytics."""
+
+import pytest
+from fastapi.testclient import TestClient
+
+from wellness.comparator import compare_models, run_lexical_baseline, run_transformer_analysis
+from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
+from wellness.wellness_tools import (
+    get_cognitive_reframes,
+    get_guided_exercises,
+    render_box_breathing_widget,
+)
+from wellness_api.main import app
+
+
+def test_lexical_baseline_identifies_polarity_and_keywords():
+    result = run_lexical_baseline("I am ecstatic and joyful about this fantastic promotion!")
+    assert result["polarity"] == "positive"
+    assert result["compound_score"] > 0.5
+    assert result["dominant_emotion"] in ("joy", "unclassified")
+    assert "vader_scores" in result
+
+
+def test_transformer_analysis_returns_probabilities():
+    result = run_transformer_analysis("I feel nervous about the upcoming milestone evaluation.")
+    assert "dominant_emotion" in result
+    assert "top_emotions" in result
+    assert len(result["top_emotions"]) > 0
+    assert "all_scores" in result
+
+
+def test_compare_models_synthesizes_insight():
+    text = "I love collaborating with my team, but this extreme workload is exhausting and stressful."
+    comparison = compare_models(text)
+
+    assert "lexical_baseline" in comparison
+    assert "transformer_model" in comparison
+    assert "comparative_analysis" in comparison
+
+    analysis = comparison["comparative_analysis"]
+    assert "is_mixed_emotion" in analysis
+    assert "insight" in analysis
+    assert len(analysis["insight"]) > 10
+
+
+def test_guided_exercises_catalog():
+    exercises = get_guided_exercises()
+    assert len(exercises) >= 4
+    exercise_ids = {e["id"] for e in exercises}
+    assert "box_breathing" in exercise_ids
+    assert "relaxing_breath_478" in exercise_ids
+    assert "physiological_sigh" in exercise_ids
+    assert "grounding_54321" in exercise_ids
+
+    # Verify widget HTML
+    widget_html = render_box_breathing_widget()
+    assert "boxBreath" in widget_html
+    assert "4-4-4-4" in widget_html
+
+
+def test_cognitive_reframing_catalog():
+    fear_reframe = get_cognitive_reframes("fear")
+    assert "reframing_prompt" in fear_reframe
+    assert "self_inquiry_questions" in fear_reframe
+    assert len(fear_reframe["self_inquiry_questions"]) >= 3
+    assert "affirmation" in fear_reframe
+
+    # Test unknown emotion uses fallback
+    unknown_reframe = get_cognitive_reframes("quantum_superposition")
+    assert "reframing_prompt" in unknown_reframe
+    assert "affirmation" in unknown_reframe
+
+
+def test_team_burnout_risk_metrics():
+    # Empty case
+    empty_result = calculate_team_burnout_risk([])
+    assert empty_result["sample_size"] == 0
+    assert empty_result["risk_level"] == "Insufficient Data"
+
+    # Synthetic burnout data
+    burnout_data = generate_synthetic_team_data(days=7, team_size=5, scenario="burnout")
+    burnout_result = calculate_team_burnout_risk(burnout_data)
+    assert burnout_result["sample_size"] == 35
+    assert burnout_result["burnout_risk_score"] > 40.0
+    assert burnout_result["distress_ratio"] > 0.3
+
+    # Synthetic thriving data
+    thriving_data = generate_synthetic_team_data(days=7, team_size=5, scenario="thriving")
+    thriving_result = calculate_team_burnout_risk(thriving_data)
+    assert thriving_result["burnout_risk_score"] < burnout_result["burnout_risk_score"]
+    assert thriving_result["team_resilience_index"] > burnout_result["team_resilience_index"]
+
+
+def test_api_new_endpoints():
+    client = TestClient(app)
+
+    # 1. Compare models endpoint
+    res_comp = client.post("/analyze/compare", json={"text": "I feel grateful for the help."})
+    assert res_comp.status_code == 200
+    data_comp = res_comp.json()
+    assert "lexical_baseline" in data_comp
+    assert "transformer_model" in data_comp
+    assert "comparative_analysis" in data_comp
+
+    # 2. Exercises endpoint
+    res_ex = client.get("/wellness/exercises")
+    assert res_ex.status_code == 200
+    assert len(res_ex.json()) >= 4
+
+    # 3. Reframing endpoint
+    res_ref = client.get("/wellness/reframes/anger")
+    assert res_ref.status_code == 200
+    assert "reframing_prompt" in res_ref.json()
+
+    # 4. Team Burnout Risk endpoint
+    res_team = client.post("/team/burnout-risk", json={"scenario": "thriving", "days": 7, "team_size": 4})
+    assert res_team.status_code == 200
+    assert "burnout_risk_score" in res_team.json()
+    assert "team_resilience_index" in res_team.json()
