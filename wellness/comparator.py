@@ -140,3 +140,4 @@ def compare_models(text: str) -> dict[str, Any]:
             "insight": insight,
         },
     }
+

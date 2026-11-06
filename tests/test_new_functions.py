@@ -117,3 +117,4 @@ def test_api_new_endpoints():
     assert res_team.status_code == 200
     assert "burnout_risk_score" in res_team.json()
     assert "team_resilience_index" in res_team.json()
+

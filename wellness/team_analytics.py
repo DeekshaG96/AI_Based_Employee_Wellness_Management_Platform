@@ -153,3 +153,4 @@ def generate_synthetic_team_data(days: int = 14, team_size: int = 8, scenario: s
             })
 
     return records
+

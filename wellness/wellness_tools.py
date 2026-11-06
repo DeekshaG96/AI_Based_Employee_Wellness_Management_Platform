@@ -192,3 +192,4 @@ def render_box_breathing_widget() -> str:
         </div>
     </div>
     """
+
