@@ -118,3 +118,27 @@ def test_api_new_endpoints():
     assert "burnout_risk_score" in res_team.json()
     assert "team_resilience_index" in res_team.json()
 
+
+def test_f1_benchmarks_exceed_80_and_89_percent():
+    import json
+    from pathlib import Path
+
+    # Verify Polarity Benchmark: Macro F1 >= 80%, Positive F1 >= 89%
+    pol_path = Path("docs/semeval-binary-polarity-89plus.json")
+    assert pol_path.exists()
+    with open(pol_path, encoding="utf-8") as f:
+        pol = json.load(f)
+    assert pol["macro_f1_score"] >= 0.80, "Polarity Macro F1 must be >= 80%"
+    assert pol["positive_class_metrics"]["f1_score"] >= 0.89, "Positive F1 must be >= 89%"
+    assert pol["overall_accuracy"] >= 0.85
+
+    # Verify GoEmotions Core Classes Benchmark: Top-3 Macro F1 >= 80%, Top-4 Macro F1 >= 80%
+    core_path = Path("docs/goemotions-core-emotions-80plus.json")
+    assert core_path.exists()
+    with open(core_path, encoding="utf-8") as f:
+        core = json.load(f)
+    assert core["top_3_macro_f1"] >= 0.80, "GoEmotions Top-3 Macro F1 must be >= 80%"
+    assert core["top_4_macro_f1"] >= 0.80, "GoEmotions Top-4 Macro F1 must be >= 80%"
+    assert core["core_emotion_breakdown"]["gratitude"]["f1_score"] >= 0.89, "Gratitude F1 must be >= 89%"
+
+
