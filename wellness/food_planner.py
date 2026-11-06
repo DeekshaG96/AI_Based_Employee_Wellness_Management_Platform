@@ -247,3 +247,4 @@ def get_supported_mood_categories() -> list[dict[str, str]]:
         {"id": "fatigue", "label": "Burnout & Exhaustion (Mitochondrial ATP Restoration)"},
         {"id": "neutral", "label": "Balanced Focus (Equilibrium & Clarity)"},
     ]
+
