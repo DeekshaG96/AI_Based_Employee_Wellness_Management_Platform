@@ -22,7 +22,7 @@ def test_lexical_baseline_identifies_polarity_and_keywords():
 
 
 def test_transformer_analysis_returns_probabilities():
-    result = run_transformer_analysis("I feel nervous about the upcoming milestone evaluation.")
+    result = run_transformer_analysis("I feel nervous about the upcoming project evaluation.")
     assert "dominant_emotion" in result
     assert "top_emotions" in result
     assert len(result["top_emotions"]) > 0

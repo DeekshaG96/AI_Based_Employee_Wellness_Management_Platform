@@ -1803,7 +1803,7 @@ def render_workspace():
             with exp2:
                 st.download_button(
                     "📥 Export Filtered Records (JSON)",
-                    data=filtered_df.to_json(orient="records", indent=2).encode("utf-8"),
+                    data=filtered_df.to_json(orient="records", indent=2, date_format="iso").encode("utf-8"),
                     file_name="moodmentor_sentiment_report.json",
                     mime="application/json",
                     use_container_width=True,
