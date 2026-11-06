@@ -30,7 +30,7 @@ def main() -> int:
 
     print("=" * 68)
     print("  MoodMentor - AI-Based Employee Wellness Platform")
-    print("  Milestone 2 Evaluation & Defense Runner")
+    print("  AI Wellness Platform - Evaluation & Service Runner")
     print("=" * 68)
 
     model_dir = root / "models" / "goemotions-distilbert"

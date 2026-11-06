@@ -82,16 +82,16 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Preset scenarios with Milestone 2 Evaluation Scenarios
+# Standard evaluation scenarios
 PRESET_SCENARIOS = {
     "Choose an example (optional)...": "",
-    "🎯 Milestone 2: Mixed Emotion (Pride + Anxiety)": (
+    "🎯 Benchmark: Mixed Emotion (Pride + Anxiety)": (
         "I feel proud that I finished the work, but worried about tomorrow."
     ),
-    "🎯 Milestone 2: Error Analysis & Negation ('I am not happy')": (
+    "🎯 Benchmark: Error Analysis & Negation ('I am not happy')": (
         "I am not happy."
     ),
-    "🎯 Milestone 2: Crisis Screening & Support Priority": (
+    "🎯 Benchmark: Crisis Screening & Support Priority": (
         "I am feeling completely overwhelmed and hopeless with the constant pressure. I don't know if I can keep going anymore."
     ),
     "🎉 Workplace Pride & Achievement": (
@@ -935,7 +935,7 @@ def render_workspace():
             "📈 Longitudinal Trends & Analytics",
             "🌬️ Somatic Wellness Tools",
             "👥 Team Health & Burnout Simulator",
-            "⚖️ Milestone 2 Defense Hub",
+            "⚖️ Model Verification & Defense Hub",
         ]
     )
 
@@ -1725,14 +1725,14 @@ def render_workspace():
         render_team_health_view()
 
     # ---------------------------------------------------------------------------
-    # TAB 6: MILESTONE 2 DEFENSE HUB
+    # TAB 6: MODEL VERIFICATION & DEFENSE HUB
     # ---------------------------------------------------------------------------
     with tab_arch:
-        st.markdown("#### 🏆 Milestone 2 Evaluation & Architecture Verification Hub")
+        st.markdown("#### 🏆 Model Evaluation & Architecture Verification Hub")
         st.caption("Comprehensive technical audit, model benchmarks, rubric verification, and evaluator defense resources.")
 
         m2_subtab1, m2_subtab2, m2_subtab3, m2_subtab4 = st.tabs([
-            "📋 Milestone 2 Rubric Compliance",
+            "📋 Technical Rubric Compliance Matrix",
             "📊 GoEmotions Model Benchmarks & Calibration",
             "🔬 Live Multi-Model Comparator",
             "🎓 Viva Defense & Technical Q&A Guide",
@@ -1743,37 +1743,37 @@ def render_workspace():
             m2_matrix = pd.DataFrame(
                 [
                     {
-                        "Milestone 2 Requirement": "1. Fine-tuned / Evaluated GoEmotions Model",
+                        "Technical Requirement": "1. Fine-tuned / Evaluated GoEmotions Model",
                         "Project Implementation": "GoEmotions simplified agree-2 dataset (54,263 rows) under archive/ & data/goemotions. BruceIC/emoticare evaluated across all 28 classes; 10k-sample DistilBERT pilot profiled.",
                         "Status": "✅ Ready & Documented",
                     },
                     {
-                        "Milestone 2 Requirement": "2. Multi-Class Confidence Telemetry (>= 6 Emotions)",
+                        "Technical Requirement": "2. Multi-Class Confidence Telemetry (>= 6 Emotions)",
                         "Project Implementation": "Full 28-dimensional multi-label independent sigmoid probabilities + Ekman 6-category cluster mappings with confidence scores.",
                         "Status": "✅ Exceeds Spec (28 classes)",
                     },
                     {
-                        "Milestone 2 Requirement": "3. VADER Sentiment Polarity Engine",
+                        "Technical Requirement": "3. VADER Sentiment Polarity Engine",
                         "Project Implementation": "Strict compound threshold boundaries (> +0.05 Pos, < -0.05 Neg, [-0.05, 0.05] Neu) with contraction expansion and negation-preserving stopwords.",
                         "Status": "✅ 100% Test-Verified",
                     },
                     {
-                        "Milestone 2 Requirement": "4. Model Evaluation Metrics",
+                        "Technical Requirement": "4. Model Evaluation Metrics",
                         "Project Implementation": "Exact-match accuracy, Macro/Micro Precision, Recall, F1, and Hamming loss reported with per-class confusion counts in docs/goemotions-bruceic-calibration.json.",
                         "Status": "✅ Complete (Test: 5,427 rows)",
                     },
                     {
-                        "Milestone 2 Requirement": "5. Validation-Only Threshold Calibration",
+                        "Technical Requirement": "5. Validation-Only Threshold Calibration",
                         "Project Implementation": "Independent per-class thresholds tuned strictly on 5,426 validation rows, tested on 5,427 untouched held-out rows (Macro F1: 48.72%, Micro F1: 60.19%).",
                         "Status": "✅ Leakage-Free Calibration",
                     },
                     {
-                        "Milestone 2 Requirement": "6. Mixed-Emotion & Error Recovery Walkthrough",
+                        "Technical Requirement": "6. Mixed-Emotion & Error Recovery Walkthrough",
                         "Project Implementation": "Built-in 1-click preset scenarios for 'proud but worried' (mixed emotions) and 'I am not happy' (negation limitation & recovery guidance).",
                         "Status": "✅ 1-Click Interactive Showcase",
                     },
                     {
-                        "Milestone 2 Requirement": "7. Security, Persistence & GDPR Controls",
+                        "Technical Requirement": "7. Security, Persistence & GDPR Controls",
                         "Project Implementation": "FastAPI + PostgreSQL/SQLite with PBKDF2 hashed passwords, SHA-256 token digests, session-scoped isolation, and 1-click record deletion.",
                         "Status": "✅ Enterprise-Grade Security",
                     },
