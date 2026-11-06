@@ -44,6 +44,8 @@ def _make_engine(url: str):
     kwargs = {"pool_pre_ping": True}
     if url.startswith("sqlite"):
         kwargs["connect_args"] = {"check_same_thread": False}
+    else:
+        kwargs["connect_args"] = {"connect_timeout": 3}
     return create_engine(url, **kwargs)
 
 
@@ -66,6 +68,8 @@ def create_tables() -> None:
     logger = logging.getLogger(__name__)
 
     try:
+        with engine.connect() as conn:
+            pass
         Base.metadata.create_all(bind=engine)
     except Exception as exc:
         logger.warning("Configured database is unreachable (%s); falling back to local SQLite.", exc)
