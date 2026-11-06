@@ -23,6 +23,7 @@ from wellness.api_client import (
     analyze_file as api_analyze_file,
 )
 from wellness.api_client import (
+    api_url,
     delete_entry as api_delete_entry,
 )
 from wellness.api_client import (
@@ -623,10 +624,10 @@ def render_landing_and_auth():
         )
         with st.container(border=True):
             # Graceful backend connectivity check
-            api_is_online = True
+            api_is_online = False
             try:
                 import urllib.request
-                with urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=0.8) as _res:
+                with urllib.request.urlopen(f"{api_url()}/health", timeout=3.0) as _res:
                     api_is_online = (_res.status == 200)
             except Exception:
                 api_is_online = False
@@ -640,6 +641,8 @@ def render_landing_and_auth():
                     st.session_state.guest_mode = True
                     st.rerun()
                 st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+            else:
+                st.caption("🟢 **FastAPI Service**: Connected (`" + api_url() + "`)")
 
             sign_in_tab, register_tab, guest_tab = st.tabs(["Sign in", "Create account", "🌿 Guest Access"])
             with sign_in_tab:

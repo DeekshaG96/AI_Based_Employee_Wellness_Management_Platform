@@ -62,8 +62,17 @@ def configure_database(url: str) -> None:
 
 def create_tables() -> None:
     from . import models  # noqa: F401 - register mapped entities
+    import logging
+    logger = logging.getLogger(__name__)
 
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as exc:
+        logger.warning("Configured database is unreachable (%s); falling back to local SQLite.", exc)
+        db_path = Path(__file__).resolve().parents[1] / "moodmentor.db"
+        configure_database(f"sqlite:///{db_path}")
+        Base.metadata.create_all(bind=engine)
+
     if "recommendations" not in inspect(engine).get_table_names():
         return
     columns = {column["name"] for column in inspect(engine).get_columns("recommendations")}

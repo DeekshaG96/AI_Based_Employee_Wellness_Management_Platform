@@ -48,7 +48,7 @@ def main() -> int:
     else:
         print("  [FastAPI]    Starting service at http://127.0.0.1:8000 ...")
         api_proc = subprocess.Popen(
-            [python_exe, "-m", "uvicorn", "wellness_api.main:app", "--host", "127.0.0.1", "--port", "8000"],
+            [python_exe, "-m", "uvicorn", "wellness_api.main:app", "--host", "0.0.0.0", "--port", "8000"],
             cwd=str(root),
         )
         for _ in range(30):
@@ -68,7 +68,7 @@ def main() -> int:
         ui_env = os.environ.copy()
         ui_env["API_URL"] = "http://127.0.0.1:8000"
         ui_proc = subprocess.Popen(
-            [python_exe, "-m", "streamlit", "run", "app.py", "--server.port", "8501", "--server.address", "127.0.0.1"],
+            [python_exe, "-m", "streamlit", "run", "app.py", "--server.port", "8501", "--server.address", "0.0.0.0"],
             cwd=str(root),
             env=ui_env,
         )
