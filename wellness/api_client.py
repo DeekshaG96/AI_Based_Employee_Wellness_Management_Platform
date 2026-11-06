@@ -166,3 +166,14 @@ def get_mood_food_plan_client(emotion: str, dietary_pref: str = "any") -> dict[s
     return _request("GET", f"/wellness/food-plan/{emotion}", params={"dietary_pref": dietary_pref})
 
 
+def get_meditations_client() -> list[dict[str, Any]]:
+    """Fetch Medito-inspired mindfulness packs from the API."""
+    return _request("GET", "/wellness/meditations")
+
+
+def get_soundscapes_client() -> list[dict[str, str]]:
+    """Fetch ambient soundscape presets from the API."""
+    return _request("GET", "/wellness/soundscapes")
+
+
+

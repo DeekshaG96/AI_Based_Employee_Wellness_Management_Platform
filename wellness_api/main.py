@@ -19,6 +19,7 @@ from wellness.pipeline import analyze_csv_records, analyze_text
 from wellness.report import AnalysisReport
 from wellness.comparator import compare_models
 from wellness.food_planner import get_mood_food_plan, get_supported_mood_categories
+from wellness.meditation import get_meditation_packs, get_soundscape_catalog
 from wellness.wellness_tools import get_cognitive_reframes, get_guided_exercises
 from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
 
@@ -391,5 +392,18 @@ def post_food_plan_endpoint(payload: MoodFoodPlanRequest) -> dict[str, Any]:
 def get_food_plan_categories_endpoint() -> list[dict[str, str]]:
     """Return supported emotional states for nutritional planning."""
     return get_supported_mood_categories()
+
+
+@app.get("/wellness/meditations", tags=["meditation"])
+def get_meditations_endpoint() -> list[dict[str, Any]]:
+    """Return catalog of structured, evidence-based Medito-inspired mindfulness packs."""
+    return get_meditation_packs()
+
+
+@app.get("/wellness/soundscapes", tags=["meditation"])
+def get_soundscapes_endpoint() -> list[dict[str, str]]:
+    """Return catalog of client-side ambient soundscapes and meditation timer presets."""
+    return get_soundscape_catalog()
+
 
 

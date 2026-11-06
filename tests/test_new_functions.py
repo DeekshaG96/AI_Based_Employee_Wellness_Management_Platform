@@ -200,5 +200,54 @@ def test_api_mood_food_endpoints():
     assert res_cats.status_code == 200
     assert len(res_cats.json()) >= 5
 
+    # 4. GET /wellness/meditations (Medito Packs)
+    res_meds = client.get("/wellness/meditations")
+    assert res_meds.status_code == 200
+    data_meds = res_meds.json()
+    assert len(data_meds) >= 4
+    pack_ids = {p["id"] for p in data_meds}
+    assert "stress_release" in pack_ids
+    assert "deep_work_focus" in pack_ids
+
+    # 5. GET /wellness/soundscapes
+    res_sounds = client.get("/wellness/soundscapes")
+    assert res_sounds.status_code == 200
+    data_sounds = res_sounds.json()
+    assert len(data_sounds) >= 3
+
+
+def test_medito_mindfulness_module():
+    from wellness.meditation import (
+        get_meditation_packs,
+        get_soundscape_catalog,
+        render_medito_soundscape_widget,
+    )
+
+    packs = get_meditation_packs()
+    assert len(packs) >= 4
+    for pack in packs:
+        assert "title" in pack
+        assert "sessions" in pack
+        assert len(pack["sessions"]) >= 2
+        for s in pack["sessions"]:
+            assert "guidance" in s
+            assert len(s["guidance"]) >= 2
+
+    soundscapes = get_soundscape_catalog()
+    assert len(soundscapes) >= 4
+    sound_ids = {s["id"] for s in soundscapes}
+    assert "rain" in sound_ids
+    assert "ocean" in sound_ids
+    assert "bell" in sound_ids
+    assert "brown_noise" in sound_ids
+
+    # Check client-side Web Audio widget HTML
+    html = render_medito_soundscape_widget()
+    assert "AudioContext" in html
+    assert "playZenBell" in html
+    assert "createRainSound" in html
+    assert "createOceanWaves" in html
+
+
 
 

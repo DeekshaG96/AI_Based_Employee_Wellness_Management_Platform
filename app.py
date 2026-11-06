@@ -40,6 +40,11 @@ from wellness.api_client import (
 )
 from wellness.comparator import compare_models
 from wellness.food_planner import get_mood_food_plan, get_supported_mood_categories
+from wellness.meditation import (
+    get_meditation_packs,
+    get_soundscape_catalog,
+    render_medito_soundscape_widget,
+)
 from wellness.pipeline import analyze_text
 from wellness.preprocessing import get_preprocessing_breakdown
 from wellness.report import SentimentLabel
@@ -799,12 +804,54 @@ def render_mood_food_planner_view(default_emotion: str = "fear"):
     st.caption(f"📚 **Clinical Basis**: {plan['scientific_basis']}")
 
 
+def render_medito_mindfulness_view():
+    st.markdown("### 🧘 Medito Open-Source Mindfulness & Ambient Sanctuary")
+    st.caption("Inspired by the open-source Medito Foundation (meditohq/medito-app) — 100% free, private, offline-capable mindfulness meditation and ambient soundscapes.")
+
+    # 1. Interactive Soundscape Generator & Meditation Timer
+    st.components.v1.html(render_medito_soundscape_widget(), height=420)
+
+    st.markdown("---")
+    st.markdown("#### 📚 Guided Mindfulness Protocols (Medito Packs)")
+    st.caption("Structured micro-sessions designed for workplace decompression and emotional stabilization.")
+
+    packs = get_meditation_packs()
+    pack_titles = [f"{p['icon']} {p['title']} ({p['duration']})" for p in packs]
+    chosen_pack_idx = st.selectbox(
+        "Choose a Mindfulness Pack to explore:",
+        range(len(packs)),
+        format_func=lambda i: pack_titles[i],
+        key="medito_pack_select",
+    )
+    selected_pack = packs[chosen_pack_idx]
+
+    st.info(f"**Focus Area**: {selected_pack['description']}")
+
+    session_names = [s["title"] for s in selected_pack["sessions"]]
+    chosen_sess_idx = st.radio(
+        "Select Session:",
+        range(len(selected_pack["sessions"])),
+        format_func=lambda i: f"{session_names[i]} · {selected_pack['sessions'][i]['duration']}",
+        horizontal=True,
+        key=f"medito_session_radio_{selected_pack['id']}",
+    )
+    session = selected_pack["sessions"][chosen_sess_idx]
+
+    with st.container(border=True):
+        st.markdown(f"##### {session['title']} ({session['type']} · {session['duration']})")
+        for step in session["guidance"]:
+            st.markdown(f"- {step}")
+
+    st.caption("🕊️ *Ethos: Based on open-source, non-profit mindfulness by Medito Foundation. No paywalls, no tracking, complete digital sanctuary.*")
+
+
 def render_wellness_tools_view():
     st.markdown("### 🌿 Comprehensive Wellness, Somatic & Nutritional Suite")
-    st.caption("Evidence-based workplace regulation tools: somatic breathwork, cognitive reframing, and nutritional psychiatry.")
+    st.caption("Evidence-based workplace regulation tools: somatic breathwork, Medito mindfulness, cognitive reframing, and nutritional psychiatry.")
 
-    tool_sub1, tool_sub2, tool_sub3 = st.tabs([
+    tool_sub1, tool_sub2, tool_sub3, tool_sub4 = st.tabs([
         "🌬️ Somatic Breathwork & Grounding",
+        "🧘 Medito Mindfulness & Soundscapes",
         "🧠 Cognitive Reframing Studio",
         "🥗 Mood-Food & Nutrition Planner",
     ])
@@ -843,6 +890,9 @@ def render_wellness_tools_view():
             st.checkbox("👅 Notice 1 taste or sensation in your mouth")
 
     with tool_sub2:
+        render_medito_mindfulness_view()
+
+    with tool_sub3:
         st.markdown("#### CBT Cognitive Reframing Studio")
         reframe_emo = st.selectbox(
             "Select emotion to reframe:",
@@ -858,7 +908,7 @@ def render_wellness_tools_view():
             st.write(f"- {q}")
         st.success(f"🌱 **Empowering Affirmation**: *\"{data['affirmation']}\"*")
 
-    with tool_sub3:
+    with tool_sub4:
         render_mood_food_planner_view()
 
 
