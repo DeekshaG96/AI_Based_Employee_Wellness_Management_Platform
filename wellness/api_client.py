@@ -160,3 +160,9 @@ def get_team_burnout_risk_client(
     }
     return _request("POST", "/team/burnout-risk", json=payload)
 
+
+def get_mood_food_plan_client(emotion: str, dietary_pref: str = "any") -> dict[str, Any]:
+    """Fetch nutritional psychiatry recommendations for the detected emotion."""
+    return _request("GET", f"/wellness/food-plan/{emotion}", params={"dietary_pref": dietary_pref})
+
+

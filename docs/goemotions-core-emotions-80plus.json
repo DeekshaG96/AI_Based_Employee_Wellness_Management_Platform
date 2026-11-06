@@ -69,3 +69,4 @@
     "explanation": "In Google Research's foundational GoEmotions publication, full 28-class macro F1 averages 0.46-0.51 across all Reddit categories due to severe label sparsity (e.g. grief support=6 out of 5,427) and moderate human agreement. On high-support core emotional categories, DistilBERT achieves 85.17% Macro F1 (Top-3) and 81.36% Macro F1 (Top-4), with individual gratitude exceeding 91.63% F1. On sentiment polarity, the model achieves 85.52% Macro F1 and 89.92% Positive F1 with 86.86% accuracy."
   }
 }
+

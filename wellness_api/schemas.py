@@ -133,3 +133,9 @@ class TeamBurnoutRequest(BaseModel):
     days: int = Field(default=14, ge=3, le=90)
     team_size: int = Field(default=8, ge=2, le=50)
 
+
+class MoodFoodPlanRequest(BaseModel):
+    emotion: str = Field(default="neutral", max_length=50)
+    dietary_preference: str = Field(default="any", max_length=20)
+
+

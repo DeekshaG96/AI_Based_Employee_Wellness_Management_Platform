@@ -142,3 +142,63 @@ def test_f1_benchmarks_exceed_80_and_89_percent():
     assert core["core_emotion_breakdown"]["gratitude"]["f1_score"] >= 0.89, "Gratitude F1 must be >= 89%"
 
 
+def test_mood_food_planner_recommendations():
+    from wellness.food_planner import get_mood_food_plan, get_supported_mood_categories
+
+    # 1. Stress / Fear profile
+    plan_fear = get_mood_food_plan("fear", dietary_pref="any")
+    assert plan_fear["mood_category"] == "stress_anxiety"
+    assert "Magnesium" in " ".join(plan_fear["key_nutrients"])
+    assert len(plan_fear["superfoods"]) >= 4
+    assert "breakfast" in plan_fear["curated_meals"]
+    assert "lunch" in plan_fear["curated_meals"]
+    assert "snack" in plan_fear["curated_meals"]
+    assert "dinner" in plan_fear["curated_meals"]
+    assert len(plan_fear["foods_to_avoid"]) >= 2
+    assert len(plan_fear["shopping_essentials"]) >= 3
+
+    # 2. Sadness / Low Mood profile
+    plan_sad = get_mood_food_plan("sadness", dietary_pref="vegetarian")
+    assert plan_sad["mood_category"] == "low_mood_sadness"
+    assert "Tryptophan" in " ".join(plan_sad["key_nutrients"])
+
+    # 3. Vegan substitution check
+    plan_vegan = get_mood_food_plan("fear", dietary_pref="vegan")
+    assert "salmon" not in plan_vegan["curated_meals"]["dinner"].lower()
+    assert "tofu" in plan_vegan["curated_meals"]["dinner"].lower() or "tempeh" in plan_vegan["curated_meals"]["dinner"].lower()
+
+    # 4. Joy / Flourishing profile
+    plan_joy = get_mood_food_plan("joy")
+    assert plan_joy["mood_category"] == "positive_flourishing"
+
+    # 5. Supported categories listing
+    categories = get_supported_mood_categories()
+    assert len(categories) >= 5
+
+
+def test_api_mood_food_endpoints():
+    client = TestClient(app)
+
+    # 1. GET /wellness/food-plan/{emotion}
+    res_get = client.get("/wellness/food-plan/fear?dietary_pref=vegan")
+    assert res_get.status_code == 200
+    data_get = res_get.json()
+    assert data_get["emotion_detected"] == "fear"
+    assert data_get["dietary_preference"] == "vegan"
+    assert "superfoods" in data_get
+    assert "curated_meals" in data_get
+
+    # 2. POST /wellness/food-plan
+    res_post = client.post("/wellness/food-plan", json={"emotion": "sadness", "dietary_preference": "vegetarian"})
+    assert res_post.status_code == 200
+    data_post = res_post.json()
+    assert data_post["emotion_detected"] == "sadness"
+    assert data_post["dietary_preference"] == "vegetarian"
+
+    # 3. GET /wellness/food-plan-categories
+    res_cats = client.get("/wellness/food-plan-categories")
+    assert res_cats.status_code == 200
+    assert len(res_cats.json()) >= 5
+
+
+

@@ -39,6 +39,7 @@ from wellness.api_client import (
     register as api_register,
 )
 from wellness.comparator import compare_models
+from wellness.food_planner import get_mood_food_plan, get_supported_mood_categories
 from wellness.pipeline import analyze_text
 from wellness.preprocessing import get_preprocessing_breakdown
 from wellness.report import SentimentLabel
@@ -717,35 +718,132 @@ def render_landing_and_auth():
                     st.rerun()
 
 
+def render_mood_food_planner_view(default_emotion: str = "fear"):
+    st.markdown("### 🥗 Nutritional Psychiatry & Mood-Food Planner")
+    st.caption("Evidence-based nutrition science targeting the gut-brain axis, cortisol down-regulation, and neurotransmitter synthesis.")
+
+    c_emo, c_diet = st.columns([1.5, 1])
+    with c_emo:
+        valid_emotions = ["fear", "sadness", "anger", "annoyance", "fatigue", "joy", "neutral"]
+        clean_default = default_emotion.lower().strip()
+        def_idx = valid_emotions.index(clean_default) if clean_default in valid_emotions else 0
+        emotion_choice = st.selectbox(
+            "Select current mood / emotional state to nourish:",
+            valid_emotions,
+            index=def_idx,
+            format_func=lambda x: {
+                "fear": "😰 Acute Stress & Nervousness (Cortisol & GABA Balance)",
+                "anger": "😠 Irritability & Frustration (Blood Sugar Stability)",
+                "annoyance": "😤 Workplace Friction & Annoyance (Anti-Irritant)",
+                "sadness": "🌧️ Low Mood & Emotional Dip (Serotonin Precursors)",
+                "fatigue": "🔋 Exhaustion & Burnout (ATP Mitochondrial Fuel)",
+                "joy": "🌟 Joy & Flourishing (Cognitive Vitality & Flow)",
+                "neutral": "⚖️ Balanced Focus & Clarity (Homeostatic Equilibrium)",
+            }.get(x, x.capitalize()),
+            key="mood_food_emotion_select",
+        )
+    with c_diet:
+        diet_pref = st.radio(
+            "Dietary Pattern:",
+            ["any", "vegetarian", "vegan"],
+            format_func=lambda x: {"any": "🍽️ Omnivore / Any", "vegetarian": "🧀 Vegetarian", "vegan": "🌱 100% Vegan"}[x],
+            horizontal=True,
+            key="mood_food_diet_radio",
+        )
+
+    plan = get_mood_food_plan(emotion_choice, diet_pref)
+
+    st.markdown(f"#### 🎯 {plan['title']}")
+    st.info(f"🧬 **Neurochemical Objective**: {plan['neurochemical_objective']}")
+
+    st.markdown("**Essential Neuro-Nutrients Targeted:**")
+    nutrient_chips = "".join([f'<span class="chip chip-token" style="background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; font-weight:600; margin-right:6px; padding:4px 10px; border-radius:12px;">{n}</span>' for n in plan["key_nutrients"]])
+    st.markdown(nutrient_chips, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("#### 🍽️ The Curated Mood-Food Plate (Daily Blueprint)")
+    col1, col2 = st.columns(2)
+    with col1:
+        with st.container(border=True):
+            st.markdown("##### 🌅 Breakfast (Morning Fuel)")
+            st.write(plan["curated_meals"]["breakfast"])
+        with st.container(border=True):
+            st.markdown("##### ☀️ Lunch (Midday Sustenance)")
+            st.write(plan["curated_meals"]["lunch"])
+    with col2:
+        with st.container(border=True):
+            st.markdown("##### ☕ Afternoon Reset Snack")
+            st.write(plan["curated_meals"]["snack"])
+        with st.container(border=True):
+            st.markdown("##### 🌙 Dinner (Restorative Wind-down)")
+            st.write(plan["curated_meals"]["dinner"])
+
+    st.markdown("---")
+    col_sf, col_av = st.columns([1.3, 1])
+    with col_sf:
+        st.markdown("#### 🥑 Top Superfoods & Physiological Benefits")
+        for item in plan["superfoods"]:
+            st.markdown(f"- **{item['food']}**: {item['benefit']}")
+
+        st.markdown(f"💧 **Hydration Protocol**: {plan['hydration_tip']}")
+
+    with col_av:
+        st.markdown("#### 🚫 Substances to Limit Today")
+        for av in plan["foods_to_avoid"]:
+            st.markdown(f"- ⚠️ {av}")
+
+        with st.expander("🛒 View Shopping Essentials List"):
+            for shop in plan["shopping_essentials"]:
+                st.write(f"• {shop}")
+
+    st.caption(f"📚 **Clinical Basis**: {plan['scientific_basis']}")
+
+
 def render_wellness_tools_view():
-    st.markdown("### 🌬️ Somatic Micro-Interventions & Grounding Studio")
-    st.caption("Evidence-based workplace regulation exercises designed to reduce autonomic stress and restore focus.")
+    st.markdown("### 🌿 Comprehensive Wellness, Somatic & Nutritional Suite")
+    st.caption("Evidence-based workplace regulation tools: somatic breathwork, cognitive reframing, and nutritional psychiatry.")
 
-    col_tools, col_reframe = st.columns([1, 1], gap="large")
-    with col_tools:
-        st.markdown("#### 1. Guided Breath Pacing")
-        st.components.v1.html(render_box_breathing_widget(), height=360)
+    tool_sub1, tool_sub2, tool_sub3 = st.tabs([
+        "🌬️ Somatic Breathwork & Grounding",
+        "🧠 Cognitive Reframing Studio",
+        "🥗 Mood-Food & Nutrition Planner",
+    ])
 
-        with st.expander("🧘 View 4-7-8 Relaxing Breath Technique"):
-            st.markdown("""
-            **Purpose**: Stimulate the parasympathetic vagal brake to de-escalate acute anxiety.
-            - **Step 1**: Inhale quietly through your nose for **4 seconds**.
-            - **Step 2**: Gently hold your breath for **7 seconds**.
-            - **Step 3**: Exhale completely with a soft whoosh sound for **8 seconds**.
-            - *Repeat for 4 complete cycles.*
-            """)
+    with tool_sub1:
+        col_tools, col_ground = st.columns([1, 1], gap="large")
+        with col_tools:
+            st.markdown("#### Guided Breath Pacing")
+            st.components.v1.html(render_box_breathing_widget(), height=360)
 
-        with st.expander("⚡ View Physiological Sigh (60-Second Fast Reset)"):
-            st.markdown("""
-            **Purpose**: Rapidly re-inflate collapsed lung alveoli and trigger immediate autonomic calming (Stanford Medicine protocol).
-            - **Step 1**: Take a deep, smooth inhale through your nose.
-            - **Step 2**: At the very top, take a second, sharp sip of extra air.
-            - **Step 3**: Release a slow, extended exhale through your mouth for 6 seconds.
-            - *Repeat 3 times.*
-            """)
+            with st.expander("🧘 View 4-7-8 Relaxing Breath Technique"):
+                st.markdown("""
+                **Purpose**: Stimulate the parasympathetic vagal brake to de-escalate acute anxiety.
+                - **Step 1**: Inhale quietly through your nose for **4 seconds**.
+                - **Step 2**: Gently hold your breath for **7 seconds**.
+                - **Step 3**: Exhale completely with a soft whoosh sound for **8 seconds**.
+                - *Repeat for 4 complete cycles.*
+                """)
 
-    with col_reframe:
-        st.markdown("#### 2. CBT Cognitive Reframing Studio")
+            with st.expander("⚡ View Physiological Sigh (60-Second Fast Reset)"):
+                st.markdown("""
+                **Purpose**: Rapidly re-inflate collapsed lung alveoli and trigger immediate autonomic calming (Stanford Medicine protocol).
+                - **Step 1**: Take a deep, smooth inhale through your nose.
+                - **Step 2**: At the very top, take a second, sharp sip of extra air.
+                - **Step 3**: Release a slow, extended exhale through your mouth for 6 seconds.
+                - *Repeat 3 times.*
+                """)
+
+        with col_ground:
+            st.markdown("#### 5-4-3-2-1 Sensory Grounding")
+            st.caption("Interrupt cognitive rumination by anchoring sensory perception in the physical environment.")
+            st.checkbox("👁️ Name 5 things you can SEE around you")
+            st.checkbox("✋ Notice 4 things you can physically FEEL")
+            st.checkbox("👂 Tune into 3 sounds you can HEAR")
+            st.checkbox("👃 Identify 2 things you can SMELL")
+            st.checkbox("👅 Notice 1 taste or sensation in your mouth")
+
+    with tool_sub2:
+        st.markdown("#### CBT Cognitive Reframing Studio")
         reframe_emo = st.selectbox(
             "Select emotion to reframe:",
             ["fear", "sadness", "anger", "annoyance", "disappointment", "joy", "neutral"],
@@ -760,13 +858,8 @@ def render_wellness_tools_view():
             st.write(f"- {q}")
         st.success(f"🌱 **Empowering Affirmation**: *\"{data['affirmation']}\"*")
 
-        st.markdown("#### 3. 5-4-3-2-1 Sensory Grounding")
-        with st.expander("👁️ Launch Sensory Grounding Checklist", expanded=False):
-            st.checkbox("👁️ Name 5 things you can SEE around you")
-            st.checkbox("✋ Notice 4 things you can physically FEEL")
-            st.checkbox("👂 Tune into 3 sounds you can HEAR")
-            st.checkbox("👃 Identify 2 things you can SMELL")
-            st.checkbox("👅 Notice 1 taste or sensation in your mouth")
+    with tool_sub3:
+        render_mood_food_planner_view()
 
 
 def render_team_health_view():
@@ -933,7 +1026,7 @@ def render_workspace():
             "📝 Mood Journal",
             "📂 File Ingestion & Benchmark",
             "📈 Longitudinal Trends & Analytics",
-            "🌬️ Somatic Wellness Tools",
+            "🥗 Somatic & Nutritional Wellness",
             "👥 Team Health & Burnout Simulator",
             "⚖️ Model Verification & Defense Hub",
         ]
@@ -1215,6 +1308,10 @@ def render_workspace():
                             """,
                             unsafe_allow_html=True,
                         )
+
+                    # Tailored Nutritional Support for the Analyzed Reflection
+                    with st.expander(f"🥗 View Personalized Mood-Food Nutrition Plan for {report.dominant_emotion.upper()}", expanded=False):
+                        render_mood_food_planner_view(default_emotion=report.dominant_emotion)
 
                     # Mood trend and downloadable report
                     st.markdown("---")
@@ -1989,7 +2086,7 @@ def render_guest_workspace():
         [
             "📝 Mood Journal",
             "📄 File Ingestion",
-            "🌬️ Somatic Wellness Tools",
+            "🥗 Somatic & Nutritional Wellness",
             "👥 Team Health & Burnout Simulator",
             "🏗️ Architecture",
         ]

@@ -1,5 +1,6 @@
 """MoodMentor employee wellness text analysis and emotion telemetry API."""
 
+from .food_planner import get_mood_food_plan, get_supported_mood_categories
 from .pipeline import (
     EMOTIONS,
     analyze_csv_records,
@@ -31,7 +32,9 @@ __all__ = [
     "connect_database",
     "delete_mood_entry",
     "generate_recommendations",
+    "get_mood_food_plan",
     "get_preprocessing_breakdown",
+    "get_supported_mood_categories",
     "get_user_mood_entries",
     "register_user",
     "sanitize_text_for_vader",

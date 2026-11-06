@@ -18,6 +18,7 @@ from wellness.errors import InputValidationError, WellnessError
 from wellness.pipeline import analyze_csv_records, analyze_text
 from wellness.report import AnalysisReport
 from wellness.comparator import compare_models
+from wellness.food_planner import get_mood_food_plan, get_supported_mood_categories
 from wellness.wellness_tools import get_cognitive_reframes, get_guided_exercises
 from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
 
@@ -31,6 +32,7 @@ from .schemas import (
     HistoryResponse,
     LoginRequest,
     MessageResponse,
+    MoodFoodPlanRequest,
     RegisterRequest,
     TeamBurnoutRequest,
     UserResponse,
@@ -371,4 +373,23 @@ def team_burnout_risk_endpoint(payload: TeamBurnoutRequest) -> dict[str, Any]:
     if not entries:
         entries = generate_synthetic_team_data(days=payload.days, team_size=payload.team_size, scenario=payload.scenario)
     return calculate_team_burnout_risk(entries)
+
+
+@app.get("/wellness/food-plan/{emotion}", tags=["nutrition"])
+def get_food_plan_endpoint(emotion: str, dietary_pref: str = Query(default="any")) -> dict[str, Any]:
+    """Return tailored nutritional psychiatry recommendations for the detected emotion."""
+    return get_mood_food_plan(emotion, dietary_pref)
+
+
+@app.post("/wellness/food-plan", tags=["nutrition"])
+def post_food_plan_endpoint(payload: MoodFoodPlanRequest) -> dict[str, Any]:
+    """Return tailored nutritional psychiatry recommendations for the requested emotion and diet."""
+    return get_mood_food_plan(payload.emotion, payload.dietary_preference)
+
+
+@app.get("/wellness/food-plan-categories", tags=["nutrition"])
+def get_food_plan_categories_endpoint() -> list[dict[str, str]]:
+    """Return supported emotional states for nutritional planning."""
+    return get_supported_mood_categories()
+
 
