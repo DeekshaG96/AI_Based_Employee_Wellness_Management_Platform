@@ -723,7 +723,7 @@ def render_landing_and_auth():
                     st.rerun()
 
 
-def render_mood_food_planner_view(default_emotion: str = "fear"):
+def render_mood_food_planner_view(default_emotion: str = "fear", key_prefix: str = "tools"):
     st.markdown("### 🥗 Nutritional Psychiatry & Mood-Food Planner")
     st.caption("Evidence-based nutrition science targeting the gut-brain axis, cortisol down-regulation, and neurotransmitter synthesis.")
 
@@ -745,7 +745,7 @@ def render_mood_food_planner_view(default_emotion: str = "fear"):
                 "joy": "🌟 Joy & Flourishing (Cognitive Vitality & Flow)",
                 "neutral": "⚖️ Balanced Focus & Clarity (Homeostatic Equilibrium)",
             }.get(x, x.capitalize()),
-            key="mood_food_emotion_select",
+            key=f"{key_prefix}_mood_food_emotion_select",
         )
     with c_diet:
         diet_pref = st.radio(
@@ -753,7 +753,7 @@ def render_mood_food_planner_view(default_emotion: str = "fear"):
             ["any", "vegetarian", "vegan"],
             format_func=lambda x: {"any": "🍽️ Omnivore / Any", "vegetarian": "🧀 Vegetarian", "vegan": "🌱 100% Vegan"}[x],
             horizontal=True,
-            key="mood_food_diet_radio",
+            key=f"{key_prefix}_mood_food_diet_radio",
         )
 
     plan = get_mood_food_plan(emotion_choice, diet_pref)
@@ -909,7 +909,7 @@ def render_wellness_tools_view():
         st.success(f"🌱 **Empowering Affirmation**: *\"{data['affirmation']}\"*")
 
     with tool_sub4:
-        render_mood_food_planner_view()
+        render_mood_food_planner_view(key_prefix="soma_sanctuary")
 
 
 def render_team_health_view():
@@ -1361,7 +1361,7 @@ def render_workspace():
 
                     # Tailored Nutritional Support for the Analyzed Reflection
                     with st.expander(f"🥗 View Personalized Mood-Food Nutrition Plan for {report.dominant_emotion.upper()}", expanded=False):
-                        render_mood_food_planner_view(default_emotion=report.dominant_emotion)
+                        render_mood_food_planner_view(default_emotion=report.dominant_emotion, key_prefix="journal_analysis")
 
                     # Mood trend and downloadable report
                     st.markdown("---")
