@@ -14,7 +14,14 @@ def summarize(path: Path) -> dict[str, Any]:
     return {
         "report": path.name,
         "base_model": data.get("base_model", "unknown"),
-        "examples_train": (training.get("examples_per_split") or {}).get("train.csv", "unknown"),
+        "examples_train": next(
+            (
+                values
+                for key, values in (training.get("examples_per_split") or {}).items()
+                if key.endswith(("train.csv", "train.tsv"))
+            ),
+            "unknown",
+        ),
         "validation_macro_f1": data.get("validation_macro_f1_at_fixed_threshold", "unknown"),
         "test_macro_f1": test.get("macro_f1", "unknown"),
         "test_micro_f1": test.get("micro_f1", "unknown"),

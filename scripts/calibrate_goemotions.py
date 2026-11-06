@@ -141,7 +141,9 @@ def tune_thresholds(
     import numpy as np
 
     scores, actual = _metric_arrays(predictions, targets, labels)
-    candidates = [round(value / 100, 2) for value in range(5, 96, 5)]
+    # Use a fine grid because rare labels can move macro-F1 materially with
+    # small threshold changes. The test split is still never used for tuning.
+    candidates = [round(value / 100, 2) for value in range(1, 100)]
     supports = actual.sum(axis=0)
     global_threshold = candidates[0]
     best_macro_f1 = -1.0
@@ -247,10 +249,12 @@ def main() -> None:
         raise SystemExit(f"Expected the 28 GoEmotions labels; found {len(labels)}.")
 
     try:
+        import torch
         from transformers import pipeline
     except ImportError as exc:
         raise SystemExit("Install the ML extras: python -m pip install -e '.[ml]'") from exc
-    classifier = pipeline("text-classification", model=args.model, top_k=None, device=-1)
+    device = 0 if torch.cuda.is_available() else -1
+    classifier = pipeline("text-classification", model=args.model, top_k=None, device=device)
     if getattr(classifier.model.config, "problem_type", None) is None:
         classifier.model.config.problem_type = "multi_label_classification"
     elif classifier.model.config.problem_type != "multi_label_classification":
@@ -286,6 +290,7 @@ def main() -> None:
         "held_out_test_fixed_threshold_metrics": test_fixed,
         "held_out_test_calibrated_metrics": test_tuned,
         "evaluated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "runtime_device": "cuda:0" if device == 0 else "cpu",
         "privacy": "Only aggregate counts and metrics are written; source text and predictions are not saved.",
         "limitations": "Calibration may overfit the development split. GoEmotions is Reddit-derived and is not a validated employee-journal benchmark.",
     }

@@ -8,3 +8,4 @@ pydantic>=2.8,<3
 nltk>=3.8.1
 spacy>=3.7
 transformers>=4.38,<5
+python-dotenv>=1.0,<2

@@ -1,7 +1,7 @@
 import csv
 import sys
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -224,3 +224,25 @@ def test_preprocessing_breakdown():
     assert "filtered_tokens" in breakdown
     assert "lemmas" in breakdown
     assert "the" not in breakdown["filtered_tokens"]
+
+
+def test_analysis_uses_builtin_stopwords_when_nltk_corpus_is_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Missing stopwords must reduce optional NLP detail, not break hosted analysis."""
+    from wellness import preprocessing
+
+    monkeypatch.delenv("WELLNESS_LIGHTWEIGHT_PREPROCESSING", raising=False)
+    monkeypatch.setenv("WELLNESS_BUNDLED_VADER", "1")
+    monkeypatch.setattr(
+        preprocessing.stopwords,
+        "words",
+        lambda _language: (_ for _ in ()).throw(LookupError("stopwords unavailable")),
+    )
+
+    report = analyze_text("I am not feeling great about this workload.")
+    breakdown = get_preprocessing_breakdown(report.original_text)
+
+    assert report.sentiment_scores.compound < 0
+    assert any("built-in English stopword list" in note for note in breakdown["resource_notes"])
+    assert "not" in breakdown["filtered_tokens"]

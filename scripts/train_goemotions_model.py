@@ -200,8 +200,11 @@ def main() -> None:
         import torch
         import transformers
         from torch.utils.data import DataLoader
-        from transformers import AutoModelForSequenceClassification, AutoTokenizer
-        from transformers import get_linear_schedule_with_warmup
+        from transformers import (
+            AutoModelForSequenceClassification,
+            AutoTokenizer,
+            get_linear_schedule_with_warmup,
+        )
     except ImportError as exc:
         raise SystemExit(
             "Install the local ML dependencies first: python -m pip install -r requirements.txt"

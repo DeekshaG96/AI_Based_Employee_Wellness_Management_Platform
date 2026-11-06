@@ -9,9 +9,13 @@ from pathlib import Path
 try:
     from dotenv import load_dotenv
 
-    _env_file = Path(__file__).resolve().parents[1] / ".env"
-    if _env_file.is_file():
-        load_dotenv(_env_file)
+    _project_root = Path(__file__).resolve().parents[1]
+    # Neon CLI writes project credentials to .env.local; keep .env as a fallback.
+    # Existing process environment variables still take precedence.
+    for _env_name in (".env.local", ".env"):
+        _env_file = _project_root / _env_name
+        if _env_file.is_file():
+            load_dotenv(_env_file)
 except ImportError:
     pass
 

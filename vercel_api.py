@@ -9,4 +9,4 @@ os.environ.setdefault("WELLNESS_DISABLE_TRANSFORMER", "1")
 os.environ.setdefault("WELLNESS_LIGHTWEIGHT_PREPROCESSING", "1")
 os.environ.setdefault("WELLNESS_BUNDLED_VADER", "1")
 
-from wellness_api.main import app  # noqa: E402
+from wellness_api.main import app  # noqa: F401

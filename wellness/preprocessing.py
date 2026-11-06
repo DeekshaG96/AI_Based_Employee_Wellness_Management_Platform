@@ -49,13 +49,7 @@ _NEGATIONS: frozenset[str] = frozenset(
 # Small dependency-free list used only by the hosted showcase. The full local app
 # continues to use the complete NLTK stopword corpus and spaCy/WordNet pipeline.
 _HOSTED_STOP_WORDS: frozenset[str] = frozenset(
-    "a an the and or but if while is am are was were be been being do does did "
-    "have has had i me my we our you your he she it they them their this that "
-    "these those what which who when where why how as at by for from in into "
-    "of on to with about between through before after above below up down out "
-    "off over under again then once here there all any both each few more most "
-    "other some such can could would should will may might must also just very"
-    .split()
+    ["a", "an", "the", "and", "or", "but", "if", "while", "is", "am", "are", "was", "were", "be", "been", "being", "do", "does", "did", "have", "has", "had", "i", "me", "my", "we", "our", "you", "your", "he", "she", "it", "they", "them", "their", "this", "that", "these", "those", "what", "which", "who", "when", "where", "why", "how", "as", "at", "by", "for", "from", "in", "into", "of", "on", "to", "with", "about", "between", "through", "before", "after", "above", "below", "up", "down", "out", "off", "over", "under", "again", "then", "once", "here", "there", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "can", "could", "would", "should", "will", "may", "might", "must", "also", "just", "very"]
 )
 
 
@@ -90,32 +84,17 @@ def _get_spacy_pipeline() -> Any:
 
 
 def validate_nltk_resources() -> None:
-    """Raise a setup error locally; the hosted showcase intentionally needs no corpora."""
+    """Validate only resources that cannot be replaced by a safe local fallback."""
     if _lightweight_preprocessing_enabled():
         return
 
     import nltk
 
-    missing: list[str] = []
-    for paths, name in _REQUIRED_RESOURCES:
-        if not any(_resource_exists(nltk, path) for path in paths):
-            missing.append(name)
-    if not any(
-        _resource_exists(nltk, path) for path in ("tokenizers/punkt", "tokenizers/punkt_tab")
+    if os.getenv("WELLNESS_BUNDLED_VADER") != "1" and not any(
+        _resource_exists(nltk, path) for path in _REQUIRED_RESOURCES[2][0]
     ):
-        missing.append("punkt")
-    if not any(
-        _resource_exists(nltk, path)
-        for path in (
-            "taggers/averaged_perceptron_tagger",
-            "taggers/averaged_perceptron_tagger_eng",
-        )
-    ):
-        missing.append("averaged_perceptron_tagger")
-    if missing:
-        joined = ", ".join(missing)
         raise NLTKResourceError(
-            f"Missing NLTK data: {joined}. Run "
+            "Could not load the VADER language resource. Run "
             "`python -m wellness.cli --download-nltk-data` and try again."
         )
 
@@ -175,17 +154,24 @@ def _wordnet_pos(tag: str) -> str:
 
 def _tokenize_and_lemmatize(
     cleaned: str,
-) -> tuple[list[str], list[str], list[tuple[str, str]], tuple[str, ...]]:
+) -> tuple[list[str], list[str], list[tuple[str, str]], tuple[str, ...], list[str]]:
     """Use corpus-free filtering in hosted mode, else spaCy or the NLTK fallback."""
+    notes: list[str] = []
     if _lightweight_preprocessing_enabled():
         raw_tokens = re.findall(r"[a-z]+", cleaned.lower())
         stop_words = _HOSTED_STOP_WORDS - _NEGATIONS
         filtered = [token for token in raw_tokens if token not in stop_words]
         tagged = [(token, "TOKEN") for token in filtered]
         # Keep surface forms here; without a corpus, do not claim lemmatization.
-        return raw_tokens, filtered, tagged, tuple(filtered)
+        return raw_tokens, filtered, tagged, tuple(filtered), notes
 
-    stop_words = set(stopwords.words("english")) - _NEGATIONS
+    try:
+        stop_words = set(stopwords.words("english")) - _NEGATIONS
+    except LookupError:
+        stop_words = set(_HOSTED_STOP_WORDS) - _NEGATIONS
+        notes.append(
+            "NLTK stopwords were unavailable; the built-in English stopword list was used."
+        )
     nlp = _get_spacy_pipeline()
     if nlp is not None:
         document = nlp(cleaned)
@@ -196,21 +182,39 @@ def _tokenize_and_lemmatize(
         filtered = [token.text.lower() for token in kept]
         tagged = [(token.text.lower(), token.tag_ or token.pos_) for token in kept]
         lemmas = tuple((token.lemma_ or token.text).lower().strip() for token in kept)
-        return raw_tokens, filtered, tagged, lemmas
+        return raw_tokens, filtered, tagged, lemmas, notes
 
-    raw_tokens = word_tokenize(cleaned)
+    try:
+        raw_tokens = word_tokenize(cleaned)
+    except LookupError:
+        raw_tokens = re.findall(r"[a-z]+", cleaned.lower())
+        notes.append(
+            "NLTK tokenization data were unavailable; regex tokenization was used."
+        )
     filtered = [token for token in raw_tokens if token.isalpha() and token not in stop_words]
-    tagged = pos_tag(filtered)
-    lemmatizer = WordNetLemmatizer()
-    lemmas = tuple(lemmatizer.lemmatize(token, _wordnet_pos(tag)) for token, tag in tagged)
-    return raw_tokens, filtered, tagged, lemmas
+    try:
+        tagged = pos_tag(filtered)
+    except LookupError:
+        tagged = [(token, "TOKEN") for token in filtered]
+        notes.append(
+            "NLTK part-of-speech data were unavailable; surface token labels were used."
+        )
+    try:
+        lemmatizer = WordNetLemmatizer()
+        lemmas = tuple(lemmatizer.lemmatize(token, _wordnet_pos(tag)) for token, tag in tagged)
+    except LookupError:
+        lemmas = tuple(filtered)
+        notes.append(
+            "WordNet data were unavailable; surface forms were retained instead of claiming lemmatization."
+        )
+    return raw_tokens, filtered, tagged, lemmas, notes
 
 
 def preprocess(text: str) -> tuple[str, tuple[str, ...]]:
     """Run full sequential NLP pipeline for keyword analytics with negations preserved."""
     validate_nltk_resources()
     cleaned = clean_text(text)
-    _raw_tokens, _filtered, _tagged, lemmas = _tokenize_and_lemmatize(cleaned)
+    _raw_tokens, _filtered, _tagged, lemmas, _notes = _tokenize_and_lemmatize(cleaned)
     return cleaned, lemmas
 
 
@@ -219,7 +223,7 @@ def get_preprocessing_breakdown(text: str) -> dict[str, Any]:
     validate_nltk_resources()
     vader_input = sanitize_text_for_vader(text)
     cleaned = clean_text(text)
-    raw_tokens, filtered, tagged, lemmas = _tokenize_and_lemmatize(cleaned)
+    raw_tokens, filtered, tagged, lemmas, notes = _tokenize_and_lemmatize(cleaned)
     return {
         "raw_text": text,
         "vader_input": vader_input,
@@ -237,6 +241,11 @@ def get_preprocessing_breakdown(text: str) -> dict[str, Any]:
         "lemmatization_method": (
             "Surface-form tokens (corpus-free hosted mode)"
             if _lightweight_preprocessing_enabled()
-            else "spaCy or WordNet lemmatization"
+            else (
+                "Surface-form tokens (WordNet unavailable)"
+                if any("WordNet data" in note for note in notes)
+                else "spaCy or WordNet lemmatization"
+            )
         ),
+        "resource_notes": notes,
     }

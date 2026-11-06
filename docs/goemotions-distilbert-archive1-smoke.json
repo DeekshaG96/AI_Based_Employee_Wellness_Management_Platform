@@ -1,0 +1,195 @@
+{
+  "model": "C:\\Users\\ganch\\Downloads\\MoodMentor\\models\\goemotions-distilbert",
+  "model_problem_type": "multi_label_classification",
+  "dataset": "GoEmotions simplified agree-2",
+  "split": "test.tsv",
+  "evaluated_at_utc": "2026-11-06T03:49:42.581242+00:00",
+  "metrics": {
+    "examples": 200,
+    "threshold": 0.5,
+    "micro_precision": 0.7421,
+    "micro_recall": 0.4937,
+    "micro_f1": 0.593,
+    "macro_precision": 0.5334,
+    "macro_recall": 0.3698,
+    "macro_f1": 0.4011,
+    "exact_match_accuracy": 0.445,
+    "hamming_loss": 0.0289,
+    "per_label": {
+      "admiration": {
+        "precision": 0.5833,
+        "recall": 0.5385,
+        "f1": 0.56,
+        "support": 13
+      },
+      "amusement": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 12
+      },
+      "anger": {
+        "precision": 0.75,
+        "recall": 0.5,
+        "f1": 0.6,
+        "support": 6
+      },
+      "annoyance": {
+        "precision": 1.0,
+        "recall": 0.1538,
+        "f1": 0.2667,
+        "support": 13
+      },
+      "approval": {
+        "precision": 0.5,
+        "recall": 0.25,
+        "f1": 0.3333,
+        "support": 8
+      },
+      "caring": {
+        "precision": 0.5,
+        "recall": 0.1429,
+        "f1": 0.2222,
+        "support": 7
+      },
+      "confusion": {
+        "precision": 0.6667,
+        "recall": 0.3333,
+        "f1": 0.4444,
+        "support": 6
+      },
+      "curiosity": {
+        "precision": 0.5455,
+        "recall": 0.75,
+        "f1": 0.6316,
+        "support": 8
+      },
+      "desire": {
+        "precision": 0.5,
+        "recall": 0.25,
+        "f1": 0.3333,
+        "support": 4
+      },
+      "disappointment": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      "disapproval": {
+        "precision": 0.5,
+        "recall": 0.1538,
+        "f1": 0.2353,
+        "support": 13
+      },
+      "disgust": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667,
+        "support": 1
+      },
+      "embarrassment": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "excitement": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2
+      },
+      "fear": {
+        "precision": 0.625,
+        "recall": 0.7143,
+        "f1": 0.6667,
+        "support": 7
+      },
+      "gratitude": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 14
+      },
+      "grief": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "joy": {
+        "precision": 0.6667,
+        "recall": 0.4,
+        "f1": 0.5,
+        "support": 5
+      },
+      "love": {
+        "precision": 0.6429,
+        "recall": 0.9,
+        "f1": 0.75,
+        "support": 10
+      },
+      "nervousness": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "optimism": {
+        "precision": 0.75,
+        "recall": 0.3333,
+        "f1": 0.4615,
+        "support": 9
+      },
+      "pride": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "realization": {
+        "precision": 1.0,
+        "recall": 0.2,
+        "f1": 0.3333,
+        "support": 5
+      },
+      "relief": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "remorse": {
+        "precision": 0.75,
+        "recall": 0.5,
+        "f1": 0.6,
+        "support": 6
+      },
+      "sadness": {
+        "precision": 0.6667,
+        "recall": 0.2857,
+        "f1": 0.4,
+        "support": 7
+      },
+      "surprise": {
+        "precision": 1.0,
+        "recall": 0.4286,
+        "f1": 0.6,
+        "support": 7
+      },
+      "neutral": {
+        "precision": 0.7872,
+        "recall": 0.5211,
+        "f1": 0.6271,
+        "support": 71
+      }
+    }
+  },
+  "runtime": {
+    "python": "3.14.6",
+    "transformers": "4.57.6",
+    "torch": "2.15.0+cpu"
+  },
+  "privacy": "Only aggregate metrics are written; input texts and predictions are not saved."
+}

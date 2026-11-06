@@ -130,6 +130,16 @@ For validation-only threshold calibration and a final untouched test score:
 
     python -m scripts.calibrate_goemotions --model BruceIC/emoticare --data-dir data/goemotions --output docs/goemotions-bruceic-calibration.json
 
+The latest offline evidence run (2026-11-05) is preserved in
+`docs/goemotions-bruceic-calibration.json` and
+`docs/goemotions-bhadresh-heldout-2026-11-05.json`. BruceIC reached validation
+macro F1 0.4981 after validation-only calibration and untouched-test macro F1
+0.4872; the cached BERT baseline reached untouched-test macro F1 0.2980. These
+fresh results are below the 0.82 milestone target. No local SemEval or ISEAR
+export is present, so the 0.90 SemEval target and ISEAR holdout remain pending;
+see [docs/MILESTONE_2_EXECUTION.md](docs/MILESTONE_2_EXECUTION.md) for the exact
+commands and evidence requirements.
+
 ### How to explain the evaluation metrics
 
 - Accuracy is reported as exact-match accuracy for this multi-label task: all 28 emotion decisions for an example must match.
@@ -139,6 +149,15 @@ For validation-only threshold calibration and a final untouched test score:
 - Hamming loss is the fraction of individual label decisions that were wrong; lower is better.
 
 The reports include per-emotion precision, recall, F1, support, and confusion counts. GoEmotions is Reddit-derived, not workplace-specific, so these results are benchmarks rather than proof of accuracy on employee reflections. See docs/GOEMOTIONS_DATASET_REVIEW.md and docs/MILESTONE_2_EXECUTION.md.
+
+For the reproducible GPU path using the attached `archive (1)` dataset and
+DistilBERT checkpoint, including same-policy BERT comparison and
+validation-only calibration, see
+[docs/MILESTONE_2_GPU_RUN.md](docs/MILESTONE_2_GPU_RUN.md).
+
+For a ready-to-run Google Colab notebook, see
+[notebooks/milestone_2_goemotions_colab.ipynb](notebooks/milestone_2_goemotions_colab.ipynb)
+and its [Colab instructions](docs/MILESTONE_2_COLAB.md).
 ## PostgreSQL data model
 
 - `users`: account name, unique email, password hash, and creation time.
@@ -208,3 +227,4 @@ The hosted app supports account registration, sign-in, sign-out, and persistent 
 ## Saved accounts without Render
 
 To connect the hosted Streamlit showcase to persistent accounts and PostgreSQL, follow [the Vercel + Neon setup guide](docs/PERSISTENT_ACCOUNT_SETUP.md). It explains how to configure private deployment secrets without committing credentials.
+For Neon-specific boundaries, local verification, and the current decision not to add a second Neon Auth/Realtime integration, see [docs/NEON_SETUP.md](docs/NEON_SETUP.md).

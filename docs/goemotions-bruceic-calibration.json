@@ -46,6 +46,7 @@
     "micro_recall": 0.4792,
     "micro_f1": 0.5702,
     "exact_match_accuracy": 0.4534,
+    "hamming_loss": 0.0303,
     "per_label_confusion": {
       "admiration": {
         "threshold": 0.5,
@@ -355,8 +356,7 @@
         "fn": 725,
         "tn": 3225
       }
-    },
-    "hamming_loss": 0.0303
+    }
   },
   "validation_calibrated_metrics": {
     "examples": 5426,
@@ -367,6 +367,7 @@
     "micro_recall": 0.6494,
     "micro_f1": 0.6085,
     "exact_match_accuracy": 0.4324,
+    "hamming_loss": 0.0351,
     "per_label_confusion": {
       "admiration": {
         "threshold": 0.35,
@@ -676,8 +677,7 @@
         "fn": 364,
         "tn": 2738
       }
-    },
-    "hamming_loss": 0.0351
+    }
   },
   "held_out_test_fixed_threshold_metrics": {
     "examples": 5427,
@@ -688,6 +688,7 @@
     "micro_recall": 0.484,
     "micro_f1": 0.5757,
     "exact_match_accuracy": 0.4584,
+    "hamming_loss": 0.0297,
     "per_label_confusion": {
       "admiration": {
         "threshold": 0.5,
@@ -997,8 +998,7 @@
         "fn": 754,
         "tn": 3235
       }
-    },
-    "hamming_loss": 0.0297
+    }
   },
   "held_out_test_calibrated_metrics": {
     "examples": 5427,
@@ -1009,6 +1009,7 @@
     "micro_recall": 0.6473,
     "micro_f1": 0.6019,
     "exact_match_accuracy": 0.4238,
+    "hamming_loss": 0.0357,
     "per_label_confusion": {
       "admiration": {
         "threshold": 0.35,
@@ -1318,10 +1319,9 @@
         "fn": 366,
         "tn": 2740
       }
-    },
-    "hamming_loss": 0.0357
+    }
   },
-  "evaluated_at_utc": "2026-11-03T18:51:26.643178+05:30",
+  "evaluated_at_utc": "2026-11-05T15:30:11.406973+00:00",
   "privacy": "Only aggregate counts and metrics are written; source text and predictions are not saved.",
   "limitations": "Calibration may overfit the development split. GoEmotions is Reddit-derived and is not a validated employee-journal benchmark."
 }

@@ -37,8 +37,8 @@ from wellness.api_client import (
 from wellness.api_client import (
     register as api_register,
 )
-from wellness.preprocessing import get_preprocessing_breakdown
 from wellness.pipeline import analyze_text
+from wellness.preprocessing import get_preprocessing_breakdown
 from wellness.report import SentimentLabel
 
 # Page configuration
@@ -151,8 +151,10 @@ def _build_analysis_report_markdown(report) -> str:
     no_emotion_signal = report.emotion_method == "no_emotion_signal"
     emotion_lines = (
         [
-            "- No fine-grained emotion estimate was produced because no supported "
-            "emotion cue matched."
+            (
+                "- No fine-grained emotion estimate was produced because no supported "
+                "emotion cue matched."
+            )
         ]
         if no_emotion_signal
         else [
@@ -1897,7 +1899,7 @@ def render_guest_workspace():
                             t = str(r[sel_col]).strip()
                             if t:
                                 rep = analyze_text(t, source_name=f"{g_file.name} (row {idx+1})")
-                                st.write(f"Row {idx+1}: **{rep.sentiment_label.value}** ({rep.sentiment_scores.compound:.2f}) · {rep.dominant_emotion.value}")
+                                st.write(f"Row {idx+1}: **{rep.sentiment_label.value}** ({rep.sentiment_scores.compound:.2f}) · {rep.dominant_emotion}")
                 except Exception as ex:
                     st.error(f"Could not read CSV: {ex}")
 
@@ -1906,16 +1908,17 @@ def render_guest_workspace():
         guest_arch_path = Path("data/goemotions/test.csv")
         if not guest_arch_path.exists():
             guest_arch_path = Path("archive/data/test.tsv")
-        if guest_arch_path.exists():
-            if st.button("📥 Load 5 Samples from GoEmotions Archive", key="guest_arch_sample"):
-                sep = "," if guest_arch_path.suffix == ".csv" else "\t"
-                df_ga = pd.read_csv(guest_arch_path, sep=sep, nrows=5)
-                t_col = "text" if "text" in df_ga.columns else df_ga.columns[0]
-                for idx, r in df_ga.iterrows():
-                    txt = str(r[t_col]).strip()
-                    if txt:
-                        rep = analyze_text(txt, source_name="GoEmotions Archive")
-                        st.write(f"Sample {idx+1}: *\"{txt[:100]}\"* ➔ **{rep.sentiment_label.value.upper()}** (Emotion: `{rep.dominant_emotion.value}`)")
+        if guest_arch_path.exists() and st.button(
+            "📥 Load 5 Samples from GoEmotions Archive", key="guest_arch_sample"
+        ):
+            sep = "," if guest_arch_path.suffix == ".csv" else "\t"
+            df_ga = pd.read_csv(guest_arch_path, sep=sep, nrows=5)
+            t_col = "text" if "text" in df_ga.columns else df_ga.columns[0]
+            for idx, r in df_ga.iterrows():
+                txt = str(r[t_col]).strip()
+                if txt:
+                    rep = analyze_text(txt, source_name="GoEmotions Archive")
+                    st.write(f"Sample {idx+1}: *\"{txt[:100]}\"* ➔ **{rep.sentiment_label.value.upper()}** (Emotion: `{rep.dominant_emotion}`)")
 
     with guest_tab3:
         st.markdown("#### System Architecture")

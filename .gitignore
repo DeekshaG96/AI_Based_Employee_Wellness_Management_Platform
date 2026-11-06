@@ -84,6 +84,8 @@ node_modules/
 
 .agents/
 .codex/
+colab_uploads/
+tsconfig.json
 hello.ts
 neon.ts
 package-lock.json

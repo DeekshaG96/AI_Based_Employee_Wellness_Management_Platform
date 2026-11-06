@@ -41,6 +41,128 @@ Calibration chose thresholds using validation only. On the untouched 5,427-examp
 
 The target validation macro F1 0.82 is still unmet. Full BERT and DistilBERT fine-tuning and comparison remain required for that milestone. Model card: https://huggingface.co/BruceIC/emoticare
 
+### Fresh attached-folder DistilBERT evidence — 2026-11-06
+
+The requested read-only reference assets were evaluated directly without
+copying the model weights or raw dataset into this repository:
+
+- Dataset: `C:\Users\ganch\Downloads\MoodMentor\archive (1)\data`
+- Checkpoint: `C:\Users\ganch\Downloads\MoodMentor\models\goemotions-distilbert`
+- Architecture: `DistilBertForSequenceClassification`
+- Labels: 28 GoEmotions labels, verified against `emotions.txt`
+- Problem type: `multi_label_classification`
+- Runtime: Python 3.14.6, Transformers 4.57.6, Torch 2.15.0+cpu, CPU-only
+
+The full held-out test run used the attached `test.tsv` (5,427 examples) at
+the default independent-label threshold of 0.50:
+
+| Checkpoint and setup | Split | Examples | Macro F1 | Micro F1 | Exact match | Comparison with target |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| Attached `goemotions-distilbert`, fixed 0.50 | held-out test | 5,427 | 0.4142 | 0.5757 | 0.4584 | Below 0.82 |
+
+Aggregate evidence is recorded in
+`docs/goemotions-distilbert-archive1-heldout.json`. The report contains
+per-label metrics and no source text or predictions. A 200-example smoke run
+was completed first (macro F1 0.4011) to verify schema, label mapping, and
+local inference before the full run.
+
+Validation-only calibration was also run on the attached `dev.tsv`, followed
+by a single untouched evaluation on the attached `test.tsv`:
+
+| Checkpoint and setup | Split | Examples | Macro F1 | Micro F1 | Exact match | Comparison with target |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| Attached `goemotions-distilbert`, fixed 0.50 | validation | 5,426 | 0.4019 | 0.5702 | 0.4534 | Below 0.82 |
+| Attached `goemotions-distilbert`, validation-calibrated | validation | 5,426 | 0.4981 | 0.6085 | 0.4324 | Below 0.82 |
+| Attached `goemotions-distilbert`, validation-calibrated | held-out test | 5,427 | 0.4872 | 0.6019 | 0.4238 | Held-out confirmation |
+
+Thresholds were selected from validation only; the held-out test was not used
+for tuning. The calibration report is
+`docs/goemotions-distilbert-archive1-calibration.json`. Calibration improves
+macro F1 relative to the fixed threshold but remains far below 0.82, so the
+milestone target is still explicitly pending.
+
+This checkpoint's held-out score does not prove the validation target, and no
+0.82 claim is made. The attached checkpoint evaluation is evidence for the
+provided model, not evidence that MoodMentor trained it. Full same-policy
+BERT-versus-DistilBERT fine-tuning remains pending on a GPU-capable
+environment.
+
+### Full Colab GPU fine-tuning — 2026-11-06
+
+The attached archive and checkpoint were then used in a full Colab Tesla T4
+run with no split limit. Both models used 43,410 training rows, 5,426
+development rows, 5,427 held-out test rows, three epochs, batch size 16,
+learning rate `2e-5`, maximum length 64, seed 42, and fixed threshold 0.50.
+
+| Model | Best epoch | Validation macro F1 | Held-out macro F1 | Held-out micro F1 | Exact match |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Attached DistilBERT checkpoint fine-tuned | 2 | 0.5074 | 0.4955 | 0.5677 | 0.3770 |
+| BERT-base-uncased fine-tuned | 3 | 0.5018 | 0.5068 | 0.5713 | 0.3665 |
+
+The aggregate report is `docs/goemotions-colab-2026-11-06.json`. These are
+fresh full-data GPU results and are stronger evidence than the CPU pilot, but
+the 0.82 validation macro-F1 target remains unmet. Run the validation-only
+calibration cell next; calibrated held-out metrics must be recorded separately
+and must not be used to claim the fixed-threshold validation target.
+
+### Fresh local evidence run — 2026-11-05
+
+The held-out runs below were executed in this worktree on 2026-11-05 with
+`HF_HUB_OFFLINE=1`, using only the already cached checkpoints and the local
+GoEmotions CSV splits. No model or dataset was downloaded during these runs.
+
+```powershell
+# Validation-only threshold calibration + untouched test evaluation
+$env:HF_HUB_OFFLINE = "1"
+python -m scripts.calibrate_goemotions `
+  --model BruceIC/emoticare `
+  --data-dir data\goemotions `
+  --batch-size 8 `
+  --output docs\goemotions-bruceic-calibration.json
+
+# Independent cached BERT baseline on the untouched test split
+$env:HF_HUB_OFFLINE = "1"
+python -m scripts.evaluate_goemotions_model `
+  --model bhadresh-savani/bert-base-go-emotion `
+  --data-dir data\goemotions `
+  --split test.csv `
+  --threshold 0.5 `
+  --batch-size 8 `
+  --output docs\goemotions-bhadresh-heldout-2026-11-05.json
+```
+
+Fresh aggregate results:
+
+| Checkpoint and setup | Split | Examples | Macro F1 | Exact match | Comparison with target |
+| --- | --- | ---: | ---: | ---: | --- |
+| BruceIC/emoticare, fixed 0.50 | validation | 5,426 | 0.4019 | 0.4534 | Below 0.82 |
+| BruceIC/emoticare, validation-calibrated | validation | 5,426 | 0.4981 | 0.4324 | Below 0.82 |
+| BruceIC/emoticare, fixed 0.50 | untouched test | 5,427 | 0.4142 | 0.4584 | Held-out confirmation; not a validation target |
+| BruceIC/emoticare, validation-calibrated | untouched test | 5,427 | 0.4872 | 0.4238 | Held-out confirmation; not a validation target |
+| bhadresh-savani/bert-base-go-emotion, fixed 0.50 | untouched test | 5,427 | 0.2980 | 0.3243 | Held-out baseline; below 0.82 |
+
+The fresh BruceIC calibration report is
+`docs/goemotions-bruceic-calibration.json`; the fresh BERT report is
+`docs/goemotions-bhadresh-heldout-2026-11-05.json`. Runtime was Python 3.14.6,
+Transformers 4.57.6, and CPU-only Torch 2.15.0. The local machine has no CUDA
+device. Full BERT and DistilBERT fine-tuning was therefore not run in this
+environment: the prior CPU pilot already required approximately 1,950 seconds
+for a one-epoch 10,000-example sample, while the milestone requires full-data
+training and a same-policy model comparison. A GPU run remains the reproducible
+next step; no 0.82 claim is made.
+
+SemEval and ISEAR evidence remains unavailable. The exact evaluator attempts
+were:
+
+```powershell
+python -m scripts.evaluate_semeval_binary data\semeval\test-binary.csv --output docs\semeval-vader-test.json
+python -m scripts.evaluate_isear data\isear\test.csv --model BruceIC/emoticare --output docs\isear-transfer-test.json
+```
+
+Both failed with `FileNotFoundError` because no local `data\semeval` or
+`data\isear` files are present. The 0.90 SemEval target and ISEAR holdout are
+therefore pending the mentor-approved, licensed, untouched dataset exports.
+
 ### Evaluation metrics in plain language
 
 - Accuracy is reported as exact-match accuracy for this multi-label task: an example counts as correct only when all 28 emotion decisions match.

@@ -1,0 +1,58 @@
+{
+  "run_type": "full_gpu_finetuning",
+  "dataset": "GoEmotions simplified agree-2",
+  "dataset_source": "C:\\Users\\ganch\\Downloads\\MoodMentor\\archive (1)\\data",
+  "split_sizes": {
+    "train.tsv": 43410,
+    "dev.tsv": 5426,
+    "test.tsv": 5427
+  },
+  "runtime": {
+    "device": "Tesla T4",
+    "device_type": "cuda",
+    "python": "3.13.16",
+    "torch": "2.11.0+cu130",
+    "transformers": "4.57.6"
+  },
+  "training": {
+    "epochs": 3,
+    "batch_size": 16,
+    "learning_rate": 0.00002,
+    "max_length": 64,
+    "threshold": 0.5,
+    "positive_weight_cap": 8.0,
+    "seed": 42,
+    "limit": null
+  },
+  "models": [
+    {
+      "name": "attached-distilbert-finetuned",
+      "base_model": "attached goemotions-distilbert checkpoint",
+      "best_epoch": 2,
+      "validation_macro_f1": 0.5074,
+      "test_macro_f1": 0.4955,
+      "test_micro_f1": 0.5677,
+      "test_exact_match_accuracy": 0.377,
+      "test_micro_precision": 0.5068,
+      "test_micro_recall": 0.6453
+    },
+    {
+      "name": "bert-base-uncased-finetuned",
+      "base_model": "bert-base-uncased",
+      "best_epoch": 3,
+      "validation_macro_f1": 0.5018,
+      "test_macro_f1": 0.5068,
+      "test_micro_f1": 0.5713,
+      "test_exact_match_accuracy": 0.3665,
+      "test_micro_precision": 0.4972,
+      "test_micro_recall": 0.6714
+    }
+  ],
+  "target_comparison": {
+    "validation_macro_f1_target": 0.82,
+    "target_status": "not_met",
+    "semeval_target_status": "pending"
+  },
+  "limitations": "These are full-data GPU training results, but GoEmotions is noisy multi-label Reddit data and the benchmark is not a validated employee-journal measure. Threshold calibration output is still required before selecting the final operating model.",
+  "privacy": "Aggregate metrics only; no source text or predictions are recorded."
+}

@@ -22,6 +22,22 @@ Account check-ins store the journal text, analysis, and recommendations in that 
 
 The Model evaluation tab presents the saved GoEmotions benchmark, threshold comparison, and definitions for precision, recall, F1, exact-match accuracy, and Hamming loss. It reads docs/goemotions-bruceic-calibration.json. That benchmark evaluates BruceIC/emoticare, not the optional live SamLowe/roberta-base-go_emotions model, and does not establish accuracy on workplace journal text.
 
+## Presentation-ready demo path
+
+Use the **Guided demo example** selector in the Mood journal tab to load synthetic
+examples without entering personal information:
+
+1. **Mixed emotion:** “I feel proud that I finished the work, but worried about tomorrow.”
+2. **Negation edge case:** “I am not happy with how today went.”
+3. **Recovery moment:** “I felt overwhelmed earlier, then a short walk helped me feel calmer.”
+
+After each analysis, show the VADER tone, the named estimator, the emotion
+signals, and the supportive next steps. Explain that heuristic scores are
+relative cue shares, transformer scores are independent multi-label signals,
+and neither is a diagnosis. Then use **Trends & history** to show the separate
+text-tone and self-reported-mood views. These synthetic examples are intended
+for demonstrations; do not use real private journal text in a public showcase.
+
 ## Deploy
 
 1. Create or select the Streamlit app connected to this repository and the streamlit-cloud branch.

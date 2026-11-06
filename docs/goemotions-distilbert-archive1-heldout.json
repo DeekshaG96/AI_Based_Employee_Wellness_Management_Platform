@@ -1,0 +1,195 @@
+{
+  "model": "C:\\Users\\ganch\\Downloads\\MoodMentor\\models\\goemotions-distilbert",
+  "model_problem_type": "multi_label_classification",
+  "dataset": "GoEmotions simplified agree-2",
+  "split": "test.tsv",
+  "evaluated_at_utc": "2026-11-06T03:56:24.082194+00:00",
+  "metrics": {
+    "examples": 5427,
+    "threshold": 0.5,
+    "micro_precision": 0.7103,
+    "micro_recall": 0.484,
+    "micro_f1": 0.5757,
+    "macro_precision": 0.5881,
+    "macro_recall": 0.3552,
+    "macro_f1": 0.4142,
+    "exact_match_accuracy": 0.4584,
+    "hamming_loss": 0.0297,
+    "per_label": {
+      "admiration": {
+        "precision": 0.6946,
+        "recall": 0.6905,
+        "f1": 0.6925,
+        "support": 504
+      },
+      "amusement": {
+        "precision": 0.8145,
+        "recall": 0.8485,
+        "f1": 0.8312,
+        "support": 264
+      },
+      "anger": {
+        "precision": 0.6281,
+        "recall": 0.3838,
+        "f1": 0.4765,
+        "support": 198
+      },
+      "annoyance": {
+        "precision": 0.5806,
+        "recall": 0.1125,
+        "f1": 0.1885,
+        "support": 320
+      },
+      "approval": {
+        "precision": 0.6027,
+        "recall": 0.2507,
+        "f1": 0.3541,
+        "support": 351
+      },
+      "caring": {
+        "precision": 0.5385,
+        "recall": 0.2593,
+        "f1": 0.35,
+        "support": 135
+      },
+      "confusion": {
+        "precision": 0.6,
+        "recall": 0.2745,
+        "f1": 0.3767,
+        "support": 153
+      },
+      "curiosity": {
+        "precision": 0.5359,
+        "recall": 0.3944,
+        "f1": 0.4544,
+        "support": 284
+      },
+      "desire": {
+        "precision": 0.7222,
+        "recall": 0.3133,
+        "f1": 0.437,
+        "support": 83
+      },
+      "disappointment": {
+        "precision": 0.7,
+        "recall": 0.0927,
+        "f1": 0.1637,
+        "support": 151
+      },
+      "disapproval": {
+        "precision": 0.4894,
+        "recall": 0.2584,
+        "f1": 0.3382,
+        "support": 267
+      },
+      "disgust": {
+        "precision": 0.7593,
+        "recall": 0.3333,
+        "f1": 0.4633,
+        "support": 123
+      },
+      "embarrassment": {
+        "precision": 0.6667,
+        "recall": 0.0541,
+        "f1": 0.1,
+        "support": 37
+      },
+      "excitement": {
+        "precision": 0.8333,
+        "recall": 0.2427,
+        "f1": 0.3759,
+        "support": 103
+      },
+      "fear": {
+        "precision": 0.7619,
+        "recall": 0.6154,
+        "f1": 0.6809,
+        "support": 78
+      },
+      "gratitude": {
+        "precision": 0.9483,
+        "recall": 0.8864,
+        "f1": 0.9163,
+        "support": 352
+      },
+      "grief": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 6
+      },
+      "joy": {
+        "precision": 0.6905,
+        "recall": 0.5404,
+        "f1": 0.6063,
+        "support": 161
+      },
+      "love": {
+        "precision": 0.7934,
+        "recall": 0.8067,
+        "f1": 0.8,
+        "support": 238
+      },
+      "nervousness": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 23
+      },
+      "optimism": {
+        "precision": 0.687,
+        "recall": 0.4247,
+        "f1": 0.5249,
+        "support": 186
+      },
+      "pride": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 16
+      },
+      "realization": {
+        "precision": 0.75,
+        "recall": 0.0828,
+        "f1": 0.1491,
+        "support": 145
+      },
+      "relief": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 11
+      },
+      "remorse": {
+        "precision": 0.6607,
+        "recall": 0.6607,
+        "f1": 0.6607,
+        "support": 56
+      },
+      "sadness": {
+        "precision": 0.6842,
+        "recall": 0.4167,
+        "f1": 0.5179,
+        "support": 156
+      },
+      "surprise": {
+        "precision": 0.6061,
+        "recall": 0.4255,
+        "f1": 0.5,
+        "support": 141
+      },
+      "neutral": {
+        "precision": 0.7184,
+        "recall": 0.5781,
+        "f1": 0.6406,
+        "support": 1787
+      }
+    }
+  },
+  "runtime": {
+    "python": "3.14.6",
+    "transformers": "4.57.6",
+    "torch": "2.15.0+cpu"
+  },
+  "privacy": "Only aggregate metrics are written; input texts and predictions are not saved."
+}

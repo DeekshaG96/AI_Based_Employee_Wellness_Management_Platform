@@ -5,8 +5,9 @@ from __future__ import annotations
 import csv
 import os
 import re
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from nltk.sentiment import SentimentIntensityAnalyzer
 

@@ -9,9 +9,10 @@ WORKDIR /app
 COPY requirements-ui.txt ./requirements-ui.txt
 RUN pip install --no-cache-dir -r requirements-ui.txt \
     && python -m spacy download en_core_web_sm \
-    && python -m nltk.downloader -d "$NLTK_DATA" \
+    && python -m nltk.downloader --extract -d "$NLTK_DATA" \
        stopwords wordnet omw-1.4 punkt punkt_tab \
        averaged_perceptron_tagger_eng vader_lexicon
+RUN chmod -R a+rX "$NLTK_DATA"
 
 COPY wellness ./wellness
 COPY app.py ./app.py

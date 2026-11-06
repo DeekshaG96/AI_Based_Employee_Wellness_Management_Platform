@@ -24,6 +24,24 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from wellness.api_client import (
+    ApiError,
+)
+from wellness.api_client import (
+    analyze as api_analyze,
+)
+from wellness.api_client import (
+    history as api_history,
+)
+from wellness.api_client import (
+    login as api_login,
+)
+from wellness.api_client import (
+    logout as api_logout,
+)
+from wellness.api_client import (
+    register as api_register,
+)
 from wellness.errors import InputValidationError, NLTKResourceError
 from wellness.pipeline import (
     EmotionClassifier,
@@ -32,14 +50,6 @@ from wellness.pipeline import (
     classify_emotions_with_method,
 )
 from wellness.preprocessing import get_preprocessing_breakdown
-from wellness.api_client import (
-    ApiError,
-    analyze as api_analyze,
-    history as api_history,
-    login as api_login,
-    logout as api_logout,
-    register as api_register,
-)
 from wellness.report import (
     AnalysisReport,
     InputSummary,
@@ -57,31 +67,228 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    :root { --ink:#19352d; --muted:#657b71; --paper:#f4f7f3; --line:#e0e9e1; --forest:#155c49; --leaf:#c9ebad; }
-    html,body,[class*="css"] { font-family:'Segoe UI',system-ui,sans-serif; color:var(--ink); }
-    .stApp { background:radial-gradient(850px circle at 86% 3%,rgba(206,231,211,.48),transparent 48%),var(--paper); }
-    .block-container { max-width:1320px; padding:2rem 2.5rem 4rem; }
-    h1,h2,h3 { font-family:'Segoe UI',system-ui,sans-serif !important; color:var(--ink); letter-spacing:-.035em; }
-    .brand { display:flex;align-items:center;gap:12px;margin:0 0 20px; }
-    .mark { display:grid;place-items:center;width:46px;height:46px;border-radius:16px;background:var(--forest);color:white;font:800 25px 'Segoe UI',system-ui,sans-serif; }
-    .brand-name { font:800 1.3rem 'Segoe UI',system-ui,sans-serif;color:var(--ink); }
-    .brand-caption { color:var(--muted);font-size:.8rem; }
-    .hero { padding:30px 34px;border-radius:24px;color:#f3f8f2;background:linear-gradient(128deg,#103e34,#155b48 65%,#26745a);box-shadow:0 18px 44px #1848391c;margin-bottom:18px; }
-    .eyebrow { color:#a9d9bb;text-transform:uppercase;font-size:.7rem;font-weight:800;letter-spacing:.15em; }
-    .hero h1 { color:white;margin:12px 0 6px;font-size:clamp(2rem,4vw,3.1rem); }
-    .hero p { max-width:720px;color:#d1e4d7;line-height:1.7;margin-bottom:0; }
-    [data-testid="stMetric"] { padding:15px 18px;border:1px solid var(--line);border-radius:16px;background:white; }
-    [data-testid="stVerticalBlockBorderWrapper"] { border:1px solid var(--line)!important;border-radius:18px!important;background:#ffffffcc; }
-    [data-testid="stTextArea"] textarea { min-height:190px;border-radius:14px;line-height:1.65; }
-    .stButton>button,.stDownloadButton>button,[data-testid="stFormSubmitButton"] button { min-height:43px;border-radius:12px;font-weight:700; }
-    .stButton>button[kind="primary"], [data-testid="stFormSubmitButton"] button[kind="primary"] { background:var(--forest);border-color:var(--forest); }
-    .stButton>button:hover,.stDownloadButton>button:hover { border-color:var(--forest);color:var(--forest); }
-    button[data-baseweb="tab"][aria-selected="true"] { color:var(--forest);border-bottom-color:var(--forest); }
-    :focus-visible { outline:3px solid #2d8467 !important; outline-offset:2px; }
-    [data-testid="stSidebar"] { background:linear-gradient(180deg,#103d33,#12382f); }
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color:#d0e1d5; }
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
-    @media(max-width:800px){.block-container{padding:1rem}.hero{padding:24px}}
+    :root {
+        --ink: #19352d;
+        --muted: #657b71;
+        --paper: #fff8fb;
+        --line: #f0dfe8;
+        --forest: #155c49;
+        --focus: #2d8467;
+    }
+
+    html,
+    body,
+    [class*="css"] {
+        color: var(--ink);
+        font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    .stApp {
+        background:
+            radial-gradient(850px circle at 86% 3%, rgb(255 214 231 / 55%), transparent 48%),
+            radial-gradient(720px circle at 5% 34%, rgb(231 224 255 / 42%), transparent 46%),
+            var(--paper);
+    }
+
+    .block-container {
+        max-width: 1320px;
+        padding: 2rem 2.5rem 4rem;
+    }
+
+    h1,
+    h2,
+    h3 {
+        color: var(--ink);
+        font-family: "Segoe UI", system-ui, sans-serif !important;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+    }
+    .brand {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        margin: 0 0 20px;
+    }
+
+    .brand-name {
+        color: var(--ink);
+        font: 800 1.3rem "Segoe UI", system-ui, sans-serif;
+    }
+
+    .brand-caption {
+        color: var(--muted);
+        font-size: 0.8rem;
+    }
+
+    .hero {
+        background: linear-gradient(128deg, #103e34, #155b48 65%, #26745a);
+        border-radius: 24px;
+        box-shadow: 0 18px 44px rgb(24 72 57 / 11%);
+        color: #f3f8f2;
+        margin-bottom: 18px;
+        overflow: hidden;
+        padding: 30px 34px;
+        position: relative;
+    }
+
+    .eyebrow {
+        color: #b8dfc7;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+    }
+
+    .hero h1 {
+        color: white;
+        font-size: clamp(2rem, 4vw, 3.1rem);
+        margin: 12px 0 6px;
+    }
+
+    .hero p {
+        color: #d1e4d7;
+        line-height: 1.7;
+        margin-bottom: 0;
+        max-width: 720px;
+    }
+
+    .analysis-panel {
+        background: rgb(255 255 255 / 84%);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgb(52 31 68 / 6%);
+        padding: 18px;
+    }
+
+    .model-pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 14px;
+    }
+
+    .model-pill {
+        background: #f3efff;
+        border: 1px solid #ded5ff;
+        border-radius: 999px;
+        color: #56478a;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 6px 10px;
+    }
+
+    .model-pill.sentiment {
+        background: #e8f7f0;
+        border-color: #c9eadc;
+        color: #236d58;
+    }
+
+    .result-heading {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+    }
+    [data-testid="stMetric"] {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        font-variant-numeric: tabular-nums;
+        padding: 15px 18px;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background: rgb(255 255 255 / 80%);
+        border: 1px solid var(--line) !important;
+        border-radius: 18px !important;
+    }
+
+    [data-testid="stTextArea"] textarea {
+        border-radius: 14px;
+        line-height: 1.65;
+        min-height: 190px;
+    }
+    .stButton > button,
+    .stDownloadButton > button,
+    [data-testid="stFormSubmitButton"] button {
+        border-radius: 12px;
+        font-weight: 700;
+        min-height: 43px;
+        touch-action: manipulation;
+    }
+    .stButton > button[kind="primary"],
+    [data-testid="stFormSubmitButton"] button[kind="primary"] {
+        background: var(--forest);
+        border-color: var(--forest);
+    }
+    .stButton > button:hover,
+    .stDownloadButton > button:hover {
+        border-color: var(--forest);
+        color: var(--forest);
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        border-bottom-color: var(--forest);
+        color: var(--forest);
+    }
+    :focus-visible {
+        outline: 3px solid var(--focus) !important;
+        outline-offset: 2px;
+    }
+
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #103d33, #12382f);
+        color: #e8f4ec !important;
+    }
+
+    [data-testid="stSidebar"] * {
+        color: #e8f4ec !important;
+    }
+
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] small,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] div,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+    [data-testid="stSidebar"] [data-testid="stMetricLabel"],
+    [data-testid="stSidebar"] [data-testid="stMetricValue"] {
+        color: #e8f4ec !important;
+    }
+
+    [data-testid="stSidebar"] button {
+        background: #ffffff !important;
+        border-color: #ffffff !important;
+        color: var(--forest) !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stMetric"] {
+        background: rgb(255 255 255 / 10%);
+        border-color: rgb(224 242 230 / 28%);
+    }
+
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+        color: #d0e1d5;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    @media (max-width: 800px) {
+        .block-container {
+            padding: 1rem;
+        }
+
+        .hero {
+            padding: 24px;
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -96,6 +303,17 @@ PROMPTS = {
     "What is one thing you handled well?": "What is one thing you handled well, even if it was small?",
     "What would help you feel a little more supported?": "What would help you feel a little more supported right now?",
     "What has been taking most of your energy?": "What has been taking most of your energy lately?",
+}
+
+GUIDED_DEMOS = {
+    "Choose a guided example (optional)": "",
+    "Mixed emotion · proud but worried": (
+        "I feel proud that I finished the work, but worried about tomorrow."
+    ),
+    "Negation edge case · I am not happy": "I am not happy with how today went.",
+    "Gentle recovery · a small reset helped": (
+        "I felt overwhelmed earlier, then a short walk helped me feel calmer."
+    ),
 }
 
 
@@ -215,7 +433,7 @@ def _render_auth_gate() -> None:
         else:
             st.info(account_flash)
     st.markdown(
-        '<div class="brand"><div class="mark">m</div><div><div class="brand-name">MoodMentor</div>'
+        '<div class="brand"><div class="mark" aria-hidden="true">♡</div><div><div class="brand-name">MoodMentor</div>'
         '<div class="brand-caption">A thoughtful space for your daily check-in</div></div></div>',
         unsafe_allow_html=True,
     )
@@ -368,7 +586,7 @@ def _make_pdf(item: dict[str, Any]) -> bytes:
     from reportlab.lib import colors
     from reportlab.lib.enums import TA_CENTER
     from reportlab.lib.pagesizes import letter
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import inch
     from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
@@ -448,18 +666,20 @@ def _analyze_many(
     token = st.session_state.get("account_token")
     if token:
         saved = 0
+        failures: list[dict[str, str]] = []
         try:
             with st.spinner(
                 f"Analyzing and saving {len(valid_items)} entr"
                 f"{'y' if len(valid_items) == 1 else 'ies'} to your account…"
             ):
                 for value, source in valid_items:
-                    api_analyze(value, token, source_name=source)
-                    saved += 1
+                    try:
+                        api_analyze(value, token, source_name=source)
+                        saved += 1
+                    except (ApiError, InputValidationError, NLTKResourceError, RuntimeError) as exc:
+                        failures.append({"source": source, "error": str(exc)})
                 _refresh_account_records()
-            st.success(
-                f"Saved {saved} check-in{'s' if saved != 1 else ''} to your account history."
-            )
+            _render_batch_summary(len(valid_items), saved, failures)
         except ApiError as exc:
             try:
                 _refresh_account_records()
@@ -473,26 +693,42 @@ def _analyze_many(
 
     try:
         with st.spinner(f"Reflecting on {len(valid_items)} entr{'y' if len(valid_items) == 1 else 'ies'}…"):
-            records = [
-                _new_record(
-                    value,
-                    source,
-                    checkin_details if source == "Journal Entry" else None,
-                    emotion_classifier if source == "Journal Entry" else None,
-                )
-                for value, source in valid_items
-            ]
+            records: list[dict[str, Any]] = []
+            failures = []
+            for value, source in valid_items:
+                try:
+                    records.append(
+                        _new_record(
+                            value,
+                            source,
+                            checkin_details if source == "Journal Entry" else None,
+                            emotion_classifier if source == "Journal Entry" else None,
+                        )
+                    )
+                except (InputValidationError, NLTKResourceError, RuntimeError) as exc:
+                    failures.append({"source": source, "error": str(exc)})
         st.session_state.records = records + st.session_state.records
         if records:
             st.session_state.selected_record_id = records[0]["id"]
-            st.success(
-                f"Saved {len(records)} check-in{'s' if len(records) != 1 else ''} "
-                "to this browser session."
-            )
-    except (InputValidationError, NLTKResourceError, RuntimeError) as exc:
-        st.error(str(exc))
+        _render_batch_summary(len(valid_items), len(records), failures)
     except Exception as exc:
         st.error(f"Analysis could not be completed: {exc}")
+
+
+def _render_batch_summary(
+    total: int, successful: int, failures: list[dict[str, str]]
+) -> None:
+    """Make batch outcomes explicit without implying failed rows were analyzed."""
+    failed = len(failures)
+    columns = st.columns(3)
+    columns[0].metric("Total", total)
+    columns[1].metric("Successful", successful)
+    columns[2].metric("Failed", failed)
+    if successful:
+        st.success(f"Completed {successful} of {total} entr{'y' if total == 1 else 'ies'}.")
+    if failures:
+        with st.expander("View failed rows"):
+            st.dataframe(failures, width="stretch", hide_index=True)
 
 if "records" not in st.session_state:
     st.session_state.records = []
@@ -510,7 +746,7 @@ if not st.session_state.get("account_token") and not st.session_state.guest_mode
     st.stop()
 
 with st.sidebar:
-    st.markdown('<div class="brand"><div class="mark">m</div><div><div class="brand-name" style="color:white">MoodMentor</div><div class="brand-caption" style="color:#b5d0c0">Your mindful space</div></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand"><div><div class="brand-name" style="color:white">MoodMentor</div><div class="brand-caption" style="color:#b5d0c0">Your mindful space</div></div></div>', unsafe_allow_html=True)
     account_user = st.session_state.get("account_user")
     if account_user and st.session_state.get("account_token"):
         st.markdown("### Your account")
@@ -553,9 +789,12 @@ with st.sidebar:
             st.session_state.records = []
             st.session_state.selected_record_id = None
             st.rerun()
-        if st.button("Sign in / create account", width="stretch"):
-            st.session_state.guest_mode = False
-            st.rerun()
+        if API_URL:
+            if st.button("Sign in / create account", width="stretch"):
+                st.session_state.guest_mode = False
+                st.rerun()
+        else:
+            st.button("Accounts unavailable in demo", width="stretch", disabled=True)
 
     account_flash = st.session_state.pop("account_flash", None)
     if account_flash:
@@ -615,114 +854,143 @@ else:
 journal_tab, file_tab, trends_tab, evaluation_tab = st.tabs(["📝 Mood journal", "📄 Import a file", "📈 Trends & history", "🧪 Model evaluation"])
 with journal_tab:
     col_editor, col_prompt = st.columns([2.1, 0.9], gap="large")
-    with col_editor:
-        st.markdown("### Start with how today feels")
-        if account_mode:
-            self_reported_mood = "Prefer not to say"
-            context_tags = []
-            include_wellbeing_details = False
-            energy = None
-            sleep_hours = None
-            st.caption(
-                "Account history stores your reflection and its analysis. Optional mood, sleep, "
-                "energy, and context notes are available in guest mode only."
+    with col_editor, st.container(border=True):
+            st.markdown("### Start with how today feels")
+            st.markdown(
+                '<div class="model-pill-row">'
+                '<span class="model-pill sentiment">VADER · text tone</span>'
+                '<span class="model-pill">Emotion estimator · multi-label signals</span>'
+                "</div>",
+                unsafe_allow_html=True,
             )
-        else:
-            mood_options = ["Prefer not to say", *MOOD_SCORE]
-            self_reported_mood = st.radio(
-                "Your mood (optional)", mood_options, horizontal=True, index=0,
-                help="This is your own check-in, shown separately from the language model's estimate.",
+            if account_mode:
+                self_reported_mood = "Prefer not to say"
+                context_tags = []
+                include_wellbeing_details = False
+                energy = None
+                sleep_hours = None
+                st.caption(
+                    "Account history stores your reflection and its analysis. Optional mood, sleep, "
+                    "energy, and context notes are available in guest mode only."
+                )
+            else:
+                mood_options = ["Prefer not to say", *MOOD_SCORE]
+                self_reported_mood = st.radio(
+                    "Your mood (optional)", mood_options, horizontal=True, index=0,
+                    help="This is your own check-in, shown separately from the language model's estimate.",
+                )
+                context_tags = st.multiselect(
+                    "What has been shaping your day? (optional)", CONTEXT_TAGS,
+                    help="Choose any context that feels relevant. These tags remain in this browser session.",
+                )
+                with st.expander("Add optional sleep and energy details"):
+                    include_wellbeing_details = st.checkbox("Include sleep and energy in this check-in")
+                    if include_wellbeing_details:
+                        energy = st.slider("Energy level", 1, 5, 3, help="1 = very low · 5 = very high")
+                        sleep_hours = st.slider("Hours of sleep", 0.0, 16.0, 7.0, 0.5)
+                    else:
+                        energy = None
+                        sleep_hours = None
+            prompt = st.selectbox("Optional writing prompt", list(PROMPTS), key="cloud_prompt")
+            if st.button("Use this prompt", key="apply_prompt", disabled=not PROMPTS[prompt]):
+                st.session_state.cloud_journal = PROMPTS[prompt]
+            guided_demo = st.selectbox(
+                "Guided demo example (optional)",
+                list(GUIDED_DEMOS),
+                key="guided_demo",
+                help="These synthetic examples are safe for a presentation and illustrate how to interpret the estimator.",
             )
-            context_tags = st.multiselect(
-                "What has been shaping your day? (optional)", CONTEXT_TAGS,
-                help="Choose any context that feels relevant. These tags remain in this browser session.",
-            )
-            with st.expander("Add optional sleep and energy details"):
-                include_wellbeing_details = st.checkbox("Include sleep and energy in this check-in")
-                if include_wellbeing_details:
-                    energy = st.slider("Energy level", 1, 5, 3, help="1 = very low · 5 = very high")
-                    sleep_hours = st.slider("Hours of sleep", 0.0, 16.0, 7.0, 0.5)
+            if st.button(
+                "Load guided example",
+                key="load_guided_demo",
+                disabled=not GUIDED_DEMOS[guided_demo],
+            ):
+                st.session_state.cloud_journal = GUIDED_DEMOS[guided_demo]
+                st.session_state.selected_record_id = None
+                st.rerun()
+            with st.form("journal_entry_form", clear_on_submit=False):
+                use_remote_emotion_model = False
+                if hf_token and not account_mode:
+                    use_remote_emotion_model = st.checkbox(
+                        "Use the GoEmotions transformer for this entry",
+                        key="use_remote_emotion_model",
+                        help=(
+                            "Optional. If selected, this reflection is sent to Hugging Face Inference "
+                            "for emotion analysis. Leave unchecked to use the in-app keyword estimator."
+                        ),
+                    )
+                    st.caption(
+                        "Model: SamLowe/roberta-base-go_emotions · 28 labels. "
+                        "Only checked entries are sent to Hugging Face."
+                    )
+                elif not account_mode:
+                    st.caption(
+                        "Transformer analysis is not connected on this deployment; the lightweight estimator is used."
+                    )
                 else:
-                    energy = None
-                    sleep_hours = None
-        prompt = st.selectbox("Optional writing prompt", list(PROMPTS), key="cloud_prompt")
-        if st.button("Use this prompt", key="apply_prompt", disabled=not PROMPTS[prompt]):
-            st.session_state.cloud_journal = PROMPTS[prompt]
-        with st.form("journal_entry_form", clear_on_submit=False):
-            use_remote_emotion_model = False
-            if hf_token and not account_mode:
-                use_remote_emotion_model = st.checkbox(
-                    "Use the GoEmotions transformer for this entry",
-                    key="use_remote_emotion_model",
-                    help=(
-                        "Optional. If selected, this reflection is sent to Hugging Face Inference "
-                        "for emotion analysis. Leave unchecked to use the in-app keyword estimator."
-                    ),
+                    st.caption(
+                        "Your reflection will be sent to the configured MoodMentor API and saved to your account history."
+                    )
+                entry = st.text_area(
+                    "Your reflection",
+                    placeholder="What felt heavy, hopeful, or important today? A few sentences are enough to begin.",
+                    height=220,
+                    max_chars=6000,
+                    key="cloud_journal",
                 )
-                st.caption(
-                    "Model: SamLowe/roberta-base-go_emotions · 28 labels. "
-                    "Only checked entries are sent to Hugging Face."
+                submitted = st.form_submit_button(
+                    "Analyze my mood", type="primary", width="stretch"
                 )
-            elif not account_mode:
-                st.caption(
-                    "Transformer analysis is not connected on this deployment; the lightweight estimator is used."
-                )
-            else:
-                st.caption(
-                    "Your reflection will be sent to the configured MoodMentor API and saved to your account history."
-                )
-            entry = st.text_area(
-                "Your reflection",
-                placeholder="What felt heavy, hopeful, or important today? A few sentences are enough to begin.",
-                height=220,
-                max_chars=6000,
-                key="cloud_journal",
-            )
-            submitted = st.form_submit_button(
-                "Analyze my mood", type="primary", width="stretch"
-            )
-        if submitted:
-            if not entry.strip():
-                st.info("Write a few words first. Your mood rating can also be recorded without sharing personal details in the text.")
-            else:
-                checkin_details = {
-                    "self_reported_mood": (
-                        None if self_reported_mood == "Prefer not to say" else self_reported_mood
-                    ),
-                    "context_tags": context_tags,
-                    "energy": energy if include_wellbeing_details else None,
-                    "sleep_hours": sleep_hours if include_wellbeing_details else None,
-                }
-                selected_classifier: EmotionClassifier | None = None
-                if use_remote_emotion_model and hf_token:
-                    def _remote_or_local_fallback(value: str):
-                        try:
-                            return classify_emotions_with_hf_api(
-                                value, api_key=hf_token
-                            )
-                        except Exception:
-                            st.warning(
-                                "The remote transformer could not complete this request. "
-                                "MoodMentor used its lightweight keyword estimator instead."
-                            )
-                            return classify_emotions_with_method(value)
+            if submitted:
+                if not entry.strip():
+                    st.info("Write a few words first. Your mood rating can also be recorded without sharing personal details in the text.")
+                else:
+                    checkin_details = {
+                        "self_reported_mood": (
+                            None if self_reported_mood == "Prefer not to say" else self_reported_mood
+                        ),
+                        "context_tags": context_tags,
+                        "energy": energy if include_wellbeing_details else None,
+                        "sleep_hours": sleep_hours if include_wellbeing_details else None,
+                    }
+                    selected_classifier: EmotionClassifier | None = None
+                    if use_remote_emotion_model and hf_token:
+                        def _remote_or_local_fallback(value: str):
+                            try:
+                                return classify_emotions_with_hf_api(
+                                    value, api_key=hf_token
+                                )
+                            except Exception:
+                                st.warning(
+                                    "The remote transformer could not complete this request. "
+                                    "MoodMentor used its lightweight keyword estimator instead."
+                                )
+                                return classify_emotions_with_method(value)
 
-                    selected_classifier = _remote_or_local_fallback
-                _analyze_many(
-                    [(entry.strip(), "Journal Entry")],
-                    checkin_details,
-                    selected_classifier,
+                        selected_classifier = _remote_or_local_fallback
+                    _analyze_many(
+                        [(entry.strip(), "Journal Entry")],
+                        checkin_details,
+                        selected_classifier,
+                    )
+            if entry.strip():
+                st.button(
+                    "Clear draft",
+                    key="clear_journal_draft",
+                    on_click=_clear_journal_draft,
                 )
-        if entry.strip():
-            st.button(
-                "Clear draft",
-                key="clear_journal_draft",
-                on_click=_clear_journal_draft,
-            )
     with col_prompt:
+        st.markdown('<div class="analysis-panel">', unsafe_allow_html=True)
         st.markdown("### A small reminder")
-        st.write("There is no right way to write this. Describe a moment, a conversation, or simply how you feel right now.")
-        st.caption("MoodMentor offers general reflection prompts. It cannot diagnose or replace professional support.")
+        st.write(
+            "There is no right way to write this. Describe a moment, a conversation, "
+            "or simply how you feel right now."
+        )
+        st.caption(
+            "MoodMentor offers general reflection prompts. It cannot diagnose or "
+            "replace professional support."
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
 
 with file_tab:
     st.markdown("### Bring in a text or CSV journal")
@@ -961,6 +1229,29 @@ with evaluation_tab:
                 f"**Model:** `{benchmark['model']}` · **Labels:** {benchmark['label_count']} "
                 f"· **Test examples:** {benchmark['held_out_test_calibrated_metrics']['examples']:,}"
             )
+            labels_path = PROJECT_ROOT / "data" / "goemotions" / "emotions.txt"
+            if labels_path.is_file():
+                labels = [
+                    line.strip()
+                    for line in labels_path.read_text(encoding="utf-8").splitlines()
+                    if line.strip() and not line.startswith("#")
+                ]
+                with st.expander("Verify model and dataset label mapping"):
+                    st.caption(
+                        "The benchmark and the GoEmotions fixture use the same ordered label list. "
+                        "This confirms label cardinality; it does not prove workplace-domain accuracy."
+                    )
+                    st.write(
+                        f"Dataset labels: {len(labels)} · Benchmark labels: "
+                        f"{benchmark['label_count']}"
+                    )
+                    st.dataframe(
+                        [{"Index": index, "GoEmotions label": label} for index, label in enumerate(labels)],
+                        width="stretch",
+                        hide_index=True,
+                    )
+                    if len(labels) != benchmark["label_count"]:
+                        st.error("Label-count mismatch: do not compare these benchmark scores to this dataset.")
             st.info(
                 "Per-emotion thresholds were chosen using the validation split only. "
                 "The held-out test split was kept separate for the final evaluation."
@@ -1057,7 +1348,15 @@ selected = next((item for item in records if item["id"] == st.session_state.sele
 if selected:
     report: AnalysisReport = selected["report"]
     st.markdown("---")
-    st.markdown("## 📊 Your mood analysis")
+    st.markdown('<div class="result-heading"><h2>📊 Your mood analysis</h2></div>', unsafe_allow_html=True)
+    estimator_label = report.emotion_method.replace("_", " ").title()
+    st.markdown(
+        '<div class="model-pill-row">'
+        '<span class="model-pill sentiment">VADER · sentiment tone</span>'
+        f'<span class="model-pill">Emotion estimator · {escape(estimator_label)}</span>'
+        "</div>",
+        unsafe_allow_html=True,
+    )
     metric1, metric2, metric3, metric4 = st.columns(4)
     metric1.metric("Sentiment tone", report.sentiment_label.value.title())
     metric2.metric("Dominant emotion", report.dominant_emotion.title() if report.emotion_scores else "No clear cue")
@@ -1077,34 +1376,55 @@ if selected:
             st.caption("These are your own check-in details; they are not inferred by the text analyzer.")
 
     result_col, emotion_col = st.columns([1, 1], gap="large")
-    with result_col:
-        st.markdown(f"### {report.recommendations.get('title', 'A way forward')}")
-        st.write(report.recommendations.get("summary", "Choose one gentle next step."))
-        for path in report.recommendations.get("action_paths", []):
-            with st.expander(f"{path.get('title', 'A way forward')} · {path.get('duration', 'Flexible')}"):
-                st.write(path.get("description", ""))
-                for step in path.get("steps", []):
-                    st.markdown(f"- {step}")
-    with emotion_col:
-        if report.emotion_scores:
-            emotion_frame = [{"Emotion": key.title(), "Signal": value} for key, value in sorted(report.emotion_scores.items(), key=lambda pair: pair[1], reverse=True)]
-            st.plotly_chart(px.bar(emotion_frame, x="Signal", y="Emotion", orientation="h", title="Emotion signal distribution", range_x=[0, 1]), width="stretch")
-        else:
-            st.info("No supported emotion cue matched this text. That does not mean the reflection is neutral.")
+    with result_col, st.container(border=True):
+            st.markdown(f"### {report.recommendations.get('title', 'A way forward')}")
+            st.write(report.recommendations.get("summary", "Choose one gentle next step."))
+            for path in report.recommendations.get("action_paths", []):
+                with st.expander(
+                    f"{path.get('title', 'A way forward')} · {path.get('duration', 'Flexible')}"
+                ):
+                    st.write(path.get("description", ""))
+                    for step in path.get("steps", []):
+                        st.markdown(f"- {step}")
+    with emotion_col, st.container(border=True):
+            if report.emotion_scores:
+                emotion_frame = [
+                    {"Emotion": key.title(), "Signal": value}
+                    for key, value in sorted(
+                        report.emotion_scores.items(),
+                        key=lambda pair: pair[1],
+                        reverse=True,
+                    )
+                ]
+                st.plotly_chart(
+                    px.bar(
+                        emotion_frame,
+                        x="Signal",
+                        y="Emotion",
+                        orientation="h",
+                        title="Emotion signal distribution",
+                        range_x=[0, 1],
+                    ),
+                    width="stretch",
+                )
+            else:
+                st.info(
+                    "No supported emotion cue matched this text. That does not mean "
+                    "the reflection is neutral."
+                )
 
     download_col, details_col = st.columns([1, 2])
     with download_col:
         st.download_button("Download this check-in as PDF", _make_pdf(selected), f"moodmentor-check-in-{selected['created_at'].strftime('%Y%m%d-%H%M')}.pdf", "application/pdf", width="stretch")
-    with details_col:
-        with st.expander("See the language-processing details"):
-            try:
-                breakdown = get_preprocessing_breakdown(report.original_text)
-                st.write("Cleaned text", breakdown["cleaned_text"])
-                st.write("Tokenization", breakdown["tokenization_method"])
-                st.write("Lemmatization", breakdown["lemmatization_method"])
-                st.write("Processed tokens", ", ".join(breakdown["lemmas"]) or "No tokens")
-            except (InputValidationError, NLTKResourceError) as exc:
-                st.warning(str(exc))
+    with details_col, st.expander("See the language-processing details"):
+        try:
+            breakdown = get_preprocessing_breakdown(report.original_text)
+            st.write("Cleaned text", breakdown["cleaned_text"])
+            st.write("Tokenization", breakdown["tokenization_method"])
+            st.write("Lemmatization", breakdown["lemmatization_method"])
+            st.write("Processed tokens", ", ".join(breakdown["lemmas"]) or "No tokens")
+        except (InputValidationError, NLTKResourceError) as exc:
+            st.warning(str(exc))
 
 st.markdown("---")
 st.caption("MoodMentor is a learning and self-reflection tool, not a clinical assessment, diagnosis, or emergency service. If you may be in immediate danger, contact local emergency services or a trusted person now.")
