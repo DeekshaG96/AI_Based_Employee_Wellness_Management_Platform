@@ -17,10 +17,10 @@ def get_meditation_packs() -> list[dict[str, Any]]:
     return [
         {
             "id": "stress_release",
-            "title": "Stress & Decompression Pack",
+            "title": "The AnchorPoint Protocol (Stress & Decompression)",
             "icon": "🌊",
             "duration": "3–5 mins per session",
-            "description": "Techniques for high-stress sprints, tense meetings, and task overwhelm.",
+            "description": "Somatic grounding techniques for high-stress sprints, tense meetings, and task overwhelm.",
             "sessions": [
                 {
                     "title": "Session 1: Dropping the Anchor",
@@ -59,10 +59,10 @@ def get_meditation_packs() -> list[dict[str, Any]]:
         },
         {
             "id": "deep_work_focus",
-            "title": "Deep Work & Focus Pack",
+            "title": "Cerebral Defrag & Flow (Deep Work & Focus)",
             "icon": "🎯",
             "duration": "2–4 mins per session",
-            "description": "Cultivate one-pointed attention, clear mental residue, and enter flow state.",
+            "description": "Cultivate one-pointed attention, clear mental residue, and enter effortless flow state.",
             "sessions": [
                 {
                     "title": "Session 1: Clearing Mental Tabs",
@@ -89,10 +89,10 @@ def get_meditation_packs() -> list[dict[str, Any]]:
         },
         {
             "id": "body_scan_sleep",
-            "title": "Restorative Body Scan & Wind-Down",
+            "title": "SomatoRelease & Sunset Detachment (Body Scan & Wind-Down)",
             "icon": "🌙",
             "duration": "5–8 mins",
-            "description": "Progressive somatic release for physical desk strain and evening wind-down.",
+            "description": "Progressive somatic release for physical desk strain and evening work-life boundary transition.",
             "sessions": [
                 {
                     "title": "Session 1: Progressive Desk Strain Release",
@@ -120,10 +120,10 @@ def get_meditation_packs() -> list[dict[str, Any]]:
         },
         {
             "id": "compassion_metta",
-            "title": "Loving-Kindness & Teammate Compassion",
+            "title": "Kith & Kin Empathy Circle (Loving-Kindness & Compassion)",
             "icon": "💚",
             "duration": "3–5 mins",
-            "description": "Foster psychological safety, empathy, and reduce friction with colleagues.",
+            "description": "Foster psychological safety, empathy, and reduce interpersonal friction with colleagues.",
             "sessions": [
                 {
                     "title": "Session 1: Self-Compassion for Mistakes",
@@ -155,25 +155,25 @@ def get_soundscape_catalog() -> list[dict[str, str]]:
     return [
         {
             "id": "rain",
-            "name": "🌧️ Gentle Summer Rain",
+            "name": "🌧️ Verdant Canopy Rain",
             "description": "Filtered pink noise with soft droplet acoustics to calm an overactive mind.",
             "category": "Relaxation",
         },
         {
             "id": "ocean",
-            "name": "🌊 Tidal Ocean Waves",
-            "description": "Rhythmic low-frequency swells modeled on a 0.1 Hz natural tidal cycle.",
+            "name": "🌊 Pacific Tidal Resonance",
+            "description": "Rhythmic low-frequency swells modeled on a 0.08 Hz natural oceanic oscillation.",
             "category": "Stress Relief",
         },
         {
             "id": "bell",
-            "name": "🔔 Tibetan Singing Bowl & Chime",
+            "name": "🔔 Zenith 432Hz Solfeggio Chime",
             "description": "Harmonic Solfeggio 432 Hz tone with resonant exponential decay for meditation.",
             "category": "Meditation",
         },
         {
             "id": "brown_noise",
-            "name": "☕ Warm Brown Noise (Deep Focus)",
+            "name": "☕ Amber Focus Frequency (Brown Noise)",
             "description": "Deeper than white noise; dampens sharp environmental distractions for deep work.",
             "category": "Focus",
         },
@@ -204,10 +204,10 @@ def render_medito_soundscape_widget() -> str:
             <div>
                 <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:#d1fae5;">1. Choose Ambient Backdrop:</label>
                 <select id="soundscapeSelect" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #10b981; background:#042f2e; color:#f0fdf4; font-size:0.9rem; font-weight:500;">
-                    <option value="rain">🌧️ Gentle Summer Rain (Pink Noise)</option>
-                    <option value="ocean">🌊 Tidal Ocean Waves (0.1Hz Swell)</option>
-                    <option value="bell">🔔 Tibetan Meditation Bell (432 Hz)</option>
-                    <option value="brown">☕ Warm Brown Noise (Deep Work)</option>
+                    <option value="rain">🌧️ Verdant Canopy Rain (Pink Noise)</option>
+                    <option value="ocean">🌊 Pacific Tidal Resonance (0.08Hz Swell)</option>
+                    <option value="bell">🔔 Zenith 432Hz Solfeggio Chime (Tibetan Bell)</option>
+                    <option value="brown">☕ Amber Focus Frequency (Brown Noise)</option>
                 </select>
             </div>
 
@@ -459,3 +459,4 @@ def render_medito_soundscape_widget() -> str:
         });
     </script>
     """
+

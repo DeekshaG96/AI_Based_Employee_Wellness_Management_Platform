@@ -61,7 +61,7 @@ def get_mood_food_plan(emotion: str, dietary_pref: str = "any") -> dict[str, Any
     # Map fine-grained GoEmotions into nutritional psychiatry profiles
     if emo in ("fear", "nervousness", "anxiety"):
         category = "stress_anxiety"
-        title = "Acute Stress & Nervousness (Elevated Cortisol & Nervous Tension)"
+        title = "CortisolShield Plate (Acute Stress & Nervousness)"
         objective = "Down-regulate adrenal cortisol, stimulate inhibitory GABA synthesis, and restore autonomic calm."
         key_nutrients = ["Magnesium Glycinate / Citrate", "L-Theanine", "Omega-3 (EPA/DHA)", "Vitamin B6", "Zinc"]
         superfoods = [
@@ -87,7 +87,7 @@ def get_mood_food_plan(emotion: str, dietary_pref: str = "any") -> dict[str, Any
 
     elif emo in ("anger", "annoyance", "disapproval", "disgust"):
         category = "irritability_anger"
-        title = "Irritability & Frustration (Adrenaline & Blood Sugar Volatility)"
+        title = "GlycoCalm Nourish Bowl (Irritability & Frustration)"
         objective = "Stabilize glycemic fluctuations, attenuate systemic vascular tension, and cool physiological irritability."
         key_nutrients = ["Complex Slow-Release Carbohydrates", "Potassium", "Polyphenols", "Vitamin C", "L-Tryptophan"]
         superfoods = [
@@ -113,7 +113,7 @@ def get_mood_food_plan(emotion: str, dietary_pref: str = "any") -> dict[str, Any
 
     elif emo in ("sadness", "grief", "disappointment", "remorse"):
         category = "low_mood_sadness"
-        title = "Emotional Low & Melancholy (Serotonin & Dopamine Deficit)"
+        title = "NeuroGenesis Serotonin Bowl (Low Mood & Melancholy)"
         objective = "Provide amino acid precursors (tryptophan, tyrosine) for serotonin/dopamine synthesis and support the gut-brain axis."
         key_nutrients = ["L-Tryptophan", "L-Tyrosine", "Folate (Vitamin B9)", "Vitamin D3", "Probiotics & Prebiotics"]
         superfoods = [
@@ -139,7 +139,7 @@ def get_mood_food_plan(emotion: str, dietary_pref: str = "any") -> dict[str, Any
 
     elif emo in ("joy", "gratitude", "admiration", "amusement", "love", "optimism", "pride", "excitement"):
         category = "positive_flourishing"
-        title = "Flourishing & Morale (Dopamine & Endorphin Momentum)"
+        title = "SynapseFlow Mezze Plate (Flourishing & Morale)"
         objective = "Sustain high cognitive vitality, enhance mitochondrial ATP generation, and reinforce neural longevity."
         key_nutrients = ["Polyphenols & Anthocyanins", "Monounsaturated Fatty Acids", "Coenzyme Q10", "Clean Protein", "Choline"]
         superfoods = [
@@ -164,7 +164,7 @@ def get_mood_food_plan(emotion: str, dietary_pref: str = "any") -> dict[str, Any
 
     elif emo in ("fatigue", "burnout"):
         category = "fatigue_burnout"
-        title = "Burnout Recovery & Rejuvenation (ATP & Adrenal Support)"
+        title = "MitoChondria Fuel Plate (Burnout Recovery & ATP)"
         objective = "Restore depleted cellular ATP energy, replenish micronutrient stores, and ease chronic allostatic load."
         key_nutrients = ["Magnesium Malate", "Iron & Vitamin C", "B-Complex (B1, B5, B12)", "CoQ10", "Adaptogens"]
         superfoods = [
@@ -190,7 +190,7 @@ def get_mood_food_plan(emotion: str, dietary_pref: str = "any") -> dict[str, Any
 
     else:  # Neutral, unclassified, confusion, curious, etc.
         category = "balanced_neutral"
-        title = "Balanced Homeostasis & Mental Focus (Equilibrium Maintenance)"
+        title = "Equilibrium Baseline Plate (Balanced Homeostasis & Focus)"
         objective = "Maintain stable glycemic baseline, steady microvascular circulation, and neurochemical equilibrium."
         key_nutrients = ["Balanced Complete Protein", "Dietary Prebiotic Fiber", "Omega-3", "Trace Minerals"]
         superfoods = [

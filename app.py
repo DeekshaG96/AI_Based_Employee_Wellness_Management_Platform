@@ -1073,12 +1073,12 @@ def render_workspace():
 
     tab_direct, tab_file, tab_trends, tab_tools, tab_team, tab_arch = st.tabs(
         [
-            "📝 Mood Journal",
-            "📂 File Ingestion & Benchmark",
-            "📈 Longitudinal Trends & Analytics",
-            "🥗 Somatic & Nutritional Wellness",
-            "👥 Team Health & Burnout Simulator",
-            "⚖️ Model Verification & Defense Hub",
+            "📝 MindEcho | Mood Journal",
+            "📂 DataStream | File & Benchmark Ingest",
+            "📈 Chronos | Longitudinal Trends & Analytics",
+            "🌿 SomaSanctuary | Somatics, Medito & Nutrition",
+            "👥 ResilienceRadar | Team Health & Burnout Simulator",
+            "⚖️ Veritas Hub | Model Evaluation & Defense",
         ]
     )
 
@@ -2134,11 +2134,11 @@ def render_guest_workspace():
 
     guest_tab1, guest_tab2, guest_tab3, guest_tab4, guest_tab5 = st.tabs(
         [
-            "📝 Mood Journal",
-            "📄 File Ingestion",
-            "🥗 Somatic & Nutritional Wellness",
-            "👥 Team Health & Burnout Simulator",
-            "🏗️ Architecture",
+            "📝 MindEcho | Mood Journal",
+            "📄 DataStream | File Ingest",
+            "🌿 SomaSanctuary | Somatics, Medito & Nutrition",
+            "👥 ResilienceRadar | Team Health & Burnout Simulator",
+            "🏗️ Architecture & Model Verification",
         ]
     )
 
