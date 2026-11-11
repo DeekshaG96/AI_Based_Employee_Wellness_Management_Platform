@@ -13,13 +13,9 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 
 from .pipeline import (
     _EMOTION_KEYWORDS,
-    _GOEMOTIONS_GROUPS,
-    _dominant_goemotions_category,
-    _get_emotion_pipeline,
     classify_emotions_with_method,
     sanitize_text_for_vader,
 )
-from .preprocessing import sanitize_text_for_vader
 
 
 def run_lexical_baseline(text: str) -> dict[str, Any]:

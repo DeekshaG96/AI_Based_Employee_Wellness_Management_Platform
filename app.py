@@ -15,6 +15,7 @@ import streamlit as st
 from wellness.api_client import (
     ApiError,
     analysis_report_from_dict,
+    api_url,
 )
 from wellness.api_client import (
     analyze as api_analyze,
@@ -23,7 +24,6 @@ from wellness.api_client import (
     analyze_file as api_analyze_file,
 )
 from wellness.api_client import (
-    api_url,
     delete_entry as api_delete_entry,
 )
 from wellness.api_client import (
@@ -39,10 +39,9 @@ from wellness.api_client import (
     register as api_register,
 )
 from wellness.comparator import compare_models
-from wellness.food_planner import get_mood_food_plan, get_supported_mood_categories
+from wellness.food_planner import get_mood_food_plan
 from wellness.meditation import (
     get_meditation_packs,
-    get_soundscape_catalog,
     render_medito_soundscape_widget,
 )
 from wellness.pipeline import analyze_text
@@ -51,7 +50,6 @@ from wellness.report import SentimentLabel
 from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
 from wellness.wellness_tools import (
     get_cognitive_reframes,
-    get_guided_exercises,
     render_box_breathing_widget,
 )
 
@@ -953,7 +951,7 @@ def render_team_health_view():
     )
     fig.add_hline(y=0.05, line_dash="dash", line_color="green", annotation_text="Positive Baseline")
     fig.add_hline(y=-0.05, line_dash="dash", line_color="red", annotation_text="Distress Boundary")
-    fig.update_layout(height=320, margin=dict(l=20, r=20, t=40, b=20))
+    fig.update_layout(height=320, margin={"l": 20, "r": 20, "t": 40, "b": 20})
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("#### 📋 Recommended Management Interventions:")

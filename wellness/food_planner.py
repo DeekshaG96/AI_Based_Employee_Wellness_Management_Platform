@@ -233,7 +233,7 @@ def get_mood_food_plan(emotion: str, dietary_pref: str = "any") -> dict[str, Any
         "foods_to_avoid": avoid,
         "hydration_tip": hydration_tip,
         "scientific_basis": scientific_basis,
-        "shopping_essentials": sorted(list(set(shopping_items))),
+        "shopping_essentials": sorted(set(shopping_items)),
     }
 
 

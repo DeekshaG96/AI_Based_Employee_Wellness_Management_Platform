@@ -63,12 +63,13 @@ def configure_database(url: str) -> None:
 
 
 def create_tables() -> None:
-    from . import models  # noqa: F401 - register mapped entities
     import logging
+
+    from . import models  # noqa: F401 - register mapped entities
     logger = logging.getLogger(__name__)
 
     try:
-        with engine.connect() as conn:
+        with engine.connect():
             pass
         Base.metadata.create_all(bind=engine)
     except Exception as exc:

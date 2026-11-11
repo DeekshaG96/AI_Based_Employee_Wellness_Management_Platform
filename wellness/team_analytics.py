@@ -6,9 +6,9 @@ while preserving individual employee privacy.
 
 from __future__ import annotations
 
+import random
 import statistics
 from datetime import datetime, timedelta
-import random
 from typing import Any
 
 

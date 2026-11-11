@@ -1,6 +1,5 @@
 """Unit tests for newly added functions: Model Comparator, Wellness Tools, and Team Analytics."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 from wellness.comparator import compare_models, run_lexical_baseline, run_transformer_analysis
