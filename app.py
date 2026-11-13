@@ -15,7 +15,6 @@ import streamlit as st
 from wellness.api_client import (
     ApiError,
     analysis_report_from_dict,
-    api_url,
 )
 from wellness.api_client import (
     analyze as api_analyze,
@@ -345,35 +344,68 @@ div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
 
 /* Buttons with Hover Elevation */
 .stButton > button, .stFormSubmitButton > button {
-  min-height: 42px !important;
+  min-height: 44px !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
-  font-size: 0.9rem !important;
+  font-size: 0.92rem !important;
+  letter-spacing: 0.01em !important;
   transition: var(--transition-smooth) !important;
 }
 button[kind="primary"],
 button[data-testid="baseButton-primary"],
 .stButton > button[kind="primary"],
 .stFormSubmitButton > button[kind="primary"],
-div[data-testid="stFormSubmitButton"] button {
-  background: #0f766e !important;
+div[data-testid="stFormSubmitButton"] button,
+.stFormSubmitButton > button {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
   background-color: #0f766e !important;
   border: 1px solid #0f766e !important;
   border-color: #0f766e !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 4px rgba(15, 118, 110, 0.2) !important;
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.25) !important;
+}
+button[kind="primary"] *,
+button[data-testid="baseButton-primary"] *,
+.stButton > button[kind="primary"] *,
+.stFormSubmitButton > button[kind="primary"] *,
+div[data-testid="stFormSubmitButton"] button *,
+.stFormSubmitButton > button *,
+button[kind="primary"] p,
+button[data-testid="baseButton-primary"] p,
+div[data-testid="stFormSubmitButton"] button p,
+button[kind="primary"] [data-testid="stMarkdownContainer"] p,
+button[data-testid="baseButton-primary"] [data-testid="stMarkdownContainer"] p,
+div[data-testid="stFormSubmitButton"] button [data-testid="stMarkdownContainer"] p,
+.stFormSubmitButton button [data-testid="stMarkdownContainer"] p {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
 }
 button[kind="primary"]:hover,
 button[data-testid="baseButton-primary"]:hover,
 .stButton > button[kind="primary"]:hover,
 .stFormSubmitButton > button[kind="primary"]:hover,
 div[data-testid="stFormSubmitButton"] button:hover {
-  background: #115e59 !important;
+  background: linear-gradient(135deg, #115e59 0%, #0f766e 100%) !important;
   background-color: #115e59 !important;
   border-color: #115e59 !important;
   color: #ffffff !important;
-  box-shadow: var(--shadow-hover) !important;
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.32) !important;
   transform: translateY(-1px) !important;
+}
+button[kind="primary"]:hover *,
+button[data-testid="baseButton-primary"]:hover *,
+div[data-testid="stFormSubmitButton"] button:hover *,
+.stFormSubmitButton button:hover * {
+  color: #ffffff !important;
+}
+button[kind="secondary"] *,
+button[data-testid="baseButton-secondary"] *,
+.stButton > button[kind="secondary"] *,
+button[kind="secondary"] p,
+button[data-testid="baseButton-secondary"] p {
+  color: #1e293b !important;
+  font-weight: 600 !important;
 }
 button[kind="secondary"],
 button[data-testid="baseButton-secondary"],
@@ -1166,23 +1198,21 @@ def _apply_auth(auth: dict):
 
 
 def render_landing_and_auth():
-    """Render the MoodMentor executive landing and authentication gateway."""
-    active_api = escape(str(api_url()))
+    """Render the MoodMentor clean, attractive employee landing and authentication portal."""
     st.markdown(
-        f"""
+        """
         <div class="brand-lockup">
             <div style="display: flex; align-items: center; gap: 14px;">
                 <div class="brand-mark">M</div>
                 <div>
-                    <div class="brand-name">MoodMentor OS</div>
-                    <div class="brand-caption">AI-Based Employee Wellness & Affective Intelligence Management Platform</div>
+                    <div class="brand-name">MoodMentor</div>
+                    <div class="brand-caption">Workplace Well-Being & Affective Intelligence Platform</div>
                 </div>
             </div>
             <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
-                <span class="workspace-badge" style="margin: 0;">Milestone 2 Defense</span>
                 <div class="workspace-status-badge" style="padding: 6px 14px; font-size: 0.78rem;">
                     <span class="status-pulse"></span>
-                    <span>FastAPI: {active_api}</span>
+                    <span>Service Online</span>
                 </div>
             </div>
         </div>
@@ -1191,39 +1221,38 @@ def render_landing_and_auth():
     )
 
     st.markdown('<style>[data-testid="stSidebar"]{display:none}</style>', unsafe_allow_html=True)
-    col_hero, col_auth = st.columns([1.18, 0.82], gap="large")
+    col_hero, col_auth = st.columns([1.12, 0.88], gap="large")
     with col_hero:
         st.markdown(
             """
             <div class="welcome-panel">
-                <div class="welcome-kicker">AFFECTIVE INTELLIGENCE & RESILIENCE ARCHITECTURE</div>
-                <div class="welcome-title">Empowering Workforce Well-Being with Calibrated NLP</div>
+                <div class="welcome-kicker">MINDFUL WORKPLACE REFLECTION</div>
+                <div class="welcome-title">Make space for how you feel.</div>
                 <div class="welcome-copy">
-                    MoodMentor combines rule-based VADER sentiment valence with fine-tuned DistilBERT multi-label emotion classification (85.17% Core Macro F1), 14-day longitudinal team resilience analytics, and evidence-based CBT micro-interventions.
+                    A thoughtful space for your daily check-in. Put your thoughts into words, understand your emotional patterns, and choose small, supportive next steps for your workday.
                 </div>
                 <div class="welcome-tags">
-                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award "><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></span>85.17% Core Macro F1</span>
-                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap "><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>Dual-Engine NLP</span>
-                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users "><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>Team Burnout Radar</span>
-                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utensils "><path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2"></path><path d="M15 11v11"></path><path d="M5 2v18"></path><path d="M5 6h4"></path></svg></span>Nutritional Psychiatry</span>
-                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield "><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>Zero-Knowledge Privacy</span>
+                    <span><span class="icon-inline">""" + svg_icon("shield", 13, "#0f766e") + """</span>Confidential & Private</span>
+                    <span><span class="icon-inline">""" + svg_icon("zap", 13, "#0f766e") + """</span>Real-Time Tone Insights</span>
+                    <span><span class="icon-inline">""" + svg_icon("heart", 13, "#0f766e") + """</span>Somatic Care & Breathwork</span>
+                    <span><span class="icon-inline">""" + svg_icon("utensils", 13, "#0f766e") + """</span>Mood-Food Nutrition</span>
                 </div>
             </div>
             <div class="feature-grid">
                 <div class="feature-card">
-                    <span class="feature-index">01 / DUAL-ENGINE NLP</span>
-                    <strong>VADER + DistilBERT</strong>
-                    <span>Real-time sentiment polarity valence (-1 to +1) alongside 28 fine-grained emotion signals.</span>
+                    <span class="feature-index">01 / REFLECT</span>
+                    <strong>Your words, your way</strong>
+                    <span>Write freely about workplace moments, team dynamics, or feelings.</span>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-index">02 / RESILIENCE RADAR</span>
-                    <strong>Team Burnout Simulation</strong>
-                    <span>14-day moving average distress detection, resilience indexing & managerial interventions.</span>
+                    <span class="feature-index">02 / NOTICE</span>
+                    <strong>Understand the tone</strong>
+                    <span>Explore calibrated sentiment valence and fine-grained emotion signals.</span>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-index">03 / VERIFIED BENCHMARKS</span>
-                    <strong>85.17% F1 vs 50.74% SOTA</strong>
-                    <span>Mathematically evaluated on 5,427 held-out Google Research GoEmotions test reflections.</span>
+                    <span class="feature-index">03 / GROW</span>
+                    <strong>Supportive next steps</strong>
+                    <span>Access guided box breathing, ambient audio, and neuro-nutrition blueprints.</span>
                 </div>
             </div>
             """,
@@ -1233,41 +1262,22 @@ def render_landing_and_auth():
     with col_auth, st.container(border=True):
         st.markdown(
             """
-            <div style="margin-bottom: 14px;">
-                <span class="eyebrow" style="color: #0f766e; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px;">SYSTEM ACCESS PORTAL</span>
-                <h3 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #0f172a;">Executive Sign-In</h3>
-                <p style="margin: 2px 0 0 0; font-size: 0.82rem; color: #64748b;">Instant evaluator access or credentialed session authentication.</p>
+            <div style="margin-bottom: 16px;">
+                <span class="eyebrow" style="color: #0f766e; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px;">YOUR ACCOUNT</span>
+                <h3 style="margin: 0; font-size: 1.45rem; font-weight: 800; color: #0f172a;">Welcome in</h3>
+                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">Sign in to continue your reflections, or explore as a guest.</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        # Prominent 1-Click Evaluation Login
-        if st.button("1-Click Evaluator Demo Access", type="primary", use_container_width=True, help="Instantly signs into Alex Rivera's preloaded account with 60+ benchmark reflections"):
-            try:
-                auth = api_login("alex@example.com", "Password123!")
-                _apply_auth(auth)
-                st.rerun()
-            except ApiError:
-                try:
-                    auth = api_register("Alex Rivera (Demo)", "alex@example.com", "Password123!")
-                    _apply_auth(auth)
-                    st.rerun()
-                except ApiError as exc:
-                    st.error(str(exc))
-
-        st.markdown(
-            "<div style='text-align: center; margin: 12px 0 10px; font-size: 0.72rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.06em;'>— OR SELECT ACCESS MODE —</div>",
-            unsafe_allow_html=True,
-        )
-
-        sign_in_tab, register_tab, guest_tab = st.tabs(["Sign In", "Register", "Guest Mode"])
+        sign_in_tab, register_tab, guest_tab = st.tabs(["Sign In", "Create Account", "Guest Access"])
         with sign_in_tab:
             with st.form("login_form"):
-                login_email = st.text_input("Corporate Email", value="alex@example.com", placeholder="alex@example.com")
+                login_email = st.text_input("Email Address", value="alex@example.com", placeholder="you@company.com")
                 login_password = st.text_input("Password", value="Password123!", type="password")
                 login_submitted = st.form_submit_button(
-                    "Sign In with Credentials", type="secondary", use_container_width=True
+                    "Sign In to MoodMentor", type="primary", use_container_width=True
                 )
             if login_submitted:
                 if not login_email or not login_password:
@@ -1282,10 +1292,10 @@ def render_landing_and_auth():
 
         with register_tab:
             with st.form("register_form"):
-                reg_name = st.text_input("Full Name", placeholder="e.g. Dr. Alex Rivera")
-                reg_email = st.text_input("Corporate Email", placeholder="user@enterprise.internal")
+                reg_name = st.text_input("Full Name", placeholder="e.g. Alex Rivera")
+                reg_email = st.text_input("Email Address", placeholder="alex@company.com")
                 reg_password = st.text_input(
-                    "Create Password", type="password", help="Use at least 8 characters."
+                    "Password", type="password", help="Use at least 8 characters."
                 )
                 register_submitted = st.form_submit_button(
                     "Create Account", type="primary", use_container_width=True
@@ -1299,12 +1309,16 @@ def render_landing_and_auth():
 
         with guest_tab:
             st.markdown(
-                "<p style='font-size: 0.82rem; color: #475569; margin: 8px 0 12px 0; line-height: 1.5;'>"
-                "Run all NLP sentiment analysis, multi-label emotion models, and export PDF reports directly in-memory without contacting the database."
-                "</p>",
+                """
+                <div style="padding: 6px 0 14px 0;">
+                    <p style="font-size: 0.88rem; color: #475569; margin: 0 0 14px 0; line-height: 1.6;">
+                        Explore all emotion analysis, sentiment meters, somatic breathing, and ambient audio tools privately in memory. No account or database required.
+                    </p>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
-            if st.button("Launch Guest Reflection Space", type="secondary", use_container_width=True):
+            if st.button("Enter Guest Mode", type="primary", use_container_width=True):
                 st.session_state.guest_mode = True
                 st.rerun()
 
@@ -1664,7 +1678,7 @@ def render_workspace():
         f"""
         <div class="workspace-header">
             <div>
-                <span class="workspace-badge">Executive Platform · Milestone 2</span>
+                <span class="workspace-badge">Workforce Well-Being Platform</span>
                 <h1 class="workspace-title">Welcome back, {active_user_name}</h1>
                 <p class="workspace-subtitle">Affective Computing, Real-time Biomarkers & Team Resilience Analytics</p>
             </div>
