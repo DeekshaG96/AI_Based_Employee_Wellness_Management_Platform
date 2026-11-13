@@ -61,30 +61,472 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# MoodMentor visual system: calm neutrals, botanical greens, and warm highlights
-CUSTOM_CSS = '<style>\n@import url(\'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap\');\n:root {\n  --ink: #19352d;\n  --muted: #657b71;\n  --paper: #f4f7f3;\n  --card: #ffffff;\n  --line: #e0e9e1;\n  --forest: #155c49;\n  --forest-dark: #103d33;\n  --leaf: #c9ebad;\n  --mint: #e9f4eb;\n  --coral: #ed8e73;\n}\nhtml, body, [class*="css"] { font-family: \'DM Sans\', sans-serif; color: var(--ink); }\n.stApp {\n  color: var(--ink);\n  background: radial-gradient(850px circle at 86% 3%, rgba(206, 231, 211, .48), transparent 48%), var(--paper);\n}\n[data-testid="stAppViewContainer"] { background: transparent; }\n[data-testid="stHeader"] { background: rgba(244,247,243,.72); }\n.block-container { max-width: 1420px; padding: 2rem 3rem 4rem; }\nh1, h2, h3, h4 { font-family: \'Manrope\', sans-serif !important; color: var(--ink); letter-spacing: -.035em; }\np, li, label { color: var(--muted); }\n[data-testid="stMarkdownContainer"] p { line-height: 1.7; }\n[data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] label { color: var(--ink) !important; font-weight: 600; }\n.brand-lockup { display: flex; align-items: center; gap: 13px; margin: 0 0 1.5rem 2px; }\n.brand-mark { width: 45px; height: 45px; display: grid; place-items: center; border-radius: 16px; background: var(--forest); color: #fff; font: 800 25px \'Manrope\',sans-serif; box-shadow: 0 8px 18px rgba(21,92,73,.18); }\n.brand-name { font: 800 1.35rem \'Manrope\',sans-serif; color: var(--ink); letter-spacing: -.04em; }\n.brand-caption { color: var(--muted); font-size: .78rem; margin-top: 1px; letter-spacing: .02em; }\n.welcome-panel {\n  position: relative; overflow: hidden; min-height: 315px; padding: 36px 38px 34px;\n  border-radius: 28px; color: #f3f8f2;\n  background: linear-gradient(128deg, #103e34 0%, #155b48 63%, #26745a 100%);\n  box-shadow: 0 22px 55px rgba(24,72,57,.16); margin: 0 0 22px;\n}\n.welcome-panel:after { content: \'\'; position: absolute; width: 290px; height: 290px; right: -78px; top: -106px; border: 1px solid rgba(229,246,220,.20); border-radius: 50%; box-shadow: 0 0 0 32px rgba(229,246,220,.035), 0 0 0 68px rgba(229,246,220,.025); }\n.welcome-kicker, .eyebrow { color: #a9d9bb; font-size: .72rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }\n.welcome-title { position: relative; z-index: 1; max-width: 560px; margin: 21px 0 12px; color: #fff; font: 800 clamp(2.05rem,4vw,3.3rem)/1.12 \'Manrope\',sans-serif; letter-spacing: -.055em; }\n.welcome-copy { position: relative; z-index: 1; max-width: 505px; color: #d1e4d7; font-size: 1rem; line-height: 1.75; }\n.welcome-tags { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 9px; margin-top: 26px; }\n.welcome-tags span { padding: 8px 12px; border: 1px solid rgba(236,249,235,.22); border-radius: 99px; background: rgba(255,255,255,.08); color: #eef7ed; font-size: .78rem; }\n.feature-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 11px; }\n.feature-card { min-height: 118px; padding: 17px 16px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.72); }\n.feature-index { display: block; margin-bottom: 10px; color: var(--forest); font-size: .7rem; font-weight: 800; letter-spacing: .1em; }\n.feature-card strong { display: block; color: var(--ink); font: 700 .88rem \'Manrope\',sans-serif; }\n.feature-card span:last-child { display: block; margin-top: 5px; color: var(--muted); font-size: .76rem; line-height: 1.5; }\n.auth-heading { margin: 8px 0 18px; }\n.auth-heading .eyebrow { color: var(--forest); }\n.auth-heading h2 { margin: 8px 0 4px; font-size: 1.8rem; }\n.auth-heading p { margin: 0; font-size: .9rem; }\n[data-testid="stVerticalBlockBorderWrapper"] { border: 1px solid var(--line) !important; border-radius: 22px !important; background: rgba(255,255,255,.88); box-shadow: 0 12px 35px rgba(34,69,51,.055); }\n[data-baseweb="tab-list"] { gap: 8px; border-bottom: 0 !important; margin-bottom: 13px; }\nbutton[data-baseweb="tab"] { height: 42px; border: 1px solid #e0e9e1 !important; border-radius: 12px 12px 12px 12px !important; background: #fff !important; color: var(--muted) !important; font-weight: 700 !important; }\nbutton[data-baseweb="tab"][aria-selected="true"] { border-color: #c4dfcd !important; background: #eaf4ec !important; color: var(--forest) !important; }\ndiv[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] { display: none !important; }\n[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea, [data-baseweb="select"] > div {\n  border: 1px solid #dce7df !important; border-radius: 13px !important; background: #fff !important; color: var(--ink) !important;\n}\n[data-testid="stTextArea"] textarea { min-height: 210px; padding: 15px 16px; line-height: 1.7; }\n[data-testid="stTextInput"] input:focus, [data-testid="stTextArea"] textarea:focus { border-color: #6da98b !important; box-shadow: 0 0 0 3px rgba(109,169,139,.15) !important; }\n[data-testid="stTextInput"] input::placeholder, [data-testid="stTextArea"] textarea::placeholder { color: #91a39a !important; }\n.stButton > button, .stFormSubmitButton > button, .stDownloadButton > button {\n  min-height: 44px; border: 1px solid #d5e2d8; border-radius: 12px; font-weight: 700; transition: transform .15s ease, box-shadow .15s ease;\n}\n.stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(28,74,54,.12); border-color: #88b69a; }\n.stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primary"] { border-color: var(--forest) !important; background: var(--forest) !important; color: #fff !important; }\n.stDownloadButton > button { border-color: #c8dfcf !important; background: #e9f4eb !important; color: var(--forest) !important; }\n[data-testid="stMetric"] { min-height: 104px; padding: 17px 19px; border: 1px solid var(--line); border-radius: 17px; background: #fff; box-shadow: 0 7px 20px rgba(34,69,51,.04); }\n[data-testid="stMetricLabel"] p { color: var(--muted) !important; font-size: .8rem; font-weight: 600; }\n[data-testid="stMetricValue"] { color: var(--ink) !important; font-family: \'Manrope\',sans-serif; }\n[data-testid="stAlert"] { border-radius: 14px; }\n[data-testid="stExpander"] { border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.78); }\n[data-testid="stDataFrame"] { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }\n.workspace-heading { position: relative; display: flex; align-items: center; justify-content: space-between; overflow: hidden; min-height: 156px; margin: 0 0 25px; padding: 28px 34px; border: 1px solid #dce9df; border-radius: 24px; background: linear-gradient(108deg,#eaf4eb 0%,#f8faf6 68%,#f3e9d9 100%); }\n.workspace-heading:after { content: \'✳\'; position: absolute; right: 43px; top: 7px; color: rgba(21,92,73,.12); font-size: 132px; line-height: 1; transform: rotate(-12deg); }\n.workspace-heading > div { position: relative; z-index: 1; }\n.workspace-heading .eyebrow { color: var(--forest); }\n.workspace-title { margin: 9px 0 4px !important; font-size: clamp(1.8rem,3vw,2.55rem) !important; }\n.workspace-copy { margin: 0; color: var(--muted); }\n.editor-heading { margin-bottom: 20px; }\n.editor-heading .eyebrow { color: var(--forest); }\n.editor-heading h3 { margin: 8px 0 5px; font-size: 1.45rem; }\n.editor-heading p { margin: 0; color: var(--muted); }\n.writing-prompt { min-height: 220px; padding: 23px 21px; border: 1px solid #deeadf; border-radius: 19px; background: linear-gradient(145deg,#f1f7ec,#fbf5eb); }\n.prompt-icon { width: 39px; height: 39px; display: grid; place-items: center; border-radius: 13px; background: #dcefd8; color: var(--forest); font-size: 1.2rem; }\n.prompt-label { margin: 18px 0 7px !important; color: var(--forest) !important; font-size: .68rem; font-weight: 800; letter-spacing: .13em; }\n.prompt-question { margin: 0 0 8px !important; color: var(--ink) !important; font: 700 1.17rem/1.5 \'Manrope\',sans-serif; }\n.prompt-note { color: var(--muted) !important; font-size: .83rem; line-height: 1.6; }\n.account-note { margin-top: 12px; padding: 13px 15px; border-radius: 14px; background: #f6f8f4; color: var(--muted); font-size: .78rem; line-height: 1.55; }\n.sidebar-brand { display: flex; align-items: center; gap: 11px; padding: 9px 5px 22px; border-bottom: 1px solid rgba(226,245,230,.15); margin-bottom: 24px; }\n.sidebar-brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 13px; background: var(--leaf); color: var(--forest-dark); font: 800 21px \'Manrope\',sans-serif; }\n.sidebar-brand strong { display: block; color: #f2f8f2; font: 800 1.05rem \'Manrope\',sans-serif; }\n.sidebar-brand small { display: block; margin-top: 2px; color: #b5d0c0; font-size: .72rem; }\n.sidebar-section-label { margin: 0 0 10px; color: #a5c7b2; font-size: .67rem; font-weight: 800; letter-spacing: .15em; }\n.sidebar-account { display: flex; align-items: center; gap: 11px; padding: 13px 12px; border: 1px solid rgba(224,244,230,.13); border-radius: 15px; background: rgba(255,255,255,.065); }\n.sidebar-avatar { width: 35px; height: 35px; display: grid; flex: 0 0 35px; place-items: center; border-radius: 12px; background: #c9ebad; color: #174b3c; font-weight: 800; }\n.sidebar-account strong { display: block; max-width: 190px; overflow: hidden; color: #f3f8f3; font-size: .86rem; text-overflow: ellipsis; white-space: nowrap; }\n.sidebar-account small { display: block; max-width: 190px; margin-top: 2px; overflow: hidden; color: #b5cbbd; font-size: .7rem; text-overflow: ellipsis; white-space: nowrap; }\n.sidebar-history { display: flex; align-items: center; justify-content: space-between; margin: 19px 0; padding: 14px 13px; border-radius: 15px; background: rgba(201,235,173,.12); }\n.sidebar-history span { color: #c7dacd; font-size: .78rem; }\n.sidebar-history strong { color: #fff; font: 800 1.15rem \'Manrope\',sans-serif; }\n.sidebar-note { margin: 17px 0 21px; padding: 14px; border-left: 2px solid #9fcf9b; border-radius: 0 12px 12px 0; background: rgba(255,255,255,.055); color: #c5d8ca; font-size: .75rem; line-height: 1.6; }\n[data-testid="stSidebar"] { background: linear-gradient(180deg,#103d33 0%,#12382f 100%) !important; border-right: 1px solid rgba(20,70,53,.18); }\n[data-testid="stSidebar"] [data-testid="stSidebarContent"] { padding: 1.25rem 1.05rem 1.5rem; }\n[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #c5d8ca; }\n[data-testid="stSidebar"] .stButton > button { width: 100%; border: 1px solid rgba(235,248,237,.22); background: rgba(255,255,255,.08); color: #f2f8f3; }\n[data-testid="stSidebar"] .stButton > button:hover { border-color: rgba(235,248,237,.5); background: rgba(255,255,255,.14); }\n@media (max-width: 900px) {\n  .block-container { padding: 1.2rem 1rem 3rem; }\n  .welcome-panel { min-height: auto; padding: 29px 24px; }\n  .feature-grid { grid-template-columns: 1fr; }\n  .workspace-heading { padding: 23px; }\n  .writing-prompt { min-height: auto; }\n}\n</style>'
+# MoodMentor Executive Visual System: Clean Enterprise Palette, Aligned Segmented Tabs, Professional Cards
+CUSTOM_CSS = """<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --primary: #0f766e;
+  --primary-hover: #115e59;
+  --primary-light: #f0fdfa;
+  --primary-border: #ccfbf1;
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-50: #f8fafc;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+}
+
+html, body, [class*="css"] {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  color: var(--slate-900);
+}
+
+.stApp {
+  background-color: var(--slate-50) !important;
+  color: var(--slate-900) !important;
+}
+
+.block-container {
+  max-width: 1380px !important;
+  padding: 1.5rem 2.5rem 4rem !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  color: var(--slate-900) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em !important;
+}
+
+p, li, label {
+  color: var(--slate-600);
+  line-height: 1.6;
+}
+
+/* Workspace Executive Header */
+.workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  margin-bottom: 22px;
+}
+.workspace-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  border: 1px solid var(--primary-border);
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.workspace-title {
+  margin: 0 0 4px 0 !important;
+  font-size: 1.65rem !important;
+  font-weight: 800 !important;
+  color: var(--slate-900) !important;
+}
+.workspace-subtitle {
+  margin: 0 !important;
+  font-size: 0.88rem !important;
+  color: var(--slate-500) !important;
+}
+.workspace-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--slate-100);
+  border: 1px solid var(--slate-200);
+  padding: 8px 14px;
+  border-radius: 24px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--slate-700);
+}
+.status-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+}
+
+/* Modern Segmented Tab Bar */
+[data-baseweb="tab-list"] {
+  gap: 6px !important;
+  background: #f1f5f9 !important;
+  padding: 5px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--slate-200) !important;
+  margin-bottom: 22px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+button[data-baseweb="tab"] {
+  height: 38px !important;
+  padding: 0 16px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--slate-600) !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+  transition: all 0.15s ease-in-out !important;
+}
+button[data-baseweb="tab"]:hover {
+  color: var(--slate-900) !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+  background: #ffffff !important;
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
+  display: none !important;
+}
+
+/* Form Controls & Inputs */
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea,
+[data-baseweb="select"] > div {
+  border: 1px solid var(--slate-200) !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: var(--slate-900) !important;
+  font-size: 0.92rem !important;
+}
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus,
+[data-baseweb="select"] > div:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12) !important;
+}
+
+/* Buttons */
+.stButton > button, .stFormSubmitButton > button {
+  min-height: 42px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  transition: all 0.15s ease !important;
+}
+.stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primary"] {
+  background: var(--primary) !important;
+  border: 1px solid var(--primary) !important;
+  color: #ffffff !important;
+}
+.stButton > button[kind="primary"]:hover, .stFormSubmitButton > button[kind="primary"]:hover {
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2) !important;
+}
+.stButton > button[kind="secondary"] {
+  background: #ffffff !important;
+  border: 1px solid var(--slate-200) !important;
+  color: var(--slate-700) !important;
+}
+.stButton > button[kind="secondary"]:hover {
+  background: var(--slate-50) !important;
+  border-color: var(--slate-500) !important;
+}
+.stDownloadButton > button {
+  background: #ffffff !important;
+  border: 1px solid var(--primary) !important;
+  color: var(--primary) !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+.stDownloadButton > button:hover {
+  background: var(--primary-light) !important;
+}
+
+/* Metric Cards */
+[data-testid="stMetric"] {
+  background: #ffffff !important;
+  border: 1px solid var(--slate-200) !important;
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
+}
+[data-testid="stMetricLabel"] p {
+  color: var(--slate-500) !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+[data-testid="stMetricValue"] {
+  color: var(--slate-900) !important;
+  font-size: 1.55rem !important;
+  font-weight: 800 !important;
+}
+
+/* Containers & Expanders */
+[data-testid="stVerticalBlockBorderWrapper"] {
+  border: 1px solid var(--slate-200) !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+}
+[data-testid="stExpander"] {
+  border: 1px solid var(--slate-200) !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+}
+
+/* Sidebar Enterprise Styling */
+[data-testid="stSidebar"] {
+  background: #0f172a !important;
+  border-right: 1px solid #1e293b !important;
+}
+[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+  padding: 1.5rem 1.2rem !important;
+}
+.sidebar-brand-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #1e293b;
+  margin-bottom: 22px;
+}
+.sidebar-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--primary);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+.sidebar-brand-text strong {
+  display: block;
+  color: #f8fafc;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.sidebar-brand-text small {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+.sidebar-user-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+.sidebar-user-card .user-title {
+  color: #f8fafc;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.sidebar-user-card .user-email {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+.sidebar-user-card .user-metric {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #334155;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+[data-testid="stSidebar"] .stButton > button {
+  background: transparent !important;
+  border: 1px solid #334155 !important;
+  color: #e2e8f0 !important;
+}
+[data-testid="stSidebar"] .stButton > button:hover {
+  background: #1e293b !important;
+  border-color: #64748b !important;
+}
+
+/* Chips */
+.chip {
+  display: inline-block;
+  margin: 3px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.chip-token { background: #e0f2fe; color: #0369a1; }
+.chip-filter { background: #fef3c7; color: #b45309; }
+.chip-lemma { background: #dcfce7; color: #15803d; }
+
+/* Feedback Sentiment Tone Cards */
+.card-positive, .card-negative, .card-neutral {
+  padding: 18px 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-positive {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+.card-negative {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+.card-neutral {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+/* Landing Page / Welcome Lockup */
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--primary);
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.3rem;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+}
+.brand-name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  line-height: 1.1;
+}
+.brand-caption {
+  font-size: 0.82rem;
+  color: var(--slate-500);
+  margin-top: 2px;
+}
+.welcome-panel {
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+.welcome-kicker {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.welcome-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+.welcome-copy {
+  font-size: 0.95rem;
+  color: var(--slate-600);
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+.welcome-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.welcome-tags span {
+  background: var(--slate-100);
+  color: var(--slate-700);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--slate-200);
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.feature-card {
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.feature-index {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+}
+.feature-card strong {
+  font-size: 0.92rem;
+  color: var(--slate-900);
+}
+.feature-card span:last-child {
+  font-size: 0.78rem;
+  color: var(--slate-500);
+}
+.auth-heading {
+  margin-bottom: 16px;
+}
+.auth-heading .eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+.auth-heading h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+.auth-heading p {
+  font-size: 0.86rem;
+  color: var(--slate-500);
+  margin: 0;
+}
+</style>"""
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
-st.markdown(
-    """
-    <style>
-    .card-positive, .card-neutral, .card-negative { min-height: 150px; padding: 20px; border: 1px solid #e0e9e1; border-radius: 19px; }
-    .card-positive { background: linear-gradient(145deg,#e9f5e9,#f6faf4); color: #17654c; }
-    .card-neutral { background: linear-gradient(145deg,#f8f2df,#fbf9f0); color: #876b24; }
-    .card-negative { background: linear-gradient(145deg,#f8e9e5,#fcf5f2); color: #a64e3e; }
-    .chip { display: inline-block; margin: 3px; padding: 5px 10px; border-radius: 99px; font-size: .78rem; font-weight: 600; }
-    .chip-token { background: #e9f1fb; color: #3d6591; }
-    .chip-filter { background: #f8f0dd; color: #8a6b1e; }
-    .chip-lemma { background: #e8f3e9; color: #216649; }
-    .writing-prompt { display: grid; grid-template-columns: auto minmax(0,1.1fr) minmax(0,1.2fr); align-items: center; gap: 15px; min-height: 0; margin-top: 13px; padding: 15px 18px; }
-    .writing-prompt .prompt-label { margin: 0 0 4px !important; }
-    .writing-prompt .prompt-question { margin: 0 !important; font-size: 1rem; line-height: 1.4; }
-    .writing-prompt .prompt-note { margin: 0; font-size: .78rem; }
-    .account-note { margin-top: 9px; }
-    @media (max-width: 640px) { .writing-prompt { grid-template-columns: auto minmax(0,1fr); } .writing-prompt .prompt-note { grid-column: 2; } }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 # Standard evaluation scenarios
 PRESET_SCENARIOS = {
@@ -1014,19 +1456,10 @@ def render_model_comparator_view():
 
 
 def render_sidebar():
-    """Render the account panel and sign-out action."""
+    """Render the executive account panel and sign-out action."""
     with st.sidebar:
-        user_name = escape(str(st.session_state.get("user_name", "MoodMentor member")))
-        user_email = escape(str(st.session_state.get("user_email", "")))
-        initial = user_name[:1].upper() or "M"
-        st.markdown(
-            '<div class="sidebar-brand"><div class="sidebar-brand-mark">m</div>'
-            '<div><strong>MoodMentor</strong><small>Your mindful space</small></div></div>'
-            '<div class="sidebar-section-label">YOUR ACCOUNT</div>'
-            f'<div class="sidebar-account"><div class="sidebar-avatar">{initial}</div>'
-            f'<div><strong>{user_name}</strong><small>{user_email}</small></div></div>',
-            unsafe_allow_html=True,
-        )
+        user_name = escape(str(st.session_state.get("user_name", "MoodMentor Member")))
+        user_email = escape(str(st.session_state.get("user_email", "member@enterprise.internal")))
 
         try:
             entries = api_history(st.session_state.user_id, st.session_state.api_token)
@@ -1037,12 +1470,31 @@ def render_sidebar():
 
         count_display = str(entry_count) if entry_count is not None else "—"
         st.markdown(
-            f'<div class="sidebar-history"><span>Saved check-ins</span><strong>{count_display}</strong></div>'
-            '<div class="sidebar-note">Your reflections stay connected to your account, so you can return to your mood patterns over time.</div>',
+            f"""
+            <div class="sidebar-brand-box">
+                <div class="sidebar-logo">M</div>
+                <div class="sidebar-brand-text">
+                    <strong>MoodMentor OS</strong>
+                    <small>Enterprise Wellness Hub</small>
+                </div>
+            </div>
+            <div class="sidebar-user-card">
+                <div class="user-title">{user_name}</div>
+                <div class="user-email">{user_email}</div>
+                <div class="user-metric">
+                    <span>Archived Reflections</span>
+                    <strong style="color: #38bdf8;">{count_display}</strong>
+                </div>
+                <div class="user-metric" style="border-top: none; padding-top: 4px;">
+                    <span>Engine Status</span>
+                    <span style="color: #34d399; font-weight: 600;">FastAPI Live</span>
+                </div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
 
-        if st.button("Sign out", use_container_width=True):
+        if st.button("🚪 Sign Out", use_container_width=True):
             try:
                 api_logout(st.session_state.api_token)
             except ApiError:
@@ -1058,25 +1510,35 @@ def render_sidebar():
 
 
 def render_workspace():
-    """Render the main protected 4-tab employee wellness workspace."""
+    """Render the main protected 6-tab employee wellness workspace."""
     render_sidebar()
 
-    active_user_name = escape(str(st.session_state.get("user_name", "friend")))
+    active_user_name = escape(str(st.session_state.get("user_name", "Team Member")))
     st.markdown(
-        f'<div class="workspace-heading"><div><span class="eyebrow">YOUR PERSONAL WELL-BEING SPACE</span>'
-        f'<h1 class="workspace-title">Good to see you, {active_user_name}.</h1>'
-        '<p class="workspace-copy">Take a moment to check in. Small reflections can reveal patterns over time.</p></div></div>',
+        f"""
+        <div class="workspace-header">
+            <div>
+                <span class="workspace-badge">Executive Platform · Milestone 2</span>
+                <h1 class="workspace-title">Welcome back, {active_user_name}</h1>
+                <p class="workspace-subtitle">Affective Computing, Real-time Biomarkers & Team Resilience Analytics</p>
+            </div>
+            <div class="workspace-status-badge">
+                <span class="status-pulse"></span>
+                <span>FastAPI Active · 127.0.0.1:8000</span>
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
     tab_direct, tab_file, tab_trends, tab_tools, tab_team, tab_arch = st.tabs(
         [
-            "📝 MindEcho | Mood Journal",
-            "📂 DataStream | File & Benchmark Ingest",
-            "📈 Chronos | Longitudinal Trends & Analytics",
-            "🌿 SomaSanctuary | Somatics, Medito & Nutrition",
-            "👥 ResilienceRadar | Team Health & Burnout Simulator",
-            "⚖️ Veritas Hub | Model Evaluation & Defense",
+            "📝 MindEcho",
+            "📂 DataStream",
+            "📈 Chronos",
+            "🌿 SomaSanctuary",
+            "👥 ResilienceRadar",
+            "⚖️ Veritas Hub",
         ]
     )
 
@@ -1086,37 +1548,41 @@ def render_workspace():
     with tab_direct:
         with st.container(border=True):
             st.markdown(
-                '<div class="editor-heading"><span class="eyebrow">A MOMENT FOR YOU</span>'
-                '<h3>What’s on your mind?</h3>'
-                '<p>There is no right way to write this. Start wherever you are.</p></div>',
+                """
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a;">MindEcho Reflection Journal</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Compose spontaneous employee reflections or select validation benchmark presets.</p>
+                    </div>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
             st.selectbox(
-                "Optional writing prompt",
+                "Benchmark validation scenario or sample prompt",
                 list(PRESET_SCENARIOS.keys()),
                 key="mood_journal_example",
                 on_change=_load_journal_example,
             )
             user_text = st.text_area(
                 "Your journal entry",
-                height=210,
-                placeholder="Write freely about how you feel, what happened, or what is on your mind...",
+                height=160,
+                placeholder="Write freely about workplace experiences, feelings, or select a benchmark scenario above...",
                 key="mood_journal_entry",
                 on_change=_clear_last_analysis_report,
                 label_visibility="collapsed",
             )
-            st.markdown(
-                '<div class="writing-prompt"><div class="prompt-icon">✦</div>'
-                '<div><p class="prompt-label">A GENTLE PROMPT</p>'
-                '<p class="prompt-question">What felt heavy, hopeful, or important today?</p></div>'
-                '<p class="prompt-note">You can write about one moment, a conversation, or simply how you feel right now.</p></div>'
-                '<div class="account-note">Your journal is saved to your account history so you can revisit your check-ins.</div>',
-                unsafe_allow_html=True,
-            )
-            run_btn = st.button(
-                "Analyze my mood", type="primary", use_container_width=True
-            )
-            st.caption("A few honest sentences are enough to begin.")
+            btn_col1, btn_col2 = st.columns([3, 1])
+            with btn_col1:
+                run_btn = st.button(
+                    "⚡ Run Emotion & Sentiment Analysis", type="primary", use_container_width=True
+                )
+            with btn_col2:
+                if st.button("🔄 Clear Entry", type="secondary", use_container_width=True):
+                    st.session_state["mood_journal_entry"] = ""
+                    st.session_state["mood_journal_example"] = next(iter(PRESET_SCENARIOS))
+                    _clear_last_analysis_report()
+                    st.rerun()
 
         if run_btn or st.session_state.get("last_analysis_report"):
             if run_btn and not user_text.strip():
@@ -1126,7 +1592,7 @@ def render_workspace():
             else:
                 try:
                     if run_btn:
-                        with st.spinner("Analyzing your journal entry..."):
+                        with st.spinner("Analyzing journal reflection..."):
                             report = api_analyze(
                                 user_text, st.session_state.api_token, "Journal Entry"
                             )
@@ -1138,11 +1604,22 @@ def render_workspace():
 
                     st.success("✅ Mood analysis saved to your account history.")
 
-                    # Results Dashboard
-                    st.markdown("---")
-                    st.markdown("### 📊 Your mood analysis")
+                    # Executive Summary Metric Strip
+                    st.markdown("#### 📊 Analytical Metrics Summary")
+                    score_cols = st.columns(4, gap="small")
+                    compound = report.sentiment_scores.compound
+                    sentiment_str = report.sentiment_label.value.upper()
+                    dominant_str = report.dominant_emotion.capitalize()
 
-                    col_gauge, col_emotions = st.columns([1, 1.2], gap="medium")
+                    score_cols[0].metric("VADER Compound", f"{compound:+.3f}", delta=sentiment_str)
+                    score_cols[1].metric("Dominant Emotion", dominant_str)
+                    score_cols[2].metric("Positive Cue Share", f"{report.sentiment_scores.positive:.1%}")
+                    score_cols[3].metric("Negative Cue Share", f"{report.sentiment_scores.negative:.1%}")
+
+                    # Visualizations Grid
+                    st.markdown("---")
+                    st.markdown("#### 🔬 Sentiment Spectrum & Emotion Topography")
+                    col_gauge, col_emotions = st.columns([1, 1.2], gap="large")
 
                     with col_gauge:
                         st.markdown("##### Sentiment tone (VADER)")
@@ -1282,24 +1759,13 @@ def render_workspace():
                                 )
                                 st.plotly_chart(fig_radar, use_container_width=True)
 
-                    # Give these values the full content width so narrow columns cannot clip them.
-                    score_cols = st.columns(4, gap="small")
-                    score_values = (
-                        ("Compound", compound),
-                        ("Positive", report.sentiment_scores.positive),
-                        ("Neutral", report.sentiment_scores.neutral),
-                        ("Negative", report.sentiment_scores.negative),
-                    )
-                    for score_col, (label, value) in zip(score_cols, score_values):
-                        score_col.metric(label, f"{value:.3f}")
-
                     # Personalized well-being suggestions
                     rec = report.recommendations
                     st.markdown("---")
                     st.markdown(
-                        f"### 🌱 A few ways forward: **{rec.get('title', 'Self-Care Focus')}**"
+                        f"#### 🌱 Evidence-Based Well-Being Plan: **{rec.get('title', 'Self-Care Focus')}**"
                     )
-                    rec_col1, rec_col2 = st.columns([2.2, 1])
+                    rec_col1, rec_col2 = st.columns([2.2, 1], gap="medium")
                     with rec_col1:
                         st.markdown(
                             f"**Category:** `{rec.get('category')}` | **Urgency:** `{rec.get('urgency')}`"
@@ -1307,12 +1773,11 @@ def render_workspace():
                         st.write(rec.get("summary"))
                         if rec.get("is_crisis"):
                             st.error(
-                                "If you may be in immediate danger, contact your local emergency service or go to the nearest emergency department. "
-                                "These suggestions are not a substitute for professional support."
+                                "🚨 **Confidential Crisis Protocol**: If you may be in immediate danger, contact your local emergency service or 24/7 helpline (988 / Tele-MANAS). These suggestions are not a substitute for professional support."
                             )
                         action_paths = rec.get("action_paths", [])
                         if action_paths:
-                            st.caption("Choose one option that feels manageable. You can skip anything that does not fit.")
+                            st.caption("Select a practical micro-intervention pathway:")
                             path_titles = [path.get("title", "A way forward") for path in action_paths]
                             selected_title = st.selectbox(
                                 "Explore a way to start",
@@ -1326,16 +1791,16 @@ def render_workspace():
                             )
                             with st.container(border=True):
                                 st.markdown(
-                                    f"#### {selected_path.get('title', 'A way forward')} · {selected_path.get('duration', 'Flexible')}"
+                                    f"##### {selected_path.get('title', 'A way forward')} · `{selected_path.get('duration', 'Flexible')}`"
                                 )
                                 st.write(selected_path.get("description", ""))
                                 for step in selected_path.get("steps", []):
                                     st.markdown(f"- {step}")
                         if rec.get("action_items"):
-                            with st.expander("See a few more quick ideas"):
+                            with st.expander("Additional supportive micro-steps"):
                                 for item in rec.get("action_items", []):
                                     st.markdown(f"- {item}")
-                        st.caption("These are optional reflection ideas, not a diagnosis or a replacement for professional care.")
+                        st.caption("These are evidence-informed reflection suggestions, not a medical diagnosis or substitute for clinical care.")
                     with rec_col2:
                         card_class = (
                             "card-positive"
@@ -1349,9 +1814,9 @@ def render_workspace():
                         st.markdown(
                             f"""
                             <div class="{card_class}">
-                                <div style="font-weight:700;font-size:1.1rem;">Dominant Tone</div>
-                                <div style="font-size:1.6rem;font-weight:800;margin-top:6px;">{report.dominant_emotion.upper()}</div>
-                                <div style="font-size:0.85rem;margin-top:4px;">Polarity: {report.sentiment_label.value.capitalize()}</div>
+                                <div style="font-weight:700;font-size:0.82rem;text-transform:uppercase;letter-spacing:0.05em;opacity:0.85;">Dominant Signal</div>
+                                <div style="font-size:1.75rem;font-weight:800;margin:6px 0;">{report.dominant_emotion.upper()}</div>
+                                <div style="font-size:0.85rem;font-weight:600;">Polarity: {report.sentiment_label.value.capitalize()}</div>
                             </div>
                             """,
                             unsafe_allow_html=True,
@@ -2118,15 +2583,27 @@ def render_guest_workspace():
     """Render a fully functional in-memory reflection workspace without requiring an API or database."""
     with st.sidebar:
         st.markdown(
-            '<div class="sidebar-brand"><div class="sidebar-brand-mark">m</div>'
-            '<div><strong>MoodMentor</strong><small>Guest reflection space</small></div></div>'
-            '<div class="sidebar-section-label">MODE</div>'
-            '<div class="sidebar-account"><div class="sidebar-avatar">🌿</div>'
-            '<div><strong>Guest Session</strong><small>Private in-memory reflection</small></div></div>',
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            '<div class="sidebar-note">You are using MoodMentor in standalone guest mode. Reflections are analyzed directly in-memory and are not sent to any database.</div>',
+            """
+            <div class="sidebar-brand-box">
+                <div class="sidebar-logo">M</div>
+                <div class="sidebar-brand-text">
+                    <strong>MoodMentor OS</strong>
+                    <small>Guest Reflection Space</small>
+                </div>
+            </div>
+            <div class="sidebar-user-card">
+                <div class="user-title">Guest Explorer</div>
+                <div class="user-email">guest@in-memory.local</div>
+                <div class="user-metric">
+                    <span>Session Mode</span>
+                    <strong style="color: #38bdf8;">In-Memory Direct</strong>
+                </div>
+                <div class="user-metric" style="border-top: none; padding-top: 4px;">
+                    <span>Security / Privacy</span>
+                    <span style="color: #34d399; font-weight: 600;">Zero Data Persisted</span>
+                </div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
         if st.button("🔑 Account Sign In / Register", use_container_width=True):
@@ -2134,32 +2611,47 @@ def render_guest_workspace():
             st.rerun()
 
     st.markdown(
-        '<div class="workspace-heading"><div><span class="eyebrow">YOUR MINDFUL REFLECTION SPACE</span>'
-        '<h1 class="workspace-title">Welcome to your check-in.</h1>'
-        '<p class="workspace-copy">Write freely. Explore the emotional patterns in your words and take a small supportive next step.</p></div></div>',
+        """
+        <div class="workspace-header">
+            <div>
+                <span class="workspace-badge">Standalone Guest Environment</span>
+                <h1 class="workspace-title">Mindful Check-in & Verification</h1>
+                <p class="workspace-subtitle">In-Memory Affective Inference, Wellness Interventions & Benchmark Evaluation</p>
+            </div>
+            <div class="workspace-status-badge">
+                <span class="status-pulse"></span>
+                <span>In-Memory Pipeline Active</span>
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
     guest_tab1, guest_tab2, guest_tab3, guest_tab4, guest_tab5 = st.tabs(
         [
-            "📝 MindEcho | Mood Journal",
-            "📄 DataStream | File Ingest",
-            "🌿 SomaSanctuary | Somatics, Medito & Nutrition",
-            "👥 ResilienceRadar | Team Health & Burnout Simulator",
-            "🏗️ Architecture & Model Verification",
+            "📝 MindEcho",
+            "📂 DataStream",
+            "🌿 SomaSanctuary",
+            "👥 ResilienceRadar",
+            "⚖️ Architecture & Verification",
         ]
     )
 
     with guest_tab1:
         with st.container(border=True):
             st.markdown(
-                '<div class="editor-heading"><span class="eyebrow">A MOMENT FOR YOU</span>'
-                '<h3>What is on your mind?</h3>'
-                '<p>There is no right or wrong way to write. Start wherever you are.</p></div>',
+                """
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a;">MindEcho Reflection Journal</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Direct affective text entry (analyzed privately in-memory)</p>
+                    </div>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
             st.selectbox(
-                "Optional writing prompt",
+                "Benchmark validation scenario or sample prompt",
                 list(PRESET_SCENARIOS.keys()),
                 key="guest_journal_example",
                 on_change=lambda: st.session_state.update(
@@ -2169,12 +2661,20 @@ def render_guest_workspace():
             )
             guest_text = st.text_area(
                 "Your journal entry",
-                height=210,
-                placeholder="Write freely about how you feel, what happened, or what is on your mind...",
+                height=160,
+                placeholder="Write freely about workplace experiences, feelings, or select a benchmark scenario above...",
                 key="guest_journal_entry",
                 label_visibility="collapsed",
             )
-            guest_btn = st.button("Analyze my mood", type="primary", use_container_width=True, key="guest_analyze_btn")
+            btn_col1, btn_col2 = st.columns([3, 1])
+            with btn_col1:
+                guest_btn = st.button("⚡ Run Emotion & Sentiment Analysis", type="primary", use_container_width=True, key="guest_analyze_btn")
+            with btn_col2:
+                if st.button("🔄 Clear Entry", type="secondary", use_container_width=True, key="guest_clear_btn"):
+                    st.session_state["guest_journal_entry"] = ""
+                    st.session_state["guest_journal_example"] = next(iter(PRESET_SCENARIOS))
+                    st.session_state["guest_last_report"] = None
+                    st.rerun()
 
         if guest_btn or st.session_state.get("guest_last_report"):
             text_to_eval = guest_text.strip()
