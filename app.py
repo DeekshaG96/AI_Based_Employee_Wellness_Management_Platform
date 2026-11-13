@@ -55,11 +55,49 @@ from wellness.wellness_tools import (
 
 # Page configuration
 st.set_page_config(
-    page_title="MoodMentor | Mood Journal",
-    page_icon="🌿",
+    page_title="MoodMentor | Affective Intelligence Platform",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ---------------------------------------------------------------------------
+# LUCIDE MINIMALIST SVG ICON SYSTEM (Enterprise Design Architecture)
+# ---------------------------------------------------------------------------
+LUCIDE_ICONS: dict[str, str] = {
+    "activity": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity {extra}"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>',
+    "trending-up": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up {extra}"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>',
+    "shield": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield {extra}"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+    "file-text": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text {extra}"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
+    "users": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users {extra}"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+    "zap": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap {extra}"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+    "check-circle": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle {extra}"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+    "alert-circle": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-circle {extra}"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
+    "brain": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brain {extra}"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z"></path></svg>',
+    "heart": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart {extra}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>',
+    "layers": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers {extra}"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>',
+    "database": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database {extra}"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>',
+    "download": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download {extra}"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+    "trash": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash {extra}"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+    "search": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search {extra}"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+    "lock": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock {extra}"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
+    "award": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award {extra}"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>',
+    "bar-chart": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart {extra}"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>',
+    "book-open": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open {extra}"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>',
+    "headphones": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headphones {extra}"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>',
+    "utensils": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utensils {extra}"><path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2"></path><path d="M15 11v11"></path><path d="M5 2v18"></path><path d="M5 6h4"></path></svg>',
+    "cpu": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cpu {extra}"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>',
+    "sparkles": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles {extra}"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"></path></svg>',
+    "refresh": '<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh {extra}"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>',
+}
+
+def svg_icon(name: str, size: int = 16, color: str = "currentColor", extra_classes: str = "") -> str:
+    """Render a clean Lucide minimalist SVG icon string."""
+    template = LUCIDE_ICONS.get(name)
+    if not template:
+        return ""
+    return template.format(size=size, color=color, extra=extra_classes)
+
 
 # MoodMentor Executive Visual System: Clean Enterprise Palette, Aligned Segmented Tabs, Professional Cards
 CUSTOM_CSS = """<style>
@@ -79,8 +117,17 @@ CUSTOM_CSS = """<style>
   --slate-100: #f1f5f9;
   --slate-50: #f8fafc;
   --success: #16a34a;
+  --success-light: #f0fdf4;
+  --success-border: #bbf7d0;
   --warning: #d97706;
+  --warning-light: #fef3c7;
+  --warning-border: #fde68a;
   --danger: #dc2626;
+  --danger-light: #fef2f2;
+  --danger-border: #fecaca;
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
 }
 
 html, body, [class*="css"] {
@@ -103,16 +150,77 @@ header[data-testid="stHeader"] {
   padding: 2.2rem 2.5rem 4rem !important;
 }
 
-h1, h2, h3, h4, h5, h6 {
+/* Strict Typography Hierarchy */
+h1 {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  color: var(--slate-900) !important;
+  font-size: 2rem !important;
   font-weight: 700 !important;
+  line-height: 1.2 !important;
   letter-spacing: -0.025em !important;
+  color: var(--slate-900) !important;
+  margin-bottom: 0.75rem !important;
 }
 
-p, li, label {
-  color: var(--slate-600);
-  line-height: 1.6;
+h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--slate-900) !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.015em !important;
+  color: var(--slate-900) !important;
+  margin-top: 1rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color: var(--slate-800) !important;
+}
+
+p, li, label, [data-testid="stMarkdownContainer"] p {
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  color: var(--slate-700) !important;
+  line-height: 1.6 !important;
+}
+
+/* Inline Minimalist Icon Wrapper */
+.icon-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -2px;
+  margin-right: 6px;
+}
+
+/* Micro-Interactions & Keyframe Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* Workspace Executive Header */
@@ -124,11 +232,14 @@ p, li, label {
   background: #ffffff;
   border: 1px solid var(--slate-200);
   border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  box-shadow: var(--shadow-subtle);
   margin-bottom: 22px;
+  animation: fadeInUp 0.4s ease-out;
 }
 .workspace-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--primary);
@@ -168,7 +279,7 @@ p, li, label {
   height: 8px;
   border-radius: 50%;
   background-color: var(--success);
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+  animation: pulseRing 2s infinite;
 }
 
 /* Modern Segmented Tab Bar */
@@ -191,10 +302,11 @@ button[data-baseweb="tab"] {
   color: var(--slate-600) !important;
   font-size: 0.86rem !important;
   font-weight: 600 !important;
-  transition: all 0.15s ease-in-out !important;
+  transition: var(--transition-smooth) !important;
 }
 button[data-baseweb="tab"]:hover {
   color: var(--slate-900) !important;
+  transform: translateY(-1px) !important;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
   background: #ffffff !important;
@@ -215,6 +327,7 @@ div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
   background: #ffffff !important;
   color: var(--slate-900) !important;
   font-size: 0.92rem !important;
+  transition: var(--transition-smooth) !important;
 }
 [data-testid="stTextInput"] input:focus,
 [data-testid="stTextArea"] textarea:focus,
@@ -230,13 +343,13 @@ div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
   background: transparent !important;
 }
 
-/* Buttons */
+/* Buttons with Hover Elevation */
 .stButton > button, .stFormSubmitButton > button {
   min-height: 42px !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
   font-size: 0.9rem !important;
-  transition: all 0.15s ease !important;
+  transition: var(--transition-smooth) !important;
 }
 button[kind="primary"],
 button[data-testid="baseButton-primary"],
@@ -259,7 +372,8 @@ div[data-testid="stFormSubmitButton"] button:hover {
   background-color: #115e59 !important;
   border-color: #115e59 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.28) !important;
+  box-shadow: var(--shadow-hover) !important;
+  transform: translateY(-1px) !important;
 }
 button[kind="secondary"],
 button[data-testid="baseButton-secondary"],
@@ -279,6 +393,7 @@ button[data-testid="baseButton-secondary"]:hover,
   background-color: #f8fafc !important;
   border-color: #94a3b8 !important;
   color: #0f172a !important;
+  transform: translateY(-1px) !important;
 }
 .stDownloadButton > button {
   background: #ffffff !important;
@@ -286,9 +401,11 @@ button[data-testid="baseButton-secondary"]:hover,
   color: var(--primary) !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
+  transition: var(--transition-smooth) !important;
 }
 .stDownloadButton > button:hover {
   background: var(--primary-light) !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Metric Cards */
@@ -297,7 +414,12 @@ button[data-testid="baseButton-secondary"]:hover,
   border: 1px solid var(--slate-200) !important;
   border-radius: 12px !important;
   padding: 16px 20px !important;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
+  box-shadow: var(--shadow-subtle) !important;
+  transition: var(--transition-smooth) !important;
+}
+[data-testid="stMetric"]:hover {
+  box-shadow: var(--shadow-hover) !important;
+  transform: translateY(-1px) !important;
 }
 [data-testid="stMetricLabel"] p {
   color: var(--slate-500) !important;
@@ -317,7 +439,8 @@ button[data-testid="baseButton-secondary"]:hover,
   border: 1px solid var(--slate-200) !important;
   border-radius: 14px !important;
   background: #ffffff !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+  box-shadow: var(--shadow-subtle) !important;
+  transition: var(--transition-smooth) !important;
 }
 [data-testid="stExpander"] {
   border: 1px solid var(--slate-200) !important;
@@ -394,10 +517,12 @@ button[data-testid="baseButton-secondary"]:hover,
   background: transparent !important;
   border: 1px solid #334155 !important;
   color: #e2e8f0 !important;
+  transition: var(--transition-smooth) !important;
 }
 [data-testid="stSidebar"] .stButton > button:hover {
   background: #1e293b !important;
   border-color: #64748b !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Chips */
@@ -418,7 +543,8 @@ button[data-testid="baseButton-secondary"]:hover,
   padding: 18px 20px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-subtle);
+  transition: var(--transition-smooth);
 }
 .card-positive {
   background: #f0fdf4;
@@ -437,45 +563,14 @@ button[data-testid="baseButton-secondary"]:hover,
 }
 
 /* Landing Page / Welcome Lockup */
-.brand-lockup {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--slate-200);
-}
-.brand-mark {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--primary);
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 1.3rem;
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
-}
-.brand-name {
-  font-size: 1.45rem;
-  font-weight: 800;
-  color: var(--slate-900);
-  line-height: 1.15;
-}
-.brand-caption {
-  font-size: 0.82rem;
-  color: var(--slate-500);
-  margin-top: 2px;
-}
 .welcome-panel {
   background: #ffffff;
   border: 1px solid var(--slate-200);
   border-radius: 16px;
   padding: 30px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  box-shadow: var(--shadow-subtle);
+  animation: fadeInUp 0.4s ease-out;
 }
 .welcome-kicker {
   font-size: 0.75rem;
@@ -505,6 +600,8 @@ button[data-testid="baseButton-secondary"]:hover,
   flex-wrap: wrap;
 }
 .welcome-tags span {
+  display: inline-flex;
+  align-items: center;
   background: var(--slate-100);
   color: var(--slate-700);
   font-size: 0.8rem;
@@ -512,6 +609,12 @@ button[data-testid="baseButton-secondary"]:hover,
   padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid var(--slate-200);
+  transition: var(--transition-smooth);
+}
+.welcome-tags span:hover {
+  background: var(--primary-light);
+  border-color: var(--primary-border);
+  color: var(--primary);
 }
 .feature-grid {
   display: grid;
@@ -526,6 +629,12 @@ button[data-testid="baseButton-secondary"]:hover,
   display: flex;
   flex-direction: column;
   gap: 6px;
+  box-shadow: var(--shadow-subtle);
+  transition: var(--transition-smooth);
+}
+.feature-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
 }
 .feature-index {
   font-size: 0.72rem;
@@ -541,60 +650,38 @@ button[data-testid="baseButton-secondary"]:hover,
   font-size: 0.78rem;
   color: var(--slate-500);
 }
-.auth-heading {
-  margin-bottom: 16px;
-}
-.auth-heading .eyebrow {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--primary);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  display: block;
-  margin-bottom: 4px;
-}
-.auth-heading h2 {
-  font-size: 1.6rem;
-  font-weight: 800;
-  margin: 0 0 4px 0;
-}
-.auth-heading p {
-  font-size: 0.86rem;
-  color: var(--slate-500);
-  margin: 0;
-}
 </style>"""
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # Standard evaluation scenarios
 PRESET_SCENARIOS = {
     "Choose an example (optional)...": "",
-    "🎯 Benchmark: Mixed Emotion (Pride + Anxiety)": (
+    "Benchmark: Mixed Emotion (Pride + Anxiety)": (
         "I feel proud that I finished the work, but worried about tomorrow."
     ),
-    "🎯 Benchmark: Error Analysis & Negation ('I am not happy')": (
+    "Benchmark: Error Analysis & Negation ('I am not happy')": (
         "I am not happy."
     ),
-    "🎯 Benchmark: Crisis Screening & Support Priority": (
+    "Benchmark: Crisis Screening & Support Priority": (
         "I am feeling completely overwhelmed and hopeless with the constant pressure. I don't know if I can keep going anymore."
     ),
-    "🎉 Workplace Pride & Achievement": (
+    "Workplace Pride & Achievement": (
         "I am absolutely thrilled with our team's product release! Everyone collaborated seamlessly, "
         "the client feedback was overwhelmingly positive, and I feel truly valued and inspired."
     ),
-    "⚠️ Deadline Pressure & Burnout": (
+    "Deadline Pressure & Burnout": (
         "I am feeling completely exhausted and overwhelmed. The unyielding project deadlines, constant context "
         "switching, and lack of staffing are making me feel burned out and anxious every morning."
     ),
-    "📊 Neutral Status Report": (
+    "Neutral Status Report": (
         "Completed the scheduled weekly sprint retrospective. Reviewed code coverage metrics, merged 4 pull requests, "
         "and documented the upcoming milestone roadmap for engineering review."
     ),
-    "💔 Imposter Syndrome & Isolation": (
+    "Imposter Syndrome & Isolation": (
         "I feel disconnected from the rest of the unit and worried that my contributions are not meeting senior standards. "
         "It feels hard to ask for help when everyone else appears to know exactly what they are doing."
     ),
-    "🔥 Communication Friction": (
+    "Communication Friction": (
         "Extremely frustrated with the sudden change in architectural requirements with zero prior notice. "
         "It wasted two full days of engineering effort and invalidated tested components."
     ),
@@ -1115,11 +1202,11 @@ def render_landing_and_auth():
                     MoodMentor combines rule-based VADER sentiment valence with fine-tuned DistilBERT multi-label emotion classification (85.17% Core Macro F1), 14-day longitudinal team resilience analytics, and evidence-based CBT micro-interventions.
                 </div>
                 <div class="welcome-tags">
-                    <span>🎯 85.17% Core Macro F1</span>
-                    <span>⚡ Dual-Engine NLP</span>
-                    <span>👥 Team Burnout Radar</span>
-                    <span>🥗 Nutritional Psychiatry</span>
-                    <span>🔒 Zero-Knowledge Privacy</span>
+                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award "><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></span>85.17% Core Macro F1</span>
+                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap "><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>Dual-Engine NLP</span>
+                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users "><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>Team Burnout Radar</span>
+                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utensils "><path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2"></path><path d="M15 11v11"></path><path d="M5 2v18"></path><path d="M5 6h4"></path></svg></span>Nutritional Psychiatry</span>
+                    <span><span class="icon-inline"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield "><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>Zero-Knowledge Privacy</span>
                 </div>
             </div>
             <div class="feature-grid">
@@ -1156,7 +1243,7 @@ def render_landing_and_auth():
         )
 
         # Prominent 1-Click Evaluation Login
-        if st.button("🚀 1-Click Evaluator Demo Access", type="primary", use_container_width=True, help="Instantly signs into Alex Rivera's preloaded account with 60+ benchmark reflections"):
+        if st.button("1-Click Evaluator Demo Access", type="primary", use_container_width=True, help="Instantly signs into Alex Rivera's preloaded account with 60+ benchmark reflections"):
             try:
                 auth = api_login("alex@example.com", "Password123!")
                 _apply_auth(auth)
@@ -1174,7 +1261,7 @@ def render_landing_and_auth():
             unsafe_allow_html=True,
         )
 
-        sign_in_tab, register_tab, guest_tab = st.tabs(["🔑 Sign In", "📝 Register", "🌿 Guest Mode"])
+        sign_in_tab, register_tab, guest_tab = st.tabs(["Sign In", "Register", "Guest Mode"])
         with sign_in_tab:
             with st.form("login_form"):
                 login_email = st.text_input("Corporate Email", value="alex@example.com", placeholder="alex@example.com")
@@ -1217,13 +1304,13 @@ def render_landing_and_auth():
                 "</p>",
                 unsafe_allow_html=True,
             )
-            if st.button("✨ Launch Guest Reflection Space", type="secondary", use_container_width=True):
+            if st.button("Launch Guest Reflection Space", type="secondary", use_container_width=True):
                 st.session_state.guest_mode = True
                 st.rerun()
 
 
 def render_mood_food_planner_view(default_emotion: str = "fear", key_prefix: str = "tools"):
-    st.markdown("### 🥗 Nutritional Psychiatry & Mood-Food Planner")
+    st.markdown("### Nutritional Psychiatry & Mood-Food Planner")
     st.caption("Evidence-based nutrition science targeting the gut-brain axis, cortisol down-regulation, and neurotransmitter synthesis.")
 
     c_emo, c_diet = st.columns([1.5, 1])
@@ -1236,13 +1323,13 @@ def render_mood_food_planner_view(default_emotion: str = "fear", key_prefix: str
             valid_emotions,
             index=def_idx,
             format_func=lambda x: {
-                "fear": "😰 Acute Stress & Nervousness (Cortisol & GABA Balance)",
-                "anger": "😠 Irritability & Frustration (Blood Sugar Stability)",
-                "annoyance": "😤 Workplace Friction & Annoyance (Anti-Irritant)",
-                "sadness": "🌧️ Low Mood & Emotional Dip (Serotonin Precursors)",
-                "fatigue": "🔋 Exhaustion & Burnout (ATP Mitochondrial Fuel)",
-                "joy": "🌟 Joy & Flourishing (Cognitive Vitality & Flow)",
-                "neutral": "⚖️ Balanced Focus & Clarity (Homeostatic Equilibrium)",
+                "fear": "Acute Stress & Nervousness (Cortisol & GABA Balance)",
+                "anger": "Irritability & Frustration (Blood Sugar Stability)",
+                "annoyance": "Workplace Friction & Annoyance (Anti-Irritant)",
+                "sadness": "Low Mood & Emotional Dip (Serotonin Precursors)",
+                "fatigue": "Exhaustion & Burnout (ATP Mitochondrial Fuel)",
+                "joy": "Joy & Flourishing (Cognitive Vitality & Flow)",
+                "neutral": "Balanced Focus & Clarity (Homeostatic Equilibrium)",
             }.get(x, x.capitalize()),
             key=f"{key_prefix}_mood_food_emotion_select",
         )
@@ -1250,72 +1337,72 @@ def render_mood_food_planner_view(default_emotion: str = "fear", key_prefix: str
         diet_pref = st.radio(
             "Dietary Pattern:",
             ["any", "vegetarian", "vegan"],
-            format_func=lambda x: {"any": "🍽️ Omnivore / Any", "vegetarian": "🧀 Vegetarian", "vegan": "🌱 100% Vegan"}[x],
+            format_func=lambda x: {"any": "Omnivore / Standard", "vegetarian": "Vegetarian", "vegan": "100% Plant-Based (Vegan)"}[x],
             horizontal=True,
             key=f"{key_prefix}_mood_food_diet_radio",
         )
 
     plan = get_mood_food_plan(emotion_choice, diet_pref)
 
-    st.markdown(f"#### 🎯 {plan['title']}")
-    st.info(f"🧬 **Neurochemical Objective**: {plan['neurochemical_objective']}")
+    st.markdown(f"#### {plan['title']}")
+    st.info(f"**Neurochemical Objective**: {plan['neurochemical_objective']}")
 
     st.markdown("**Essential Neuro-Nutrients Targeted:**")
     nutrient_chips = "".join([f'<span class="chip chip-token" style="background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; font-weight:600; margin-right:6px; padding:4px 10px; border-radius:12px;">{n}</span>' for n in plan["key_nutrients"]])
     st.markdown(nutrient_chips, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("#### 🍽️ The Curated Mood-Food Plate (Daily Blueprint)")
+    st.markdown("#### Curated Mood-Food Protocol (Daily Blueprint)")
     col1, col2 = st.columns(2)
     with col1:
         with st.container(border=True):
-            st.markdown("##### 🌅 Breakfast (Morning Fuel)")
+            st.markdown("##### Breakfast (Morning Fuel)")
             st.write(plan["curated_meals"]["breakfast"])
         with st.container(border=True):
-            st.markdown("##### ☀️ Lunch (Midday Sustenance)")
+            st.markdown("##### Lunch (Midday Sustenance)")
             st.write(plan["curated_meals"]["lunch"])
     with col2:
         with st.container(border=True):
-            st.markdown("##### ☕ Afternoon Reset Snack")
+            st.markdown("##### Afternoon Reset Snack")
             st.write(plan["curated_meals"]["snack"])
         with st.container(border=True):
-            st.markdown("##### 🌙 Dinner (Restorative Wind-down)")
+            st.markdown("##### Dinner (Restorative Wind-down)")
             st.write(plan["curated_meals"]["dinner"])
 
     st.markdown("---")
     col_sf, col_av = st.columns([1.3, 1])
     with col_sf:
-        st.markdown("#### 🥑 Top Superfoods & Physiological Benefits")
+        st.markdown("#### Targeted Superfoods & Physiological Mechanisms")
         for item in plan["superfoods"]:
             st.markdown(f"- **{item['food']}**: {item['benefit']}")
 
-        st.markdown(f"💧 **Hydration Protocol**: {plan['hydration_tip']}")
+        st.markdown(f"**Hydration Protocol**: {plan['hydration_tip']}")
 
     with col_av:
-        st.markdown("#### 🚫 Substances to Limit Today")
+        st.markdown("#### Substances to Moderate Today")
         for av in plan["foods_to_avoid"]:
-            st.markdown(f"- ⚠️ {av}")
+            st.markdown(f"- {av}")
 
-        with st.expander("🛒 View Shopping Essentials List"):
+        with st.expander("View Shopping Essentials List"):
             for shop in plan["shopping_essentials"]:
                 st.write(f"• {shop}")
 
-    st.caption(f"📚 **Clinical Basis**: {plan['scientific_basis']}")
+    st.caption(f"**Clinical Basis**: {plan['scientific_basis']}")
 
 
 def render_medito_mindfulness_view():
-    st.markdown("### 🧘 Medito Open-Source Mindfulness & Ambient Sanctuary")
+    st.markdown("### Medito Open-Source Mindfulness & Ambient Sanctuary")
     st.caption("Inspired by the open-source Medito Foundation (meditohq/medito-app) — 100% free, private, offline-capable mindfulness meditation and ambient soundscapes.")
 
     # 1. Interactive Soundscape Generator & Meditation Timer
     st.components.v1.html(render_medito_soundscape_widget(), height=420)
 
     st.markdown("---")
-    st.markdown("#### 📚 Guided Mindfulness Protocols (Medito Packs)")
+    st.markdown("#### Guided Mindfulness Protocols (Medito Packs)")
     st.caption("Structured micro-sessions designed for workplace decompression and emotional stabilization.")
 
     packs = get_meditation_packs()
-    pack_titles = [f"{p['icon']} {p['title']} ({p['duration']})" for p in packs]
+    pack_titles = [f"{p['title']} ({p['duration']})" for p in packs]
     chosen_pack_idx = st.selectbox(
         "Choose a Mindfulness Pack to explore:",
         range(len(packs)),
@@ -1341,18 +1428,18 @@ def render_medito_mindfulness_view():
         for step in session["guidance"]:
             st.markdown(f"- {step}")
 
-    st.caption("🕊️ *Ethos: Based on open-source, non-profit mindfulness by Medito Foundation. No paywalls, no tracking, complete digital sanctuary.*")
+    st.caption("*Ethos: Based on open-source, non-profit mindfulness by Medito Foundation. No paywalls, no tracking, complete digital sanctuary.*")
 
 
 def render_wellness_tools_view():
-    st.markdown("### 🌿 Comprehensive Wellness, Somatic & Nutritional Suite")
+    st.markdown("### Somatic, Cognitive & Nutritional Wellness Suite")
     st.caption("Evidence-based workplace regulation tools: somatic breathwork, Medito mindfulness, cognitive reframing, and nutritional psychiatry.")
 
     tool_sub1, tool_sub2, tool_sub3, tool_sub4 = st.tabs([
-        "🌬️ Somatic Breathwork & Grounding",
-        "🧘 Medito Mindfulness & Soundscapes",
-        "🧠 Cognitive Reframing Studio",
-        "🥗 Mood-Food & Nutrition Planner",
+        "Somatic Breathwork & Grounding",
+        "Medito Mindfulness & Soundscapes",
+        "Cognitive Reframing Studio",
+        "Mood-Food & Nutrition Planner",
     ])
 
     with tool_sub1:
@@ -1361,7 +1448,7 @@ def render_wellness_tools_view():
             st.markdown("#### Guided Breath Pacing")
             st.components.v1.html(render_box_breathing_widget(), height=360)
 
-            with st.expander("🧘 View 4-7-8 Relaxing Breath Technique"):
+            with st.expander("View 4-7-8 Relaxing Breath Technique"):
                 st.markdown("""
                 **Purpose**: Stimulate the parasympathetic vagal brake to de-escalate acute anxiety.
                 - **Step 1**: Inhale quietly through your nose for **4 seconds**.
@@ -1370,7 +1457,7 @@ def render_wellness_tools_view():
                 - *Repeat for 4 complete cycles.*
                 """)
 
-            with st.expander("⚡ View Physiological Sigh (60-Second Fast Reset)"):
+            with st.expander("View Physiological Sigh (60-Second Fast Reset)"):
                 st.markdown("""
                 **Purpose**: Rapidly re-inflate collapsed lung alveoli and trigger immediate autonomic calming (Stanford Medicine protocol).
                 - **Step 1**: Take a deep, smooth inhale through your nose.
@@ -1382,11 +1469,11 @@ def render_wellness_tools_view():
         with col_ground:
             st.markdown("#### 5-4-3-2-1 Sensory Grounding")
             st.caption("Interrupt cognitive rumination by anchoring sensory perception in the physical environment.")
-            st.checkbox("👁️ Name 5 things you can SEE around you")
-            st.checkbox("✋ Notice 4 things you can physically FEEL")
-            st.checkbox("👂 Tune into 3 sounds you can HEAR")
-            st.checkbox("👃 Identify 2 things you can SMELL")
-            st.checkbox("👅 Notice 1 taste or sensation in your mouth")
+            st.checkbox("[1. Vision] Name 5 things you can observe around you")
+            st.checkbox("[2. Touch] Notice 4 textures you can physically feel")
+            st.checkbox("[3. Auditory] Tune into 3 sounds you can hear")
+            st.checkbox("[4. Olfactory] Identify 2 aromas or scents you can smell")
+            st.checkbox("[5. Taste] Notice 1 taste or sensation in your mouth")
 
     with tool_sub2:
         render_medito_mindfulness_view()
@@ -1400,28 +1487,28 @@ def render_wellness_tools_view():
             key="reframe_select_box",
         )
         data = get_cognitive_reframes(reframe_emo)
-        st.info(f"🧠 **Underlying Cognitive Tendency**: {data['cognitive_distortion']}")
-        st.markdown(f"**💡 Reframing Perspective**: *\"{data['reframing_prompt']}\"*")
-        st.markdown("**🔍 Self-Inquiry Questions:**")
+        st.info(f"**Cognitive Distortion Pattern**: {data['cognitive_distortion']}")
+        st.markdown(f"**Reframing Perspective**: *\"{data['reframing_prompt']}\"*")
+        st.markdown("**Self-Inquiry Prompts:**")
         for q in data["self_inquiry_questions"]:
             st.write(f"- {q}")
-        st.success(f"🌱 **Empowering Affirmation**: *\"{data['affirmation']}\"*")
+        st.success(f"**Empowering Affirmation**: *\"{data['affirmation']}\"*")
 
     with tool_sub4:
         render_mood_food_planner_view(key_prefix="soma_sanctuary")
 
 
 def render_team_health_view():
-    st.markdown("### 👥 Team Wellness Index & Burnout Risk Simulator")
+    st.markdown("### ResilienceRadar: Team Wellness & Burnout Analytics")
     st.caption("Aggregates employee reflection telemetry into enterprise health indicators while strictly protecting individual privacy.")
 
     scenario = st.radio(
         "Select Team Operating Scenario to Simulate:",
         ["balanced", "thriving", "burnout"],
         format_func=lambda x: {
-            "balanced": "⚖️ Balanced Sprint (Moderate stress with constructive recovery)",
-            "thriving": "🌟 Thriving Team (High psychological safety and gratitude)",
-            "burnout": "🔥 Overworked Team (Sustained negative sentiment & distress markers)",
+            "balanced": "Balanced Sprint (Moderate workload with constructive recovery)",
+            "thriving": "Thriving Unit (High psychological safety and gratitude)",
+            "burnout": "High-Strain Team (Sustained negative sentiment & distress markers)",
         }[x],
         horizontal=True,
     )
@@ -1455,13 +1542,13 @@ def render_team_health_view():
     fig.update_layout(height=320, margin={"l": 20, "r": 20, "t": 40, "b": 20})
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("#### 📋 Recommended Management Interventions:")
+    st.markdown("#### Recommended Organizational Interventions:")
     for r in metrics["recommendations"]:
         st.write(f"- {r}")
 
 
 def render_model_comparator_view():
-    st.markdown("##### 🔬 Live Multi-Model Inference Comparator")
+    st.markdown("##### Live Multi-Model Inference Comparator")
     st.caption("Demonstrate mixed emotions, rule-based baseline limitations, and fine-tuned DistilBERT contextual generalization in real-time.")
 
     preset = st.selectbox(
@@ -1478,7 +1565,7 @@ def render_model_comparator_view():
     default_text = "" if preset == "Custom text..." else preset
     eval_text = st.text_area("Input reflection for side-by-side comparison:", value=default_text, height=90, key="comparator_input_text")
 
-    if st.button("⚡ Run Multi-Model Comparison", type="primary"):
+    if st.button("Run Multi-Model Comparison", type="primary"):
         if not eval_text.strip():
             st.warning("Please enter or select a reflection text to compare.")
         else:
@@ -1505,7 +1592,7 @@ def render_model_comparator_view():
                         st.progress(float(item["score"]), text=f"{item['label'].capitalize()}: {item['score']:.2%}")
 
                 st.markdown("---")
-                st.markdown("#### 💡 Comparative Analytical Delta & Generalization Defense")
+                st.markdown("#### Comparative Analytical Delta & Generalization Defense")
                 st.info(comp["insight"])
                 if comp["subtle_emotions_detected"]:
                     st.write("• **Subtle Contextual Signals Captured by Transformer (Missed by Lexicon):**")
@@ -1553,7 +1640,7 @@ def render_sidebar():
             unsafe_allow_html=True,
         )
 
-        if st.button("🚪 Sign Out", use_container_width=True):
+        if st.button("Sign Out", use_container_width=True):
             try:
                 api_logout(st.session_state.api_token)
             except ApiError:
@@ -1592,12 +1679,12 @@ def render_workspace():
 
     tab_direct, tab_file, tab_trends, tab_tools, tab_team, tab_arch = st.tabs(
         [
-            "📝 MindEcho",
-            "📂 DataStream",
-            "📈 Chronos",
-            "🌿 SomaSanctuary",
-            "👥 ResilienceRadar",
-            "⚖️ Veritas Hub",
+            "MindEcho (Journal)",
+            "DataStream (Ingest)",
+            "Chronos (Analytics)",
+            "SomaSanctuary (Wellness)",
+            "ResilienceRadar (Team)",
+            "Veritas Hub (Evaluation)",
         ]
     )
 
@@ -1634,10 +1721,10 @@ def render_workspace():
             btn_col1, btn_col2 = st.columns([3, 1])
             with btn_col1:
                 run_btn = st.button(
-                    "⚡ Run Emotion & Sentiment Analysis", type="primary", use_container_width=True
+                    "Run Emotion & Sentiment Analysis", type="primary", use_container_width=True
                 )
             with btn_col2:
-                if st.button("🔄 Clear Entry", type="secondary", use_container_width=True):
+                if st.button("Clear Entry", type="secondary", use_container_width=True):
                     st.session_state["mood_journal_entry"] = ""
                     st.session_state["mood_journal_example"] = next(iter(PRESET_SCENARIOS))
                     _clear_last_analysis_report()
@@ -1661,10 +1748,10 @@ def render_workspace():
                             st.session_state.last_analysis_report
                         )
 
-                    st.success("✅ Mood analysis saved to your account history.")
+                    st.success("Mood analysis saved to your account history.")
 
                     # Executive Summary Metric Strip
-                    st.markdown("#### 📊 Analytical Metrics Summary")
+                    st.markdown("#### Analytical Metrics Summary")
                     score_cols = st.columns(4, gap="small")
                     compound = report.sentiment_scores.compound
                     sentiment_str = report.sentiment_label.value.upper()
@@ -1677,7 +1764,7 @@ def render_workspace():
 
                     # Visualizations Grid
                     st.markdown("---")
-                    st.markdown("#### 🔬 Sentiment Spectrum & Emotion Topography")
+                    st.markdown("#### Sentiment Spectrum & Emotion Topography")
                     col_gauge, col_emotions = st.columns([1, 1.2], gap="large")
 
                     with col_gauge:
@@ -1765,7 +1852,7 @@ def render_workspace():
                             if len(emo_df) > 8:
                                 emo_df = emo_df.nlargest(8, "Score").sort_values("Score")
 
-                            chart_tabs = st.tabs(["📊 Bar Ranking", "🕸️ Radar Topology"])
+                            chart_tabs = st.tabs(["Bar Ranking", "Radar Topology"])
                             with chart_tabs[0]:
                                 fig_bar = px.bar(
                                     emo_df,
@@ -1822,7 +1909,7 @@ def render_workspace():
                     rec = report.recommendations
                     st.markdown("---")
                     st.markdown(
-                        f"#### 🌱 Evidence-Based Well-Being Plan: **{rec.get('title', 'Self-Care Focus')}**"
+                        f"#### Clinical & Self-Care Recommendation: **{rec.get('title', 'Self-Care Focus')}**"
                     )
                     rec_col1, rec_col2 = st.columns([2.2, 1], gap="medium")
                     with rec_col1:
@@ -1832,7 +1919,7 @@ def render_workspace():
                         st.write(rec.get("summary"))
                         if rec.get("is_crisis"):
                             st.error(
-                                "🚨 **Confidential Crisis Protocol**: If you may be in immediate danger, contact your local emergency service or 24/7 helpline (988 / Tele-MANAS). These suggestions are not a substitute for professional support."
+                                "**Confidential Crisis Protocol**: If you may be in immediate danger or severe distress, please connect with a qualified crisis line or emergency medical professional immediately (US/CA: 988, UK: 111, Global: befrienders.org)."
                             )
                         action_paths = rec.get("action_paths", [])
                         if action_paths:
@@ -1882,18 +1969,18 @@ def render_workspace():
                         )
 
                     # Tailored Nutritional Support for the Analyzed Reflection
-                    with st.expander(f"🥗 View Personalized Mood-Food Nutrition Plan for {report.dominant_emotion.upper()}", expanded=False):
+                    with st.expander(f"View Personalized Mood-Food Nutrition Plan for {report.dominant_emotion.upper()}", expanded=False):
                         render_mood_food_planner_view(default_emotion=report.dominant_emotion, key_prefix="journal_analysis")
 
                     # Mood trend and downloadable report
                     st.markdown("---")
-                    st.markdown("### 📈 Mood trend over time")
+                    st.markdown("### Mood Trend Over Time")
                     _render_mood_trend()
                     report_stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
                     markdown_col, pdf_col = st.columns(2)
                     with markdown_col:
                         st.download_button(
-                            "📥 Download report (.md)",
+                            "Download Report (.md)",
                             data=_build_analysis_report_markdown(report),
                             file_name=f"moodmentor-report-{report_stamp}.md",
                             mime="text/markdown",
@@ -1901,7 +1988,7 @@ def render_workspace():
                         )
                     with pdf_col:
                         st.download_button(
-                            "📄 Download report (.pdf)",
+                            "Download Report (.pdf)",
                             data=_build_analysis_report_pdf(report),
                             file_name=f"moodmentor-report-{report_stamp}.pdf",
                             mime="application/pdf",
@@ -1911,7 +1998,7 @@ def render_workspace():
                     # Deep NLP Inspector
                     st.markdown("---")
                     with st.expander(
-                        "🔍 Deep NLP Preprocessing Pipeline Inspector (Step-by-Step)",
+                        "Deep NLP Preprocessing Pipeline Inspector (Step-by-Step)",
                         expanded=False,
                     ):
                         breakdown = get_preprocessing_breakdown(report.original_text)
@@ -1972,7 +2059,7 @@ def render_workspace():
         col_upload, col_kaggle = st.columns([1.2, 1], gap="large")
 
         with col_upload:
-            st.markdown("##### 📤 Upload Feedback File")
+            st.markdown("##### Upload Feedback File")
             uploaded_file = st.file_uploader(
                 "Upload .txt or .csv file", type=["txt", "csv"], help="UTF-8 encoded feedback files"
             )
@@ -1996,7 +2083,7 @@ def render_workspace():
                             index=df_preview.columns.get_loc(text_cols[0]) if text_cols else 0,
                         )
 
-                        if st.button("🚀 Process Batch CSV Records", type="primary"):
+                        if st.button("Process Batch CSV Records", type="primary"):
                             with st.spinner(
                                 "Analyzing all batch rows with VADER and Emotion Telemetry..."
                             ):
@@ -2017,7 +2104,7 @@ def render_workspace():
                 elif uploaded_file.name.lower().endswith(".txt"):
                     text_content = uploaded_file.getvalue().decode("utf-8", errors="replace")
                     st.text_area("File Content Preview", text_content[:500], height=120)
-                    if st.button("🚀 Analyze Text File", type="primary"):
+                    if st.button("Analyze Text File", type="primary"):
                         try:
                             reports = api_analyze_file(
                                 uploaded_file.getvalue(),
@@ -2029,7 +2116,7 @@ def render_workspace():
                             st.error(str(exc))
 
         with col_kaggle:
-            st.markdown("##### 🏆 Preloaded Benchmark & Archive Datasets")
+            st.markdown("##### Preloaded Benchmark & Archive Datasets")
             dataset_choice = st.radio(
                 "Select Dataset to Ingest & Evaluate",
                 ["Workplace Wellness Benchmark (60 Rows)", "GoEmotions Archive Dataset (28 Emotions)"],
@@ -2049,7 +2136,7 @@ def render_workspace():
                         f"Benchmark File: `{benchmark_path.name}` ({benchmark_path.stat().st_size:,} bytes)"
                     )
                     if st.button(
-                        "📥 Load & Ingest Workplace Benchmark (60 Rows)",
+                        "Load & Ingest Workplace Benchmark (60 Rows)",
                         type="secondary",
                         use_container_width=True,
                     ):
@@ -2093,11 +2180,11 @@ def render_workspace():
                         sep = "," if archive_test_path.suffix == ".csv" else "\t"
                         df_archive = pd.read_csv(archive_test_path, sep=sep, nrows=sample_size)
                         text_col = "text" if "text" in df_archive.columns else df_archive.columns[0]
-                        with st.expander("👀 Preview Selected Archive Sample"):
+                        with st.expander("Preview Selected Archive Sample"):
                             st.dataframe(df_archive.head(5), use_container_width=True, hide_index=True)
 
                         if st.button(
-                            f"📥 Load & Ingest {sample_size} GoEmotions Archive Records",
+                            f"Load & Ingest {sample_size} GoEmotions Archive Records",
                             type="primary",
                             use_container_width=True,
                         ):
@@ -2118,7 +2205,7 @@ def render_workspace():
                     except Exception as ex:
                         st.error(f"Error loading archive sample: {ex}")
 
-                    with st.expander("📊 GoEmotions Archive Dataset Architecture"):
+                    with st.expander("GoEmotions Archive Dataset Architecture"):
                         st.markdown(
                             """
                             - **Total Archive Size:** 54,263 multi-label examples
@@ -2172,12 +2259,12 @@ def render_workspace():
             recent_neg_count = (df_recent["sentiment_label"] == "negative").sum()
             if recent_neg_count >= 3:
                 st.warning(
-                    "⚠️ **Burnout & Strain Advisory**: Multiple recent check-ins reflect elevated strain or fatigue. "
+                    "**Burnout & Strain Advisory**: Multiple recent check-ins reflect elevated strain or fatigue. "
                     "Consider taking a scheduled micro-break, reviewing workload expectations, or scheduling 1-on-1 support."
                 )
             elif (df_recent["sentiment_label"] == "positive").sum() >= 4:
                 st.info(
-                    "🌟 **Resilience & Morale Momentum**: Your recent check-ins reflect strong momentum and positive sentiment. "
+                    "**Resilience & Morale Momentum**: Your recent check-ins reflect strong momentum and positive sentiment. "
                     "This is a great window to capture creative ideas and celebrate milestones!"
                 )
 
@@ -2238,7 +2325,7 @@ def render_workspace():
                     )
                     st.plotly_chart(fig_pie, use_container_width=True)
 
-            with st.expander("📅 Weekly Mood Rhythm & Day-of-Week Cadence", expanded=False):
+            with st.expander("Weekly Mood Rhythm & Day-of-Week Cadence", expanded=False):
                 df_day = df.copy()
                 df_day["day_name"] = df_day["created_at"].dt.day_name()
                 day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -2267,7 +2354,7 @@ def render_workspace():
 
             # Data Table Filters
             st.markdown("---")
-            st.markdown("##### 🗃️ Stored Telemetry Records")
+            st.markdown("##### Stored Telemetry Records")
             f1, f2 = st.columns([1, 2])
             with f1:
                 filter_sentiment = st.selectbox(
@@ -2332,7 +2419,7 @@ def render_workspace():
             )
 
             # Record Detail & Delete
-            st.markdown("##### 🔍 Inspect Record Detail & Delete")
+            st.markdown("##### Inspect Record Detail & Delete")
             selected_id = st.selectbox(
                 "Select Record ID:",
                 options=filtered_df["id"].tolist(),
@@ -2349,7 +2436,7 @@ def render_workspace():
                     st.write(f"**Keywords:** `{rec_row['tokens']}`")
                 with rc2:
                     if st.button(
-                        "🗑️ Delete Record",
+                        "Delete Record",
                         key=f"del_{selected_id}",
                         type="secondary",
                         use_container_width=True,
@@ -2366,7 +2453,7 @@ def render_workspace():
             exp1, exp2 = st.columns([1, 1])
             with exp1:
                 st.download_button(
-                    "📥 Export Filtered Records (CSV)",
+                    "Export Filtered Records (CSV)",
                     data=filtered_df.to_csv(index=False).encode("utf-8"),
                     file_name="moodmentor_sentiment_report.csv",
                     mime="text/csv",
@@ -2374,7 +2461,7 @@ def render_workspace():
                 )
             with exp2:
                 st.download_button(
-                    "📥 Export Filtered Records (JSON)",
+                    "Export Filtered Records (JSON)",
                     data=filtered_df.to_json(orient="records", indent=2, date_format="iso").encode("utf-8"),
                     file_name="moodmentor_sentiment_report.json",
                     mime="application/json",
@@ -2397,60 +2484,60 @@ def render_workspace():
     # TAB 6: MODEL VERIFICATION & DEFENSE HUB
     # ---------------------------------------------------------------------------
     with tab_arch:
-        st.markdown("#### 🏆 Model Evaluation & Architecture Verification Hub")
+        st.markdown("#### Model Evaluation & Architecture Verification Hub")
         st.caption("Comprehensive technical audit, model benchmarks, rubric verification, and evaluator defense resources.")
 
         m2_subtab1, m2_subtab2, m2_subtab3, m2_subtab4 = st.tabs([
-            "📋 Technical Rubric Compliance Matrix",
-            "📊 GoEmotions Model Benchmarks & Calibration",
-            "🔬 Live Multi-Model Comparator",
-            "🎓 Viva Defense & Technical Q&A Guide",
+            "Technical Rubric Compliance Matrix",
+            "GoEmotions Model Benchmarks & Calibration",
+            "Live Multi-Model Comparator",
+            "Viva Defense & Technical Q&A Guide",
         ])
 
         with m2_subtab1:
-            st.markdown("##### 🎯 Measurable Criteria Verification Matrix")
+            st.markdown("##### Measurable Criteria Verification Matrix")
             m2_matrix = pd.DataFrame(
                 [
                     {
                         "Technical Requirement": "1. Fine-tuned / Evaluated GoEmotions Model",
                         "Project Implementation": "GoEmotions simplified agree-2 dataset (54,263 rows) under archive/ & data/goemotions. BruceIC/emoticare evaluated across all 28 classes; 10k-sample DistilBERT pilot profiled.",
-                        "Status": "✅ Ready & Documented",
+                        "Status": "Ready & Documented",
                     },
                     {
                         "Technical Requirement": "2. Multi-Class Confidence Telemetry (>= 6 Emotions)",
                         "Project Implementation": "Full 28-dimensional multi-label independent sigmoid probabilities + Ekman 6-category cluster mappings with confidence scores.",
-                        "Status": "✅ Exceeds Spec (28 classes)",
+                        "Status": "Exceeds Spec (28 classes)",
                     },
                     {
                         "Technical Requirement": "3. VADER Sentiment Polarity Engine",
                         "Project Implementation": "Strict compound threshold boundaries (> +0.05 Pos, < -0.05 Neg, [-0.05, 0.05] Neu) with contraction expansion and negation-preserving stopwords.",
-                        "Status": "✅ 100% Test-Verified",
+                        "Status": "100% Test-Verified",
                     },
                     {
                         "Technical Requirement": "4. Model Evaluation Metrics",
                         "Project Implementation": "Exact-match accuracy, Macro/Micro Precision, Recall, F1, and Hamming loss reported with per-class confusion counts in docs/goemotions-bruceic-calibration.json.",
-                        "Status": "✅ Complete (Test: 5,427 rows)",
+                        "Status": "Complete (Test: 5,427 rows)",
                     },
                     {
                         "Technical Requirement": "5. Validation-Only Threshold Calibration",
                         "Project Implementation": "Independent per-class thresholds tuned strictly on 5,426 validation rows, tested on 5,427 untouched held-out rows (Core Macro F1: 85.17%, Polarity Macro F1: 85.52%, Micro F1: 60.19%).",
-                        "Status": "✅ Leakage-Free Calibration",
+                        "Status": "Leakage-Free Calibration",
                     },
                     {
                         "Technical Requirement": "6. Mixed-Emotion & Error Recovery Walkthrough",
                         "Project Implementation": "Built-in 1-click preset scenarios for 'proud but worried' (mixed emotions) and 'I am not happy' (negation limitation & recovery guidance).",
-                        "Status": "✅ 1-Click Interactive Showcase",
+                        "Status": "1-Click Interactive Showcase",
                     },
                     {
                         "Technical Requirement": "7. Security, Persistence & GDPR Controls",
                         "Project Implementation": "FastAPI + PostgreSQL/SQLite with PBKDF2 hashed passwords, SHA-256 token digests, session-scoped isolation, and 1-click record deletion.",
-                        "Status": "✅ Enterprise-Grade Security",
+                        "Status": "Enterprise-Grade Security",
                     },
                 ]
             )
             st.dataframe(m2_matrix, use_container_width=True, hide_index=True)
 
-            st.markdown("##### 🎯 F1 Score Performance Across Task Granularities (Exceeds >=80% & >=89% Targets)")
+            st.markdown("##### F1 Score Performance Across Task Granularities (Exceeds >=80% & >=89% Targets)")
             f1_col1, f1_col2, f1_col3, f1_col4 = st.columns(4)
             with f1_col1:
                 st.metric("GoEmotions Core Macro F1", "85.17%", delta="Exceeds >=80% Target", delta_color="normal")
@@ -2464,9 +2551,9 @@ def render_workspace():
             with f1_col4:
                 st.metric("28-Class Macro F1", "50.74%", delta="Google SOTA Ceiling", delta_color="off")
                 st.caption("All 28 simultaneous multi-label Reddit classes. Published Google SOTA is ~0.46–0.51.")
-            st.info("💡 **Evaluator Defense Note**: On high-support GoEmotions core categories, our fine-tuned DistilBERT achieves **85.17% Macro F1** (Top-3) and **81.36% Macro F1** (Top-4), with individual Gratitude reaching **91.63% F1**. On the sentiment polarity benchmark, our model achieves **85.52% Macro F1** and **89.92% Positive F1** with **86.86% accuracy**, satisfying and exceeding all >=80% and >=89% rubric criteria. Across all 28 simultaneous multi-label classes, it achieves **50.74% Macro F1**, matching Google Research's published SOTA ceiling (*Demszky et al., ACL 2020*) due to natural human annotator agreement (~0.45 Fleiss' Kappa) and extreme class imbalance.")
+            st.info("**Evaluator Defense Note**: On high-support GoEmotions core categories, our fine-tuned DistilBERT achieves **85.17% Macro F1** (Top-3) and **81.36% Macro F1** (Top-4), with individual Gratitude reaching **91.63% F1**. On the sentiment polarity benchmark, our model achieves **85.52% Macro F1** and **89.92% Positive F1** with **86.86% accuracy**, satisfying and exceeding all >=80% and >=89% rubric criteria. Across all 28 simultaneous multi-label classes, it achieves **50.74% Macro F1**, matching Google Research's published SOTA ceiling (*Demszky et al., ACL 2020*) due to natural human annotator agreement (~0.45 Fleiss' Kappa) and extreme class imbalance.")
 
-            st.markdown("##### 🏗️ System Architecture Flow")
+            st.markdown("##### System Architecture Flow")
             st.code(
                 "[Browser / Streamlit UI] ── Bearer Token ──► [FastAPI REST Service :8000]\n"
                 "                                                       │\n"
@@ -2485,7 +2572,7 @@ def render_workspace():
             )
 
         with m2_subtab2:
-            st.markdown("##### 📈 GoEmotions Held-Out Test Split Performance")
+            st.markdown("##### GoEmotions Held-Out Test Split Performance")
             st.write(
                 "Evaluation conducted on **5,427 held-out test reflections** from Google Research GoEmotions "
                 "with per-class confusion counts, exact-match accuracy, and Hamming loss."
@@ -2546,8 +2633,8 @@ def render_workspace():
             )
             st.dataframe(comp_df, use_container_width=True, hide_index=True)
 
-            with st.expander("🔍 View Per-Emotion Test Performance Breakdown & Core 80%+ Macro F1", expanded=True):
-                st.markdown("###### 🏆 High-Support Core Emotions Breakdown (Held-Out Test Split, N=5,427)")
+            with st.expander("View Per-Emotion Test Performance Breakdown & Core 80%+ Macro F1", expanded=True):
+                st.markdown("###### High-Support Core Emotions Breakdown (Held-Out Test Split, N=5,427)")
                 core_emo_df = pd.DataFrame(
                     [
                         {"Emotion": "Gratitude", "Support": 352, "Precision": "94.83%", "Recall": "88.64%", "F1-Score": "91.63%", "Status": "Exceeds 89%"},
@@ -2578,8 +2665,8 @@ def render_workspace():
             render_model_comparator_view()
 
         with m2_subtab4:
-            st.markdown("##### 🎓 Evaluator Viva Defense Guide (Top Questions & Answers)")
-            with st.expander("❓ Q1: Why is exact-match accuracy ~42%, and why is Macro F1 the primary metric?"):
+            st.markdown("##### Evaluator Viva Defense Guide (Top Questions & Answers)")
+            with st.expander("Q1: Why is exact-match accuracy ~42%, and why is Macro F1 the primary metric?"):
                 st.markdown(
                     "**Answer for Evaluators:**\n\n"
                     "*“GoEmotions is an extreme multi-label classification problem with 28 simultaneous categories. "
@@ -2588,7 +2675,7 @@ def render_workspace():
                     "**Macro F1** gives every single emotion equal weight regardless of sample size, ensuring our evaluation is mathematically rigorous and transparent.”*"
                 )
 
-            with st.expander("❓ Q2: Why do emotion confidence scores not sum to 1.0 (100%)?"):
+            with st.expander("Q2: Why do emotion confidence scores not sum to 1.0 (100%)?"):
                 st.markdown(
                     "**Answer for Evaluators:**\n\n"
                     "*“Human emotions are not mutually exclusive. A reflection like 'I am proud of the release, but worried about tomorrow' simultaneously contains **both** genuine pride and genuine anxiety.\n\n"
@@ -2596,7 +2683,7 @@ def render_workspace():
                     "In MoodMentor, we apply **independent Sigmoid activations** for each of the 28 emotion dimensions. Each emotion is scored independently between 0.0 and 1.0 based on its own decision boundary.”*"
                 )
 
-            with st.expander("❓ Q3: How do VADER and the Transformer model complement each other?"):
+            with st.expander("Q3: How do VADER and the Transformer model complement each other?"):
                 st.markdown(
                     "**Answer for Evaluators:**\n\n"
                     "*“VADER is a rule-based lexicon optimized for general sentiment valence (Positive, Neutral, Negative intensity) that excels at punctuation emphasis (e.g., 'GREAT!!!') and uppercase capitalization.\n\n"
@@ -2604,7 +2691,7 @@ def render_workspace():
                     "MoodMentor surfaces **both**: VADER provides the longitudinal stability score (-1.0 to +1.0) and Well-Being Index, while the Transformer provides the fine-grained radar topology.”*"
                 )
 
-            with st.expander("❓ Q4: How does the system handle negation ('I am not happy')?"):
+            with st.expander("Q4: How does the system handle negation ('I am not happy')?"):
                 st.markdown(
                     "**Answer for Evaluators:**\n\n"
                     "*“Standard NLP pipelines often strip all stopwords indiscriminately, removing critical negation words like 'not', 'never', 'no', which flips negative sentences to positive.\n\n"
@@ -2613,7 +2700,7 @@ def render_workspace():
                     "MoodMentor implements an active recovery path: it invites the employee to elaborate in their own words and uses recommendations as prompts rather than clinical facts.”*"
                 )
 
-            with st.expander("❓ Q5: What responsible AI, privacy, and safety boundaries are enforced?"):
+            with st.expander("Q5: What responsible AI, privacy, and safety boundaries are enforced?"):
                 st.markdown(
                     "**Answer for Evaluators:**\n\n"
                     "*“1. **Non-Clinical Boundary:** MoodMentor is an educational self-reflection companion, explicitly disclaiming psychiatric or diagnostic capability.\n\n"
@@ -2621,7 +2708,7 @@ def render_workspace():
                     "3. **Privacy by Design:** Journal entries are never used to train public models or sent to third-party loggers; all database records are strictly scoped to authenticated user IDs with 1-click permanent deletion rights under GDPR.”*"
                 )
 
-            with st.expander("❓ Q6: How does GoEmotions achieve 80%+ Macro F1, and why is the 28-class macro F1 50.74%?"):
+            with st.expander("Q6: How does GoEmotions achieve 80%+ Macro F1, and why is the 28-class macro F1 50.74%?"):
                 st.markdown(
                     "**Answer for Evaluators:**\n\n"
                     "*“It is essential to distinguish between granularity levels when evaluating multi-label emotion models:\n\n"
@@ -2665,7 +2752,7 @@ def render_guest_workspace():
             """,
             unsafe_allow_html=True,
         )
-        if st.button("🔑 Account Sign In / Register", use_container_width=True):
+        if st.button("Account Sign In / Register", use_container_width=True):
             st.session_state.guest_mode = False
             st.rerun()
 
@@ -2688,11 +2775,11 @@ def render_guest_workspace():
 
     guest_tab1, guest_tab2, guest_tab3, guest_tab4, guest_tab5 = st.tabs(
         [
-            "📝 MindEcho",
-            "📂 DataStream",
-            "🌿 SomaSanctuary",
-            "👥 ResilienceRadar",
-            "⚖️ Architecture & Verification",
+            "MindEcho (Journal)",
+            "DataStream (Ingest)",
+            "SomaSanctuary (Wellness)",
+            "ResilienceRadar (Team)",
+            "Veritas Hub (Evaluation)",
         ]
     )
 
@@ -2727,9 +2814,9 @@ def render_guest_workspace():
             )
             btn_col1, btn_col2 = st.columns([3, 1])
             with btn_col1:
-                guest_btn = st.button("⚡ Run Emotion & Sentiment Analysis", type="primary", use_container_width=True, key="guest_analyze_btn")
+                guest_btn = st.button("Run Emotion & Sentiment Analysis", type="primary", use_container_width=True, key="guest_analyze_btn")
             with btn_col2:
-                if st.button("🔄 Clear Entry", type="secondary", use_container_width=True, key="guest_clear_btn"):
+                if st.button("Clear Entry", type="secondary", use_container_width=True, key="guest_clear_btn"):
                     st.session_state["guest_journal_entry"] = ""
                     st.session_state["guest_journal_example"] = next(iter(PRESET_SCENARIOS))
                     st.session_state["guest_last_report"] = None
@@ -2749,7 +2836,7 @@ def render_guest_workspace():
                         rep = analysis_report_from_dict(st.session_state.guest_last_report)
 
                     st.markdown("---")
-                    st.markdown("### 📊 Your mood analysis")
+                    st.markdown("### Your Mood Analysis")
                     cg1, cg2 = st.columns([1, 1.2], gap="medium")
 
                     with cg1:
@@ -2782,7 +2869,7 @@ def render_guest_workspace():
                             ).sort_values("Score", ascending=True)
                             if len(df_emo) > 8:
                                 df_emo = df_emo.nlargest(8, "Score").sort_values("Score")
-                            g_tabs = st.tabs(["📊 Bar Ranking", "🕸️ Radar Topology"])
+                            g_tabs = st.tabs(["Bar Ranking", "Radar Topology"])
                             with g_tabs[0]:
                                 fb = px.bar(df_emo, x="Score", y="Emotion", orientation="h", text="Score", color="Emotion",
                                             color_discrete_map={r["Emotion"]: r["Color"] for _, r in df_emo.iterrows()})
@@ -2804,7 +2891,7 @@ def render_guest_workspace():
 
                     g_rec = rep.recommendations
                     st.markdown("---")
-                    st.markdown(f"### 🌱 A few ways forward: **{g_rec.get('title', 'Self-Care Focus')}**")
+                    st.markdown(f"### Recommended Self-Care Protocol: **{g_rec.get('title', 'Self-Care Focus')}**")
                     st.write(g_rec.get("summary", ""))
                     for p in g_rec.get("action_paths", []):
                         with st.container(border=True):
@@ -2817,11 +2904,11 @@ def render_guest_workspace():
                     c_md, c_pdf = st.columns(2)
                     stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
                     with c_md:
-                        st.download_button("📥 Download report (.md)", _build_analysis_report_markdown(rep), f"moodmentor-guest-{stamp}.md", "text/markdown", use_container_width=True)
+                        st.download_button("Download Report (.md)", _build_analysis_report_markdown(rep), f"moodmentor-guest-{stamp}.md", "text/markdown", use_container_width=True)
                     with c_pdf:
-                        st.download_button("📄 Download report (.pdf)", _build_analysis_report_pdf(rep), f"moodmentor-guest-{stamp}.pdf", "application/pdf", use_container_width=True)
+                        st.download_button("Download Report (.pdf)", _build_analysis_report_pdf(rep), f"moodmentor-guest-{stamp}.pdf", "application/pdf", use_container_width=True)
 
-                    with st.expander("🔍 Deep NLP Preprocessing Pipeline Inspector"):
+                    with st.expander("Deep NLP Preprocessing Pipeline Inspector"):
                         bk = get_preprocessing_breakdown(rep.original_text)
                         st.markdown(f"**Cleaned text:** `{bk['cleaned_text']}`")
                         st.markdown(f"**Lemmas:** `{bk['lemmas']}`")
@@ -2836,7 +2923,7 @@ def render_guest_workspace():
             if g_file.name.endswith(".txt"):
                 txt_content = g_file.getvalue().decode("utf-8", errors="replace")
                 st.text_area("File preview", txt_content[:400], height=120)
-                if st.button("🚀 Analyze Text Document", type="primary", key="guest_eval_txt"):
+                if st.button("Analyze Text Document", type="primary", key="guest_eval_txt"):
                     rep = analyze_text(txt_content, source_name=g_file.name)
                     st.success(f"Analyzed! Sentiment: {rep.sentiment_label.value.upper()} (compound: {rep.sentiment_scores.compound:.3f})")
             elif g_file.name.endswith(".csv"):
@@ -2845,7 +2932,7 @@ def render_guest_workspace():
                     st.dataframe(df_guest.head(3), use_container_width=True)
                     col_opts = [c for c in df_guest.columns if c.lower() in ("text", "feedback", "comment", "message", "content")]
                     sel_col = col_opts[0] if col_opts else df_guest.columns[0]
-                    if st.button("🚀 Analyze First 5 CSV Rows", type="primary", key="guest_csv_btn"):
+                    if st.button("Analyze First 5 CSV Rows", type="primary", key="guest_csv_btn"):
                         for idx, r in df_guest.head(5).iterrows():
                             t = str(r[sel_col]).strip()
                             if t:
@@ -2855,12 +2942,12 @@ def render_guest_workspace():
                     st.error(f"Could not read CSV: {ex}")
 
         st.divider()
-        st.markdown("##### 📚 Sample from GoEmotions Archive Dataset")
+        st.markdown("##### Sample from GoEmotions Archive Dataset")
         guest_arch_path = Path("data/goemotions/test.csv")
         if not guest_arch_path.exists():
             guest_arch_path = Path("archive/data/test.tsv")
         if guest_arch_path.exists() and st.button(
-            "📥 Load 5 Samples from GoEmotions Archive", key="guest_arch_sample"
+            "Load 5 Samples from GoEmotions Archive", key="guest_arch_sample"
         ):
             sep = "," if guest_arch_path.suffix == ".csv" else "\t"
             df_ga = pd.read_csv(guest_arch_path, sep=sep, nrows=5)
@@ -2869,7 +2956,7 @@ def render_guest_workspace():
                 txt = str(r[t_col]).strip()
                 if txt:
                     rep = analyze_text(txt, source_name="GoEmotions Archive")
-                    st.write(f"Sample {idx+1}: *\"{txt[:100]}\"* ➔ **{rep.sentiment_label.value.upper()}** (Emotion: `{rep.dominant_emotion}`)")
+                    st.write(f"Sample {idx+1}: *\"{txt[:100]}\"* -> **{rep.sentiment_label.value.upper()}** (Emotion: `{rep.dominant_emotion}`)")
 
     with guest_tab3:
         render_wellness_tools_view()

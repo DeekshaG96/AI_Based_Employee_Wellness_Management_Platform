@@ -18,7 +18,7 @@ def get_meditation_packs() -> list[dict[str, Any]]:
         {
             "id": "stress_release",
             "title": "The AnchorPoint Protocol (Stress & Decompression)",
-            "icon": "🌊",
+            "icon": "waves",
             "duration": "3–5 mins per session",
             "description": "Somatic grounding techniques for high-stress sprints, tense meetings, and task overwhelm.",
             "sessions": [
@@ -60,7 +60,7 @@ def get_meditation_packs() -> list[dict[str, Any]]:
         {
             "id": "deep_work_focus",
             "title": "Cerebral Defrag & Flow (Deep Work & Focus)",
-            "icon": "🎯",
+            "icon": "target",
             "duration": "2–4 mins per session",
             "description": "Cultivate one-pointed attention, clear mental residue, and enter effortless flow state.",
             "sessions": [
@@ -90,7 +90,7 @@ def get_meditation_packs() -> list[dict[str, Any]]:
         {
             "id": "body_scan_sleep",
             "title": "SomatoRelease & Sunset Detachment (Body Scan & Wind-Down)",
-            "icon": "🌙",
+            "icon": "moon",
             "duration": "5–8 mins",
             "description": "Progressive somatic release for physical desk strain and evening work-life boundary transition.",
             "sessions": [
@@ -121,7 +121,7 @@ def get_meditation_packs() -> list[dict[str, Any]]:
         {
             "id": "compassion_metta",
             "title": "Kith & Kin Empathy Circle (Loving-Kindness & Compassion)",
-            "icon": "💚",
+            "icon": "heart",
             "duration": "3–5 mins",
             "description": "Foster psychological safety, empathy, and reduce interpersonal friction with colleagues.",
             "sessions": [
@@ -155,25 +155,25 @@ def get_soundscape_catalog() -> list[dict[str, str]]:
     return [
         {
             "id": "rain",
-            "name": "🌧️ Verdant Canopy Rain",
+            "name": "Verdant Canopy Rain",
             "description": "Filtered pink noise with soft droplet acoustics to calm an overactive mind.",
             "category": "Relaxation",
         },
         {
             "id": "ocean",
-            "name": "🌊 Pacific Tidal Resonance",
+            "name": "Pacific Tidal Resonance",
             "description": "Rhythmic low-frequency swells modeled on a 0.08 Hz natural oceanic oscillation.",
             "category": "Stress Relief",
         },
         {
             "id": "bell",
-            "name": "🔔 Zenith 432Hz Solfeggio Chime",
+            "name": "Zenith 432Hz Solfeggio Chime",
             "description": "Harmonic Solfeggio 432 Hz tone with resonant exponential decay for meditation.",
             "category": "Meditation",
         },
         {
             "id": "brown_noise",
-            "name": "☕ Amber Focus Frequency (Brown Noise)",
+            "name": "Amber Focus Frequency (Brown Noise)",
             "description": "Deeper than white noise; dampens sharp environmental distractions for deep work.",
             "category": "Focus",
         },
@@ -190,12 +190,12 @@ def render_medito_soundscape_widget() -> str:
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:12px; margin-bottom:16px;">
             <div>
                 <h3 style="margin:0; font-size:1.25rem; font-weight:700; display:flex; align-items:center; gap:8px;">
-                    🧘 Medito Mindfulness & Ambient Sanctuary
+                    Medito Mindfulness & Ambient Sanctuary
                 </h3>
-                <small style="color:#a7f3d0; font-size:0.8rem;">Open-source 100% client-side Web Audio synthesis & meditation timer</small>
+                <small style="color:#a7f3d0; font-size:0.8rem;">Client-side Web Audio synthesis and focused meditation timer</small>
             </div>
             <span style="background:rgba(255,255,255,0.12); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; color:#6ee7b7;">
-                🌱 Offline & Private
+                Offline & Private
             </span>
         </div>
 
@@ -204,10 +204,10 @@ def render_medito_soundscape_widget() -> str:
             <div>
                 <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:#d1fae5;">1. Choose Ambient Backdrop:</label>
                 <select id="soundscapeSelect" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #10b981; background:#042f2e; color:#f0fdf4; font-size:0.9rem; font-weight:500;">
-                    <option value="rain">🌧️ Verdant Canopy Rain (Pink Noise)</option>
-                    <option value="ocean">🌊 Pacific Tidal Resonance (0.08Hz Swell)</option>
-                    <option value="bell">🔔 Zenith 432Hz Solfeggio Chime (Tibetan Bell)</option>
-                    <option value="brown">☕ Amber Focus Frequency (Brown Noise)</option>
+                    <option value="rain">Verdant Canopy Rain (Pink Noise)</option>
+                    <option value="ocean">Pacific Tidal Resonance (0.08Hz Swell)</option>
+                    <option value="bell">Zenith 432Hz Solfeggio Chime (Harmonic Bell)</option>
+                    <option value="brown">Amber Focus Frequency (Brown Noise)</option>
                 </select>
             </div>
 
@@ -233,11 +233,11 @@ def render_medito_soundscape_widget() -> str:
             </div>
 
             <div style="display:flex; justify-content:center; gap:12px;">
-                <button id="playBtn" onclick="toggleAudio()" style="background:#10b981; hover:background:#059669; color:#064e3b; font-weight:700; border:none; padding:10px 24px; border-radius:24px; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s;">
-                    ▶ Start Session
+                <button id="playBtn" onclick="toggleAudio()" style="background:#10b981; color:#064e3b; font-weight:700; border:none; padding:10px 24px; border-radius:24px; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s;">
+                    Start Session
                 </button>
                 <button id="bellBtn" onclick="playZenBell()" style="background:rgba(255,255,255,0.15); color:#f0fdf4; font-weight:600; border:1px solid rgba(255,255,255,0.25); padding:10px 18px; border-radius:24px; font-size:0.85rem; cursor:pointer;">
-                    🔔 Chime Bell
+                    Chime Bell
                 </button>
             </div>
         </div>
@@ -413,10 +413,10 @@ def render_medito_soundscape_widget() -> str:
 
             if (!isPlaying) {
                 isPlaying = true;
-                btn.innerHTML = '⏸ Pause Session';
+                btn.innerHTML = 'Pause Session';
                 btn.style.background = '#f59e0b';
                 btn.style.color = '#78350f';
-                status.innerText = '🌿 Mindfulness session in progress. Rest your eyes or gaze softly.';
+                status.innerText = 'Mindfulness session in progress. Rest your eyes or gaze softly.';
 
                 playZenBell(); // Opening chime
                 startSoundscape();
@@ -431,10 +431,10 @@ def render_medito_soundscape_widget() -> str:
                         stopSoundscape();
                         playZenBell(); // Closing chime
                         isPlaying = false;
-                        btn.innerHTML = '▶ Start Session';
+                        btn.innerHTML = 'Start Session';
                         btn.style.background = '#10b981';
                         btn.style.color = '#064e3b';
-                        status.innerText = '✨ Meditation complete. Take this calm awareness into your next task.';
+                        status.innerText = 'Meditation complete. Take this calm awareness into your next task.';
                         timeLeft = parseInt(document.getElementById('timerDurationSelect').value);
                         document.getElementById('timerDisplay').innerText = formatTime(timeLeft);
                     }
@@ -442,7 +442,7 @@ def render_medito_soundscape_widget() -> str:
 
             } else {
                 isPlaying = false;
-                btn.innerHTML = '▶ Resume Session';
+                btn.innerHTML = 'Resume Session';
                 btn.style.background = '#10b981';
                 btn.style.color = '#064e3b';
                 status.innerText = 'Session paused.';

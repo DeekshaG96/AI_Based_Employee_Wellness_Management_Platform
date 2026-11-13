@@ -56,11 +56,11 @@ def get_guided_exercises() -> list[dict[str, Any]]:
             "clinical_evidence": "Cognitive Behavioral Therapy (CBT) somatic anchor technique for sensory re-orientation.",
             "duration": "3 minutes",
             "steps": [
-                "👁️ 5 things you can SEE around you (a pen, the edge of a monitor, light on a wall)",
-                "✋ 4 things you can physically FEEL (feet on the floor, fabric against skin, desk surface)",
-                "👂 3 things you can HEAR right now (hum of an appliance, distant traffic, your breath)",
-                "👃 2 things you can SMELL (coffee, fresh air, paper)",
-                "👅 1 thing you can TASTE (a sip of water, or notice the sensation in your mouth)",
+                "[1. Visual] 5 distinct objects you can observe around you (a pen, edge of a monitor, light on a surface)",
+                "[2. Tactile] 4 physical sensations you can ground into (feet on the floor, fabric against skin, desk texture)",
+                "[3. Auditory] 3 subtle ambient sounds you can detect (fan hum, distant movement, your natural breath)",
+                "[4. Olfactory] 2 scents in your immediate environment (coffee, fresh air, neutral atmosphere)",
+                "[5. Gustatory] 1 taste or resting sensation in your mouth (a sip of water, neutral breath)",
             ],
         },
     ]

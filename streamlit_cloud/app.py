@@ -59,7 +59,7 @@ from wellness.report import (
 
 st.set_page_config(
     page_title="MoodMentor | Mindful Check-in",
-    page_icon="🌿",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -433,7 +433,7 @@ def _render_auth_gate() -> None:
         else:
             st.info(account_flash)
     st.markdown(
-        '<div class="brand"><div class="mark" aria-hidden="true">♡</div><div><div class="brand-name">MoodMentor</div>'
+        '<div class="brand"><div class="mark" aria-hidden="true">M</div><div><div class="brand-name">MoodMentor</div>'
         '<div class="brand-caption">A thoughtful space for your daily check-in</div></div></div>',
         unsafe_allow_html=True,
     )
@@ -834,7 +834,7 @@ if account_mode:
         "Account mode: your reflection is sent to the configured MoodMentor API for analysis "
         "and saved with its results in your account history. Avoid sensitive or identifying details. "
         "Use Sign out when you finish.",
-        icon="🔒",
+        icon=None,
     )
 elif hf_token:
     st.info(
@@ -851,7 +851,7 @@ else:
         icon="ℹ️",
     )
 
-journal_tab, file_tab, trends_tab, evaluation_tab = st.tabs(["📝 Mood journal", "📄 Import a file", "📈 Trends & history", "🧪 Model evaluation"])
+journal_tab, file_tab, trends_tab, evaluation_tab = st.tabs(["Mood Journal", "Import a File", "Trends & History", "Model Evaluation"])
 with journal_tab:
     col_editor, col_prompt = st.columns([2.1, 0.9], gap="large")
     with col_editor, st.container(border=True):
@@ -1047,7 +1047,7 @@ with file_tab:
                 st.error(f"Could not read this CSV: {exc}")
 
     st.markdown("---")
-    st.markdown("### 📚 Explore GoEmotions Archive Dataset")
+    st.markdown("### Explore GoEmotions Archive Dataset")
     st.caption("Load a curated 20-entry slice from the held-out GoEmotions archive dataset (`data/goemotions/test.csv`) without uploading your own file.")
     cloud_archive_path = PROJECT_ROOT / "data" / "goemotions" / "test.csv"
     if not cloud_archive_path.is_file():
@@ -1055,7 +1055,7 @@ with file_tab:
     if cloud_archive_path.is_file():
         col_arch_btn, col_arch_info = st.columns([1, 1.5])
         with col_arch_btn:
-            if st.button("📥 Load 20 GoEmotions Archive Entries", key="load_archive_cloud_sample", use_container_width=True):
+            if st.button("Load 20 GoEmotions Archive Entries", key="load_archive_cloud_sample", use_container_width=True):
                 try:
                     sep = "," if cloud_archive_path.suffix == ".csv" else "\t"
                     df_c = pd.read_csv(cloud_archive_path, sep=sep, nrows=20)
@@ -1348,7 +1348,7 @@ selected = next((item for item in records if item["id"] == st.session_state.sele
 if selected:
     report: AnalysisReport = selected["report"]
     st.markdown("---")
-    st.markdown('<div class="result-heading"><h2>📊 Your mood analysis</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="result-heading"><h2>Your Mood Analysis</h2></div>', unsafe_allow_html=True)
     estimator_label = report.emotion_method.replace("_", " ").title()
     st.markdown(
         '<div class="model-pill-row">'

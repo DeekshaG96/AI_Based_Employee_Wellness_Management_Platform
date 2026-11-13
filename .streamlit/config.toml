@@ -12,3 +12,4 @@ toolbarMode = "minimal"
 headless = true
 enableCORS = false
 enableXsrfProtection = false
+
