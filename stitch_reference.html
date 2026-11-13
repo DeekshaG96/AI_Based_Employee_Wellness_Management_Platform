@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {"colors": {"outline-variant": "#c0c9bd", "on-error": "#ffffff", "surface-container-highest": "#e3e2e0", "on-tertiary-container": "#d4e5c2", "secondary-container": "#8596ff", "secondary-fixed-dim": "#bac3ff", "on-secondary-container": "#11278e", "error-container": "#ffdad6", "surface-variant": "#e3e2e0", "on-primary-container": "#aaefb4", "background": "#faf9f7", "surface-container-lowest": "#ffffff", "on-primary-fixed": "#00210b", "primary-fixed": "#adf3b8", "error": "#ba1a1a", "surface-container-low": "#f4f3f1", "on-primary-fixed-variant": "#0a5226", "on-surface-variant": "#404940", "surface-dim": "#dadad8", "on-surface": "#1a1c1b", "secondary": "#4355b9", "on-primary": "#ffffff", "on-secondary": "#ffffff", "on-tertiary": "#ffffff", "primary": "#11562a", "on-background": "#1a1c1b", "surface-bright": "#faf9f7", "inverse-on-surface": "#f1f1ef", "surface-tint": "#296b3c", "surface-container": "#efeeec", "tertiary": "#414f35", "surface-container-high": "#e9e8e6", "on-tertiary-fixed-variant": "#3d4b32", "inverse-primary": "#92d69d", "on-secondary-fixed-variant": "#293ca0", "secondary-fixed": "#dee0ff", "outline": "#70796f", "surface": "#faf9f7", "primary-fixed-dim": "#92d69d", "on-secondary-fixed": "#00105c", "tertiary-fixed-dim": "#bcccab", "primary-container": "#2e6f40", "inverse-surface": "#2f3130", "on-tertiary-fixed": "#131f09", "tertiary-container": "#58674c", "tertiary-fixed": "#d7e8c6", "on-error-container": "#93000a"}, "borderRadius": {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"}, "spacing": {"margin": "2rem", "gutter": "1.5rem", "space-sm": "0.75rem", "space-lg": "2.5rem", "space-xs": "0.375rem", "space-md": "1.5rem", "space-xl": "4rem"}, "fontFamily": {"label-sm": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"]}}}};</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head><body class="bg-surface font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col pt-6 pb-8"><div class="px-6 mb-8 flex items-center gap-3"><img alt="MoodMentor Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrC9yaE0LDLBZ8uisa6o9E1l_SiDVIeH6T-JCUQTOBZqEUgUDxtqb_QZB_HI_mfw0c5nuMyzAv18sOIfHea7ApT9YgBR1PnfO0z-Ovpef_yRavqa5p2umyv8whLPhNE6uhwmmSt_qRDrBvJGX5X6stFhHGTWdjNxUxnyfp1ws_4YNrmFNrISAgsp2DvSAApuGFKciDUPNKA0XuLCEj5TWsNKBukdJumejyDBEzvoLvaO"/><span class="text-headline-sm font-headline-sm text-primary tracking-tight">MoodMentor</span></div><nav class="flex-1 px-4 space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-medium rounded-xl"><a class="flex items-center px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-body-sm" data-path="daily-check-in" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">self_improvement</span>Daily Check-in</a><a class="flex items-center px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-body-sm" data-path="manager-analytics" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">analytics</span>Manager Analytics</a><a aria-current="page" class="flex items-center px-4 py-3 transition-all bg-primary-container text-on-primary-container font-medium rounded-xl" data-path="ai-mentor-insights" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">psychology</span>AI Mentor Insights</a><a class="flex items-center px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-body-sm" data-path="employee-history" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">history</span>Employee History</a></nav></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-8 border-b border-outline-variant/30"><div class="flex items-center gap-2"><span class="text-body-md font-body-md text-on-surface-variant">Welcome back, User</span></div><div class="flex items-center gap-4"><span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-on-surface">notifications</span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="relative pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full pb-20">
+<!-- Top Intro Section with 3D Companion Hero Card -->
+<section class="px-8 pt-10 pb-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+<div class="lg:col-span-7 flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-3">
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-xl text-label-sm uppercase tracking-wider font-label-sm">AI Synthesis &amp; Strategy</span>
+<span class="text-on-surface-variant text-body-sm">• Updated 2 hours ago</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Team Wellbeing Intelligence</h1>
+<p class="text-body-lg text-on-surface-variant mt-2">Synthesized insights derived from recent check-ins, sentiment trends, and organizational rhythm to optimize leadership action, guided by your interactive AI Wellbeing Companion.</p>
+</div>
+<div class="flex flex-wrap items-center gap-3 mt-6">
+<button class="px-5 py-3 bg-primary-container text-on-primary-container rounded-xl font-label-md text-label-md flex items-center gap-2 shadow-sm hover:scale-[1.02] transition-transform">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+        Refresh AI Insights
+      </button>
+<button class="px-5 py-3 bg-surface-container-high text-on-surface rounded-xl font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+        Export Report
+      </button>
+</div>
+</div>
+<!-- Interactive 3D Companion Hero Card -->
+<div class="lg:col-span-5 bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between shadow-lg">
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex items-center justify-between z-10">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
+<span class="text-label-sm uppercase tracking-wider font-semibold text-primary">Live Zen Companion</span>
+</div>
+<span class="text-xs bg-surface px-2.5 py-1 rounded-lg text-on-surface-variant border border-outline-variant/20">Active Aura</span>
+</div>
+<div class="w-full h-56 relative my-2 cursor-pointer active:cursor-grabbing" id="companion-container"><canvas height="280" style="display: block; width: 332px; height: 224px;" width="415"></canvas></div>
+<div class="z-10 bg-surface/60 backdrop-blur-sm p-3.5 rounded-xl border border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">spa</span>
+<div>
+<h4 class="text-body-sm font-semibold text-on-surface" id="companion-dialogue">"Team balance is optimal today."</h4>
+<p class="text-xs text-on-surface-variant">Click the 3D guide to interact and awaken new insights.</p>
+</div>
+</div>
+<button class="p-2 rounded-lg bg-primary text-on-primary hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">chat</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Impact Score Metrics Banner (Bento Style) -->
+<section class="px-8 mb-10">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<!-- Metric 1 -->
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/5 rounded-full blur-xl"></div>
+<div>
+<span class="text-label-sm uppercase tracking-wider text-on-surface-variant">Team Pulse Index</span>
+<div class="flex items-baseline gap-3 mt-2">
+<span class="text-headline-xl font-headline-xl text-primary">8.4</span>
+<span class="text-body-sm text-primary font-medium flex items-center">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> +0.6
+            </span>
+</div>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-4">Calculated from 42 daily check-ins this week.</p>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-secondary/5 rounded-full blur-xl"></div>
+<div>
+<span class="text-label-sm uppercase tracking-wider text-on-surface-variant">Burnout Risk Factor</span>
+<div class="flex items-baseline gap-3 mt-2">
+<span class="text-headline-xl font-headline-xl text-secondary">Low</span>
+<span class="text-body-sm text-secondary font-medium flex items-center">
+<span class="material-symbols-outlined text-[16px]">trending_down</span> -12%
+            </span>
+</div>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-4">Decreased stability across engineering teams.</p>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-tertiary/5 rounded-full blur-xl"></div>
+<div>
+<span class="text-label-sm uppercase tracking-wider text-on-surface-variant">Action Adoption Rate</span>
+<div class="flex items-baseline gap-3 mt-2">
+<span class="text-headline-xl font-headline-xl text-tertiary">78%</span>
+<span class="text-body-sm text-tertiary font-medium flex items-center">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> On Track
+            </span>
+</div>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-4">14 of 18 suggested micro-interventions completed.</p>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-primary-container/10 rounded-full blur-xl"></div>
+<div>
+<span class="text-label-sm uppercase tracking-wider text-on-surface-variant">Psychological Safety</span>
+<div class="flex items-baseline gap-3 mt-2">
+<span class="text-headline-xl font-headline-xl text-on-surface">9.1</span>
+<span class="text-body-sm text-primary font-medium flex items-center">
+<span class="material-symbols-outlined text-[16px]">star</span> High
+            </span>
+</div>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-4">Consistent openness reported in 1-on-1 notes.</p>
+</div>
+</div>
+</section>
+<!-- Main Split Layout: AI Recommendations & Action Checklist -->
+<section class="px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+<!-- Left Column: AI Recommendations (7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-headline-md font-headline-md text-on-surface">Recommended Strategic Shifts</h2>
+<span class="text-label-md text-on-surface-variant font-label-md">2 High-Impact Priorities</span>
+</div>
+<!-- Recommendation Card 1 -->
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-8 rounded-xl shadow-sm relative overflow-hidden flex flex-col gap-4">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">event_busy</span>
+</div>
+<div>
+<span class="px-2.5 py-0.5 bg-primary-fixed text-on-primary-fixed rounded-xl text-label-sm font-label-sm">Priority 01 • Urgent Focus</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mt-1">Schedule Team Recharge Day</h3>
+</div>
+</div>
+<span class="text-body-sm text-on-surface-variant">Impact: <strong class="text-primary">Very High</strong></span>
+</div>
+<p class="text-body-md text-on-surface-variant">
+          Recent telemetry indicates high cognitive load and continuous context switching over the past 3 weeks. An uninterrupted recharge day will significantly lower cortisol levels and restore baseline focus.
+        </p>
+<div class="p-4 bg-surface-container/60 rounded-xl flex items-center justify-between mt-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">lightbulb</span>
+<span class="text-body-sm text-on-surface">Suggested window: Next Wednesday or Thursday afternoon.</span>
+</div>
+<button class="px-4 py-2 bg-primary text-on-primary rounded-xl text-label-sm font-label-sm hover:opacity-90 transition-opacity">Deploy Plan</button>
+</div>
+</div>
+<!-- Recommendation Card 2 -->
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-8 rounded-xl shadow-sm relative overflow-hidden flex flex-col gap-4">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">forum</span>
+</div>
+<div>
+<span class="px-2.5 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded-xl text-label-sm font-label-sm">Priority 02 • Structural Habit</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mt-1">Encourage Asynchronous Communication</h3>
+</div>
+</div>
+<span class="text-body-sm text-on-surface-variant">Impact: <strong class="text-secondary">High</strong></span>
+</div>
+<p class="text-body-md text-on-surface-variant">
+          Meeting volume has increased by 22% month-over-month. Transitioning standard status updates to async threads can recover approximately 6 hours of deep work time per team member weekly.
+        </p>
+<div class="p-4 bg-surface-container/60 rounded-xl flex items-center justify-between mt-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">lightbulb</span>
+<span class="text-body-sm text-on-surface">Suggested action: Establish "No-Meeting Mornings" on Tue/Thu.</span>
+</div>
+<button class="px-4 py-2 bg-secondary text-on-secondary rounded-xl text-label-sm font-label-sm hover:opacity-90 transition-opacity">Send Guidelines</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Actionable Micro-Interventions Checklist (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-headline-md font-headline-md text-on-surface">Manager Micro-Interventions</h2>
+<span class="text-label-md text-on-surface-variant font-label-md">3 of 5 Done</span>
+</div>
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm flex flex-col gap-4">
+<p class="text-body-sm text-on-surface-variant">Select or check off actions taken this week to maintain momentum and boost overall team wellness scores.</p>
+<div class="flex flex-col gap-3 mt-2">
+<!-- Item 1 -->
+<label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+<input checked="" class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<span class="text-body-md font-medium text-on-surface line-through opacity-75">Send appreciation shout-out in public channel</span>
+<p class="text-body-sm text-on-surface-variant">Acknowledged design lead for exceptional delivery.</p>
+</div>
+</label>
+<!-- Item 2 -->
+<label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+<input checked="" class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<span class="text-body-md font-medium text-on-surface line-through opacity-75">Audit recurring calendar meetings</span>
+<p class="text-body-sm text-on-surface-variant">Cancelled 3 redundant status syncs.</p>
+</div>
+</label>
+<!-- Item 3 -->
+<label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+<input checked="" class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<span class="text-body-md font-medium text-on-surface line-through opacity-75">Review workload balance in 1-on-1s</span>
+<p class="text-body-sm text-on-surface-variant">Shifted sprint deliverables for Sarah and Alex.</p>
+</div>
+</label>
+<!-- Item 4 -->
+<label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+<input class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<span class="text-body-md font-medium text-on-surface">Host unstructured coffee chat</span>
+<p class="text-body-sm text-on-surface-variant">Optional 30-min casual hangout on Friday.</p>
+</div>
+</label>
+<!-- Item 5 -->
+<label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+<input class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<span class="text-body-md font-medium text-on-surface">Share guided breathing resource</span>
+<p class="text-body-sm text-on-surface-variant">Post 5-minute reset session link before planning.</p>
+</div>
+</label>
+</div>
+<button class="w-full mt-2 py-3 bg-surface/80 text-on-surface border border-outline-variant/30 rounded-xl text-label-md font-label-md hover:bg-surface-container transition-colors">
+          + Add Custom Intervention
+        </button>
+</div>
+</div>
+</section>
+<!-- Success Tracking & Long-term Insights Section -->
+<section class="px-8 mb-12">
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-8 rounded-xl shadow-sm relative overflow-hidden">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+<div>
+<span class="text-label-sm uppercase tracking-wider text-on-surface-variant">Long-term Outcomes</span>
+<h2 class="text-headline-md font-headline-md text-on-surface mt-1">Success Tracking &amp; Trend Analysis</h2>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 bg-surface text-on-surface rounded-lg text-label-sm font-label-sm shadow-sm border border-outline-variant/20">Last 30 Days</button>
+<button class="px-3 py-1.5 text-on-surface-variant hover:text-on-surface rounded-lg text-label-sm font-label-sm">Quarterly</button>
+<button class="px-3 py-1.5 text-on-surface-variant hover:text-on-surface rounded-lg text-label-sm font-label-sm">Yearly</button>
+</div>
+</div>
+<!-- Simple Visual Chart Simulation (Bars & Trends) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Card A -->
+<div class="bg-surface p-6 rounded-xl flex flex-col justify-between border border-outline-variant/20">
+<div class="flex items-center justify-between mb-4">
+<span class="text-body-sm font-medium text-on-surface">Energy Recovery Score</span>
+<span class="text-label-sm text-primary font-medium">+14% vs avg</span>
+</div>
+<!-- Simulated Progress Bar -->
+<div class="w-full bg-surface-container h-3 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 82%;"></div>
+</div>
+<span class="text-body-sm text-on-surface-variant mt-4">Team consistently regaining baseline energy by mid-week.</span>
+</div>
+<!-- Card B -->
+<div class="bg-surface p-6 rounded-xl flex flex-col justify-between border border-outline-variant/20">
+<div class="flex items-center justify-between mb-4">
+<span class="text-body-sm font-medium text-on-surface">Meeting Fatigue Reduction</span>
+<span class="text-label-sm text-secondary font-medium">-2.4 hrs/wk</span>
+</div>
+<!-- Simulated Progress Bar -->
+<div class="w-full bg-surface-container h-3 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 68%;"></div>
+</div>
+<span class="text-body-sm text-on-surface-variant mt-4">Calendar audits have successfully trimmed redundant syncs.</span>
+</div>
+<!-- Card C -->
+<div class="bg-surface p-6 rounded-xl flex flex-col justify-between border border-outline-variant/20">
+<div class="flex items-center justify-between mb-4">
+<span class="text-body-sm font-medium text-on-surface">Overall Engagement Rating</span>
+<span class="text-label-sm text-tertiary font-medium">Stable &amp; High</span>
+</div>
+<!-- Simulated Progress Bar -->
+<div class="w-full bg-surface-container h-3 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full rounded-full" style="width: 90%;"></div>
+</div>
+<span class="text-body-sm text-on-surface-variant mt-4">Team morale holding steady through major product milestones.</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Photo / Atmosphere Banner -->
+<section class="px-8">
+<div class="w-full h-48 rounded-xl bg-cover bg-center relative overflow-hidden flex items-center justify-center p-8 text-center" data-alt="A serene, sunlit minimalist workspace surrounded by lush green indoor plants, soft natural light filtering through sheer curtains, calm and restful atmosphere with muted sage and warm cream tones." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAokfd6NCRipfjcFp7D2CocG35I4swbaLlTSiKmMNJvFjg2WxyrdXpC6ed63TGrQekrBW1jQUfeLyfhj_aXbNfptlExBFbmV4VB4qEq8XYMzS5znahyXTzes7YAAek4nymf0pnYWsocXlsMPvfaP0pS9jgO51oyBCIN6O1mkbFXrYmEfxCvRkbTNMULoog2H80AD54KKHwWPVlzBd1I2lELmMKD54A4acy970FDPG8C')">
+<div class="absolute inset-0 bg-on-surface/40 backdrop-blur-[2px]"></div>
+<div class="relative z-10 max-w-xl text-on-error">
+<h3 class="text-headline-sm font-headline-sm">"Sustainable high performance starts with deliberate rest and empathetic guidance."</h3>
+<p class="text-body-sm mt-2 opacity-90">MoodMentor AI Leadership Philosophy</p>
+</div>
+</div>
+</section>
+</div></main></div>
+<script>
+  const container = document.getElementById('companion-container');
+  if (container) {
+    const width = container.clientWidth || 300;
+    const height = container.clientHeight || 220;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0x2e6f40, 3.5, 50);
+    pointLight.position.set(2, 4, 3);
+    scene.add(pointLight);
+
+    const pointLightWarm = new THREE.PointLight(0xd4a373, 2.5, 50);
+    pointLightWarm.position.set(-2, -3, 2);
+    scene.add(pointLightWarm);
+
+    const companionGroup = new THREE.Group();
+
+    const coreGeometry = new THREE.SphereGeometry(1.0, 32, 32);
+    const coreMaterial = new THREE.MeshPhongMaterial({
+      color: 0x2e6f40,
+      emissive: 0x14361d,
+      shininess: 90,
+      transparent: true,
+      opacity: 0.88
+    });
+    const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
+    companionGroup.add(coreMesh);
+
+    const innerGeometry = new THREE.SphereGeometry(0.55, 24, 24);
+    const innerMaterial = new THREE.MeshPhongMaterial({
+      color: 0xfaf9f7,
+      emissive: 0x2e6f40,
+      shininess: 100
+    });
+    const innerMesh = new THREE.Mesh(innerGeometry, innerMaterial);
+    companionGroup.add(innerMesh);
+
+    const petalCount = 6;
+    const petalGroup = new THREE.Group();
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2;
+      const leafShape = new THREE.ConeGeometry(0.25, 1.2, 16);
+      const leafMat = new THREE.MeshPhongMaterial({
+        color: 0x40916c,
+        shininess: 80,
+        flatShading: true
+      });
+      const leaf = new THREE.Mesh(leafShape, leafMat);
+      leaf.rotation.z = Math.PI / 3;
+      leaf.position.set(Math.cos(angle) * 1.6, Math.sin(angle) * 1.6, 0);
+      petalGroup.add(leaf);
+    }
+    companionGroup.add(petalGroup);
+
+    const particleCount = 80;
+    const particleGeometry = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    for(let i = 0; i < particleCount * 3; i += 3) {
+      particlePositions[i] = (Math.random() - 0.5) * 7;
+      particlePositions[i+1] = (Math.random() - 0.5) * 7;
+      particlePositions[i+2] = (Math.random() - 0.5) * 7;
+    }
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    const particleMaterial = new THREE.PointsMaterial({
+      color: 0x40916c,
+      size: 0.07,
+      transparent: true,
+      opacity: 0.7
+    });
+    const particles = new THREE.Points(particleGeometry, particleMaterial);
+    scene.add(particles);
+
+    scene.add(companionGroup);
+
+    let mouseX = 0;
+    let mouseY = 0;
+    container.addEventListener('mousemove', (e) => {
+      const rect = container.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / container.clientWidth - 0.5) * 0.8;
+      mouseY = ((e.clientY - rect.top) / container.clientHeight - 0.5) * 0.8;
+    });
+
+    let isInteracting = false;
+    let interactionTimer = 0;
+
+    const insights = [
+      '"Take a deep breath and reset your focus."',
+      '"Your team\'s energy is radiant!"',
+      '"Empathy is the cornerstone of great leadership."',
+      '"Small mindful moments compound into major balance."',
+      '"Allow space for silent focus today."'
+    ];
+
+    container.addEventListener('click', () => {
+      isInteracting = true;
+      interactionTimer = 1.5; // duration of rapid spin & glow
+
+      // Update dialogue
+      const dialogueEl = document.getElementById('companion-dialogue');
+      if (dialogueEl) {
+        const randomInsight = insights[Math.floor(Math.random() * insights.length)];
+        dialogueEl.textContent = randomInsight;
+      }
+    });
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const elapsedTime = clock.getElapsedTime();
+
+      let speedMultiplier = 1;
+      if (isInteracting) {
+        interactionTimer -= delta;
+        speedMultiplier = 6;
+        coreMaterial.emissive.setHex(0xd4af37); // Gold glow
+        coreMaterial.color.setHex(0x92d69d);
+        particles.material.size = 0.12;
+        if (interactionTimer <= 0) {
+          isInteracting = false;
+          coreMaterial.emissive.setHex(0x14361d);
+          coreMaterial.color.setHex(0x2e6f40);
+          particles.material.size = 0.07;
+        }
+      }
+
+      companionGroup.position.y = Math.sin(elapsedTime * 1.5) * 0.15;
+      companionGroup.rotation.y += (elapsedTime * 0.35 + mouseX - companionGroup.rotation.y) * 0.1 + (isInteracting ? 0.2 : 0);
+      companionGroup.rotation.x = Math.sin(elapsedTime * 0.7) * 0.12 + mouseY;
+
+      petalGroup.rotation.z += (isInteracting ? -0.15 : -0.007);
+
+      const scale = 1 + Math.sin(elapsedTime * 2.2) * 0.06 + (isInteracting ? 0.15 * Math.sin(elapsedTime * 10) : 0);
+      innerMesh.scale.set(scale, scale, scale);
+
+      particles.rotation.y += (isInteracting ? 0.08 : 0.0008);
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      const w = container.clientWidth || 300;
+      const h = container.clientHeight || 220;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+  }
+</script>
+</body></html>

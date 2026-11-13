@@ -344,11 +344,10 @@ div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
 
 /* Buttons with Hover Elevation */
 .stButton > button, .stFormSubmitButton > button {
-  min-height: 44px !important;
+  min-height: 42px !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
-  font-size: 0.92rem !important;
-  letter-spacing: 0.01em !important;
+  font-size: 0.9rem !important;
   transition: var(--transition-smooth) !important;
 }
 button[kind="primary"],
@@ -357,12 +356,12 @@ button[data-testid="baseButton-primary"],
 .stFormSubmitButton > button[kind="primary"],
 div[data-testid="stFormSubmitButton"] button,
 .stFormSubmitButton > button {
-  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+  background: #0f766e !important;
   background-color: #0f766e !important;
   border: 1px solid #0f766e !important;
   border-color: #0f766e !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.25) !important;
+  box-shadow: 0 2px 4px rgba(15, 118, 110, 0.2) !important;
 }
 button[kind="primary"] *,
 button[data-testid="baseButton-primary"] *,
@@ -372,32 +371,10 @@ div[data-testid="stFormSubmitButton"] button *,
 .stFormSubmitButton > button *,
 button[kind="primary"] p,
 button[data-testid="baseButton-primary"] p,
-div[data-testid="stFormSubmitButton"] button p,
-button[kind="primary"] [data-testid="stMarkdownContainer"] p,
-button[data-testid="baseButton-primary"] [data-testid="stMarkdownContainer"] p,
-div[data-testid="stFormSubmitButton"] button [data-testid="stMarkdownContainer"] p,
-.stFormSubmitButton button [data-testid="stMarkdownContainer"] p {
+div[data-testid="stFormSubmitButton"] button p {
   color: #ffffff !important;
   font-weight: 700 !important;
   font-size: 0.95rem !important;
-}
-button[kind="primary"]:hover,
-button[data-testid="baseButton-primary"]:hover,
-.stButton > button[kind="primary"]:hover,
-.stFormSubmitButton > button[kind="primary"]:hover,
-div[data-testid="stFormSubmitButton"] button:hover {
-  background: linear-gradient(135deg, #115e59 0%, #0f766e 100%) !important;
-  background-color: #115e59 !important;
-  border-color: #115e59 !important;
-  color: #ffffff !important;
-  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.32) !important;
-  transform: translateY(-1px) !important;
-}
-button[kind="primary"]:hover *,
-button[data-testid="baseButton-primary"]:hover *,
-div[data-testid="stFormSubmitButton"] button:hover *,
-.stFormSubmitButton button:hover * {
-  color: #ffffff !important;
 }
 button[kind="secondary"] *,
 button[data-testid="baseButton-secondary"] *,
@@ -406,6 +383,18 @@ button[kind="secondary"] p,
 button[data-testid="baseButton-secondary"] p {
   color: #1e293b !important;
   font-weight: 600 !important;
+}
+button[kind="primary"]:hover,
+button[data-testid="baseButton-primary"]:hover,
+.stButton > button[kind="primary"]:hover,
+.stFormSubmitButton > button[kind="primary"]:hover,
+div[data-testid="stFormSubmitButton"] button:hover {
+  background: #115e59 !important;
+  background-color: #115e59 !important;
+  border-color: #115e59 !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-hover) !important;
+  transform: translateY(-1px) !important;
 }
 button[kind="secondary"],
 button[data-testid="baseButton-secondary"],
@@ -1512,35 +1501,370 @@ def render_wellness_tools_view():
         render_mood_food_planner_view(key_prefix="soma_sanctuary")
 
 
-def render_team_health_view():
-    st.markdown("### ResilienceRadar: Team Wellness & Burnout Analytics")
-    st.caption("Aggregates employee reflection telemetry into enterprise health indicators while strictly protecting individual privacy.")
+def render_zen_companion_3d_widget() -> str:
+    """Return interactive 3D Zen Companion WebGL widget powered by Three.js (Google Stitch)."""
+    return """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f4f3f1;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 340px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(192, 201, 189, 0.4);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      user-select: none;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #11562a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #11562a;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .tag {
+      font-size: 11px;
+      background: #ffffff;
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #404940;
+      border: 1px solid rgba(192, 201, 189, 0.4);
+      font-weight: 600;
+    }
+    #canvas-container {
+      flex: 1;
+      width: 100%;
+      cursor: pointer;
+      position: relative;
+    }
+    .dialogue-bar {
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(192, 201, 189, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .dialogue-text h4 {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #1a1c1b;
+    }
+    .dialogue-text p {
+      font-size: 10.5px;
+      color: #70796f;
+      margin-top: 1px;
+    }
+    .icon-spa {
+      color: #11562a;
+      font-size: 20px;
+    }
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #11562a;
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .action-btn:hover { transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="badge">
+      <div class="pulse-dot"></div>
+      Live Zen Companion
+    </div>
+    <div class="tag">Active Aura</div>
+  </div>
 
-    scenario = st.radio(
-        "Select Team Operating Scenario to Simulate:",
-        ["balanced", "thriving", "burnout"],
-        format_func=lambda x: {
-            "balanced": "Balanced Sprint (Moderate workload with constructive recovery)",
-            "thriving": "Thriving Unit (High psychological safety and gratitude)",
-            "burnout": "High-Strain Team (Sustained negative sentiment & distress markers)",
-        }[x],
-        horizontal=True,
+  <div id="canvas-container"></div>
+
+  <div class="dialogue-bar">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="material-symbols-outlined icon-spa">spa</span>
+      <div class="dialogue-text">
+        <h4 id="dialogue-msg">"Team balance is optimal today."</h4>
+        <p>Click the 3D guide to interact and awaken new insights.</p>
+      </div>
+    </div>
+    <button class="action-btn" id="btn-spin" title="Aura Thought">
+      <span class="material-symbols-outlined" style="font-size: 15px;">chat</span>
+    </button>
+  </div>
+
+  <script>
+    const container = document.getElementById('canvas-container');
+    const width = container.clientWidth || 300;
+    const height = container.clientHeight || 200;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+
+    const pLight = new THREE.PointLight(0x2e6f40, 3.5, 50);
+    pLight.position.set(2, 4, 3);
+    scene.add(pLight);
+
+    const pLightWarm = new THREE.PointLight(0xd4a373, 2.5, 50);
+    pLightWarm.position.set(-2, -3, 2);
+    scene.add(pLightWarm);
+
+    const group = new THREE.Group();
+
+    const coreMat = new THREE.MeshPhongMaterial({
+      color: 0x2e6f40,
+      emissive: 0x14361d,
+      shininess: 90,
+      transparent: true,
+      opacity: 0.88
+    });
+    const coreMesh = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), coreMat);
+    group.add(coreMesh);
+
+    const innerMat = new THREE.MeshPhongMaterial({ color: 0xfaf9f7, emissive: 0x2e6f40, shininess: 100 });
+    const innerMesh = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 24), innerMat);
+    group.add(innerMesh);
+
+    const petalCount = 6;
+    const petalGroup = new THREE.Group();
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2;
+      const leaf = new THREE.Mesh(
+        new THREE.ConeGeometry(0.25, 1.2, 16),
+        new THREE.MeshPhongMaterial({ color: 0x40916c, shininess: 80, flatShading: true })
+      );
+      leaf.rotation.z = Math.PI / 3;
+      leaf.position.set(Math.cos(angle) * 1.6, Math.sin(angle) * 1.6, 0);
+      petalGroup.add(leaf);
+    }
+    group.add(petalGroup);
+
+    const pCount = 80;
+    const pGeo = new THREE.BufferGeometry();
+    const pPos = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount * 3; i += 3) {
+      pPos[i] = (Math.random() - 0.5) * 7;
+      pPos[i+1] = (Math.random() - 0.5) * 7;
+      pPos[i+2] = (Math.random() - 0.5) * 7;
+    }
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+    const pMat = new THREE.PointsMaterial({ color: 0x40916c, size: 0.07, transparent: true, opacity: 0.7 });
+    const particles = new THREE.Points(pGeo, pMat);
+    scene.add(particles);
+
+    scene.add(group);
+
+    let mouseX = 0, mouseY = 0;
+    container.addEventListener('mousemove', (e) => {
+      const rect = container.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / container.clientWidth - 0.5) * 0.8;
+      mouseY = ((e.clientY - rect.top) / container.clientHeight - 0.5) * 0.8;
+    });
+
+    let isInteracting = false;
+    let timer = 0;
+    const insights = [
+      '"Take a deep breath and reset your focus."',
+      '"Your team\\'s energy is radiant and grounded!"',
+      '"Empathy is the cornerstone of great leadership."',
+      '"Small mindful moments compound into major balance."',
+      '"Allow space for silent focus today."'
+    ];
+
+    function trigger() {
+      isInteracting = true;
+      timer = 1.5;
+      const d = document.getElementById('dialogue-msg');
+      if (d) d.textContent = insights[Math.floor(Math.random() * insights.length)];
+    }
+
+    container.addEventListener('click', trigger);
+    document.getElementById('btn-spin').addEventListener('click', trigger);
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const t = clock.getElapsedTime();
+
+      if (isInteracting) {
+        timer -= delta;
+        coreMat.emissive.setHex(0xd4af37);
+        coreMat.color.setHex(0x92d69d);
+        pMat.size = 0.12;
+        if (timer <= 0) {
+          isInteracting = false;
+          coreMat.emissive.setHex(0x14361d);
+          coreMat.color.setHex(0x2e6f40);
+          pMat.size = 0.07;
+        }
+      }
+
+      group.position.y = Math.sin(t * 1.5) * 0.15;
+      group.rotation.y += (t * 0.35 + mouseX - group.rotation.y) * 0.1 + (isInteracting ? 0.2 : 0);
+      group.rotation.x = Math.sin(t * 0.7) * 0.12 + mouseY;
+      petalGroup.rotation.z += (isInteracting ? -0.15 : -0.007);
+
+      const s = 1 + Math.sin(t * 2.2) * 0.06 + (isInteracting ? 0.15 * Math.sin(t * 10) : 0);
+      innerMesh.scale.set(s, s, s);
+
+      particles.rotation.y += (isInteracting ? 0.08 : 0.0008);
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      const w = container.clientWidth || 300;
+      const h = container.clientHeight || 200;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+  </script>
+</body>
+</html>
+"""
+
+
+def render_team_health_view():
+    """Render Google Stitch-inspired Team Wellbeing Intelligence & 3D Companion."""
+    st.markdown(
+        """
+        <div style="margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span style="background: #d7e8c6; color: #3d4b32; padding: 3px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">AI Synthesis & Strategy</span>
+                <span style="color: #70796f; font-size: 0.8rem;">• Updated 2 hours ago</span>
+            </div>
+            <h2 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #1a1c1b;">Team Wellbeing Intelligence</h2>
+            <p style="margin: 4px 0 0 0; color: #404940; font-size: 0.92rem; line-height: 1.5;">
+                Synthesized insights derived from recent check-ins, sentiment trends, and organizational rhythm to optimize leadership action, guided by your interactive AI Wellbeing Companion.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    mock_data = generate_synthetic_team_data(days=14, team_size=8, scenario=scenario)
-    metrics = calculate_team_burnout_risk(mock_data)
+    col_ctrl, col_companion = st.columns([1.1, 0.9], gap="large")
+    with col_ctrl:
+        scenario = st.radio(
+            "Select Team Operating Scenario to Simulate:",
+            ["balanced", "thriving", "burnout"],
+            format_func=lambda x: {
+                "balanced": "Balanced Sprint (Moderate workload with constructive recovery)",
+                "thriving": "Thriving Unit (High psychological safety and gratitude)",
+                "burnout": "High-Strain Team (Sustained negative sentiment & distress markers)",
+            }[x],
+            horizontal=False,
+            key="team_health_scenario_select",
+        )
 
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        score = metrics["burnout_risk_score"]
-        st.metric("Burnout Risk Score", f"{score}/100", delta=metrics["risk_level"], delta_color="inverse")
-    with col2:
-        st.metric("Team Resilience Index", f"{metrics['team_resilience_index']}/100")
-    with col3:
-        st.metric("Sentiment Compound", f"{metrics['sentiment_mean']:+.2f}")
-    with col4:
-        st.metric("Distress vs Flourish", f"{int(metrics['distress_ratio']*100)}% / {int(metrics['flourishing_ratio']*100)}%")
+        mock_data = generate_synthetic_team_data(days=14, team_size=8, scenario=scenario)
+        metrics = calculate_team_burnout_risk(mock_data)
 
+        c_btn1, c_btn2 = st.columns(2)
+        with c_btn1:
+            if st.button("Refresh AI Insights", type="primary", use_container_width=True, key="btn_refresh_team_ai"):
+                st.toast("Telemetry refreshed across 42 team check-ins.", icon="✨")
+        with c_btn2:
+            st.download_button(
+                "Export Intelligence Report",
+                data=pd.DataFrame(mock_data).to_csv(index=False),
+                file_name="team_wellbeing_intelligence.csv",
+                mime="text/csv",
+                use_container_width=True,
+                key="btn_export_team_report",
+            )
+
+    with col_companion:
+        # Embed Interactive 3D Zen Companion (Three.js WebGL)
+        st.components.v1.html(render_zen_companion_3d_widget(), height=360)
+
+    st.markdown("---")
+
+    # Bento Style Impact Metrics
+    b1, b2, b3, b4 = st.columns(4)
+    with b1:
+        pulse_val = "8.4" if scenario == "balanced" else ("9.2" if scenario == "thriving" else "5.8")
+        st.metric(
+            label="Team Pulse Index",
+            value=pulse_val,
+            delta="+0.6 Trending Up" if scenario != "burnout" else "-1.4 High Strain",
+            delta_color="normal" if scenario != "burnout" else "inverse",
+            help="Calculated from 42 daily check-ins this week.",
+        )
+    with b2:
+        st.metric(
+            label="Burnout Risk Factor",
+            value=metrics["risk_level"].capitalize(),
+            delta=f"{metrics['burnout_risk_score']}/100 Score",
+            delta_color="inverse",
+            help="Cognitive friction index across engineering teams.",
+        )
+    with b3:
+        st.metric(
+            label="Action Adoption Rate",
+            value=f"{metrics['team_resilience_index']}%",
+            delta="14 of 18 Complete",
+            help="Suggested micro-interventions completed by leads.",
+        )
+    with b4:
+        st.metric(
+            label="Psychological Safety",
+            value="9.1 / 10" if scenario != "burnout" else "5.2 / 10",
+            delta="High Flow" if scenario != "burnout" else "Needs Attention",
+            help="Consistent openness reported in 1-on-1 reflections.",
+        )
+
+    # 14-Day Team Sentiment Chart
     df_team = pd.DataFrame(mock_data)
     df_agg = df_team.groupby("date")["sentiment_compound"].mean().reset_index()
     fig = px.line(
@@ -1548,17 +1872,106 @@ def render_team_health_view():
         x="date",
         y="sentiment_compound",
         markers=True,
-        title="14-Day Team Sentiment Moving Average",
-        labels={"sentiment_compound": "Average Sentiment Compound", "date": "Date"},
+        title="14-Day Team Sentiment Moving Average vs Distress Boundary",
+        labels={"sentiment_compound": "Sentiment Valence", "date": "Date"},
     )
-    fig.add_hline(y=0.05, line_dash="dash", line_color="green", annotation_text="Positive Baseline")
-    fig.add_hline(y=-0.05, line_dash="dash", line_color="red", annotation_text="Distress Boundary")
-    fig.update_layout(height=320, margin={"l": 20, "r": 20, "t": 40, "b": 20})
+    fig.add_hline(y=0.05, line_dash="dash", line_color="#11562a", annotation_text="Positive Baseline (+0.05)")
+    fig.add_hline(y=-0.05, line_dash="dash", line_color="#ba1a1a", annotation_text="Distress Boundary (-0.05)")
+    fig.update_layout(
+        height=320,
+        margin={"l": 20, "r": 20, "t": 40, "b": 20},
+        plot_bgcolor="#faf9f7",
+        paper_bgcolor="#faf9f7",
+    )
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("#### Recommended Organizational Interventions:")
-    for r in metrics["recommendations"]:
-        st.write(f"- {r}")
+    # Split: Recommended Strategic Shifts & Micro-Interventions Checklist
+    c_shifts, c_check = st.columns([1.1, 0.9], gap="large")
+
+    with c_shifts:
+        st.markdown("#### Recommended Strategic Shifts")
+
+        # Priority 1 Card
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div>
+                        <span style="background: #adf3b8; color: #00210b; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 01 • Urgent Focus</span>
+                        <h4 style="margin: 4px 0 0 0; color: #1a1c1b; font-weight: 800;">Schedule Team Recharge Day</h4>
+                    </div>
+                    <span style="font-size: 0.8rem; color: #11562a; font-weight: 700;">Impact: Very High</span>
+                </div>
+                <p style="font-size: 0.85rem; color: #404940; line-height: 1.5; margin-bottom: 12px;">
+                    Recent telemetry indicates high cognitive load and continuous context switching over the past 3 weeks. An uninterrupted recharge day will significantly lower cortisol levels and restore baseline focus.
+                </p>
+                """,
+                unsafe_allow_html=True,
+            )
+            col_hint1, col_act1 = st.columns([1.5, 1])
+            with col_hint1:
+                st.caption("Suggested window: Next Wednesday or Thursday afternoon.")
+            with col_act1:
+                if st.button("Deploy Plan", key="btn_deploy_plan_1", type="primary", use_container_width=True):
+                    st.success("Recharge Day invite drafted.")
+
+        # Priority 2 Card
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div>
+                        <span style="background: #dee0ff; color: #00105c; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 02 • Structural Habit</span>
+                        <h4 style="margin: 4px 0 0 0; color: #1a1c1b; font-weight: 800;">Encourage Asynchronous Communication</h4>
+                    </div>
+                    <span style="font-size: 0.8rem; color: #4355b9; font-weight: 700;">Impact: High</span>
+                </div>
+                <p style="font-size: 0.85rem; color: #404940; line-height: 1.5; margin-bottom: 12px;">
+                    Meeting volume has increased by 22% month-over-month. Transitioning standard status updates to async threads can recover approximately 6 hours of deep work time per team member weekly.
+                </p>
+                """,
+                unsafe_allow_html=True,
+            )
+            col_hint2, col_act2 = st.columns([1.5, 1])
+            with col_hint2:
+                st.caption("Suggested action: Establish 'No-Meeting Mornings' on Tue/Thu.")
+            with col_act2:
+                if st.button("Send Guidelines", key="btn_deploy_plan_2", type="secondary", use_container_width=True):
+                    st.info("Guidelines distributed to team leads.")
+
+    with c_check:
+        st.markdown("#### Manager Micro-Interventions")
+        with st.container(border=True):
+            st.caption("Select or check off actions taken this week to maintain team wellness scores:")
+            st.checkbox(
+                "Send appreciation shout-out in public channel",
+                value=True,
+                help="Acknowledged design lead for exceptional delivery.",
+                key="chk_interv_1",
+            )
+            st.checkbox(
+                "Audit recurring calendar meetings",
+                value=True,
+                help="Cancelled 3 redundant status syncs.",
+                key="chk_interv_2",
+            )
+            st.checkbox(
+                "Review workload balance in 1-on-1s",
+                value=True,
+                help="Shifted sprint deliverables for Sarah and Alex.",
+                key="chk_interv_3",
+            )
+            st.checkbox(
+                "Host unstructured coffee chat (30-min hangout)",
+                value=False,
+                key="chk_interv_4",
+            )
+            st.checkbox(
+                "Share guided breathing resource before sprint planning",
+                value=False,
+                key="chk_interv_5",
+            )
+
 
 
 def render_model_comparator_view():

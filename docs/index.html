@@ -1,638 +1,808 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="MoodMentor - The premier workplace affective intelligence and employee wellness platform.">
-  <title>MoodMentor | Employee Wellness & Affective Intelligence Platform</title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="web_dashboard" name="shell-type"/>
+  <title>MoodMentor | Workplace Affective Intelligence & Wellbeing Platform</title>
+  <meta name="description" content="AI-Based Employee Wellness & Affective Intelligence Management Platform with 3D Zen Companion and Real-Time Sentiment Analysis."/>
+
+  <!-- Google Stitch Material Design Tokens & Tailwind Configuration -->
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #c0c9bd; border-radius: 9999px; }
+    .nav-tab-active {
+      background-color: #2e6f40 !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      box-shadow: 0 2px 8px rgba(46, 111, 64, 0.25) !important;
+    }
+    .nav-tab-active span {
+      color: #ffffff !important;
+    }
+    .view-container { display: none; }
+    .view-container.active { display: block; animation: fadeInView 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes fadeInView {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(46, 111, 64, 0.2); }
+      50% { box-shadow: 0 0 30px rgba(46, 111, 64, 0.45); }
+    }
+    .companion-glow { animation: pulseGlow 4s infinite ease-in-out; }
+  </style>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "outline-variant": "#c0c9bd",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#e3e2e0",
+            "on-tertiary-container": "#d4e5c2",
+            "secondary-container": "#8596ff",
+            "secondary-fixed-dim": "#bac3ff",
+            "on-secondary-container": "#11278e",
+            "error-container": "#ffdad6",
+            "surface-variant": "#e3e2e0",
+            "on-primary-container": "#aaefb4",
+            "background": "#faf9f7",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed": "#00210b",
+            "primary-fixed": "#adf3b8",
+            "error": "#ba1a1a",
+            "surface-container-low": "#f4f3f1",
+            "on-primary-fixed-variant": "#0a5226",
+            "on-surface-variant": "#404940",
+            "surface-dim": "#dadad8",
+            "on-surface": "#1a1c1b",
+            "secondary": "#4355b9",
+            "on-primary": "#ffffff",
+            "on-secondary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "primary": "#11562a",
+            "on-background": "#1a1c1b",
+            "surface-bright": "#faf9f7",
+            "inverse-on-surface": "#f1f1ef",
+            "surface-tint": "#296b3c",
+            "surface-container": "#efeeec",
+            "tertiary": "#414f35",
+            "surface-container-high": "#e9e8e6",
+            "on-tertiary-fixed-variant": "#3d4b32",
+            "inverse-primary": "#92d69d",
+            "on-secondary-fixed-variant": "#293ca0",
+            "secondary-fixed": "#dee0ff",
+            "outline": "#70796f",
+            "surface": "#faf9f7",
+            "primary-fixed-dim": "#92d69d",
+            "on-secondary-fixed": "#00105c",
+            "tertiary-fixed-dim": "#bcccab",
+            "primary-container": "#2e6f40",
+            "inverse-surface": "#2f3130",
+            "on-tertiary-fixed": "#131f09",
+            "tertiary-container": "#58674c",
+            "tertiary-fixed": "#d7e8c6",
+            "on-error-container": "#93000a"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "margin": "2rem",
+            "gutter": "1.5rem",
+            "space-sm": "0.75rem",
+            "space-lg": "2.5rem",
+            "space-xs": "0.375rem",
+            "space-md": "1.5rem",
+            "space-xl": "4rem"
+          },
+          fontFamily: {
+            "sans": ["Plus Jakarta Sans", "sans-serif"],
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-xl": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Typography & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <!-- Three.js for 3D Zen Companion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
-<body>
 
-  <!-- Ambient Background Mesh Glow -->
-  <div class="ambient-mesh" aria-hidden="true"></div>
+<body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-fixed selection:text-on-primary-fixed">
 
   <!-- =========================================================================
-       Top Navigation Bar (Sticky Glassmorphic)
+       SIDEBAR NAVIGATION (Google Stitch Architectural Shell)
        ========================================================================= -->
-  <header class="topbar">
-    <div class="shell topbar-content">
-      <a href="#hero" class="brand-link" aria-label="MoodMentor Home">
-        <div class="brand-icon">
-          <!-- Elegant Minimalist Mind/Leaf SVG -->
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9A9 9 0 0 1 3 11a9 9 0 0 1 9-9z"></path>
-            <path d="M12 7v5l3 3"></path>
-          </svg>
-        </div>
-        <div>
-          <span class="brand-title">MoodMentor</span>
-          <span class="brand-badge">Wellness Intelligence</span>
-        </div>
-      </a>
-
-      <!-- Navigation Links -->
-      <nav aria-label="Platform navigation">
-        <ul class="nav-links">
-          <li class="nav-item"><a href="#analyzer" class="active">Mood Analyzer</a></li>
-          <li class="nav-item"><a href="#somatic">Somatic Studio</a></li>
-          <li class="nav-item"><a href="#nutrition">Mood-Food</a></li>
-          <li class="nav-item"><a href="#team-radar">Team Radar</a></li>
-          <li class="nav-item"><a href="#journal">Private Journal</a></li>
-        </ul>
-      </nav>
-
-      <!-- Action Buttons -->
-      <div class="nav-actions">
-        <!-- Quick Soundscape Player Button -->
-        <button class="sound-quick-toggle" id="soundQuickToggle" title="Toggle Calming Rain Soundscape" aria-label="Toggle Soundscape">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-          <div class="sound-wave-bars">
-            <span></span><span></span><span></span>
-          </div>
-          <span>Audio Sanctuary</span>
-        </button>
-
-        <!-- Theme Switcher -->
-        <button class="btn-icon" id="themeToggleBtn" title="Switch Theme (Light / Dark)" aria-label="Toggle Dark/Light Mode">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
-
-        <!-- Crisis Modal Trigger -->
-        <button class="btn-icon" id="crisisModalOpenBtn" title="Confidential 24/7 Crisis Helplines" aria-label="Emergency Helplines">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-        </button>
+  <aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col pt-6 pb-6 border-r border-outline-variant/30">
+    <!-- Brand Lockup -->
+    <div class="px-6 mb-7 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-primary-container flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-on-primary text-2xl">spa</span>
       </div>
-    </div>
-  </header>
-
-  <!-- =========================================================================
-       Hero Section & Animated Wellness Mascot ("Aura")
-       ========================================================================= -->
-  <main>
-    <section class="hero-section" id="hero">
-      <div class="shell hero-grid">
-        <div>
-          <div class="hero-kicker">
-            <span class="pulse-dot"></span>
-            <span>Workforce Affective Intelligence & Resilience</span>
-          </div>
-          <h1 class="hero-title">
-            Empowering Workforce Well-Being with <span class="gradient-text">Real-Time Mood Intelligence</span>
-          </h1>
-          <p class="hero-copy">
-            MoodMentor provides employees with a confidential, science-backed sanctuary to untangle workplace stress, monitor emotional patterns, practice somatic regulation, and nourish cognitive flow.
-          </p>
-          <div class="hero-actions">
-            <a href="#analyzer" class="btn btn-primary">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-              <span>Start Mood Check-in</span>
-            </a>
-            <a href="#somatic" class="btn btn-secondary">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polygon points="10 8 16 12 10 16 10 8"></polygon>
-              </svg>
-              <span>Explore Somatic Sanctuary</span>
-            </a>
-          </div>
-
-          <!-- High-Level Metric Strip -->
-          <div class="hero-stats-row">
-            <div class="hero-stat">
-              <h4>Real-Time NLP</h4>
-              <p>Dual sentiment valence & emotion detection</p>
-            </div>
-            <div class="hero-stat">
-              <h4>Zero-Knowledge</h4>
-              <p>100% confidential in-browser private storage</p>
-            </div>
-            <div class="hero-stat">
-              <h4>Multi-Somatic</h4>
-              <p>Box breathwork, Web Audio & nutrition science</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Animated Wellness Mascot Container -->
-        <div class="mascot-container">
-          <div class="mascot-aura-glow" id="mascotAuraGlow"></div>
-          
-          <div class="mascot-svg-wrap" id="mascotSvg" title="Click Aura for a mindfulness prompt">
-            <!-- Animated SVG Character: "Aura" -->
-            <svg class="mascot-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Mascot Shadow -->
-              <ellipse cx="100" cy="180" rx="55" ry="12" fill="rgba(11, 19, 37, 0.08)"></ellipse>
-              
-              <!-- Mascot Body with Gradient Fill -->
-              <defs>
-                <linearGradient id="bodyGrad" x1="50" y1="30" x2="150" y2="170" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#2dd4bf" />
-                  <stop offset="0.5" stop-color="#0f766e" />
-                  <stop offset="1" stop-color="#042f2e" />
-                </linearGradient>
-                <linearGradient id="bellyGrad" x1="70" y1="80" x2="130" y2="150" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#ccfbf1" stop-opacity="0.8" />
-                  <stop offset="1" stop-color="#99f6e4" stop-opacity="0.3" />
-                </linearGradient>
-              </defs>
-
-              <!-- Main Body Blob -->
-              <path d="M 60 70 C 60 30, 140 30, 140 70 C 155 100, 155 145, 135 165 C 115 178, 85 178, 65 165 C 45 145, 45 100, 60 70 Z" fill="url(#bodyGrad)"></path>
-              
-              <!-- Soft Belly Patch -->
-              <ellipse cx="100" cy="120" rx="36" ry="32" fill="url(#bellyGrad)"></ellipse>
-
-              <!-- Little Cute Antennas / Leaf Sprout -->
-              <path d="M 100 42 Q 95 20 84 22 C 78 24 82 34 100 42 Z" fill="#34d399"></path>
-              <path d="M 100 42 Q 105 18 116 20 C 122 22 118 34 100 42 Z" fill="#2dd4bf"></path>
-
-              <!-- Left Eye -->
-              <g id="mascotEyeL">
-                <circle cx="82" cy="95" r="7.5" fill="#070c18"></circle>
-                <circle cx="80" cy="92.5" r="2.5" fill="#ffffff"></circle>
-              </g>
-
-              <!-- Right Eye -->
-              <g id="mascotEyeR">
-                <circle cx="118" cy="95" r="7.5" fill="#070c18"></circle>
-                <circle cx="116" cy="92.5" r="2.5" fill="#ffffff"></circle>
-              </g>
-
-              <!-- Left Eyebrow -->
-              <path d="M 76 83 Q 82 81 88 84" stroke="#042f2e" stroke-width="2.5" stroke-linecap="round"></path>
-              <!-- Right Eyebrow -->
-              <path d="M 112 84 Q 118 81 124 83" stroke="#042f2e" stroke-width="2.5" stroke-linecap="round"></path>
-
-              <!-- Blush Cheeks -->
-              <ellipse id="mascotBlushL" cx="72" cy="106" rx="8" ry="4.5" fill="#f43f5e" opacity="0.6"></ellipse>
-              <ellipse id="mascotBlushR" cx="128" cy="106" rx="8" ry="4.5" fill="#f43f5e" opacity="0.6"></ellipse>
-
-              <!-- Expressive Mouth (Dynamic SVG Path) -->
-              <path id="mascotMouth" d="M 88 126 Q 100 138 112 126" stroke="#070c18" stroke-width="3" stroke-linecap="round" fill="none"></path>
-
-              <!-- Gentle Little Hands -->
-              <ellipse cx="52" cy="115" rx="8" ry="6" fill="#2dd4bf"></ellipse>
-              <ellipse cx="148" cy="115" rx="8" ry="6" fill="#2dd4bf"></ellipse>
-            </svg>
-          </div>
-
-          <!-- Dynamic Speech Bubble -->
-          <div class="mascot-speech-bubble" id="mascotSpeechBubble">
-            <span class="mascot-mood-tag" id="mascotMoodTag">Aura · Wellness Companion</span>
-            <div class="mascot-quote" id="mascotQuote">"I am here to reflect with you. How is your work and mind feeling right now?"</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================================
-         Interactive Analyzer Studio (Real-Time Affective Engine)
-         ========================================================================= -->
-    <section class="section section-alt" id="analyzer">
-      <div class="shell">
-        <div class="section-head">
-          <span class="section-kicker">Affective Intelligence Engine</span>
-          <h2 class="section-title">MindEcho Reflection Studio</h2>
-          <p class="section-subtitle">Compose spontaneous workplace thoughts, explore granular sentiment valence, and unlock personalized CBT recovery pathways.</p>
-        </div>
-
-        <div class="analyzer-card">
-          <div class="analyzer-input-group">
-            <div class="input-header-row">
-              <label for="analyzerTextarea">Your Confidential Reflection</label>
-              <div class="preset-dropdown-wrap">
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Try a scenario:</span>
-                <select class="preset-select" id="presetSelect" aria-label="Select benchmark reflection preset">
-                  <option value="">Select an example...</option>
-                  <option value="I am extremely proud of our product launch! The team worked seamlessly together and the client feedback was glowing.">Workplace Pride & Achievement</option>
-                  <option value="I am feeling completely exhausted and overwhelmed. The unyielding deadlines, staffing shortages, and context switching are draining my energy.">Deadline Pressure & Burnout</option>
-                  <option value="I feel disconnected from the rest of my team and worried that my contributions aren't meeting expectations.">Imposter Syndrome & Disconnection</option>
-                  <option value="Frustrated with the last-minute requirement changes. It wasted two full days of engineering effort and invalidated our tests.">Communication Friction</option>
-                  <option value="I am not happy with how the retrospective went today.">Error & Negation Check ('not happy')</option>
-                  <option value="Completed weekly code review, resolved 3 staging tickets, and documented architectural patterns for tomorrow.">Neutral Engineering Status</option>
-                </select>
-              </div>
-            </div>
-
-            <textarea class="analyzer-textarea" id="analyzerTextarea" placeholder="Write openly about how your day, team, and workload feel right now..."></textarea>
-
-            <div class="analyzer-actions-row">
-              <span class="char-counter" id="analyzerCharCount">0 characters</span>
-              <div style="display: flex; gap: 10px;">
-                <button class="btn btn-secondary" id="saveToJournalBtn" type="button">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                  <span>Save to Journal</span>
-                </button>
-                <button class="btn btn-primary" id="runAnalyzeBtn" type="button">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                  <span>Analyze Reflection</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Dynamic Analysis Output (Revealed on analysis) -->
-          <div class="analysis-results-grid" id="analysisResultsGrid" style="display: none;">
-            
-            <!-- Left: Sentiment Polarity & Compound Meter -->
-            <div class="sentiment-gauge-card">
-              <div class="gauge-header">
-                <div>
-                  <div class="gauge-title">Sentiment Polarity</div>
-                  <span style="font-size: 0.78rem; color: var(--text-muted);">Calibrated VADER Valence Scale (-1.0 to +1.0)</span>
-                </div>
-                <span class="polarity-pill polarity-positive" id="gaugePolarityPill">POSITIVE</span>
-              </div>
-
-              <!-- Meter Bar -->
-              <div class="valence-meter-wrap">
-                <div class="valence-meter-bar">
-                  <div class="valence-needle-fill" id="gaugeNeedleFill" style="width: 78%; background: #10b981;"></div>
-                </div>
-                <div class="meter-scale-markers">
-                  <span>-1.0 (Distress)</span>
-                  <span>0.0 (Neutral)</span>
-                  <span>+1.0 (Flourishing)</span>
-                </div>
-              </div>
-
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px;">
-                <span style="font-size: 0.85rem; color: var(--text-secondary);">Compound Intensity Score:</span>
-                <strong style="font-size: 1.4rem; color: var(--text-primary);" class="mono" id="gaugeCompoundVal">+0.68</strong>
-              </div>
-            </div>
-
-            <!-- Right: Fine-Grained Emotion Telemetry Signals -->
-            <div class="emotion-signals-card">
-              <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <div class="gauge-title">Emotional Telemetry</div>
-                <span style="font-size: 0.75rem; color: var(--primary-accent); font-weight: 700;">Multi-Label Confidence</span>
-              </div>
-              <div class="emotion-bar-list" id="emotionSignalsList">
-                <!-- Dynamically Populated by App.js -->
-              </div>
-            </div>
-
-            <!-- Full Width: Tailored Action Pathway Box -->
-            <div class="action-pathway-box">
-              <div class="action-pathway-header">
-                <span class="action-badge">Personalized Pathway</span>
-                <h4 style="margin: 0; font-size: 1.15rem;" id="actionPathwayTitle">Self-Care Micro-Intervention</h4>
-              </div>
-              <ul class="action-steps-list" id="actionPathwaySteps">
-                <!-- Dynamically Populated by App.js -->
-              </ul>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================================
-         SomaSanctuary: Breathwork Pacer & Web Audio Sanctuary
-         ========================================================================= -->
-    <section class="section" id="somatic">
-      <div class="shell">
-        <div class="section-head">
-          <span class="section-kicker">Somatic Regulation & Digital Sanctuary</span>
-          <h2 class="section-title">SomaSanctuary Breathwork & Audio</h2>
-          <p class="section-subtitle">Engage the parasympathetic vagal brake with guided box breathing and procedural ambient soundscapes synthesized directly in your browser.</p>
-        </div>
-
-        <div class="somatic-grid">
-          <!-- Left: Box Breathing Visual Pacer -->
-          <div class="pacer-card">
-            <div>
-              <span class="brand-badge">Autonomic Nervous System Regulation</span>
-              <h3 style="margin-top: 6px;">Box Breathing Pacer</h3>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">4s Inhale · 4s Hold · 4s Exhale · 4s Hold (Stanford Protocol)</p>
-            </div>
-
-            <!-- Animated Pacer Visual Stage -->
-            <div class="pacer-visual-stage">
-              <div class="pacer-ring-outer"></div>
-              <div class="pacer-orb" id="pacerOrb">4s</div>
-            </div>
-
-            <div>
-              <div class="pacer-phase-label" id="pacerPhaseLabel">Ready to begin</div>
-              <div class="pacer-controls">
-                <button class="btn btn-primary" id="startPacerBtn" type="button">Start Guided Breathwork</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: Procedural Web Audio Ambient Synthesizer -->
-          <div class="ambient-sound-card">
-            <span class="brand-badge">Zero-Network Offline Sanctuary</span>
-            <h3 style="margin-top: 6px;">Ambient Sound Generator</h3>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">Synthesized procedurally via Web Audio API for cognitive focus and cortisol recovery.</p>
-
-            <!-- Soundscape Selection Grid -->
-            <div class="soundscapes-grid">
-              <div class="soundscape-tile" data-sound="rain">
-                <div class="sound-title">Gentle Rain Shower</div>
-                <div class="sound-desc">Filtered pink noise mimics natural rainfall</div>
-              </div>
-              <div class="soundscape-tile" data-sound="waves">
-                <div class="sound-title">Ocean Waves Tide</div>
-                <div class="sound-desc">8-second rhythmic oceanic wave swells</div>
-              </div>
-              <div class="soundscape-tile" data-sound="bowl">
-                <div class="sound-title">Tibetan Singing Bowl</div>
-                <div class="sound-desc">432Hz meditative resonant overtone chord</div>
-              </div>
-              <div class="soundscape-tile" data-sound="drone">
-                <div class="sound-title">432Hz Binaural Drone</div>
-                <div class="sound-desc">Deep alpha-theta restorative frequencies</div>
-              </div>
-            </div>
-
-            <!-- Volume Slider -->
-            <div class="sound-volume-row">
-              <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Sanctuary Volume:</span>
-              <input type="range" class="sound-volume-slider" id="soundVolumeSlider" min="0" max="1" step="0.05" value="0.5">
-            </div>
-
-            <!-- 5-4-3-2-1 Sensory Grounding Tool -->
-            <div class="grounding-box">
-              <strong style="font-size: 0.9rem; color: var(--text-primary); display: block; margin-bottom: 4px;">5-4-3-2-1 Sensory Grounding Checklist</strong>
-              <p style="font-size: 0.78rem; color: var(--text-muted);">Anchor attention into your physical room to halt cognitive rumination.</p>
-              <ul class="grounding-checklist">
-                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Name 5 objects you can observe with your eyes right now</span></li>
-                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Notice 4 tactile surfaces you can physically feel</span></li>
-                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Tune into 3 distinct ambient sounds you can hear</span></li>
-                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Identify 2 aromas or scents in your space</span></li>
-                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Notice 1 clean taste or sensation in your mouth</span></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================================
-         Nutritional Psychiatry & Mood-Food Section
-         ========================================================================= -->
-    <section class="section section-alt" id="nutrition">
-      <div class="shell">
-        <div class="section-head">
-          <span class="section-kicker">Gut-Brain Axis & Clinical Nutrition</span>
-          <h2 class="section-title">Mood-Food & Neuro-Nutrition Blueprint</h2>
-          <p class="section-subtitle">Target neurotransmitter synthesis (serotonin, dopamine, GABA) and down-regulate cortisol with evidence-based dietary blueprints.</p>
-        </div>
-
-        <div class="nutrition-card">
-          <!-- Filter Controls -->
-          <div class="nutrition-filters-bar">
-            <div class="filter-group">
-              <label for="nutritionMoodSelect">Target Emotion to Nourish:</label>
-              <select class="preset-select" id="nutritionMoodSelect" style="font-weight: 600;">
-                <option value="stress">Acute Stress & Nervousness (GABA & Cortisol Balance)</option>
-                <option value="fatigue">Exhaustion & Burnout (ATP Mitochondrial Renewal)</option>
-                <option value="joy">Joy & Cognitive Flourishing (BDNF & Vitality)</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label>Dietary Pattern:</label>
-              <div class="segmented-control">
-                <button class="seg-btn seg-diet-btn active" data-diet="any" type="button">Omnivore / Standard</button>
-                <button class="seg-btn seg-diet-btn" data-diet="vegetarian" type="button">Vegetarian</button>
-                <button class="seg-btn seg-diet-btn" data-diet="vegan" type="button">100% Plant-Based</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Protocol Heading -->
-          <div style="margin-bottom: 22px;">
-            <h3 id="nutritionPlanTitle" style="color: var(--teal-700);">Cortisol Down-Regulation & GABA Balance Protocol</h3>
-            <p id="nutritionPlanTarget" style="font-size: 0.88rem; color: var(--text-muted);">Inhibitory neurotransmitter modulation and adrenal axis recovery</p>
-          </div>
-
-          <!-- Daily 4-Meal Plate Grid -->
-          <div class="meal-plate-grid">
-            <div class="meal-card">
-              <div class="meal-time-tag">Morning Fuel</div>
-              <div class="meal-dish-title">Breakfast</div>
-              <p class="meal-desc" id="mealBreakfastDesc">Warm steel-cut oats with crushed pumpkin seeds, wild blueberries, and organic kefir.</p>
-            </div>
-
-            <div class="meal-card">
-              <div class="meal-time-tag">Midday Sustenance</div>
-              <div class="meal-dish-title">Lunch</div>
-              <p class="meal-desc" id="mealLunchDesc">Wild Alaskan salmon bowl with avocado, wilted spinach, brown rice, and lemon-tahini dressing.</p>
-            </div>
-
-            <div class="meal-card">
-              <div class="meal-time-tag">Afternoon Reset</div>
-              <div class="meal-dish-title">Snack</div>
-              <p class="meal-desc" id="mealSnackDesc">Small handful of sprouted walnuts with chamomile-infused green tea.</p>
-            </div>
-
-            <div class="meal-card">
-              <div class="meal-time-tag">Evening Recovery</div>
-              <div class="meal-dish-title">Dinner</div>
-              <p class="meal-desc" id="mealDinnerDesc">Herb-roasted pasture-raised chicken breast with roasted asparagus and sweet potato wedges.</p>
-            </div>
-          </div>
-
-          <!-- Superfoods & Substances to Moderate -->
-          <div class="nutrition-details-row">
-            <div class="superfoods-box">
-              <h4 style="margin-bottom: 12px; font-size: 0.95rem;">Targeted Neuro-Nutrient Superfoods</h4>
-              <div id="superfoodsList">
-                <!-- Populated by App.js -->
-                <div class="superfood-item"><strong>Pumpkin Seeds:</strong> <span>Highest natural source of bioavailable magnesium for neuromuscular relaxation.</span></div>
-                <div class="superfood-item"><strong>Matcha / Green Tea:</strong> <span>Concentrated L-Theanine induces calm alpha brainwaves without sedation.</span></div>
-                <div class="superfood-item"><strong>Fermented Kefir:</strong> <span>Microbial probiotics synthesize serotonin precursors along the vagus nerve.</span></div>
-              </div>
-            </div>
-
-            <div class="moderate-box">
-              <h4 style="margin-bottom: 12px; font-size: 0.95rem;">Substances to Moderate Today</h4>
-              <div id="moderateList">
-                <!-- Populated by App.js -->
-                <div class="superfood-item"><span style="color:#f43f5e;font-weight:700;">Moderate:</span> <span>High-glycemic processed sugars that trigger cortisol spikes.</span></div>
-                <div class="superfood-item"><span style="color:#f43f5e;font-weight:700;">Moderate:</span> <span>Late afternoon caffeine past 2 PM which suppresses restorative slow-wave sleep.</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================================
-         Team Morale & Burnout Radar Section
-         ========================================================================= -->
-    <section class="section" id="team-radar">
-      <div class="shell">
-        <div class="section-head">
-          <span class="section-kicker">Organizational Dynamics & Privacy</span>
-          <h2 class="section-title">ResilienceRadar: Team Morale Simulator</h2>
-          <p class="section-subtitle">Model 14-day longitudinal team sentiment, detect impending burnout thresholds early, and activate preventative leadership interventions.</p>
-        </div>
-
-        <div class="team-dashboard-card">
-          <!-- Scenario Selector -->
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 24px;">
-            <div style="font-weight: 700; font-size: 0.95rem;">Select Team Operating Scenario:</div>
-            <div class="segmented-control">
-              <button class="seg-btn team-scenario-btn active" data-scenario="balanced" type="button">Balanced Sprint</button>
-              <button class="seg-btn team-scenario-btn" data-scenario="thriving" type="button">Thriving Unit</button>
-              <button class="seg-btn team-scenario-btn" data-scenario="burnout" type="button">High-Strain Crunch</button>
-            </div>
-          </div>
-
-          <!-- KPI Strip -->
-          <div class="team-kpis-strip">
-            <div class="team-kpi-card">
-              <div class="team-kpi-label">Burnout Risk Index</div>
-              <div class="team-kpi-val" id="kpiBurnoutRisk">32/100</div>
-              <div class="team-kpi-delta safe">Healthy Baseline</div>
-            </div>
-            <div class="team-kpi-card">
-              <div class="team-kpi-label">Team Resilience Score</div>
-              <div class="team-kpi-val" id="kpiResilienceIndex">74/100</div>
-              <div class="team-kpi-delta safe">Strong Recovery</div>
-            </div>
-            <div class="team-kpi-card">
-              <div class="team-kpi-label">Sentiment Compound</div>
-              <div class="team-kpi-val" id="kpiSentimentComp">+0.18</div>
-              <div class="team-kpi-delta safe">Constructive Mood</div>
-            </div>
-            <div class="team-kpi-card">
-              <div class="team-kpi-label">Distress vs Flourish</div>
-              <div class="team-kpi-val" id="kpiDistressRatio">18% / 82%</div>
-              <div class="team-kpi-delta safe">High Psychological Safety</div>
-            </div>
-          </div>
-
-          <!-- Interactive HTML5 Canvas Chart -->
-          <div class="team-chart-canvas-wrap">
-            <canvas class="team-chart-canvas" id="teamChartCanvas"></canvas>
-          </div>
-
-          <!-- Management Interventions -->
-          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 22px;">
-            <h4 style="font-size: 0.95rem; margin-bottom: 8px;">Recommended Team Health Interventions:</h4>
-            <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-secondary);">
-              Maintain regular sprint retrospective check-ins, encourage asynchronous project handoffs, and protect focus blocks by designating "No-Meeting Thursdays" across the engineering unit.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================================
-         Confidential Reflection Journal & History Log
-         ========================================================================= -->
-    <section class="section section-alt" id="journal">
-      <div class="shell">
-        <div class="section-head">
-          <span class="section-kicker">Personal Longitudinal Reflection</span>
-          <h2 class="section-title">Confidential Wellness Journal</h2>
-          <p class="section-subtitle">All entries are encrypted and stored in your private browser memory. Zero corporate tracking or external surveillance.</p>
-        </div>
-
-        <div class="journal-section-card">
-          <!-- Toolbar -->
-          <div class="journal-toolbar">
-            <input type="text" class="journal-search-input" id="journalSearchInput" placeholder="Filter reflections by keyword or mood..." aria-label="Search Journal">
-            
-            <div style="display: flex; gap: 10px;">
-              <button class="btn btn-secondary" id="exportMdBtn" type="button" style="padding: 8px 16px; font-size: 0.85rem;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span>Export Markdown</span>
-              </button>
-              <button class="btn btn-secondary" id="exportCsvBtn" type="button" style="padding: 8px 16px; font-size: 0.85rem;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span>Export CSV</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Entries Container -->
-          <div class="journal-entries-list" id="journalEntriesList">
-            <!-- Dynamically populated by App.js -->
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- =========================================================================
-       Footer
-       ========================================================================= -->
-  <footer class="footer">
-    <div class="shell footer-content">
       <div>
-        <strong style="font-size: 1.05rem; color: var(--text-primary); display: block;">MoodMentor</strong>
-        <p class="footer-copy">Enterprise Affective Wellness Platform · Dedicated to human flourishing in the workplace.</p>
+        <span class="text-headline-sm font-headline-sm font-bold text-primary tracking-tight block">MoodMentor</span>
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block">Workplace AI</span>
       </div>
-
-      <ul class="footer-links">
-        <li><a href="#analyzer">Mood Analyzer</a></li>
-        <li><a href="#somatic">Somatic Studio</a></li>
-        <li><a href="#nutrition">Neuro-Nutrition</a></li>
-        <li><a href="#team-radar">Team Radar</a></li>
-        <li><a href="#journal">Private Journal</a></li>
-      </ul>
     </div>
-  </footer>
 
-  <!-- =========================================================================
-       Crisis Support Modal (Accessible Globally)
-       ========================================================================= -->
-  <div class="modal-backdrop" id="crisisModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="crisisModalTitle">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h3 id="crisisModalTitle" style="color: #f43f5e; display: flex; align-items: center; gap: 8px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          <span>Confidential Support Helplines</span>
-        </h3>
-        <button class="btn-icon" id="crisisModalCloseBtn" aria-label="Close dialog">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <!-- Navigation Menu Items -->
+    <nav class="flex-1 px-4 space-y-1.5" id="sidebar-nav">
+      <a class="flex items-center px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-body-sm cursor-pointer group" data-view="daily-check-in">
+        <span class="material-symbols-outlined mr-3 text-[20px] text-on-surface-variant group-hover:text-primary transition-colors">self_improvement</span>
+        Daily Check-in
+      </a>
+      <a class="flex items-center px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-body-sm cursor-pointer group" data-view="manager-analytics">
+        <span class="material-symbols-outlined mr-3 text-[20px] text-on-surface-variant group-hover:text-secondary transition-colors">analytics</span>
+        Manager Analytics
+      </a>
+      <a class="flex items-center px-4 py-3 transition-all nav-tab-active font-medium rounded-xl text-body-sm cursor-pointer group" data-view="ai-mentor-insights" aria-current="page">
+        <span class="material-symbols-outlined mr-3 text-[20px] text-on-primary-container">psychology</span>
+        AI Mentor Insights
+      </a>
+      <a class="flex items-center px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-body-sm cursor-pointer group" data-view="employee-history">
+        <span class="material-symbols-outlined mr-3 text-[20px] text-on-surface-variant group-hover:text-tertiary transition-colors">history</span>
+        Employee History
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer Sanctuary Controls -->
+    <div class="px-4 pt-4 border-t border-outline-variant/30 space-y-3">
+      <!-- Quick Soundscape Widget -->
+      <div class="p-3 bg-surface rounded-xl border border-outline-variant/20 flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-primary text-[20px]" id="audio-icon">volume_up</span>
+          <div>
+            <div class="text-xs font-semibold text-on-surface" id="audio-label">Calm Rain Sanctuary</div>
+            <div class="text-[10px] text-on-surface-variant" id="audio-status">432Hz Soundscape</div>
+          </div>
+        </div>
+        <button id="audio-toggle-btn" class="w-7 h-7 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface flex items-center justify-center transition-all" title="Toggle Calming Audio">
+          <span class="material-symbols-outlined text-[16px]" id="audio-play-icon">play_arrow</span>
         </button>
       </div>
-      <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">
-        MoodMentor is a self-reflection tool, not a clinical emergency service. If you or someone you know is experiencing severe distress or crisis, compassionate professional support is available 24/7 free of charge:
-      </p>
-      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px;">
-        <strong>United States & Canada:</strong> Call or text <strong style="color: var(--teal-600);">988</strong> (Suicide & Crisis Lifeline).
-      </div>
-      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px;">
-        <strong>United Kingdom:</strong> Call <strong style="color: var(--teal-600);">111</strong> (NHS Mental Health Services) or text SHOUT to 85258.
-      </div>
-      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px;">
-        <strong>India:</strong> Call <strong style="color: var(--teal-600);">14416</strong> (Tele-MANAS National Helpline) or Vandrevala Foundation (9999 666 555).
-      </div>
-      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px;">
-        <strong>Worldwide / International:</strong> Visit <a href="https://www.befrienders.org" target="_blank" rel="noopener" style="color: var(--primary-accent); font-weight: 700;">befrienders.org</a> or iasp.info for local emergency support.
+
+      <!-- Live Service Status Pill -->
+      <div class="flex items-center justify-between text-xs px-2 text-on-surface-variant">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          Engine Live
+        </span>
+        <span class="text-[11px] font-mono opacity-80">v2.4 Online</span>
       </div>
     </div>
+  </aside>
+
+  <!-- =========================================================================
+       MAIN CONTENT CONTAINER
+       ========================================================================= -->
+  <div class="pl-64">
+    <!-- Top Header -->
+    <header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-8 border-b border-outline-variant/30">
+      <div class="flex items-center gap-2">
+        <span class="text-body-md font-body-md font-medium text-on-surface" id="header-greeting">Welcome back, Alex Rivera</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-semibold tracking-wide">Workforce Care</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <!-- Quick Mood Action Button -->
+        <button id="quick-checkin-btn" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-primary-container text-on-primary-container text-xs font-semibold hover:scale-102 transition-transform shadow-xs">
+          <span class="material-symbols-outlined text-[16px]">edit_note</span>
+          Quick Reflection
+        </button>
+
+        <!-- Notification Bell -->
+        <div class="relative">
+          <button id="notif-btn" class="p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors relative" title="Notifications">
+            <span class="material-symbols-outlined text-[20px]">notifications</span>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-secondary rounded-full"></span>
+          </button>
+        </div>
+
+        <!-- User Profile Avatar -->
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-xs cursor-pointer" title="Alex Rivera (Team Lead)">
+          <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Views Mount -->
+    <main class="relative pt-16 bg-surface min-h-screen">
+      
+      <!-- =====================================================================
+           VIEW 1: AI MENTOR INSIGHTS (The Flagship Google Stitch Screen)
+           ===================================================================== -->
+      <div id="view-ai-mentor-insights" class="view-container active flex flex-col w-full pb-20">
+        <!-- Top Intro Section with 3D Companion Hero Card -->
+        <section class="px-8 pt-10 pb-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          <div class="lg:col-span-7 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-xl text-label-sm uppercase tracking-wider font-semibold">AI Synthesis &amp; Strategy</span>
+                <span class="text-on-surface-variant text-body-sm" id="synthesis-timestamp">• Updated 2 hours ago</span>
+              </div>
+              <h1 class="text-headline-lg font-headline-lg text-on-surface font-extrabold tracking-tight">Team Wellbeing Intelligence</h1>
+              <p class="text-body-lg text-on-surface-variant mt-2 max-w-2xl leading-relaxed">
+                Synthesized insights derived from recent check-ins, sentiment trends, and organizational rhythm to optimize leadership action, guided by your interactive AI Wellbeing Companion.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 mt-6">
+              <button id="btn-refresh-insights" class="px-5 py-3 bg-primary-container text-on-primary-container rounded-xl font-label-md text-label-md font-semibold flex items-center gap-2 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all">
+                <span class="material-symbols-outlined text-[18px]" id="refresh-icon">auto_awesome</span>
+                Refresh AI Insights
+              </button>
+              <button id="btn-export-report" class="px-5 py-3 bg-surface-container-high text-on-surface rounded-xl font-label-md text-label-md font-semibold flex items-center gap-2 hover:bg-surface-container-highest transition-colors">
+                <span class="material-symbols-outlined text-[18px]">download</span>
+                Export Report
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive 3D Companion Hero Card -->
+          <div class="lg:col-span-5 bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between shadow-lg companion-glow">
+            <div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="flex items-center justify-between z-10">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
+                <span class="text-label-sm uppercase tracking-wider font-semibold text-primary">Live Zen Companion</span>
+              </div>
+              <span class="text-xs bg-surface px-2.5 py-1 rounded-lg text-on-surface-variant border border-outline-variant/20 font-medium">Active Aura</span>
+            </div>
+            
+            <!-- Three.js Canvas Container -->
+            <div class="w-full h-56 relative my-2 cursor-pointer active:cursor-grabbing flex items-center justify-center" id="companion-container">
+              <!-- Three.js WebGL canvas injected by script -->
+            </div>
+
+            <div class="z-10 bg-surface/75 backdrop-blur-sm p-3.5 rounded-xl border border-outline-variant/20 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">spa</span>
+                <div>
+                  <h4 class="text-body-sm font-semibold text-on-surface" id="companion-dialogue">"Team balance is optimal today."</h4>
+                  <p class="text-xs text-on-surface-variant">Click the 3D guide to interact and awaken new insights.</p>
+                </div>
+              </div>
+              <button id="btn-companion-chat" class="p-2 rounded-lg bg-primary text-on-primary hover:opacity-90 transition-opacity" title="Aura Thought">
+                <span class="material-symbols-outlined text-sm">chat</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Impact Score Metrics Banner (Bento Style) -->
+        <section class="px-8 mb-10">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Metric 1 -->
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none"></div>
+              <div>
+                <span class="text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Team Pulse Index</span>
+                <div class="flex items-baseline gap-3 mt-2">
+                  <span class="text-headline-xl font-headline-xl text-primary font-bold text-3xl" id="metric-pulse-val">8.4</span>
+                  <span class="text-body-sm text-primary font-medium flex items-center">
+                    <span class="material-symbols-outlined text-[16px]">trending_up</span> +0.6
+                  </span>
+                </div>
+              </div>
+              <p class="text-body-sm text-on-surface-variant mt-4">Calculated from 42 daily check-ins this week.</p>
+            </div>
+
+            <!-- Metric 2 -->
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-secondary/5 rounded-full blur-xl pointer-events-none"></div>
+              <div>
+                <span class="text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Burnout Risk Factor</span>
+                <div class="flex items-baseline gap-3 mt-2">
+                  <span class="text-headline-xl font-headline-xl text-secondary font-bold text-3xl" id="metric-burnout-val">Low</span>
+                  <span class="text-body-sm text-secondary font-medium flex items-center">
+                    <span class="material-symbols-outlined text-[16px]">trending_down</span> -12%
+                  </span>
+                </div>
+              </div>
+              <p class="text-body-sm text-on-surface-variant mt-4">Decreased stability across engineering teams.</p>
+            </div>
+
+            <!-- Metric 3 -->
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-tertiary/5 rounded-full blur-xl pointer-events-none"></div>
+              <div>
+                <span class="text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Action Adoption Rate</span>
+                <div class="flex items-baseline gap-3 mt-2">
+                  <span class="text-headline-xl font-headline-xl text-tertiary font-bold text-3xl" id="metric-adoption-val">78%</span>
+                  <span class="text-body-sm text-tertiary font-medium flex items-center">
+                    <span class="material-symbols-outlined text-[16px]">check_circle</span> On Track
+                  </span>
+                </div>
+              </div>
+              <p class="text-body-sm text-on-surface-variant mt-4" id="metric-adoption-desc">14 of 18 suggested micro-interventions completed.</p>
+            </div>
+
+            <!-- Metric 4 -->
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-primary-container/10 rounded-full blur-xl pointer-events-none"></div>
+              <div>
+                <span class="text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Psychological Safety</span>
+                <div class="flex items-baseline gap-3 mt-2">
+                  <span class="text-headline-xl font-headline-xl text-on-surface font-bold text-3xl" id="metric-safety-val">9.1</span>
+                  <span class="text-body-sm text-primary font-medium flex items-center">
+                    <span class="material-symbols-outlined text-[16px]">star</span> High
+                  </span>
+                </div>
+              </div>
+              <p class="text-body-sm text-on-surface-variant mt-4">Consistent openness reported in 1-on-1 notes.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Main Split Layout: AI Recommendations & Action Checklist -->
+        <section class="px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+          <!-- Left Column: AI Recommendations (7 cols) -->
+          <div class="lg:col-span-7 flex flex-col gap-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-headline-md font-headline-md text-on-surface font-bold text-xl">Recommended Strategic Shifts</h2>
+              <span class="text-label-md text-on-surface-variant font-label-md font-medium">2 High-Impact Priorities</span>
+            </div>
+
+            <!-- Recommendation Card 1 -->
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-8 rounded-xl shadow-sm relative overflow-hidden flex flex-col gap-4">
+              <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-xs">
+                    <span class="material-symbols-outlined text-[20px]">event_busy</span>
+                  </div>
+                  <div>
+                    <span class="px-2.5 py-0.5 bg-primary-fixed text-on-primary-fixed font-semibold rounded-xl text-label-sm font-label-sm">Priority 01 • Urgent Focus</span>
+                    <h3 class="text-headline-sm font-headline-sm text-on-surface font-bold mt-1">Schedule Team Recharge Day</h3>
+                  </div>
+                </div>
+                <span class="text-body-sm text-on-surface-variant">Impact: <strong class="text-primary font-bold">Very High</strong></span>
+              </div>
+              <p class="text-body-md text-on-surface-variant leading-relaxed">
+                Recent telemetry indicates high cognitive load and continuous context switching over the past 3 weeks. An uninterrupted recharge day will significantly lower cortisol levels and restore baseline focus.
+              </p>
+              <div class="p-4 bg-surface-container/60 rounded-xl flex items-center justify-between mt-2 flex-wrap gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary">lightbulb</span>
+                  <span class="text-body-sm text-on-surface">Suggested window: Next Wednesday or Thursday afternoon.</span>
+                </div>
+                <button id="btn-deploy-recharge" class="px-4 py-2 bg-primary text-on-primary rounded-xl text-label-sm font-label-sm font-semibold hover:opacity-90 active:scale-95 transition-all shadow-xs">
+                  Deploy Plan
+                </button>
+              </div>
+            </div>
+
+            <!-- Recommendation Card 2 -->
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-8 rounded-xl shadow-sm relative overflow-hidden flex flex-col gap-4">
+              <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-2xl pointer-events-none"></div>
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-xs">
+                    <span class="material-symbols-outlined text-[20px]">forum</span>
+                  </div>
+                  <div>
+                    <span class="px-2.5 py-0.5 bg-secondary-fixed text-on-secondary-fixed font-semibold rounded-xl text-label-sm font-label-sm">Priority 02 • Structural Habit</span>
+                    <h3 class="text-headline-sm font-headline-sm text-on-surface font-bold mt-1">Encourage Asynchronous Communication</h3>
+                  </div>
+                </div>
+                <span class="text-body-sm text-on-surface-variant">Impact: <strong class="text-secondary font-bold">High</strong></span>
+              </div>
+              <p class="text-body-md text-on-surface-variant leading-relaxed">
+                Meeting volume has increased by 22% month-over-month. Transitioning standard status updates to async threads can recover approximately 6 hours of deep work time per team member weekly.
+              </p>
+              <div class="p-4 bg-surface-container/60 rounded-xl flex items-center justify-between mt-2 flex-wrap gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-secondary">lightbulb</span>
+                  <span class="text-body-sm text-on-surface">Suggested action: Establish "No-Meeting Mornings" on Tue/Thu.</span>
+                </div>
+                <button id="btn-send-async-guidelines" class="px-4 py-2 bg-secondary text-on-secondary rounded-xl text-label-sm font-label-sm font-semibold hover:opacity-90 active:scale-95 transition-all shadow-xs">
+                  Send Guidelines
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Actionable Micro-Interventions Checklist (5 cols) -->
+          <div class="lg:col-span-5 flex flex-col gap-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-headline-md font-headline-md text-on-surface font-bold text-xl">Manager Micro-Interventions</h2>
+              <span class="text-label-md text-on-surface-variant font-label-md font-medium" id="intervention-progress-text">3 of 5 Done</span>
+            </div>
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-6 rounded-xl shadow-sm flex flex-col gap-4">
+              <p class="text-body-sm text-on-surface-variant">Select or check off actions taken this week to maintain momentum and boost overall team wellness scores.</p>
+              <div class="flex flex-col gap-3 mt-2" id="interventions-checklist">
+                <!-- Checklist Items -->
+                <label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+                  <input checked="" class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer intervention-checkbox" type="checkbox"/>
+                  <div class="flex-1">
+                    <span class="text-body-md font-medium text-on-surface line-through opacity-75">Send appreciation shout-out in public channel</span>
+                    <p class="text-body-sm text-on-surface-variant">Acknowledged design lead for exceptional delivery.</p>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+                  <input checked="" class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer intervention-checkbox" type="checkbox"/>
+                  <div class="flex-1">
+                    <span class="text-body-md font-medium text-on-surface line-through opacity-75">Audit recurring calendar meetings</span>
+                    <p class="text-body-sm text-on-surface-variant">Cancelled 3 redundant status syncs.</p>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+                  <input checked="" class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer intervention-checkbox" type="checkbox"/>
+                  <div class="flex-1">
+                    <span class="text-body-md font-medium text-on-surface line-through opacity-75">Review workload balance in 1-on-1s</span>
+                    <p class="text-body-sm text-on-surface-variant">Shifted sprint deliverables for Sarah and Alex.</p>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+                  <input class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer intervention-checkbox" type="checkbox"/>
+                  <div class="flex-1">
+                    <span class="text-body-md font-medium text-on-surface">Host unstructured coffee chat</span>
+                    <p class="text-body-sm text-on-surface-variant">Optional 30-min casual hangout on Friday.</p>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-surface/80 rounded-xl cursor-pointer hover:bg-surface-container-highest transition-colors">
+                  <input class="w-5 h-5 accent-primary rounded-md mt-0.5 cursor-pointer intervention-checkbox" type="checkbox"/>
+                  <div class="flex-1">
+                    <span class="text-body-md font-medium text-on-surface">Share guided breathing resource</span>
+                    <p class="text-body-sm text-on-surface-variant">Post 5-minute reset session link before planning.</p>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Add custom intervention form -->
+              <div id="add-intervention-box" class="hidden pt-2 border-t border-outline-variant/20">
+                <input type="text" id="custom-intervention-input" placeholder="e.g. Schedule team walking sync..." class="w-full px-3.5 py-2 text-sm bg-surface rounded-xl border border-outline-variant/30 focus:border-primary focus:outline-none mb-2"/>
+                <div class="flex justify-end gap-2">
+                  <button id="btn-cancel-intervention" class="px-3 py-1.5 text-xs text-on-surface-variant hover:text-on-surface">Cancel</button>
+                  <button id="btn-save-intervention" class="px-3 py-1.5 text-xs bg-primary text-on-primary rounded-lg font-medium">Add Action</button>
+                </div>
+              </div>
+
+              <button id="btn-show-add-intervention" class="w-full mt-2 py-3 bg-surface/80 text-on-surface border border-outline-variant/30 rounded-xl text-label-md font-label-md font-medium hover:bg-surface-container transition-colors flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">add</span> Add Custom Intervention
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Success Tracking & Long-term Insights Section -->
+        <section class="px-8 mb-12">
+          <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 p-8 rounded-xl shadow-sm relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+              <div>
+                <span class="text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Long-term Outcomes</span>
+                <h2 class="text-headline-md font-headline-md text-on-surface font-bold text-xl mt-1">Success Tracking &amp; Trend Analysis</h2>
+              </div>
+              <div class="flex items-center gap-2" id="timeframe-filters">
+                <button class="px-3 py-1.5 bg-surface text-on-surface rounded-lg text-label-sm font-label-sm font-semibold shadow-sm border border-outline-variant/20 timeframe-btn active" data-period="30d">Last 30 Days</button>
+                <button class="px-3 py-1.5 text-on-surface-variant hover:text-on-surface rounded-lg text-label-sm font-label-sm font-medium timeframe-btn" data-period="quarter">Quarterly</button>
+                <button class="px-3 py-1.5 text-on-surface-variant hover:text-on-surface rounded-lg text-label-sm font-label-sm font-medium timeframe-btn" data-period="year">Yearly</button>
+              </div>
+            </div>
+
+            <!-- Progress Bars & Trend Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- Card A -->
+              <div class="bg-surface p-6 rounded-xl flex flex-col justify-between border border-outline-variant/20 shadow-2xs">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-body-sm font-semibold text-on-surface">Energy Recovery Score</span>
+                  <span class="text-label-sm text-primary font-bold" id="trend-val-a">+14% vs avg</span>
+                </div>
+                <div class="w-full bg-surface-container h-3 rounded-full overflow-hidden">
+                  <div id="trend-bar-a" class="bg-primary h-full rounded-full transition-all duration-700" style="width: 82%;"></div>
+                </div>
+                <span class="text-body-sm text-on-surface-variant mt-4">Team consistently regaining baseline energy by mid-week.</span>
+              </div>
+
+              <!-- Card B -->
+              <div class="bg-surface p-6 rounded-xl flex flex-col justify-between border border-outline-variant/20 shadow-2xs">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-body-sm font-semibold text-on-surface">Meeting Fatigue Reduction</span>
+                  <span class="text-label-sm text-secondary font-bold" id="trend-val-b">-2.4 hrs/wk</span>
+                </div>
+                <div class="w-full bg-surface-container h-3 rounded-full overflow-hidden">
+                  <div id="trend-bar-b" class="bg-secondary h-full rounded-full transition-all duration-700" style="width: 68%;"></div>
+                </div>
+                <span class="text-body-sm text-on-surface-variant mt-4">Calendar audits have successfully trimmed redundant syncs.</span>
+              </div>
+
+              <!-- Card C -->
+              <div class="bg-surface p-6 rounded-xl flex flex-col justify-between border border-outline-variant/20 shadow-2xs">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-body-sm font-semibold text-on-surface">Overall Engagement Rating</span>
+                  <span class="text-label-sm text-tertiary font-bold" id="trend-val-c">Stable &amp; High</span>
+                </div>
+                <div class="w-full bg-surface-container h-3 rounded-full overflow-hidden">
+                  <div id="trend-bar-c" class="bg-tertiary h-full rounded-full transition-all duration-700" style="width: 90%;"></div>
+                </div>
+                <span class="text-body-sm text-on-surface-variant mt-4">Team morale holding steady through major product milestones.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Serene Atmosphere / Philosophy Banner -->
+        <section class="px-8">
+          <div class="w-full h-48 rounded-2xl bg-cover bg-center relative overflow-hidden flex items-center justify-center p-8 text-center shadow-md" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAokfd6NCRipfjcFp7D2CocG35I4swbaLlTSiKmMNJvFjg2WxyrdXpC6ed63TGrQekrBW1jQUfeLyfhj_aXbNfptlExBFbmV4VB4qEq8XYMzS5znahyXTzes7YAAek4nymf0pnYWsocXlsMPvfaP0pS9jgO51oyBCIN6O1mkbFXrYmEfxCvRkbTNMULoog2H80AD54KKHwWPVlzBd1I2lELmMKD54A4acy970FDPG8C')">
+            <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-[2px]"></div>
+            <div class="relative z-10 max-w-xl text-on-error">
+              <h3 class="text-headline-sm font-headline-sm font-bold text-lg md:text-xl">"Sustainable high performance starts with deliberate rest and empathetic guidance."</h3>
+              <p class="text-body-sm mt-2 font-medium opacity-90">MoodMentor AI Leadership Philosophy</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 2: DAILY CHECK-IN (Interactive Journal, Sentiment & Somatics)
+           ===================================================================== -->
+      <div id="view-daily-check-in" class="view-container flex flex-col w-full pb-20 px-8 pt-8">
+        <div class="mb-8">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded-xl text-label-sm uppercase tracking-wider font-semibold">Private Reflection</span>
+            <span class="text-on-surface-variant text-body-sm">• Zero-Knowledge Storage</span>
+          </div>
+          <h1 class="text-headline-lg font-headline-lg font-extrabold text-on-surface">Employee Daily Check-in</h1>
+          <p class="text-body-lg text-on-surface-variant mt-1">Express your workday feelings in private. Our calibrated NLP model analyzes sentiment valence and suggests personalized mindful somatic resets.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Left Column: Journal Reflection Textarea -->
+          <div class="lg:col-span-7 bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[20px]">edit</span>
+                How are you feeling about work today?
+              </span>
+              <span class="text-xs text-on-surface-variant" id="char-count">0 characters</span>
+            </div>
+
+            <!-- Quick Inspiration Prompts -->
+            <div class="flex flex-wrap gap-2">
+              <button class="prompt-chip px-3 py-1 rounded-lg bg-surface text-xs text-on-surface-variant hover:text-primary hover:border-primary border border-outline-variant/30 transition-colors" data-prompt="Feeling productive and aligned after our morning sprint review.">Morning flow</button>
+              <button class="prompt-chip px-3 py-1 rounded-lg bg-surface text-xs text-on-surface-variant hover:text-primary hover:border-primary border border-outline-variant/30 transition-colors" data-prompt="Overwhelmed by back-to-back syncs and tight deadlines today.">Meeting fatigue</button>
+              <button class="prompt-chip px-3 py-1 rounded-lg bg-surface text-xs text-on-surface-variant hover:text-primary hover:border-primary border border-outline-variant/30 transition-colors" data-prompt="Grateful for the support my team gave me during the client demo.">Gratitude</button>
+            </div>
+
+            <textarea id="journal-input" rows="7" placeholder="Write freely about today's meetings, focus blocks, emotional state, or challenges..." class="w-full p-4 bg-surface rounded-xl border border-outline-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/20 text-on-surface outline-none transition-all resize-y text-sm leading-relaxed"></textarea>
+
+            <div class="flex items-center justify-between pt-2">
+              <button id="btn-analyze-clear" class="px-4 py-2 text-xs font-semibold text-on-surface-variant hover:text-on-surface">Clear</button>
+              <button id="btn-submit-checkin" class="px-6 py-2.5 bg-primary text-on-primary rounded-xl font-semibold text-sm hover:opacity-90 active:scale-95 transition-all shadow-sm flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">neurology</span>
+                Analyze &amp; Save Reflection
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Real-Time Sentiment & Emotion Feedback -->
+          <div class="lg:col-span-5 flex flex-col gap-6">
+            <!-- Sentiment Gauge Card -->
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Real-Time Valence Gauge</h3>
+                <span id="sentiment-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-surface text-on-surface-variant border border-outline-variant/30">Neutral (0.00)</span>
+              </div>
+              
+              <!-- Sentiment Bar -->
+              <div class="relative h-4 bg-surface rounded-full overflow-hidden border border-outline-variant/20 my-3">
+                <div id="sentiment-gauge-fill" class="h-full bg-primary transition-all duration-500 rounded-full" style="width: 50%;"></div>
+              </div>
+              <div class="flex justify-between text-[11px] text-on-surface-variant font-medium">
+                <span>Distress (-1.0)</span>
+                <span>Neutral (0.0)</span>
+                <span>Flourishing (+1.0)</span>
+              </div>
+
+              <!-- Emotion Badges -->
+              <div class="mt-6">
+                <h4 class="text-xs font-semibold text-on-surface-variant mb-2.5">Top Emotion Classifications</h4>
+                <div class="flex flex-wrap gap-2" id="emotion-chips-container">
+                  <span class="px-3 py-1 rounded-xl bg-surface border border-outline-variant/30 text-xs font-medium text-on-surface">Balanced · 65%</span>
+                  <span class="px-3 py-1 rounded-xl bg-surface border border-outline-variant/30 text-xs font-medium text-on-surface">Focus · 25%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Somatic Breathwork Pacer (Box Breathing 4-4-4-4) -->
+            <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
+              <div class="flex items-center justify-between w-full mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-primary">Somatic Reset</span>
+                <span class="text-xs text-on-surface-variant">Box Breathing 4-4-4-4</span>
+              </div>
+
+              <!-- Animated Breathing Circle -->
+              <div class="relative w-36 h-36 my-3 flex items-center justify-center">
+                <div id="breathing-ring" class="w-28 h-28 rounded-full bg-primary/15 border-2 border-primary flex items-center justify-center transition-all duration-1000">
+                  <div class="text-center">
+                    <span id="breathing-phase" class="text-xs font-bold text-primary block">Inhale</span>
+                    <span id="breathing-counter" class="text-2xl font-black text-on-surface block mt-0.5">4</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-2 mt-2">
+                <button id="btn-toggle-breathing" class="px-4 py-2 bg-primary-container text-on-primary-container rounded-xl text-xs font-semibold hover:opacity-90 transition-opacity">
+                  Start 1-Min Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 3: MANAGER ANALYTICS (Team Radar, Fatigue & Resilience)
+           ===================================================================== -->
+      <div id="view-manager-analytics" class="view-container flex flex-col w-full pb-20 px-8 pt-8">
+        <div class="mb-8">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed rounded-xl text-label-sm uppercase tracking-wider font-semibold">Organizational Telemetry</span>
+            <span class="text-on-surface-variant text-body-sm">• Aggregated &amp; Anonymized</span>
+          </div>
+          <h1 class="text-headline-lg font-headline-lg font-extrabold text-on-surface">Team Resilience &amp; Burnout Radar</h1>
+          <p class="text-body-lg text-on-surface-variant mt-1">14-day rolling moving average of team cognitive friction, context switching, and emotional stability indices.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <!-- 14-Day Timeline Simulation Canvas -->
+          <div class="lg:col-span-8 bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h3 class="text-base font-bold text-on-surface">14-Day Longitudinal Wellness Trajectory</h3>
+                <p class="text-xs text-on-surface-variant">Daily team emotional sentiment versus meeting saturation index</p>
+              </div>
+              <div class="flex items-center gap-3 text-xs">
+                <span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-primary inline-block"></span> Team Resilience</span>
+                <span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-secondary inline-block"></span> Cognitive Load</span>
+              </div>
+            </div>
+            
+            <div class="w-full h-64 relative">
+              <canvas id="resilience-chart" width="700" height="260" class="w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <!-- Departmental Risk Heatmap -->
+          <div class="lg:col-span-4 bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <h3 class="text-base font-bold text-on-surface mb-1">Departmental Risk Factor</h3>
+              <p class="text-xs text-on-surface-variant mb-5">Current health breakdown by functional squad</p>
+              
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span>Engineering</span>
+                    <span class="text-secondary">Moderate Load (68%)</span>
+                  </div>
+                  <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+                    <div class="bg-secondary h-full rounded-full" style="width: 68%;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span>Product &amp; Design</span>
+                    <span class="text-primary">Optimal Flow (86%)</span>
+                  </div>
+                  <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+                    <div class="bg-primary h-full rounded-full" style="width: 86%;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span>Operations &amp; Support</span>
+                    <span class="text-tertiary">Stable (79%)</span>
+                  </div>
+                  <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+                    <div class="bg-tertiary h-full rounded-full" style="width: 79%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 bg-surface rounded-xl border border-outline-variant/20 mt-6">
+              <div class="flex items-center gap-2 text-xs font-bold text-primary mb-1">
+                <span class="material-symbols-outlined text-[16px]">verified</span>
+                Leadership Recommendation
+              </div>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Prioritize async pull request reviews for Engineering squad on Thursdays to preserve flow state.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 4: EMPLOYEE HISTORY (Confidential Past Reflections)
+           ===================================================================== -->
+      <div id="view-employee-history" class="view-container flex flex-col w-full pb-20 px-8 pt-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded-xl text-label-sm uppercase tracking-wider font-semibold">Audit &amp; Journal</span>
+              <span class="text-on-surface-variant text-body-sm">• Private History</span>
+            </div>
+            <h1 class="text-headline-lg font-headline-lg font-extrabold text-on-surface">Employee Reflection Archive</h1>
+            <p class="text-body-lg text-on-surface-variant mt-1">Review past reflections, emotional trends, and exported reports.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-export-csv" class="px-4 py-2 bg-surface text-on-surface border border-outline-variant/30 rounded-xl text-xs font-semibold hover:bg-surface-container transition-colors flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">table_view</span> Export CSV
+            </button>
+            <button id="btn-export-md" class="px-4 py-2 bg-surface text-on-surface border border-outline-variant/30 rounded-xl text-xs font-semibold hover:bg-surface-container transition-colors flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">description</span> Export Markdown
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm" id="history-table">
+              <thead>
+                <tr class="border-b border-outline-variant/20 text-xs font-bold uppercase text-on-surface-variant">
+                  <th class="pb-3 px-4">Date &amp; Time</th>
+                  <th class="pb-3 px-4">Reflection Preview</th>
+                  <th class="pb-3 px-4">Valence</th>
+                  <th class="pb-3 px-4">Primary Emotion</th>
+                  <th class="pb-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body" class="divide-y divide-outline-variant/10">
+                <!-- Dynamically populated entries -->
+                <tr class="hover:bg-surface/50 transition-colors">
+                  <td class="py-3 px-4 text-xs text-on-surface-variant whitespace-nowrap">Today, 2:45 PM</td>
+                  <td class="py-3 px-4 text-on-surface font-medium max-w-md truncate">Completed the product roadmap sync. Feeling energetic and aligned with our milestones.</td>
+                  <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-xs font-bold bg-primary-fixed text-on-primary-fixed">+0.74</span></td>
+                  <td class="py-3 px-4 text-xs font-semibold text-primary">Joy &amp; Optimism</td>
+                  <td class="py-3 px-4 text-right"><button class="text-xs text-on-surface-variant hover:text-primary">View</button></td>
+                </tr>
+                <tr class="hover:bg-surface/50 transition-colors">
+                  <td class="py-3 px-4 text-xs text-on-surface-variant whitespace-nowrap">Yesterday, 5:10 PM</td>
+                  <td class="py-3 px-4 text-on-surface font-medium max-w-md truncate">A lot of context switching between code reviews and design tickets. Need a restful evening.</td>
+                  <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-xs font-bold bg-secondary-fixed text-on-secondary-fixed">-0.28</span></td>
+                  <td class="py-3 px-4 text-xs font-semibold text-secondary">Cognitive Fatigue</td>
+                  <td class="py-3 px-4 text-right"><button class="text-xs text-on-surface-variant hover:text-primary">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
   </div>
 
-  <!-- Main JavaScript Engine -->
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- App Core Script -->
   <script src="app.js"></script>
 </body>
 </html>
-
