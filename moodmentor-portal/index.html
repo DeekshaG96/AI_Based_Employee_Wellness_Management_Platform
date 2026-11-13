@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MoodMentor - The premier workplace affective intelligence and employee wellness platform.">
+  <title>MoodMentor | Employee Wellness & Affective Intelligence Platform</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Ambient Background Mesh Glow -->
+  <div class="ambient-mesh" aria-hidden="true"></div>
+
+  <!-- =========================================================================
+       Top Navigation Bar (Sticky Glassmorphic)
+       ========================================================================= -->
+  <header class="topbar">
+    <div class="shell topbar-content">
+      <a href="#hero" class="brand-link" aria-label="MoodMentor Home">
+        <div class="brand-icon">
+          <!-- Elegant Minimalist Mind/Leaf SVG -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9A9 9 0 0 1 3 11a9 9 0 0 1 9-9z"></path>
+            <path d="M12 7v5l3 3"></path>
+          </svg>
+        </div>
+        <div>
+          <span class="brand-title">MoodMentor</span>
+          <span class="brand-badge">Wellness Intelligence</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav aria-label="Platform navigation">
+        <ul class="nav-links">
+          <li class="nav-item"><a href="#analyzer" class="active">Mood Analyzer</a></li>
+          <li class="nav-item"><a href="#somatic">Somatic Studio</a></li>
+          <li class="nav-item"><a href="#nutrition">Mood-Food</a></li>
+          <li class="nav-item"><a href="#team-radar">Team Radar</a></li>
+          <li class="nav-item"><a href="#journal">Private Journal</a></li>
+        </ul>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="nav-actions">
+        <!-- Quick Soundscape Player Button -->
+        <button class="sound-quick-toggle" id="soundQuickToggle" title="Toggle Calming Rain Soundscape" aria-label="Toggle Soundscape">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <div class="sound-wave-bars">
+            <span></span><span></span><span></span>
+          </div>
+          <span>Audio Sanctuary</span>
+        </button>
+
+        <!-- Theme Switcher -->
+        <button class="btn-icon" id="themeToggleBtn" title="Switch Theme (Light / Dark)" aria-label="Toggle Dark/Light Mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- Crisis Modal Trigger -->
+        <button class="btn-icon" id="crisisModalOpenBtn" title="Confidential 24/7 Crisis Helplines" aria-label="Emergency Helplines">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       Hero Section & Animated Wellness Mascot ("Aura")
+       ========================================================================= -->
+  <main>
+    <section class="hero-section" id="hero">
+      <div class="shell hero-grid">
+        <div>
+          <div class="hero-kicker">
+            <span class="pulse-dot"></span>
+            <span>Workforce Affective Intelligence & Resilience</span>
+          </div>
+          <h1 class="hero-title">
+            Empowering Workforce Well-Being with <span class="gradient-text">Real-Time Mood Intelligence</span>
+          </h1>
+          <p class="hero-copy">
+            MoodMentor provides employees with a confidential, science-backed sanctuary to untangle workplace stress, monitor emotional patterns, practice somatic regulation, and nourish cognitive flow.
+          </p>
+          <div class="hero-actions">
+            <a href="#analyzer" class="btn btn-primary">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              <span>Start Mood Check-in</span>
+            </a>
+            <a href="#somatic" class="btn btn-secondary">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="10 8 16 12 10 16 10 8"></polygon>
+              </svg>
+              <span>Explore Somatic Sanctuary</span>
+            </a>
+          </div>
+
+          <!-- High-Level Metric Strip -->
+          <div class="hero-stats-row">
+            <div class="hero-stat">
+              <h4>Real-Time NLP</h4>
+              <p>Dual sentiment valence & emotion detection</p>
+            </div>
+            <div class="hero-stat">
+              <h4>Zero-Knowledge</h4>
+              <p>100% confidential in-browser private storage</p>
+            </div>
+            <div class="hero-stat">
+              <h4>Multi-Somatic</h4>
+              <p>Box breathwork, Web Audio & nutrition science</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animated Wellness Mascot Container -->
+        <div class="mascot-container">
+          <div class="mascot-aura-glow" id="mascotAuraGlow"></div>
+          
+          <div class="mascot-svg-wrap" id="mascotSvg" title="Click Aura for a mindfulness prompt">
+            <!-- Animated SVG Character: "Aura" -->
+            <svg class="mascot-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Mascot Shadow -->
+              <ellipse cx="100" cy="180" rx="55" ry="12" fill="rgba(11, 19, 37, 0.08)"></ellipse>
+              
+              <!-- Mascot Body with Gradient Fill -->
+              <defs>
+                <linearGradient id="bodyGrad" x1="50" y1="30" x2="150" y2="170" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#2dd4bf" />
+                  <stop offset="0.5" stop-color="#0f766e" />
+                  <stop offset="1" stop-color="#042f2e" />
+                </linearGradient>
+                <linearGradient id="bellyGrad" x1="70" y1="80" x2="130" y2="150" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#ccfbf1" stop-opacity="0.8" />
+                  <stop offset="1" stop-color="#99f6e4" stop-opacity="0.3" />
+                </linearGradient>
+              </defs>
+
+              <!-- Main Body Blob -->
+              <path d="M 60 70 C 60 30, 140 30, 140 70 C 155 100, 155 145, 135 165 C 115 178, 85 178, 65 165 C 45 145, 45 100, 60 70 Z" fill="url(#bodyGrad)"></path>
+              
+              <!-- Soft Belly Patch -->
+              <ellipse cx="100" cy="120" rx="36" ry="32" fill="url(#bellyGrad)"></ellipse>
+
+              <!-- Little Cute Antennas / Leaf Sprout -->
+              <path d="M 100 42 Q 95 20 84 22 C 78 24 82 34 100 42 Z" fill="#34d399"></path>
+              <path d="M 100 42 Q 105 18 116 20 C 122 22 118 34 100 42 Z" fill="#2dd4bf"></path>
+
+              <!-- Left Eye -->
+              <g id="mascotEyeL">
+                <circle cx="82" cy="95" r="7.5" fill="#070c18"></circle>
+                <circle cx="80" cy="92.5" r="2.5" fill="#ffffff"></circle>
+              </g>
+
+              <!-- Right Eye -->
+              <g id="mascotEyeR">
+                <circle cx="118" cy="95" r="7.5" fill="#070c18"></circle>
+                <circle cx="116" cy="92.5" r="2.5" fill="#ffffff"></circle>
+              </g>
+
+              <!-- Left Eyebrow -->
+              <path d="M 76 83 Q 82 81 88 84" stroke="#042f2e" stroke-width="2.5" stroke-linecap="round"></path>
+              <!-- Right Eyebrow -->
+              <path d="M 112 84 Q 118 81 124 83" stroke="#042f2e" stroke-width="2.5" stroke-linecap="round"></path>
+
+              <!-- Blush Cheeks -->
+              <ellipse id="mascotBlushL" cx="72" cy="106" rx="8" ry="4.5" fill="#f43f5e" opacity="0.6"></ellipse>
+              <ellipse id="mascotBlushR" cx="128" cy="106" rx="8" ry="4.5" fill="#f43f5e" opacity="0.6"></ellipse>
+
+              <!-- Expressive Mouth (Dynamic SVG Path) -->
+              <path id="mascotMouth" d="M 88 126 Q 100 138 112 126" stroke="#070c18" stroke-width="3" stroke-linecap="round" fill="none"></path>
+
+              <!-- Gentle Little Hands -->
+              <ellipse cx="52" cy="115" rx="8" ry="6" fill="#2dd4bf"></ellipse>
+              <ellipse cx="148" cy="115" rx="8" ry="6" fill="#2dd4bf"></ellipse>
+            </svg>
+          </div>
+
+          <!-- Dynamic Speech Bubble -->
+          <div class="mascot-speech-bubble" id="mascotSpeechBubble">
+            <span class="mascot-mood-tag" id="mascotMoodTag">Aura · Wellness Companion</span>
+            <div class="mascot-quote" id="mascotQuote">"I am here to reflect with you. How is your work and mind feeling right now?"</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         Interactive Analyzer Studio (Real-Time Affective Engine)
+         ========================================================================= -->
+    <section class="section section-alt" id="analyzer">
+      <div class="shell">
+        <div class="section-head">
+          <span class="section-kicker">Affective Intelligence Engine</span>
+          <h2 class="section-title">MindEcho Reflection Studio</h2>
+          <p class="section-subtitle">Compose spontaneous workplace thoughts, explore granular sentiment valence, and unlock personalized CBT recovery pathways.</p>
+        </div>
+
+        <div class="analyzer-card">
+          <div class="analyzer-input-group">
+            <div class="input-header-row">
+              <label for="analyzerTextarea">Your Confidential Reflection</label>
+              <div class="preset-dropdown-wrap">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Try a scenario:</span>
+                <select class="preset-select" id="presetSelect" aria-label="Select benchmark reflection preset">
+                  <option value="">Select an example...</option>
+                  <option value="I am extremely proud of our product launch! The team worked seamlessly together and the client feedback was glowing.">Workplace Pride & Achievement</option>
+                  <option value="I am feeling completely exhausted and overwhelmed. The unyielding deadlines, staffing shortages, and context switching are draining my energy.">Deadline Pressure & Burnout</option>
+                  <option value="I feel disconnected from the rest of my team and worried that my contributions aren't meeting expectations.">Imposter Syndrome & Disconnection</option>
+                  <option value="Frustrated with the last-minute requirement changes. It wasted two full days of engineering effort and invalidated our tests.">Communication Friction</option>
+                  <option value="I am not happy with how the retrospective went today.">Error & Negation Check ('not happy')</option>
+                  <option value="Completed weekly code review, resolved 3 staging tickets, and documented architectural patterns for tomorrow.">Neutral Engineering Status</option>
+                </select>
+              </div>
+            </div>
+
+            <textarea class="analyzer-textarea" id="analyzerTextarea" placeholder="Write openly about how your day, team, and workload feel right now..."></textarea>
+
+            <div class="analyzer-actions-row">
+              <span class="char-counter" id="analyzerCharCount">0 characters</span>
+              <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" id="saveToJournalBtn" type="button">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  <span>Save to Journal</span>
+                </button>
+                <button class="btn btn-primary" id="runAnalyzeBtn" type="button">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                  <span>Analyze Reflection</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Analysis Output (Revealed on analysis) -->
+          <div class="analysis-results-grid" id="analysisResultsGrid" style="display: none;">
+            
+            <!-- Left: Sentiment Polarity & Compound Meter -->
+            <div class="sentiment-gauge-card">
+              <div class="gauge-header">
+                <div>
+                  <div class="gauge-title">Sentiment Polarity</div>
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">Calibrated VADER Valence Scale (-1.0 to +1.0)</span>
+                </div>
+                <span class="polarity-pill polarity-positive" id="gaugePolarityPill">POSITIVE</span>
+              </div>
+
+              <!-- Meter Bar -->
+              <div class="valence-meter-wrap">
+                <div class="valence-meter-bar">
+                  <div class="valence-needle-fill" id="gaugeNeedleFill" style="width: 78%; background: #10b981;"></div>
+                </div>
+                <div class="meter-scale-markers">
+                  <span>-1.0 (Distress)</span>
+                  <span>0.0 (Neutral)</span>
+                  <span>+1.0 (Flourishing)</span>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px;">
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">Compound Intensity Score:</span>
+                <strong style="font-size: 1.4rem; color: var(--text-primary);" class="mono" id="gaugeCompoundVal">+0.68</strong>
+              </div>
+            </div>
+
+            <!-- Right: Fine-Grained Emotion Telemetry Signals -->
+            <div class="emotion-signals-card">
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <div class="gauge-title">Emotional Telemetry</div>
+                <span style="font-size: 0.75rem; color: var(--primary-accent); font-weight: 700;">Multi-Label Confidence</span>
+              </div>
+              <div class="emotion-bar-list" id="emotionSignalsList">
+                <!-- Dynamically Populated by App.js -->
+              </div>
+            </div>
+
+            <!-- Full Width: Tailored Action Pathway Box -->
+            <div class="action-pathway-box">
+              <div class="action-pathway-header">
+                <span class="action-badge">Personalized Pathway</span>
+                <h4 style="margin: 0; font-size: 1.15rem;" id="actionPathwayTitle">Self-Care Micro-Intervention</h4>
+              </div>
+              <ul class="action-steps-list" id="actionPathwaySteps">
+                <!-- Dynamically Populated by App.js -->
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SomaSanctuary: Breathwork Pacer & Web Audio Sanctuary
+         ========================================================================= -->
+    <section class="section" id="somatic">
+      <div class="shell">
+        <div class="section-head">
+          <span class="section-kicker">Somatic Regulation & Digital Sanctuary</span>
+          <h2 class="section-title">SomaSanctuary Breathwork & Audio</h2>
+          <p class="section-subtitle">Engage the parasympathetic vagal brake with guided box breathing and procedural ambient soundscapes synthesized directly in your browser.</p>
+        </div>
+
+        <div class="somatic-grid">
+          <!-- Left: Box Breathing Visual Pacer -->
+          <div class="pacer-card">
+            <div>
+              <span class="brand-badge">Autonomic Nervous System Regulation</span>
+              <h3 style="margin-top: 6px;">Box Breathing Pacer</h3>
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">4s Inhale · 4s Hold · 4s Exhale · 4s Hold (Stanford Protocol)</p>
+            </div>
+
+            <!-- Animated Pacer Visual Stage -->
+            <div class="pacer-visual-stage">
+              <div class="pacer-ring-outer"></div>
+              <div class="pacer-orb" id="pacerOrb">4s</div>
+            </div>
+
+            <div>
+              <div class="pacer-phase-label" id="pacerPhaseLabel">Ready to begin</div>
+              <div class="pacer-controls">
+                <button class="btn btn-primary" id="startPacerBtn" type="button">Start Guided Breathwork</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Procedural Web Audio Ambient Synthesizer -->
+          <div class="ambient-sound-card">
+            <span class="brand-badge">Zero-Network Offline Sanctuary</span>
+            <h3 style="margin-top: 6px;">Ambient Sound Generator</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">Synthesized procedurally via Web Audio API for cognitive focus and cortisol recovery.</p>
+
+            <!-- Soundscape Selection Grid -->
+            <div class="soundscapes-grid">
+              <div class="soundscape-tile" data-sound="rain">
+                <div class="sound-title">Gentle Rain Shower</div>
+                <div class="sound-desc">Filtered pink noise mimics natural rainfall</div>
+              </div>
+              <div class="soundscape-tile" data-sound="waves">
+                <div class="sound-title">Ocean Waves Tide</div>
+                <div class="sound-desc">8-second rhythmic oceanic wave swells</div>
+              </div>
+              <div class="soundscape-tile" data-sound="bowl">
+                <div class="sound-title">Tibetan Singing Bowl</div>
+                <div class="sound-desc">432Hz meditative resonant overtone chord</div>
+              </div>
+              <div class="soundscape-tile" data-sound="drone">
+                <div class="sound-title">432Hz Binaural Drone</div>
+                <div class="sound-desc">Deep alpha-theta restorative frequencies</div>
+              </div>
+            </div>
+
+            <!-- Volume Slider -->
+            <div class="sound-volume-row">
+              <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Sanctuary Volume:</span>
+              <input type="range" class="sound-volume-slider" id="soundVolumeSlider" min="0" max="1" step="0.05" value="0.5">
+            </div>
+
+            <!-- 5-4-3-2-1 Sensory Grounding Tool -->
+            <div class="grounding-box">
+              <strong style="font-size: 0.9rem; color: var(--text-primary); display: block; margin-bottom: 4px;">5-4-3-2-1 Sensory Grounding Checklist</strong>
+              <p style="font-size: 0.78rem; color: var(--text-muted);">Anchor attention into your physical room to halt cognitive rumination.</p>
+              <ul class="grounding-checklist">
+                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Name 5 objects you can observe with your eyes right now</span></li>
+                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Notice 4 tactile surfaces you can physically feel</span></li>
+                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Tune into 3 distinct ambient sounds you can hear</span></li>
+                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Identify 2 aromas or scents in your space</span></li>
+                <li class="grounding-item"><input type="checkbox" class="grounding-checkbox"> <span>Notice 1 clean taste or sensation in your mouth</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         Nutritional Psychiatry & Mood-Food Section
+         ========================================================================= -->
+    <section class="section section-alt" id="nutrition">
+      <div class="shell">
+        <div class="section-head">
+          <span class="section-kicker">Gut-Brain Axis & Clinical Nutrition</span>
+          <h2 class="section-title">Mood-Food & Neuro-Nutrition Blueprint</h2>
+          <p class="section-subtitle">Target neurotransmitter synthesis (serotonin, dopamine, GABA) and down-regulate cortisol with evidence-based dietary blueprints.</p>
+        </div>
+
+        <div class="nutrition-card">
+          <!-- Filter Controls -->
+          <div class="nutrition-filters-bar">
+            <div class="filter-group">
+              <label for="nutritionMoodSelect">Target Emotion to Nourish:</label>
+              <select class="preset-select" id="nutritionMoodSelect" style="font-weight: 600;">
+                <option value="stress">Acute Stress & Nervousness (GABA & Cortisol Balance)</option>
+                <option value="fatigue">Exhaustion & Burnout (ATP Mitochondrial Renewal)</option>
+                <option value="joy">Joy & Cognitive Flourishing (BDNF & Vitality)</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Dietary Pattern:</label>
+              <div class="segmented-control">
+                <button class="seg-btn seg-diet-btn active" data-diet="any" type="button">Omnivore / Standard</button>
+                <button class="seg-btn seg-diet-btn" data-diet="vegetarian" type="button">Vegetarian</button>
+                <button class="seg-btn seg-diet-btn" data-diet="vegan" type="button">100% Plant-Based</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Protocol Heading -->
+          <div style="margin-bottom: 22px;">
+            <h3 id="nutritionPlanTitle" style="color: var(--teal-700);">Cortisol Down-Regulation & GABA Balance Protocol</h3>
+            <p id="nutritionPlanTarget" style="font-size: 0.88rem; color: var(--text-muted);">Inhibitory neurotransmitter modulation and adrenal axis recovery</p>
+          </div>
+
+          <!-- Daily 4-Meal Plate Grid -->
+          <div class="meal-plate-grid">
+            <div class="meal-card">
+              <div class="meal-time-tag">Morning Fuel</div>
+              <div class="meal-dish-title">Breakfast</div>
+              <p class="meal-desc" id="mealBreakfastDesc">Warm steel-cut oats with crushed pumpkin seeds, wild blueberries, and organic kefir.</p>
+            </div>
+
+            <div class="meal-card">
+              <div class="meal-time-tag">Midday Sustenance</div>
+              <div class="meal-dish-title">Lunch</div>
+              <p class="meal-desc" id="mealLunchDesc">Wild Alaskan salmon bowl with avocado, wilted spinach, brown rice, and lemon-tahini dressing.</p>
+            </div>
+
+            <div class="meal-card">
+              <div class="meal-time-tag">Afternoon Reset</div>
+              <div class="meal-dish-title">Snack</div>
+              <p class="meal-desc" id="mealSnackDesc">Small handful of sprouted walnuts with chamomile-infused green tea.</p>
+            </div>
+
+            <div class="meal-card">
+              <div class="meal-time-tag">Evening Recovery</div>
+              <div class="meal-dish-title">Dinner</div>
+              <p class="meal-desc" id="mealDinnerDesc">Herb-roasted pasture-raised chicken breast with roasted asparagus and sweet potato wedges.</p>
+            </div>
+          </div>
+
+          <!-- Superfoods & Substances to Moderate -->
+          <div class="nutrition-details-row">
+            <div class="superfoods-box">
+              <h4 style="margin-bottom: 12px; font-size: 0.95rem;">Targeted Neuro-Nutrient Superfoods</h4>
+              <div id="superfoodsList">
+                <!-- Populated by App.js -->
+                <div class="superfood-item"><strong>Pumpkin Seeds:</strong> <span>Highest natural source of bioavailable magnesium for neuromuscular relaxation.</span></div>
+                <div class="superfood-item"><strong>Matcha / Green Tea:</strong> <span>Concentrated L-Theanine induces calm alpha brainwaves without sedation.</span></div>
+                <div class="superfood-item"><strong>Fermented Kefir:</strong> <span>Microbial probiotics synthesize serotonin precursors along the vagus nerve.</span></div>
+              </div>
+            </div>
+
+            <div class="moderate-box">
+              <h4 style="margin-bottom: 12px; font-size: 0.95rem;">Substances to Moderate Today</h4>
+              <div id="moderateList">
+                <!-- Populated by App.js -->
+                <div class="superfood-item"><span style="color:#f43f5e;font-weight:700;">Moderate:</span> <span>High-glycemic processed sugars that trigger cortisol spikes.</span></div>
+                <div class="superfood-item"><span style="color:#f43f5e;font-weight:700;">Moderate:</span> <span>Late afternoon caffeine past 2 PM which suppresses restorative slow-wave sleep.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         Team Morale & Burnout Radar Section
+         ========================================================================= -->
+    <section class="section" id="team-radar">
+      <div class="shell">
+        <div class="section-head">
+          <span class="section-kicker">Organizational Dynamics & Privacy</span>
+          <h2 class="section-title">ResilienceRadar: Team Morale Simulator</h2>
+          <p class="section-subtitle">Model 14-day longitudinal team sentiment, detect impending burnout thresholds early, and activate preventative leadership interventions.</p>
+        </div>
+
+        <div class="team-dashboard-card">
+          <!-- Scenario Selector -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 24px;">
+            <div style="font-weight: 700; font-size: 0.95rem;">Select Team Operating Scenario:</div>
+            <div class="segmented-control">
+              <button class="seg-btn team-scenario-btn active" data-scenario="balanced" type="button">Balanced Sprint</button>
+              <button class="seg-btn team-scenario-btn" data-scenario="thriving" type="button">Thriving Unit</button>
+              <button class="seg-btn team-scenario-btn" data-scenario="burnout" type="button">High-Strain Crunch</button>
+            </div>
+          </div>
+
+          <!-- KPI Strip -->
+          <div class="team-kpis-strip">
+            <div class="team-kpi-card">
+              <div class="team-kpi-label">Burnout Risk Index</div>
+              <div class="team-kpi-val" id="kpiBurnoutRisk">32/100</div>
+              <div class="team-kpi-delta safe">Healthy Baseline</div>
+            </div>
+            <div class="team-kpi-card">
+              <div class="team-kpi-label">Team Resilience Score</div>
+              <div class="team-kpi-val" id="kpiResilienceIndex">74/100</div>
+              <div class="team-kpi-delta safe">Strong Recovery</div>
+            </div>
+            <div class="team-kpi-card">
+              <div class="team-kpi-label">Sentiment Compound</div>
+              <div class="team-kpi-val" id="kpiSentimentComp">+0.18</div>
+              <div class="team-kpi-delta safe">Constructive Mood</div>
+            </div>
+            <div class="team-kpi-card">
+              <div class="team-kpi-label">Distress vs Flourish</div>
+              <div class="team-kpi-val" id="kpiDistressRatio">18% / 82%</div>
+              <div class="team-kpi-delta safe">High Psychological Safety</div>
+            </div>
+          </div>
+
+          <!-- Interactive HTML5 Canvas Chart -->
+          <div class="team-chart-canvas-wrap">
+            <canvas class="team-chart-canvas" id="teamChartCanvas"></canvas>
+          </div>
+
+          <!-- Management Interventions -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 22px;">
+            <h4 style="font-size: 0.95rem; margin-bottom: 8px;">Recommended Team Health Interventions:</h4>
+            <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-secondary);">
+              Maintain regular sprint retrospective check-ins, encourage asynchronous project handoffs, and protect focus blocks by designating "No-Meeting Thursdays" across the engineering unit.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         Confidential Reflection Journal & History Log
+         ========================================================================= -->
+    <section class="section section-alt" id="journal">
+      <div class="shell">
+        <div class="section-head">
+          <span class="section-kicker">Personal Longitudinal Reflection</span>
+          <h2 class="section-title">Confidential Wellness Journal</h2>
+          <p class="section-subtitle">All entries are encrypted and stored in your private browser memory. Zero corporate tracking or external surveillance.</p>
+        </div>
+
+        <div class="journal-section-card">
+          <!-- Toolbar -->
+          <div class="journal-toolbar">
+            <input type="text" class="journal-search-input" id="journalSearchInput" placeholder="Filter reflections by keyword or mood..." aria-label="Search Journal">
+            
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary" id="exportMdBtn" type="button" style="padding: 8px 16px; font-size: 0.85rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export Markdown</span>
+              </button>
+              <button class="btn btn-secondary" id="exportCsvBtn" type="button" style="padding: 8px 16px; font-size: 0.85rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Entries Container -->
+          <div class="journal-entries-list" id="journalEntriesList">
+            <!-- Dynamically populated by App.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       Footer
+       ========================================================================= -->
+  <footer class="footer">
+    <div class="shell footer-content">
+      <div>
+        <strong style="font-size: 1.05rem; color: var(--text-primary); display: block;">MoodMentor</strong>
+        <p class="footer-copy">Enterprise Affective Wellness Platform · Dedicated to human flourishing in the workplace.</p>
+      </div>
+
+      <ul class="footer-links">
+        <li><a href="#analyzer">Mood Analyzer</a></li>
+        <li><a href="#somatic">Somatic Studio</a></li>
+        <li><a href="#nutrition">Neuro-Nutrition</a></li>
+        <li><a href="#team-radar">Team Radar</a></li>
+        <li><a href="#journal">Private Journal</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       Crisis Support Modal (Accessible Globally)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="crisisModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="crisisModalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="crisisModalTitle" style="color: #f43f5e; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>Confidential Support Helplines</span>
+        </h3>
+        <button class="btn-icon" id="crisisModalCloseBtn" aria-label="Close dialog">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">
+        MoodMentor is a self-reflection tool, not a clinical emergency service. If you or someone you know is experiencing severe distress or crisis, compassionate professional support is available 24/7 free of charge:
+      </p>
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px;">
+        <strong>United States & Canada:</strong> Call or text <strong style="color: var(--teal-600);">988</strong> (Suicide & Crisis Lifeline).
+      </div>
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px;">
+        <strong>United Kingdom:</strong> Call <strong style="color: var(--teal-600);">111</strong> (NHS Mental Health Services) or text SHOUT to 85258.
+      </div>
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px;">
+        <strong>India:</strong> Call <strong style="color: var(--teal-600);">14416</strong> (Tele-MANAS National Helpline) or Vandrevala Foundation (9999 666 555).
+      </div>
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px;">
+        <strong>Worldwide / International:</strong> Visit <a href="https://www.befrienders.org" target="_blank" rel="noopener" style="color: var(--primary-accent); font-weight: 700;">befrienders.org</a> or iasp.info for local emergency support.
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript Engine -->
+  <script src="app.js"></script>
+</body>
+</html>
