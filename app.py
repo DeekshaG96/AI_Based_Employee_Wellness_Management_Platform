@@ -2081,31 +2081,98 @@ def render_sidebar():
             st.session_state["mood_journal_entry"] = ""
             st.rerun()
 
+        st.markdown("---")
+        st.markdown(
+            """
+            <div style="font-size: 0.78rem; font-weight: 700; color: #11562a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                Interactive 3D Portal
+            </div>
+            <p style="font-size: 0.75rem; color: #70796f; margin: 0 0 8px 0; line-height: 1.4;">
+                Download the standalone Google Stitch 3D package for offline presentation.
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )
+        try:
+            zip_file = Path("moodmentor-portal.zip")
+            if zip_file.exists():
+                st.download_button(
+                    "Download 3D Portal (.zip)",
+                    data=zip_file.read_bytes(),
+                    file_name="moodmentor-portal.zip",
+                    mime="application/zip",
+                    use_container_width=True,
+                    key="sidebar_download_portal_zip",
+                )
+        except Exception:
+            pass
+
+
+def get_inlined_portal_html(user_name: str = "Alex Rivera") -> str:
+    """Return fully inlined, self-contained MoodMentor Google Stitch 3D Portal HTML."""
+    portal_dir = Path(__file__).parent / "moodmentor-portal"
+    index_file = portal_dir / "index.html"
+    js_file = portal_dir / "app.js"
+    css_file = portal_dir / "styles.css"
+
+    if not index_file.exists():
+        return "<div style='padding: 24px; color: #ba1a1a;'>MoodMentor Portal files not found.</div>"
+
+    html = index_file.read_text(encoding="utf-8")
+    js = js_file.read_text(encoding="utf-8") if js_file.exists() else ""
+    css = css_file.read_text(encoding="utf-8") if css_file.exists() else ""
+
+    if "<style>" in html:
+        html = html.replace("<style>", f"<style>\n{css}\n", 1)
+
+    html = html.replace('<script src="app.js"></script>', f"<script>\n{js}\n</script>")
+    if user_name and user_name != "Alex Rivera":
+        html = html.replace("Alex Rivera", escape(user_name))
+        html = html.replace("Welcome back, User", f"Welcome back, {escape(user_name)}")
+
+    return html
+
 
 def render_workspace():
-    """Render the main protected 6-tab employee wellness workspace."""
+    """Render the main protected 7-tab employee wellness workspace with integrated 3D portal."""
     render_sidebar()
 
     active_user_name = escape(str(st.session_state.get("user_name", "Team Member")))
-    st.markdown(
-        f"""
-        <div class="workspace-header">
-            <div>
-                <span class="workspace-badge">Workforce Well-Being Platform</span>
-                <h1 class="workspace-title">Welcome back, {active_user_name}</h1>
-                <p class="workspace-subtitle">Affective Computing, Real-time Biomarkers & Team Resilience Analytics</p>
-            </div>
-            <div class="workspace-status-badge">
-                <span class="status-pulse"></span>
-                <span>FastAPI Active · 127.0.0.1:8000</span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
-    tab_direct, tab_file, tab_trends, tab_tools, tab_team, tab_arch = st.tabs(
+    # Quick Fullscreen Switch Header
+    col_hdr_l, col_hdr_r = st.columns([1.4, 1.0], gap="medium")
+    with col_hdr_l:
+        st.markdown(
+            f"""
+            <div class="workspace-header" style="margin-bottom: 8px;">
+                <div>
+                    <span class="workspace-badge">Workforce Well-Being Platform</span>
+                    <h1 class="workspace-title">Welcome back, {active_user_name}</h1>
+                    <p class="workspace-subtitle">Affective Computing, Real-time Biomarkers & Team Resilience Analytics</p>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_hdr_r:
+        portal_fullscreen = st.toggle("Full-Screen 3D Zen Portal View", value=False, key="ws_portal_fullscreen_toggle")
+        st.markdown(
+            """
+            <div style="text-align: right; margin-top: 4px;">
+                <span class="status-pulse" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #11562a; margin-right: 4px;"></span>
+                <span style="font-size: 0.75rem; color: #70796f; font-weight: 600;">FastAPI Active · 127.0.0.1:8000</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    if portal_fullscreen:
+        st.components.v1.html(get_inlined_portal_html(user_name=active_user_name), height=960, scrolling=True)
+        return
+
+    tab_portal, tab_direct, tab_file, tab_trends, tab_tools, tab_team, tab_arch = st.tabs(
         [
+            "ZenPortal (Interactive 3D)",
             "MindEcho (Journal)",
             "DataStream (Ingest)",
             "Chronos (Analytics)",
@@ -2114,6 +2181,27 @@ def render_workspace():
             "Veritas Hub (Evaluation)",
         ]
     )
+
+    # ---------------------------------------------------------------------------
+    # TAB 0: INTEGRATED MOODMENTOR 3D PORTAL
+    # ---------------------------------------------------------------------------
+    with tab_portal:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: #faf9f7; padding: 14px 20px; border-radius: 14px; border: 1px solid rgba(192, 201, 189, 0.4);">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background: #d7e8c6; color: #3d4b32; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">Google Stitch Design</span>
+                        <span style="font-size: 0.78rem; color: #70796f;">• Three.js WebGL & Spatial Wellness</span>
+                    </div>
+                    <h3 style="margin: 4px 0 0 0; font-size: 1.35rem; font-weight: 800; color: #11562a;">MoodMentor Interactive 3D Portal</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #404940;">Navigate Daily Check-in, Manager Telemetry, 3D Zen Companion, and Reflection Archive directly below.</p>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.components.v1.html(get_inlined_portal_html(user_name=active_user_name), height=940, scrolling=True)
 
     # ---------------------------------------------------------------------------
     # TAB 1: DIRECT FEEDBACK ANALYSIS
@@ -3183,25 +3271,39 @@ def render_guest_workspace():
             st.session_state.guest_mode = False
             st.rerun()
 
-    st.markdown(
-        """
-        <div class="workspace-header">
-            <div>
-                <span class="workspace-badge">Standalone Guest Environment</span>
-                <h1 class="workspace-title">Mindful Check-in & Verification</h1>
-                <p class="workspace-subtitle">In-Memory Affective Inference, Wellness Interventions & Benchmark Evaluation</p>
+    col_guest_l, col_guest_r = st.columns([1.4, 1.0], gap="medium")
+    with col_guest_l:
+        st.markdown(
+            """
+            <div class="workspace-header" style="margin-bottom: 8px;">
+                <div>
+                    <span class="workspace-badge">Standalone Guest Environment</span>
+                    <h1 class="workspace-title">Mindful Check-in & Verification</h1>
+                    <p class="workspace-subtitle">In-Memory Affective Inference, Wellness Interventions & Benchmark Evaluation</p>
+                </div>
             </div>
-            <div class="workspace-status-badge">
-                <span class="status-pulse"></span>
-                <span>In-Memory Pipeline Active</span>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_guest_r:
+        guest_portal_fullscreen = st.toggle("Full-Screen 3D Zen Portal View", value=False, key="guest_ws_portal_toggle")
+        st.markdown(
+            """
+            <div style="text-align: right; margin-top: 4px;">
+                <span class="status-pulse" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #11562a; margin-right: 4px;"></span>
+                <span style="font-size: 0.75rem; color: #70796f; font-weight: 600;">In-Memory Pipeline Active</span>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
 
-    guest_tab1, guest_tab2, guest_tab3, guest_tab4, guest_tab5 = st.tabs(
+    if guest_portal_fullscreen:
+        st.components.v1.html(get_inlined_portal_html(user_name="Guest Explorer"), height=960, scrolling=True)
+        return
+
+    guest_tab_portal, guest_tab1, guest_tab2, guest_tab3, guest_tab4, guest_tab5 = st.tabs(
         [
+            "ZenPortal (Interactive 3D)",
             "MindEcho (Journal)",
             "DataStream (Ingest)",
             "SomaSanctuary (Wellness)",
@@ -3209,6 +3311,24 @@ def render_guest_workspace():
             "Veritas Hub (Evaluation)",
         ]
     )
+
+    with guest_tab_portal:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: #faf9f7; padding: 14px 20px; border-radius: 14px; border: 1px solid rgba(192, 201, 189, 0.4);">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background: #adf3b8; color: #00210b; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">Google Stitch Design</span>
+                        <span style="font-size: 0.78rem; color: #70796f;">• Three.js WebGL & Spatial Wellness</span>
+                    </div>
+                    <h3 style="margin: 4px 0 0 0; font-size: 1.35rem; font-weight: 800; color: #11562a;">MoodMentor Interactive 3D Portal</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #404940;">Explore Daily Check-in, Manager Telemetry, 3D Zen Companion, and Reflection Archive directly below.</p>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.components.v1.html(get_inlined_portal_html(user_name="Guest Explorer"), height=940, scrolling=True)
 
     with guest_tab1:
         with st.container(border=True):

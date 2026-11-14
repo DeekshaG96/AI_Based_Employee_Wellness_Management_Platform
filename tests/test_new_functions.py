@@ -24,6 +24,7 @@ def test_transformer_analysis_returns_probabilities():
     result = run_transformer_analysis("I feel nervous about the upcoming project evaluation.")
     assert "dominant_emotion" in result
     assert "top_emotions" in result
+    
     assert len(result["top_emotions"]) > 0
     assert "all_scores" in result
 
