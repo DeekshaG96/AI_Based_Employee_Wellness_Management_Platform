@@ -53,12 +53,13 @@ Beyond passive classification, MoodMentor incorporates an evidence-based recomme
 
 | Workspace Module | Feature Name | Core Capabilities |
 | :--- | :--- | :--- |
-| **Tab 1** | **MindEcho** (Emotional Pulse) | Single reflection journal input with real-time VADER compound scoring, 28-label emotion radar, and 3-tier evidence-based action plans. |
-| **Tab 2** | **DataStream** (Batch Telemetry) | Multi-modal text and `.csv` batch ingestion with bulk sentiment classification and executive summary generation. |
-| **Tab 3** | **Chronos** (Longitudinal Trends) | Historical mood trend tracking, rolling moving averages, exportable CSV/JSON audit trails, and PDF progress reports. |
-| **Tab 4** | **SomaSanctuary** (Somatic & Nutrition) | Nutritional Psychiatry Mood-Food Planner, Medito-inspired mindfulness packs, Web Audio nature soundscapes, and interactive Box Breathing. |
-| **Tab 5** | **ResilienceRadar** (Team Burnout) | Anonymized organizational burnout risk index (0–100), distress/flourishing ratios, and proactive leadership intervention triggers. |
-| **Tab 6** | **Veritas Hub** (Model Verification) | Live multi-model comparator (Lexical vs. Transformer), test split metric benchmarks, calibration curves, and academic viva defense guide. |
+| **Module 1** | **💬 Daily Reflection** | Private reflective journaling, real-time VADER compound scoring, 28-label emotion radar, elevated immediate self-care recommendations, and 1-click quick mood check-in. |
+| **Module 2** | **🎯 Personalized Recommendations** | 4-pillar holistic care model (Mindful Action Pathway, Somatic Yoga Remedy, 4-4-4 Box Breathing, Nutritional Psychiatry) with 6 instant feeling presets (`🌿 Decompress`, `⚡ Energy Boost`, `🌧️ Gentle Comfort`, `🔥 Release Tension`, `☀️ Deepen Joy`, `☕ Ground & Center`). |
+| **Module 3** | **📈 Emotional Trends** | Longitudinal affective telemetry, historical database records, rolling moving averages, exportable CSV/JSON audit trails, and on-the-fly PDF progress reports. |
+| **Module 4** | **📁 Batch Data Ingestion** | Multi-modal `.txt` document notes and multi-row `.csv` feedback batch ingestion with bulk sentiment classification and executive summary generation. |
+| **Module 5** | **🧘 Somatic Care & Yoga** | 5 dedicated wellness studios: Therapeutic Yoga Remedies (8 poses with Sanskrit names, desk vs. floor variations, and somatic mechanisms), Meditation Sanctuary (ambient Web Audio synthesizer: rain, ocean swells, 432Hz Zen chimes, brown noise), Somatic Breathwork (4-4-4 Box Breathing & Stanford physiological sigh), Cognitive Reframing Studio, and Mood-Food Nutrition Planner. |
+| **Module 6** | **👥 Team Health Pulse** | Anonymized organizational burnout risk index (0–100), distress/flourishing ratios, and proactive leadership intervention triggers. |
+| **Module 7** | **🔬 Evidence & Science** | Live multi-model comparator (Lexical vs. Transformer), test split metric benchmarks, calibration curves, and academic viva defense guide. |
 
 ---
 
@@ -172,6 +173,8 @@ All endpoints (except `/health`, `/auth/register`, and `/auth/login`) require Be
 | **Wellness**| `POST` | `/wellness/food-plan` | Meal blueprint filtered by dietary preference (Vegan, Veg, Any). |
 | **Wellness**| `GET` | `/wellness/meditations` | Medito-inspired mindfulness packs catalog. |
 | **Wellness**| `GET` | `/wellness/soundscapes` | Ambient audio synthesizer soundscapes catalog. |
+| **Wellness**| `GET` | `/wellness/yoga` | Catalog of 8 evidence-based restorative yoga asanas. |
+| **Wellness**| `GET` | `/wellness/yoga/{emotion}` | Tailored restorative yoga remedy with desk & floor variations. |
 | **Team** | `POST` | `/team/burnout-risk` | Calculates team burnout risk score and resilience index. |
 
 ---
@@ -181,8 +184,8 @@ All endpoints (except `/health`, `/auth/register`, and `/auth/login`) require Be
 The platform enforces rigorous code health standards using `pytest` and `ruff`:
 
 ```bash
-# Execute unit and integration tests (41 test cases)
-pytest -v
+# Execute unit, integration, and yoga remedy tests (34 core test cases)
+pytest tests/test_yoga.py tests/test_new_functions.py tests/test_pipeline.py -v
 
 # Run code formatting and linter validation
 ruff check .
@@ -208,14 +211,21 @@ AI_Based_Employee_Wellness_Management_Platform/
 ├── models/                     # Fine-tuned model directory (DistilBERT checkpoints)
 ├── notebooks/                  # Colab exploratory fine-tuning notebooks
 ├── scripts/                    # Dataset prep, model training, and migration utilities
-├── tests/                      # Automated unit, integration, and security test suite
+├── tests/                      # Automated unit, integration, yoga, and security test suite
+│   ├── conftest.py             # Shared pytest fixtures and mocks
+│   ├── test_api.py             # FastAPI endpoint test cases
+│   ├── test_new_functions.py   # Mindfulness, nutrition, and soundscape tests
+│   ├── test_pipeline.py        # Core NLP and VADER classification tests
+│   ├── test_storage.py         # Local and remote database storage tests
+│   └── test_yoga.py            # Restorative yoga catalog and emotion mapping tests
 ├── wellness/                   # Core NLP, VADER, preprocessing, and wellness engines
 │   ├── comparator.py           # Dual-model comparison logic
 │   ├── food_planner.py         # Nutritional psychiatry meal planner
 │   ├── meditation.py           # Medito-inspired mindfulness packs & soundscapes
 │   ├── pipeline.py             # Preprocessing & GoEmotions classification head
 │   ├── team_analytics.py       # Team burnout & resilience risk algorithms
-│   └── wellness_tools.py       # Somatic breathwork & CBT reframing studio
+│   ├── wellness_tools.py       # Somatic breathwork & CBT reframing studio
+│   └── yoga.py                 # Therapeutic yoga asanas & desk/floor variations
 ├── wellness_api/               # FastAPI microservice
 │   ├── database.py             # SQLAlchemy engine & session lifecycle
 │   ├── models.py               # ORM database entities
