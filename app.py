@@ -116,7 +116,7 @@ def svg_icon(name: str, size: int = 16, color: str = "currentColor", extra_class
 
 # EquiMind Executive Visual System: High-Class Luxury Aesthetic & Editorial Serif Brand
 CUSTOM_CSS = """<style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700&display=swap');
 
 /* Award-Winning Awwwards/Apple-Grade UI Overrides */
 [data-testid="stDecoration"] {
@@ -1965,7 +1965,7 @@ def render_landing_hero_3d() -> str:
           font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
           color: #0f172a;
           overflow: hidden;
-          height: 350px;
+          height: 335px;
           user-select: none;
         }
         .hero-3d-card {
@@ -1974,11 +1974,12 @@ def render_landing_hero_3d() -> str:
           border-radius: 20px;
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.78) 55%, rgba(241, 245, 249, 0.72) 100%);
           border: 1.5px solid rgba(204, 251, 241, 0.85);
-          box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.14), 0 4px 16px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+          box-shadow: 0 14px 34px -8px rgba(15, 118, 110, 0.12), 0 2px 8px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.95);
           position: relative;
           overflow: hidden;
           display: flex;
           flex-direction: column;
+          justify-content: space-between;
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
         }
@@ -1986,7 +1987,7 @@ def render_landing_hero_3d() -> str:
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 10px 16px 4px;
+          padding: 10px 16px 2px;
           z-index: 5;
         }
         .aura-badge {
@@ -2027,8 +2028,8 @@ def render_landing_hero_3d() -> str:
           letter-spacing: 0.02em;
         }
         #webgl-viewport {
-          height: 250px;
-          min-height: 250px;
+          height: 215px;
+          min-height: 215px;
           width: 100%;
           cursor: grab;
           position: relative;
@@ -2454,16 +2455,39 @@ div[data-testid="stMarkdownContainer"] > h4,
   line-height: 1.25 !important;
 }
 
-/* Crisp Clean Body & Label Typography */
+/* Crisp Clean Body & Label Typography (Excluding Icon Fonts) */
 html, body, [data-testid="stAppViewContainer"],
-p, span, label, div,
-input, textarea, select, button,
+p, label,
 [data-testid="stMarkdownContainer"] p,
 [data-testid="stWidgetLabel"] label,
 [data-baseweb="tab"] {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Protect Streamlit Material Symbols & Password Visibility Toggle */
+[data-testid="stIconMaterial"],
+.material-symbols-rounded,
+.material-symbols-outlined,
+.material-icons,
+[data-baseweb="base-input"] button,
+[data-baseweb="base-input"] button *,
+button[aria-label*="password" i],
+button[aria-label*="password" i] *,
+button[aria-label*="visibility" i],
+button[aria-label*="visibility" i] * {
+  font-family: "Material Symbols Rounded", "Material Icons" !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  word-wrap: normal !important;
+  white-space: nowrap !important;
+  direction: ltr !important;
+  -webkit-font-smoothing: antialiased !important;
+  text-rendering: optimizeLegibility !important;
 }
 
 /* Secondary Button Upgrade: Pill Silhouette with Luminous Specular Rim */
@@ -2661,35 +2685,9 @@ table tbody tr:hover td {
 """, unsafe_allow_html=True)
 
         try:
-            render_iframe(render_landing_hero_3d(), height=365)
+            render_iframe(render_landing_hero_3d(), height=350)
         except Exception:
             pass
-
-        st.markdown("""
-<div style="display: flex; flex-direction: column; gap: 11px; margin-top: 14px; margin-bottom: 24px;">
-    <div style="display: flex; align-items: center; gap: 14px; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.95); border-radius: 14px; padding: 12px 16px; box-shadow: var(--card-3d-shadow); backdrop-filter: blur(10px); transform-style: preserve-3d; transition: transform 0.3s ease, box-shadow 0.3s ease;">
-        <div style="width: 38px; height: 38px; min-width: 38px; border-radius: 10px; background: linear-gradient(135deg, #ccfbf1, #99f6e4); display: grid; place-items: center; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(45, 212, 191, 0.25);">🧘</div>
-        <div>
-            <strong style="color: #0f172a; font-size: 0.90rem;">SomaSanctuary Breathwork & Restorative Yoga</strong>
-            <div style="color: #64748b; font-size: 0.79rem;">Animated 4-4-4 breathing pacer, Zen singing bowls & desk-friendly yoga remedies.</div>
-        </div>
-    </div>
-    <div style="display: flex; align-items: center; gap: 14px; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.95); border-radius: 14px; padding: 12px 16px; box-shadow: var(--card-3d-shadow); backdrop-filter: blur(10px); transform-style: preserve-3d; transition: transform 0.3s ease, box-shadow 0.3s ease;">
-        <div style="width: 38px; height: 38px; min-width: 38px; border-radius: 10px; background: linear-gradient(135deg, #e0f2fe, #bae6fd); display: grid; place-items: center; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(56, 189, 248, 0.25);">✍️</div>
-        <div>
-            <strong style="color: #0f172a; font-size: 0.90rem;">MindEcho Reflective Journal</strong>
-            <div style="color: #64748b; font-size: 0.79rem;">1-click mood check-ins, gratitude templates & compassionate cognitive reframing.</div>
-        </div>
-    </div>
-    <div style="display: flex; align-items: center; gap: 14px; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.95); border-radius: 14px; padding: 12px 16px; box-shadow: var(--card-3d-shadow); backdrop-filter: blur(10px); transform-style: preserve-3d; transition: transform 0.3s ease, box-shadow 0.3s ease;">
-        <div style="width: 38px; height: 38px; min-width: 38px; border-radius: 10px; background: linear-gradient(135deg, #fef3c7, #fde68a); display: grid; place-items: center; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);">🔒</div>
-        <div>
-            <strong style="color: #0f172a; font-size: 0.90rem;">Private & Confidential Architecture</strong>
-            <div style="color: #64748b; font-size: 0.79rem;">Enterprise AES-256 encryption with strict k-anonymity (n &ge; 5) protection.</div>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
     # Right Column: Unified Luxury Frosted Glass Sign-in Card
     with col_card, st.container(border=True):
@@ -2773,6 +2771,34 @@ table tbody tr:hover td {
     🔒 Confidential & Secure Reflection Space · Enterprise Protected
 </div>
 """, unsafe_allow_html=True)
+
+    # Full-Width 3-Pillar Foundation Grid (Perfect Visual Balance & Harmony)
+    st.markdown('<div style="height: 22px;"></div>', unsafe_allow_html=True)
+    f1, f2, f3 = st.columns(3, gap="medium")
+    with f1:
+        st.markdown("""
+        <div style="height: 100%; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.75) 100%); border: 1.5px solid rgba(204, 251, 241, 0.88); border-radius: 18px; padding: 20px 22px; box-shadow: 0 10px 28px -4px rgba(15, 118, 110, 0.08), inset 0 1px 1px #ffffff; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #ccfbf1, #99f6e4); display: grid; place-items: center; font-size: 1.3rem; box-shadow: 0 4px 12px rgba(45, 212, 191, 0.25);">🧘</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-weight: 700; color: #044e47; font-size: 1.05rem; letter-spacing: -0.015em; margin-top: 6px;">SomaSanctuary Breathwork</div>
+            <div style="color: #64748b; font-size: 0.82rem; line-height: 1.6;">Animated 4-4-4 breathing pacer, Zen singing bowls & desk-friendly restorative yoga remedies.</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with f2:
+        st.markdown("""
+        <div style="height: 100%; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.75) 100%); border: 1.5px solid rgba(204, 251, 241, 0.88); border-radius: 18px; padding: 20px 22px; box-shadow: 0 10px 28px -4px rgba(15, 118, 110, 0.08), inset 0 1px 1px #ffffff; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #e0f2fe, #bae6fd); display: grid; place-items: center; font-size: 1.3rem; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);">✍️</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-weight: 700; color: #044e47; font-size: 1.05rem; letter-spacing: -0.015em; margin-top: 6px;">MindEcho Reflection Studio</div>
+            <div style="color: #64748b; font-size: 0.82rem; line-height: 1.6;">1-click mood check-ins, gratitude templates & compassionate CBT cognitive reframing.</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with f3:
+        st.markdown("""
+        <div style="height: 100%; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.75) 100%); border: 1.5px solid rgba(204, 251, 241, 0.88); border-radius: 18px; padding: 20px 22px; box-shadow: 0 10px 28px -4px rgba(15, 118, 110, 0.08), inset 0 1px 1px #ffffff; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #fef3c7, #fde68a); display: grid; place-items: center; font-size: 1.3rem; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);">🔒</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-weight: 700; color: #044e47; font-size: 1.05rem; letter-spacing: -0.015em; margin-top: 6px;">Confidential Architecture</div>
+            <div style="color: #64748b; font-size: 0.82rem; line-height: 1.6;">Enterprise AES-256 encryption with strict k-anonymity (n &ge; 5) privacy protection.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def render_mood_food_planner_view(default_emotion: str = "fear", key_prefix: str = "tools"):
@@ -5092,10 +5118,10 @@ def render_workspace():
     # 1-Click SOS Vagus Nerve Reset (Immediate Calm Modal)
     render_sos_vagal_reset_banner()
 
-    # Quick Access Micro-Intervention Trigger
+    # Quick Access Micro-Intervention Trigger (Neatly Aligned Right Header Bar)
     if not st.session_state.get("show_sos_reset_modal", False):
-        _, h_sos_col = st.columns([3.2, 1])
-        with h_sos_col:
+        _sos_spacer, sos_btn_col = st.columns([3.8, 1.2], gap="small")
+        with sos_btn_col:
             if st.button("⚡ 60s SOS Calm Reset", key="header_sos_reset_btn", type="secondary", width="stretch", help="1-click physiological sigh & parasympathetic de-escalation"):
                 st.session_state["show_sos_reset_modal"] = True
                 st.rerun()
