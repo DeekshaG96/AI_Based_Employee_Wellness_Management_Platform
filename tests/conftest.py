@@ -1,15 +1,14 @@
 """Pytest configuration and test isolation fixtures."""
 
 import os
-import sys
 from pathlib import Path
 
 # Mark test environment so all database calls use local SQLite
 os.environ["TESTING"] = "1"
 os.environ["WELLNESS_FAST_TEST"] = "1"
 
-import pytest
 import nltk
+import pytest
 
 # Ensure local workspace NLTK directory is preferred
 _local_nltk = Path(__file__).resolve().parents[1] / "nltk_data"

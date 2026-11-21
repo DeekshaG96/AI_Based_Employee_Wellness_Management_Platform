@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from html import escape
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import plotly.express as px
@@ -50,6 +51,7 @@ from wellness.team_analytics import calculate_team_burnout_risk, generate_synthe
 from wellness.wellness_tools import (
     get_cognitive_reframes,
     render_box_breathing_widget,
+    render_zen_companion_studio_widget,
 )
 from wellness.yoga import (
     get_all_yoga_remedies,
@@ -1841,9 +1843,8 @@ def render_landing_and_auth():
 """, unsafe_allow_html=True)
 
     # Right Column: Unified Luxury Frosted Glass Sign-in Card
-    with col_card:
-        with st.container(border=True):
-            st.markdown("""
+    with col_card, st.container(border=True):
+        st.markdown("""
 <div style="text-align: center; margin-bottom: 14px;">
     <div class="disney-brand-title" style="font-size: 2.85rem; line-height: 1;">EquiMind</div>
     <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.05rem; color: #0f766e; margin-top: 2px;">
@@ -1852,73 +1853,73 @@ def render_landing_and_auth():
 </div>
 """, unsafe_allow_html=True)
 
-            tab_signin, tab_register = st.tabs(["Sign In", "Create Account"])
+        tab_signin, tab_register = st.tabs(["Sign In", "Create Account"])
 
-            with tab_signin:
-                with st.form("portal_login_form"):
-                    login_email = st.text_input(
-                        "Work Email Address",
-                        value="alex@example.com",
-                        placeholder="your.name@enterprise.com",
-                        key="login_email_input"
-                    )
-                    login_password = st.text_input(
-                        "Password",
-                        value="Password123!",
-                        type="password",
-                        placeholder="Enter your password",
-                        key="login_password_input"
-                    )
-                    st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
-                    login_submitted = st.form_submit_button(
-                        "Sign In to EquiMind →",
-                        type="primary",
-                        use_container_width=True,
-                    )
+        with tab_signin:
+            with st.form("portal_login_form"):
+                login_email = st.text_input(
+                    "Work Email Address",
+                    value="alex@example.com",
+                    placeholder="your.name@enterprise.com",
+                    key="login_email_input"
+                )
+                login_password = st.text_input(
+                    "Password",
+                    value="Password123!",
+                    type="password",
+                    placeholder="Enter your password",
+                    key="login_password_input"
+                )
+                st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
+                login_submitted = st.form_submit_button(
+                    "Sign In to EquiMind →",
+                    type="primary",
+                    use_container_width=True,
+                )
 
-                if login_submitted:
-                    if not login_email or not login_password:
-                        st.warning("Please enter your work email and password to proceed.")
-                    else:
-                        with st.spinner("Connecting to EquiMind secure environment..."):
-                            success = False
-                            try:
-                                auth = api_login(login_email.strip(), login_password)
-                                _apply_auth(auth)
-                                success = True
-                            except Exception:
-                                st.session_state.logged_in = True
-                                st.session_state.user_id = 7
-                                st.session_state.user_name = "Alex Chen" if "alex" in login_email.lower() else login_email.split("@")[0].title()
-                                st.session_state.user_email = login_email.strip()
-                                st.session_state.api_token = "equimind_session_active"
-                                success = True
+            if login_submitted:
+                if not login_email or not login_password:
+                    st.warning("Please enter your work email and password to proceed.")
+                else:
+                    with st.spinner("Connecting to EquiMind secure environment..."):
+                        success = False
+                        try:
+                            auth = api_login(login_email.strip(), login_password)
+                            _apply_auth(auth)
+                            success = True
+                        except Exception:
+                            st.session_state.logged_in = True
+                            st.session_state.user_id = 7
+                            st.session_state.user_name = "Alex Chen" if "alex" in login_email.lower() else login_email.split("@")[0].title()
+                            st.session_state.user_email = login_email.strip()
+                            st.session_state.api_token = "equimind_session_active"
+                            success = True
 
-                            if success:
-                                st.success("Access authorized! Opening workspace...")
-                                st.rerun()
+                        if success:
+                            st.success("Access authorized! Opening workspace...")
+                            st.rerun()
 
-            with tab_register:
-                with st.form("portal_register_form"):
-                    reg_name = st.text_input("Full Name", placeholder="e.g. Alex Chen", key="reg_name_input")
-                    reg_email = st.text_input("Work Email Address", placeholder="your.name@enterprise.com", key="reg_email_input")
-                    reg_password = st.text_input("Password", type="password", placeholder="Minimum 8 characters", help="Minimum 8 characters.", key="reg_password_input")
-                    st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
-                    reg_submitted = st.form_submit_button("Create Profile →", type="primary", use_container_width=True)
-                if reg_submitted:
-                    if not reg_name or not reg_email or not reg_password:
-                        st.warning("Please fill in all registration fields.")
-                    else:
-                        with st.spinner("Provisioning profile..."):
-                            try:
-                                auth = api_register(reg_name, reg_email, reg_password)
-                                _apply_auth(auth)
-                                st.success("Profile created! Entering workspace...")
-                                st.rerun()
-                            except ApiError as exc:
-                                st.error(str(exc))
+        with tab_register:
+            with st.form("portal_register_form"):
+                reg_name = st.text_input("Full Name", placeholder="e.g. Alex Chen", key="reg_name_input")
+                reg_email = st.text_input("Work Email Address", placeholder="your.name@enterprise.com", key="reg_email_input")
+                reg_password = st.text_input("Password", type="password", placeholder="Minimum 8 characters", help="Minimum 8 characters.", key="reg_password_input")
+                st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
+                reg_submitted = st.form_submit_button("Create Profile →", type="primary", use_container_width=True)
+            if reg_submitted:
+                if not reg_name or not reg_email or not reg_password:
+                    st.warning("Please fill in all registration fields.")
+                else:
+                    with st.spinner("Provisioning profile..."):
+                        try:
+                            auth = api_register(reg_name, reg_email, reg_password)
+                            _apply_auth(auth)
+                            st.success("Profile created! Entering workspace...")
+                            st.rerun()
+                        except ApiError as exc:
+                            st.error(str(exc))
 
-            st.markdown("""
+        st.markdown("""
 <div style="text-align: center; margin-top: 14px; font-size: 0.72rem; color: #64748b; line-height: 1.4;">
     Demo credentials pre-filled · 🔒 AES-256 Protected Sanctuary
 </div>
@@ -2880,29 +2881,27 @@ def render_recommendations_view():
         fp = get_mood_food_plan(sel_food_emo)
         
         fc1, fc2 = st.columns([1.5, 1], gap="medium")
-        with fc1:
-            with st.container(border=True):
-                st.markdown(f"#### 🍽️ {fp.get('title', 'Nutritional Blueprint')}")
-                st.markdown(f"**Neurochemical Goal:** `{fp.get('neurochemical_objective')}`")
-                st.write(fp.get("scientific_basis", ""))
-                
-                meals = fp.get("curated_meals", {})
-                if meals:
-                    st.markdown("##### Curated Day Menu:")
-                    st.markdown(f"- **Breakfast:** {meals.get('breakfast')}")
-                    st.markdown(f"- **Lunch:** {meals.get('lunch')}")
-                    st.markdown(f"- **Snack & Tea:** {meals.get('snack')}")
-                    st.markdown(f"- **Dinner:** {meals.get('dinner')}")
-        with fc2:
-            with st.container(border=True):
-                st.markdown("##### 🥑 Superfoods & Allies:")
-                for sf in fp.get("superfoods", []):
-                    st.markdown(f"**{sf.get('food')}**\n*{sf.get('benefit')}*")
-                
-                st.markdown("---")
-                st.markdown("##### 🚫 Foods to Limit:")
-                for av in fp.get("foods_to_avoid", []):
-                    st.markdown(f"- {av}")
+        with fc1, st.container(border=True):
+            st.markdown(f"#### 🍽️ {fp.get('title', 'Nutritional Blueprint')}")
+            st.markdown(f"**Neurochemical Goal:** `{fp.get('neurochemical_objective')}`")
+            st.write(fp.get("scientific_basis", ""))
+            
+            meals = fp.get("curated_meals", {})
+            if meals:
+                st.markdown("##### Curated Day Menu:")
+                st.markdown(f"- **Breakfast:** {meals.get('breakfast')}")
+                st.markdown(f"- **Lunch:** {meals.get('lunch')}")
+                st.markdown(f"- **Snack & Tea:** {meals.get('snack')}")
+                st.markdown(f"- **Dinner:** {meals.get('dinner')}")
+        with fc2, st.container(border=True):
+            st.markdown("##### 🥑 Superfoods & Allies:")
+            for sf in fp.get("superfoods", []):
+                st.markdown(f"**{sf.get('food')}**\n*{sf.get('benefit')}*")
+            
+            st.markdown("---")
+            st.markdown("##### 🚫 Foods to Limit:")
+            for av in fp.get("foods_to_avoid", []):
+                st.markdown(f"- {av}")
 
         # Developer Diagnostic Expander (Preserving 100% of the /recommend REST API test harness)
         with st.expander("🔧 Developer Diagnostic: Inspect Backend /recommend REST API Endpoint (Optional)", expanded=False):
@@ -2978,7 +2977,7 @@ def render_model_comparator_view():
 
 
 
-def set_active_view(target_view: str, soma_tool: str = None):
+def set_active_view(target_view: str, soma_tool: str | None = None):
     """Safely queue a navigation switch before sidebar instantiation."""
     st.session_state["nav_redirect"] = target_view
     if soma_tool:
@@ -3217,7 +3216,7 @@ def render_workspace():
             )
 
             with st.expander("💬 Attach Context Note / Cognitive Reframe (Optional)", expanded=False):
-                reflection_note = st.text_area(
+                st.text_area(
                     "Contextual Note or Cognitive Reframe:",
                     height=60,
                     placeholder="E.g., Trigger: 4 back-to-back reviews. Reframe: The team completed our core launch safely.",
@@ -3369,7 +3368,6 @@ def render_workspace():
                     # Elevate Tailored Recommendations & Restorative Yoga Remedy
                     rec = report.recommendations
                     yoga_remedy = get_yoga_remedy_for_emotion(report.dominant_emotion)
-                    food_plan = get_mood_food_plan(report.dominant_emotion)
 
                     st.markdown("---")
                     st.markdown(
@@ -3391,71 +3389,69 @@ def render_workspace():
                     )
 
                     rec_col1, rec_col2 = st.columns([1.4, 1.2], gap="medium")
-                    with rec_col1:
-                        with st.container(border=True):
-                            st.markdown(f"#### 💡 {rec.get('title', 'Self-Care Focus')}")
-                            st.markdown(
-                                f"<span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: #475569; font-weight: 600;'>Category: {rec.get('category', 'Well-Being')}</span> · <span style='background: #ecfeff; border: 1px solid #a5f3fc; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: #0e7490; font-weight: 600;'>Urgency: {rec.get('urgency', 'Low')}</span>",
-                                unsafe_allow_html=True,
-                            )
-                            st.write(rec.get("summary", ""))
+                    with rec_col1, st.container(border=True):
+                        st.markdown(f"#### 💡 {rec.get('title', 'Self-Care Focus')}")
+                        st.markdown(
+                            f"<span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: #475569; font-weight: 600;'>Category: {rec.get('category', 'Well-Being')}</span> · <span style='background: #ecfeff; border: 1px solid #a5f3fc; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: #0e7490; font-weight: 600;'>Urgency: {rec.get('urgency', 'Low')}</span>",
+                            unsafe_allow_html=True,
+                        )
+                        st.write(rec.get("summary", ""))
 
-                            if rec.get("is_crisis"):
-                                st.error(
-                                    "**Confidential Crisis Protocol**: If you may be in immediate danger or severe distress, please connect with a qualified crisis line or emergency medical professional immediately (US/CA: 988, UK: 111, Global: befrienders.org)."
-                                )
-
-                            action_paths = rec.get("action_paths", [])
-                            if action_paths:
-                                path = action_paths[0]
-                                st.markdown(f"##### Recommended Pathway: {path.get('title', 'Action Steps')} (`⏱️ {path.get('duration', '5 min')}`)")
-                                st.write(path.get("description", ""))
-                                for s_idx, step in enumerate(path.get("steps", []), 1):
-                                    st.markdown(f"**Step {s_idx}:** {step}")
-
-                            st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
-                            act_b1, act_b2 = st.columns([1.2, 1], gap="small")
-                            with act_b1:
-                                if st.button("✅ Adopt Suggestion (Accept)", type="primary", use_container_width=True, key="elevated_adopt_rec_btn"):
-                                    if "suggestion_feedback" not in st.session_state:
-                                        st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
-                                    st.session_state["suggestion_feedback"]["accepted"] += 1
-                                    st.toast("Suggestion adopted! Recorded in your personal care milestones.", icon="🎯")
-                                    st.rerun()
-                            with act_b2:
-                                if st.button("🎯 Open Full Hub →", type="secondary", use_container_width=True, key="elevated_open_hub_btn"):
-                                    set_active_view("🎯 Personalized Recommendations")
-                                    st.rerun()
-
-                    with rec_col2:
-                        with st.container(border=True):
-                            st.markdown(f"#### 🧘 {yoga_remedy.get('icon', '🧘')} {yoga_remedy.get('english_name', 'Restorative Asana')}")
-                            st.markdown(
-                                f"<span style='color: #0f766e; font-weight: 700; font-size: 0.82rem;'>Sanskrit: {yoga_remedy.get('sanskrit_name', 'Asana')}</span> · <span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;'>⏱️ {yoga_remedy.get('duration', '3 mins')}</span>",
-                                unsafe_allow_html=True,
-                            )
-                            st.markdown(
-                                f"<p style='font-size: 0.82rem; color: #475569; margin: 6px 0;'><strong>Somatic Mechanism:</strong> {yoga_remedy.get('somatic_mechanism', 'Eases tension and restores autonomic balance.')}</p>",
-                                unsafe_allow_html=True,
+                        if rec.get("is_crisis"):
+                            st.error(
+                                "**Confidential Crisis Protocol**: If you may be in immediate danger or severe distress, please connect with a qualified crisis line or emergency medical professional immediately (US/CA: 988, UK: 111, Global: befrienders.org)."
                             )
 
-                            yoga_p_tab1, yoga_p_tab2 = st.tabs(["🖥️ Desk Seated", "🧘 Floor Mat"])
-                            with yoga_p_tab1:
-                                st.write(yoga_remedy.get("office_variation", "Sit tall, breathe deeply, and gently decompress."))
-                            with yoga_p_tab2:
-                                for s in yoga_remedy.get("steps_floor", []):
-                                    st.write(f"- {s}")
+                        action_paths = rec.get("action_paths", [])
+                        if action_paths:
+                            path = action_paths[0]
+                            st.markdown(f"##### Recommended Pathway: {path.get('title', 'Action Steps')} (`⏱️ {path.get('duration', '5 min')}`)")
+                            st.write(path.get("description", ""))
+                            for s_idx, step in enumerate(path.get("steps", []), 1):
+                                st.markdown(f"**Step {s_idx}:** {step}")
 
-                            st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-                            y_b1, y_b2 = st.columns([1, 1], gap="small")
-                            with y_b1:
-                                if st.button("🧘 Somatic Care →", type="secondary", use_container_width=True, key="elevated_open_yoga_btn"):
-                                    set_active_view("🧘 Somatic Care & Yoga", soma_tool="yoga")
-                                    st.rerun()
-                            with y_b2:
-                                if st.button("🌬️ 2-Min Reset →", type="secondary", use_container_width=True, key="elevated_open_breath_btn"):
-                                    set_active_view("🧘 Somatic Care & Yoga", soma_tool="breath")
-                                    st.rerun()
+                        st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
+                        act_b1, act_b2 = st.columns([1.2, 1], gap="small")
+                        with act_b1:
+                            if st.button("✅ Adopt Suggestion (Accept)", type="primary", use_container_width=True, key="elevated_adopt_rec_btn"):
+                                if "suggestion_feedback" not in st.session_state:
+                                    st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
+                                st.session_state["suggestion_feedback"]["accepted"] += 1
+                                st.toast("Suggestion adopted! Recorded in your personal care milestones.", icon="🎯")
+                                st.rerun()
+                        with act_b2:
+                            if st.button("🎯 Open Full Hub →", type="secondary", use_container_width=True, key="elevated_open_hub_btn"):
+                                set_active_view("🎯 Personalized Recommendations")
+                                st.rerun()
+
+                    with rec_col2, st.container(border=True):
+                        st.markdown(f"#### 🧘 {yoga_remedy.get('icon', '🧘')} {yoga_remedy.get('english_name', 'Restorative Asana')}")
+                        st.markdown(
+                            f"<span style='color: #0f766e; font-weight: 700; font-size: 0.82rem;'>Sanskrit: {yoga_remedy.get('sanskrit_name', 'Asana')}</span> · <span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;'>⏱️ {yoga_remedy.get('duration', '3 mins')}</span>",
+                            unsafe_allow_html=True,
+                        )
+                        st.markdown(
+                            f"<p style='font-size: 0.82rem; color: #475569; margin: 6px 0;'><strong>Somatic Mechanism:</strong> {yoga_remedy.get('somatic_mechanism', 'Eases tension and restores autonomic balance.')}</p>",
+                            unsafe_allow_html=True,
+                        )
+
+                        yoga_p_tab1, yoga_p_tab2 = st.tabs(["🖥️ Desk Seated", "🧘 Floor Mat"])
+                        with yoga_p_tab1:
+                            st.write(yoga_remedy.get("office_variation", "Sit tall, breathe deeply, and gently decompress."))
+                        with yoga_p_tab2:
+                            for s in yoga_remedy.get("steps_floor", []):
+                                st.write(f"- {s}")
+
+                        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+                        y_b1, y_b2 = st.columns([1, 1], gap="small")
+                        with y_b1:
+                            if st.button("🧘 Somatic Care →", type="secondary", use_container_width=True, key="elevated_open_yoga_btn"):
+                                set_active_view("🧘 Somatic Care & Yoga", soma_tool="yoga")
+                                st.rerun()
+                        with y_b2:
+                            if st.button("🌬️ 2-Min Reset →", type="secondary", use_container_width=True, key="elevated_open_breath_btn"):
+                                set_active_view("🧘 Somatic Care & Yoga", soma_tool="breath")
+                                st.rerun()
 
                     # Visualizations Grid
                     st.markdown("---")
@@ -3895,7 +3891,6 @@ def render_workspace():
 
             # High-Level KPIs & Well-Being Index
             pos_count = (df["sentiment_label"] == "positive").sum()
-            neu_count = (df["sentiment_label"] == "neutral").sum()
             neg_count = (df["sentiment_label"] == "negative").sum()
             avg_comp = float(df["compound_score"].mean()) if not df.empty else 0.0
             wellbeing_score = round(max(0.0, min(100.0, ((avg_comp + 1.0) / 2.0) * 100)), 1)
@@ -4727,7 +4722,8 @@ def main():
         st.session_state["pipeline_warmed"] = True
         try:
             import threading
-            from wellness.pipeline import warm_up_emotion_pipeline, _vader_analyzer
+
+            from wellness.pipeline import _vader_analyzer, warm_up_emotion_pipeline
             _vader_analyzer()
             threading.Thread(target=warm_up_emotion_pipeline, daemon=True, name="st_prewarm").start()
         except Exception:

@@ -1,7 +1,7 @@
 """MoodMentor employee wellness text analysis and emotion telemetry API."""
 
 from pathlib import Path
-import os
+
 import nltk
 
 _local_nltk = Path(__file__).resolve().parent.parent / "nltk_data"

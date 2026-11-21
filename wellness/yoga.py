@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 YOGA_REMEDIES: list[dict[str, Any]] = [
     {
         "id": "balasana",

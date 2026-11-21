@@ -24,7 +24,7 @@ from wellness.pipeline import analyze_csv_records, analyze_text, generate_recomm
 from wellness.report import AnalysisReport, SentimentLabel
 from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
 from wellness.wellness_tools import get_cognitive_reframes, get_guided_exercises
-from wellness.yoga import get_all_yoga_remedies, get_yoga_categories, get_yoga_remedy_for_emotion
+from wellness.yoga import get_all_yoga_remedies, get_yoga_remedy_for_emotion
 
 from .database import create_tables, get_session
 from .models import AuthSession, MoodLog, Recommendation, User, recommendation_dict
@@ -53,7 +53,8 @@ async def lifespan(app: FastAPI):
     import sys
     if not ("pytest" in sys.modules or os.getenv("TESTING") == "1"):
         import threading
-        from wellness.pipeline import warm_up_emotion_pipeline, _vader_analyzer
+
+        from wellness.pipeline import _vader_analyzer, warm_up_emotion_pipeline
         _vader_analyzer()
         threading.Thread(target=warm_up_emotion_pipeline, daemon=True, name="nlp_prewarm").start()
     yield

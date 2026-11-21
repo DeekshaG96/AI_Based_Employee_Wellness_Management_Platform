@@ -1,6 +1,5 @@
 """Unit tests for the Therapeutic Yoga Remedies catalog and emotional mapping."""
 
-import pytest
 from wellness.yoga import (
     get_all_yoga_remedies,
     get_yoga_categories,
