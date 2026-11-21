@@ -116,6 +116,78 @@ def svg_icon(name: str, size: int = 16, color: str = "currentColor", extra_class
 
 # EquiMind Executive Visual System: High-Class Luxury Aesthetic & Editorial Serif Brand
 CUSTOM_CSS = """<style>
+/* Award-Winning Awwwards/Apple-Grade UI Overrides */
+[data-testid="stDecoration"] {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
+}
+#MainMenu, footer {
+  visibility: hidden !important;
+  height: 0 !important;
+}
+header[data-testid="stHeader"] {
+  background: transparent !important;
+  height: 2.2rem !important;
+  z-index: 99 !important;
+}
+
+/* Custom Minimalist Silk Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(240, 253, 250, 0.4);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(45, 212, 191, 0.45);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 118, 110, 0.75);
+}
+::selection {
+  background: rgba(45, 212, 191, 0.28);
+  color: #0f766e;
+}
+
+/* Dynamic Ambient Living Atmosphere Glow Orbs */
+.stApp::before {
+  content: "";
+  position: fixed;
+  top: -120px;
+  right: -120px;
+  width: 550px;
+  height: 550px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.16) 0%, rgba(20, 184, 166, 0.05) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: orbFloat1 18s infinite alternate ease-in-out;
+}
+.stApp::after {
+  content: "";
+  position: fixed;
+  bottom: -180px;
+  left: -80px;
+  width: 650px;
+  height: 650px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, rgba(14, 165, 233, 0.04) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: orbFloat2 24s infinite alternate ease-in-out;
+}
+@keyframes orbFloat1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-60px, 80px) scale(1.12); }
+}
+@keyframes orbFloat2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(80px, -60px) scale(1.18); }
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 /* High-Class Editorial Brand Typography */
@@ -4049,6 +4121,11 @@ def render_team_health_view():
             title="14-Day Team Sentiment Moving Average vs Distress Boundary",
             labels={"sentiment_compound": "Sentiment Valence", "date": "Date"},
         )
+        fig.update_traces(
+            line_shape="spline",
+            line={"color": "#0f766e", "width": 3},
+            marker={"size": 7, "color": "#14b8a6", "line": {"width": 2, "color": "#ffffff"}}
+        )
         fig.add_hline(y=0.05, line_dash="dash", line_color="#11562a", annotation_text="Positive Baseline (+0.05)")
         fig.add_hline(y=-0.05, line_dash="dash", line_color="#ba1a1a", annotation_text="Distress Boundary (-0.05)")
         fig.update_layout(
@@ -4357,7 +4434,7 @@ def render_recommendations_view():
     # High-Class Luxury Header Banner
     st.markdown(
         f"""
-        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.72) 55%, rgba(248, 250, 252, 0.90) 100%); border: 1.5px solid rgba(204, 251, 241, 0.85); border-radius: 20px; padding: 20px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 1); margin-bottom: 20px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transform-style: preserve-3d; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;">
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.80) 55%, rgba(248, 250, 252, 0.94) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 22px; padding: 22px 30px; box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.10), 0 4px 16px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 1); margin-bottom: 22px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transform-style: preserve-3d; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Care Pathways & Daily Remedies</h2>
