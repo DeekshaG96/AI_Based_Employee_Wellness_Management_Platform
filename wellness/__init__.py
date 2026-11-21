@@ -1,5 +1,17 @@
 """MoodMentor employee wellness text analysis and emotion telemetry API."""
 
+from pathlib import Path
+import os
+import nltk
+
+_local_nltk = Path(__file__).resolve().parent.parent / "nltk_data"
+# Filter out unreadable AppData paths to prevent NLTK pathsec permission errors in restricted environments
+_safe_paths = [str(_local_nltk)] + [
+    p for p in nltk.data.path
+    if "AppData" not in p and Path(p).is_dir()
+]
+nltk.data.path = _safe_paths
+
 from .food_planner import get_mood_food_plan, get_supported_mood_categories
 from .meditation import (
     get_meditation_packs,

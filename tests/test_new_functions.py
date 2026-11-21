@@ -1,7 +1,5 @@
 """Unit tests for newly added functions: Model Comparator, Wellness Tools, and Team Analytics."""
 
-from fastapi.testclient import TestClient
-
 from wellness.comparator import compare_models, run_lexical_baseline, run_transformer_analysis
 from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
 from wellness.wellness_tools import (
@@ -9,7 +7,18 @@ from wellness.wellness_tools import (
     get_guided_exercises,
     render_box_breathing_widget,
 )
-from wellness_api.main import app
+from wellness_api.main import (
+    compare_models_endpoint,
+    get_exercises_endpoint,
+    get_food_plan_categories_endpoint,
+    get_food_plan_endpoint,
+    get_meditations_endpoint,
+    get_reframe_endpoint,
+    get_soundscapes_endpoint,
+    post_food_plan_endpoint,
+    team_burnout_risk_endpoint,
+)
+from wellness_api.schemas import CompareRequest, MoodFoodPlanRequest, TeamBurnoutRequest
 
 
 def test_lexical_baseline_identifies_polarity_and_keywords():
@@ -92,31 +101,24 @@ def test_team_burnout_risk_metrics():
 
 
 def test_api_new_endpoints():
-    client = TestClient(app)
-
     # 1. Compare models endpoint
-    res_comp = client.post("/analyze/compare", json={"text": "I feel grateful for the help."})
-    assert res_comp.status_code == 200
-    data_comp = res_comp.json()
+    data_comp = compare_models_endpoint(CompareRequest(text="I feel grateful for the help."))
     assert "lexical_baseline" in data_comp
     assert "transformer_model" in data_comp
     assert "comparative_analysis" in data_comp
 
     # 2. Exercises endpoint
-    res_ex = client.get("/wellness/exercises")
-    assert res_ex.status_code == 200
-    assert len(res_ex.json()) >= 4
+    data_ex = get_exercises_endpoint()
+    assert len(data_ex) >= 4
 
     # 3. Reframing endpoint
-    res_ref = client.get("/wellness/reframes/anger")
-    assert res_ref.status_code == 200
-    assert "reframing_prompt" in res_ref.json()
+    data_ref = get_reframe_endpoint("anger")
+    assert "reframing_prompt" in data_ref
 
     # 4. Team Burnout Risk endpoint
-    res_team = client.post("/team/burnout-risk", json={"scenario": "thriving", "days": 7, "team_size": 4})
-    assert res_team.status_code == 200
-    assert "burnout_risk_score" in res_team.json()
-    assert "team_resilience_index" in res_team.json()
+    data_team = team_burnout_risk_endpoint(TeamBurnoutRequest(scenario="thriving", days=7, team_size=4))
+    assert "burnout_risk_score" in data_team
+    assert "team_resilience_index" in data_team
 
 
 def test_f1_benchmarks_exceed_80_and_89_percent():
@@ -177,42 +179,31 @@ def test_mood_food_planner_recommendations():
 
 
 def test_api_mood_food_endpoints():
-    client = TestClient(app)
-
     # 1. GET /wellness/food-plan/{emotion}
-    res_get = client.get("/wellness/food-plan/fear?dietary_pref=vegan")
-    assert res_get.status_code == 200
-    data_get = res_get.json()
+    data_get = get_food_plan_endpoint("fear", dietary_pref="vegan")
     assert data_get["emotion_detected"] == "fear"
     assert data_get["dietary_preference"] == "vegan"
     assert "superfoods" in data_get
     assert "curated_meals" in data_get
 
     # 2. POST /wellness/food-plan
-    res_post = client.post("/wellness/food-plan", json={"emotion": "sadness", "dietary_preference": "vegetarian"})
-    assert res_post.status_code == 200
-    data_post = res_post.json()
+    data_post = post_food_plan_endpoint(MoodFoodPlanRequest(emotion="sadness", dietary_preference="vegetarian"))
     assert data_post["emotion_detected"] == "sadness"
     assert data_post["dietary_preference"] == "vegetarian"
 
     # 3. GET /wellness/food-plan-categories
-    res_cats = client.get("/wellness/food-plan-categories")
-    assert res_cats.status_code == 200
-    assert len(res_cats.json()) >= 5
+    data_cats = get_food_plan_categories_endpoint()
+    assert len(data_cats) >= 5
 
     # 4. GET /wellness/meditations (Medito Packs)
-    res_meds = client.get("/wellness/meditations")
-    assert res_meds.status_code == 200
-    data_meds = res_meds.json()
+    data_meds = get_meditations_endpoint()
     assert len(data_meds) >= 4
     pack_ids = {p["id"] for p in data_meds}
     assert "stress_release" in pack_ids
     assert "deep_work_focus" in pack_ids
 
     # 5. GET /wellness/soundscapes
-    res_sounds = client.get("/wellness/soundscapes")
-    assert res_sounds.status_code == 200
-    data_sounds = res_sounds.json()
+    data_sounds = get_soundscapes_endpoint()
     assert len(data_sounds) >= 3
 
 

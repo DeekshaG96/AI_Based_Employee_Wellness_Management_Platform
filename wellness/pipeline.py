@@ -657,16 +657,34 @@ def generate_recommendations(
     }
 
 
+_VADER_INSTANCE: Any = None
+
+
 def _vader_analyzer() -> Any:
     """Use bundled VADER data in hosted mode; preserve the NLTK implementation locally."""
+    global _VADER_INSTANCE
+    if _VADER_INSTANCE is not None:
+        return _VADER_INSTANCE
     if os.getenv("WELLNESS_BUNDLED_VADER") == "1":
         try:
             from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer as BundledVader
 
-            return BundledVader()
+            _VADER_INSTANCE = BundledVader()
+            return _VADER_INSTANCE
         except ImportError:
             pass
-    return SentimentIntensityAnalyzer()
+    _VADER_INSTANCE = SentimentIntensityAnalyzer()
+    return _VADER_INSTANCE
+
+
+def warm_up_emotion_pipeline() -> None:
+    """Eagerly initialize and warm up the transformer classifier in memory."""
+    try:
+        clf = _get_emotion_pipeline()
+        if clf is not None:
+            clf("System pipeline warm-up ping.")
+    except Exception:
+        pass
 
 
 def analyze_text(

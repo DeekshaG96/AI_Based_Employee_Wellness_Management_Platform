@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
@@ -18,10 +20,11 @@ from wellness.comparator import compare_models
 from wellness.errors import InputValidationError, WellnessError
 from wellness.food_planner import get_mood_food_plan, get_supported_mood_categories
 from wellness.meditation import get_meditation_packs, get_soundscape_catalog
-from wellness.pipeline import analyze_csv_records, analyze_text
-from wellness.report import AnalysisReport
+from wellness.pipeline import analyze_csv_records, analyze_text, generate_recommendations
+from wellness.report import AnalysisReport, SentimentLabel
 from wellness.team_analytics import calculate_team_burnout_risk, generate_synthetic_team_data
 from wellness.wellness_tools import get_cognitive_reframes, get_guided_exercises
+from wellness.yoga import get_all_yoga_remedies, get_yoga_categories, get_yoga_remedy_for_emotion
 
 from .database import create_tables, get_session
 from .models import AuthSession, MoodLog, Recommendation, User, recommendation_dict
@@ -34,6 +37,7 @@ from .schemas import (
     LoginRequest,
     MessageResponse,
     MoodFoodPlanRequest,
+    RecommendRequest,
     RegisterRequest,
     TeamBurnoutRequest,
     UserResponse,
@@ -45,6 +49,13 @@ from .security import current_user, hash_password, issue_session, token_digest, 
 async def lifespan(app: FastAPI):
     if os.getenv("MOODMENTOR_SKIP_CREATE_TABLES") != "1":
         create_tables()
+    # Eagerly warm up NLP transformer and VADER in a background daemon thread (skip during pytest)
+    import sys
+    if not ("pytest" in sys.modules or os.getenv("TESTING") == "1"):
+        import threading
+        from wellness.pipeline import warm_up_emotion_pipeline, _vader_analyzer
+        _vader_analyzer()
+        threading.Thread(target=warm_up_emotion_pipeline, daemon=True, name="nlp_prewarm").start()
     yield
 
 
@@ -54,12 +65,29 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 MAX_UPLOAD_BYTES = 2_000_000
+
+portal_dir = Path(__file__).resolve().parent.parent / "moodmentor-portal"
+if portal_dir.is_dir():
+    app.mount("/portal", StaticFiles(directory=str(portal_dir), html=True), name="portal")
 
 
 @app.get("/", tags=["service"])
 def root() -> dict[str, str]:
-    return {"name": "MoodMentor API", "docs": "/docs", "health": "/health"}
+    return {
+        "name": "MoodMentor API",
+        "docs": "/docs",
+        "health": "/health",
+        "portal": "/portal",
+        "streamlit": "http://localhost:8501",
+    }
 
 
 @app.get("/health", tags=["service"])
@@ -349,6 +377,35 @@ def delete_history(
     return MessageResponse(message="Record deleted.")
 
 
+@app.post("/analyze/quick", tags=["analysis"])
+def analyze_quick(
+    payload: AnalyzeRequest,
+    db: Session = Depends(get_session),
+) -> dict[str, Any]:
+    """Analyze single reflection text and sync to database."""
+    try:
+        report = analyze_text(payload.text, payload.source_name or "web_portal")
+        email = "portal@moodmentor.local"
+        portal_user = db.scalar(select(User).where(User.email == email))
+        if portal_user is None:
+            portal_user = User(
+                name="Portal Explorer",
+                email=email,
+                password_hash=hash_password("portalpass123"),
+            )
+            db.add(portal_user)
+            db.commit()
+            db.refresh(portal_user)
+        saved = _persist_report(db, portal_user, report, "web_portal", payload.source_name or "web_portal")
+        res = report.to_dict()
+        res["id"] = saved.id
+        return res
+    except InputValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except WellnessError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
 @app.post("/analyze/compare", tags=["evaluation"])
 def compare_models_endpoint(payload: CompareRequest) -> dict[str, Any]:
     """Compare lexical baseline against fine-tuned DistilBERT transformer for any input text."""
@@ -404,6 +461,33 @@ def get_meditations_endpoint() -> list[dict[str, Any]]:
 def get_soundscapes_endpoint() -> list[dict[str, str]]:
     """Return catalog of client-side ambient soundscapes and meditation timer presets."""
     return get_soundscape_catalog()
+
+
+@app.get("/wellness/yoga-remedies", tags=["yoga"])
+def get_yoga_remedies_endpoint() -> list[dict[str, Any]]:
+    """Return catalog of evidence-based therapeutic yoga remedies and desk modifications."""
+    return get_all_yoga_remedies()
+
+
+@app.get("/wellness/yoga-remedies/{emotion}", tags=["yoga"])
+def get_yoga_remedy_endpoint(emotion: str) -> dict[str, Any]:
+    """Retrieve the targeted yoga remedy for a specific emotional or strain state."""
+    return get_yoga_remedy_for_emotion(emotion)
+
+
+@app.post("/recommend", tags=["recommendations"])
+def recommend_endpoint(payload: RecommendRequest) -> dict[str, Any]:
+    """Generate tailored well-being recommendations and micro-interventions for any emotion."""
+    lbl_str = payload.sentiment_label.lower()
+    lbl = SentimentLabel(lbl_str) if lbl_str in ("positive", "neutral", "negative") else SentimentLabel.NEUTRAL
+    return generate_recommendations(payload.emotion.lower(), lbl, payload.compound, payload.text)
+
+
+@app.get("/recommend/{emotion}", tags=["recommendations"])
+def get_recommend_by_emotion_endpoint(emotion: str) -> dict[str, Any]:
+    """Return curated recommendation strategies for a specified emotion."""
+    return generate_recommendations(emotion.lower(), SentimentLabel.NEUTRAL, 0.0, "")
+
 
 
 

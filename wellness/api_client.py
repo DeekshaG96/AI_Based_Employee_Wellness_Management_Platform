@@ -176,4 +176,14 @@ def get_soundscapes_client() -> list[dict[str, str]]:
     return _request("GET", "/wellness/soundscapes")
 
 
+def get_yoga_remedies_client() -> list[dict[str, Any]]:
+    """Fetch catalog of evidence-based therapeutic yoga poses from the API."""
+    return _request("GET", "/wellness/yoga-remedies")
+
+
+def get_yoga_remedy_client(emotion: str) -> dict[str, Any]:
+    """Fetch targeted yoga remedy for an emotional state from the API."""
+    return _request("GET", f"/wellness/yoga-remedies/{emotion}")
+
+
 

@@ -139,3 +139,11 @@ class MoodFoodPlanRequest(BaseModel):
     dietary_preference: str = Field(default="any", max_length=20)
 
 
+class RecommendRequest(BaseModel):
+    emotion: str = Field(default="neutral", max_length=50)
+    sentiment_label: str = Field(default="neutral", max_length=20)
+    compound: float = Field(default=0.0, ge=-1.0, le=1.0)
+    text: str = Field(default="", max_length=10000)
+
+
+

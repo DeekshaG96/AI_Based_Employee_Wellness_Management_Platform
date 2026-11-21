@@ -102,7 +102,7 @@ def validate_nltk_resources() -> None:
 def _resource_exists(nltk_module: object, path: str) -> bool:
     try:
         nltk_module.data.find(path)  # type: ignore[attr-defined]
-    except LookupError:
+    except (LookupError, PermissionError, OSError):
         return False
     return True
 
@@ -167,7 +167,7 @@ def _tokenize_and_lemmatize(
 
     try:
         stop_words = set(stopwords.words("english")) - _NEGATIONS
-    except LookupError:
+    except (LookupError, PermissionError, OSError):
         stop_words = set(_HOSTED_STOP_WORDS) - _NEGATIONS
         notes.append(
             "NLTK stopwords were unavailable; the built-in English stopword list was used."
@@ -186,7 +186,7 @@ def _tokenize_and_lemmatize(
 
     try:
         raw_tokens = word_tokenize(cleaned)
-    except LookupError:
+    except (LookupError, PermissionError, OSError):
         raw_tokens = re.findall(r"[a-z]+", cleaned.lower())
         notes.append(
             "NLTK tokenization data were unavailable; regex tokenization was used."
@@ -194,7 +194,7 @@ def _tokenize_and_lemmatize(
     filtered = [token for token in raw_tokens if token.isalpha() and token not in stop_words]
     try:
         tagged = pos_tag(filtered)
-    except LookupError:
+    except (LookupError, PermissionError, OSError):
         tagged = [(token, "TOKEN") for token in filtered]
         notes.append(
             "NLTK part-of-speech data were unavailable; surface token labels were used."
@@ -202,7 +202,7 @@ def _tokenize_and_lemmatize(
     try:
         lemmatizer = WordNetLemmatizer()
         lemmas = tuple(lemmatizer.lemmatize(token, _wordnet_pos(tag)) for token, tag in tagged)
-    except LookupError:
+    except (LookupError, PermissionError, OSError):
         lemmas = tuple(filtered)
         notes.append(
             "WordNet data were unavailable; surface forms were retained instead of claiming lemmatization."

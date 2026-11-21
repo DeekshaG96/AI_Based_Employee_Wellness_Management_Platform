@@ -91,3 +91,5 @@ neon.ts
 package-lock.json
 package.json
 skills-lock.json
+nltk_data/
+scratch/

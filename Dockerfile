@@ -17,6 +17,8 @@ RUN chmod -R a+rX "$NLTK_DATA"
 COPY wellness ./wellness
 COPY app.py ./app.py
 COPY data ./data
+COPY moodmentor-portal ./moodmentor-portal
+COPY moodmentor-portal.zip ./moodmentor-portal.zip
 RUN useradd --create-home --uid 10001 appuser \
     && chown -R appuser:appuser /app
 USER appuser

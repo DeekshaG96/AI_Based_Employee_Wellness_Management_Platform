@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from collections.abc import Generator
 from pathlib import Path
 
@@ -28,6 +29,9 @@ class Base(DeclarativeBase):
 
 
 def _database_url() -> str:
+    if os.getenv("PYTEST_CURRENT_TEST") or "pytest" in sys.modules or os.getenv("TESTING") == "1":
+        db_path = Path(__file__).resolve().parents[1] / "test_moodmentor.db"
+        return f"sqlite:///{db_path}"
     url = os.getenv("DATABASE_URL")
     if not url:
         db_path = Path(__file__).resolve().parents[1] / "moodmentor.db"

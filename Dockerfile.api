@@ -15,6 +15,7 @@ RUN chmod -R a+rX "$NLTK_DATA"
 
 COPY wellness ./wellness
 COPY wellness_api ./wellness_api
+COPY moodmentor-portal ./moodmentor-portal
 RUN useradd --create-home --uid 10001 appuser \
     && mkdir -p /var/cache/huggingface \
     && chown -R appuser:appuser /app /var/cache/huggingface
