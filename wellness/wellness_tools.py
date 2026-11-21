@@ -349,7 +349,7 @@ def render_box_breathing_widget() -> str:
     """
 
 
-def render_zen_companion_studio_widget(user_name: str = "Alex Rivera") -> str:
+def render_zen_companion_studio_widget(user_name: str = "Mindful Member") -> str:
     """Generate self-contained Three.js 3D Zen Companion studio widget with interactive aura and procedural audio."""
     safe_name = escape(str(user_name)) if user_name else "Team Member"
     return f"""

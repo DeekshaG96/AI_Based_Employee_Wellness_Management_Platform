@@ -2348,13 +2348,11 @@ def render_landing_and_auth():
             with st.form("portal_login_form"):
                 login_email = st.text_input(
                     "Work Email Address",
-                    value="alex@example.com",
                     placeholder="your.name@enterprise.com",
                     key="login_email_input"
                 )
                 login_password = st.text_input(
                     "Password",
-                    value="Password123!",
                     type="password",
                     placeholder="Enter your password",
                     key="login_password_input"
@@ -2379,7 +2377,8 @@ def render_landing_and_auth():
                         except Exception:
                             st.session_state.logged_in = True
                             st.session_state.user_id = 7
-                            st.session_state.user_name = "Alex Chen" if "alex" in login_email.lower() else login_email.split("@")[0].title()
+                            email_name = login_email.split("@")[0].replace(".", " ").replace("_", " ").title()
+                            st.session_state.user_name = email_name if email_name else "Team Member"
                             st.session_state.user_email = login_email.strip()
                             st.session_state.api_token = "equimind_session_active"
                             success = True
@@ -2390,7 +2389,7 @@ def render_landing_and_auth():
 
         with tab_register:
             with st.form("portal_register_form"):
-                reg_name = st.text_input("Full Name", placeholder="e.g. Alex Chen", key="reg_name_input")
+                reg_name = st.text_input("Full Name", placeholder="e.g. Your Full Name", key="reg_name_input")
                 reg_email = st.text_input("Work Email Address", placeholder="your.name@enterprise.com", key="reg_email_input")
                 reg_password = st.text_input("Password", type="password", placeholder="Minimum 8 characters", help="Minimum 8 characters.", key="reg_password_input")
                 st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
@@ -2410,7 +2409,7 @@ def render_landing_and_auth():
 
         st.markdown("""
 <div style="text-align: center; margin-top: 14px; font-size: 0.72rem; color: #64748b; line-height: 1.4;">
-    Demo credentials pre-filled · 🔒 AES-256 Protected Sanctuary
+    🔒 Confidential & Secure Reflection Space · Enterprise Protected
 </div>
 """, unsafe_allow_html=True)
 
