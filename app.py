@@ -116,6 +116,8 @@ def svg_icon(name: str, size: int = 16, color: str = "currentColor", extra_class
 
 # EquiMind Executive Visual System: High-Class Luxury Aesthetic & Editorial Serif Brand
 CUSTOM_CSS = """<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700&display=swap');
+
 /* Award-Winning Awwwards/Apple-Grade UI Overrides */
 [data-testid="stDecoration"] {
   display: none !important;
@@ -188,7 +190,7 @@ header[data-testid="stHeader"] {
   100% { transform: translate(80px, -60px) scale(1.18); }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@400;500;600;700;800&display=swap');
+
 
 /* High-Class Editorial Brand Typography */
 .brand-logo-text {
@@ -293,45 +295,59 @@ header[data-testid="stHeader"] {
   padding: 1.6rem 2.2rem 4rem !important;
 }
 
-/* Refined Luxury Typography Hierarchy */
-h1 {
+/* Refined Luxury Typography Hierarchy - Editorial Serifs Everywhere */
+h1,
+div[data-testid="stMarkdownContainer"] > h1,
+[data-testid="stHeadingWithActionElements"] h1,
+.stMarkdown h1,
+.editorial-title {
   font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
-  font-size: 2.2rem !important;
+  font-size: 2.35rem !important;
   font-weight: 700 !important;
   line-height: 1.2 !important;
   letter-spacing: -0.025em !important;
-  color: #0f172a !important;
+  color: #044e47 !important;
   margin-bottom: 0.75rem !important;
 }
 
-h2 {
+h2,
+div[data-testid="stMarkdownContainer"] > h2,
+[data-testid="stHeadingWithActionElements"] h2,
+.stMarkdown h2,
+.editorial-heading {
   font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
-  font-size: 1.65rem !important;
+  font-size: 1.75rem !important;
   font-weight: 700 !important;
   line-height: 1.25 !important;
-  letter-spacing: -0.02em !important;
-  color: #0f172a !important;
+  letter-spacing: -0.022em !important;
+  color: #044e47 !important;
   margin-top: 1.25rem !important;
   margin-bottom: 0.5rem !important;
 }
 
-h3 {
+h3,
+div[data-testid="stMarkdownContainer"] > h3,
+[data-testid="stHeadingWithActionElements"] h3,
+.stMarkdown h3 {
   font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
-  font-size: 1.35rem !important;
+  font-size: 1.40rem !important;
   font-weight: 700 !important;
   line-height: 1.3 !important;
-  letter-spacing: -0.015em !important;
-  color: #0f172a !important;
+  letter-spacing: -0.018em !important;
+  color: #044e47 !important;
   margin-top: 0.9rem !important;
   margin-bottom: 0.45rem !important;
 }
 
-h4 {
+h4,
+div[data-testid="stMarkdownContainer"] > h4,
+[data-testid="stHeadingWithActionElements"] h4,
+.stMarkdown h4 {
   font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
-  font-size: 1.15rem !important;
+  font-size: 1.18rem !important;
   font-weight: 700 !important;
-  letter-spacing: -0.01em !important;
-  color: var(--slate-900) !important;
+  letter-spacing: -0.012em !important;
+  color: #0f172a !important;
 }
 
 h5, h6 {
@@ -464,37 +480,45 @@ p, li, label, [data-testid="stMarkdownContainer"] p {
   animation: pulseRing 2s infinite;
 }
 
-/* Modern Segmented Tab Bar */
-[data-baseweb="tab-list"] {
-  gap: 6px !important;
-  background: #f1f5f9 !important;
-  padding: 5px !important;
-  border-radius: 12px !important;
-  border: 1px solid var(--slate-200) !important;
-  margin-bottom: 22px !important;
+/* Executive Luxury Pill Tab Bar */
+[data-baseweb="tab-list"], div[data-baseweb="tab-list"] {
+  gap: 8px !important;
+  background: rgba(240, 253, 250, 0.75) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  padding: 6px !important;
+  border-radius: 9999px !important;
+  border: 1.5px solid rgba(204, 251, 241, 0.90) !important;
+  box-shadow: 0 4px 18px rgba(15, 118, 110, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.95) !important;
+  margin-bottom: 24px !important;
   display: flex !important;
   flex-wrap: wrap !important;
 }
-button[data-baseweb="tab"] {
-  height: 38px !important;
-  padding: 0 16px !important;
+button[data-baseweb="tab"], div[data-baseweb="tab-list"] button {
+  height: 40px !important;
+  padding: 0 20px !important;
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: 9999px !important;
   background: transparent !important;
-  color: var(--slate-600) !important;
-  font-size: 0.86rem !important;
+  color: #475569 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.88rem !important;
   font-weight: 600 !important;
-  transition: var(--transition-smooth) !important;
+  letter-spacing: -0.01em !important;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
-button[data-baseweb="tab"]:hover {
-  color: var(--slate-900) !important;
+button[data-baseweb="tab"]:hover, div[data-baseweb="tab-list"] button:hover {
+  color: #0f766e !important;
+  background: rgba(255, 255, 255, 0.65) !important;
   transform: translateY(-1px) !important;
 }
-button[data-baseweb="tab"][aria-selected="true"] {
-  background: #ffffff !important;
-  color: var(--primary) !important;
+button[data-baseweb="tab"][aria-selected="true"], div[data-baseweb="tab-list"] button[aria-selected="true"] {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%) !important;
+  color: #044e47 !important;
   font-weight: 700 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.12), inset 0 1px 1px #ffffff !important;
+  border: 1px solid rgba(204, 251, 241, 0.95) !important;
+  transform: scale(1.02) !important;
 }
 div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
   display: none !important;
@@ -652,52 +676,77 @@ button[data-testid="baseButton-secondary"]:hover,
   box-shadow: 0 8px 20px rgba(15, 118, 110, 0.22) !important;
 }
 
-/* 3D Kinetic Metric Cards */
+/* Metric Cards - Editorial Horology / Swiss Boutique Grade */
 [data-testid="stMetric"] {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 253, 250, 0.6) 100%) !important;
-  border: 1px solid rgba(204, 251, 241, 0.85) !important;
-  border-radius: 14px !important;
-  padding: 16px 20px !important;
-  box-shadow: var(--card-3d-shadow) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.88) 55%, rgba(241, 245, 249, 0.80) 100%) !important;
+  border: 1.5px solid rgba(204, 251, 241, 0.90) !important;
+  border-radius: 18px !important;
+  padding: 18px 22px !important;
+  box-shadow: 0 10px 28px -4px rgba(15, 118, 110, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02), inset 0 1px 1px #ffffff !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
   transform-style: preserve-3d !important;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease !important;
+  transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 [data-testid="stMetric"]:hover {
-  box-shadow: var(--card-3d-hover) !important;
-  transform: perspective(800px) translateY(-5px) rotateX(2.5deg) scale(1.02) !important;
-  border-color: rgba(45, 212, 191, 0.7) !important;
+  transform: translateY(-4px) scale(1.01) !important;
+  border-color: #5eead4 !important;
+  box-shadow: 0 18px 42px -6px rgba(15, 118, 110, 0.18), inset 0 1px 2px #ffffff !important;
 }
-[data-testid="stMetricLabel"] p {
-  color: var(--slate-500) !important;
-  font-size: 0.78rem !important;
-  font-weight: 600 !important;
+[data-testid="stMetricLabel"] p,
+[data-testid="stMetricLabel"] span,
+[data-testid="stMetricLabel"] {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  color: #0f766e !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.10em !important;
 }
-[data-testid="stMetricValue"] {
-  color: var(--slate-900) !important;
-  font-size: 1.55rem !important;
-  font-weight: 800 !important;
+[data-testid="stMetricValue"],
+[data-testid="stMetricValue"] div {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+  color: #044e47 !important;
+  font-size: 2.15rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+}
+[data-testid="stMetricDelta"],
+[data-testid="stMetricDelta"] div {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
 }
 
-/* 3D Elevated Containers & Expanders */
-[data-testid="stVerticalBlockBorderWrapper"] {
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  border-radius: 16px !important;
-  background: #ffffff !important;
-  box-shadow: var(--card-3d-shadow) !important;
+/* 3D Elevated Frosted Containers & Editorial Expanders */
+[data-testid="stVerticalBlockBorderWrapper"],
+div[data-testid="stVerticalBlockBorderWrapper"] {
+  border: 1.5px solid rgba(204, 251, 241, 0.88) !important;
+  border-radius: 20px !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.78) 50%, rgba(248, 250, 252, 0.92) 100%) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: 0 12px 34px -4px rgba(15, 118, 110, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02), inset 0 1px 1px #ffffff !important;
   transform-style: preserve-3d !important;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease !important;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.3s ease !important;
 }
-[data-testid="stVerticalBlockBorderWrapper"]:hover {
-  box-shadow: var(--card-3d-hover) !important;
+[data-testid="stVerticalBlockBorderWrapper"]:hover,
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+  box-shadow: 0 20px 48px -6px rgba(15, 118, 110, 0.16), 0 6px 16px rgba(0, 0, 0, 0.03), inset 0 1px 2px #ffffff !important;
+  border-color: rgba(45, 212, 191, 0.95) !important;
 }
 [data-testid="stExpander"] {
-  border: 1px solid var(--slate-200) !important;
-  border-radius: 14px !important;
-  background: #ffffff !important;
-  box-shadow: var(--shadow-subtle) !important;
-  transition: var(--transition-smooth) !important;
+  border: 1.5px solid rgba(204, 251, 241, 0.85) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.65) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 18px rgba(15, 118, 110, 0.05), inset 0 1px 1px #ffffff !important;
+  transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+[data-testid="stExpander"]:hover {
+  border-color: rgba(45, 212, 191, 0.8) !important;
+  box-shadow: 0 8px 26px rgba(15, 118, 110, 0.10) !important;
 }
 
 /* Sidebar Cool Breezy Luminous Styling */
@@ -1273,7 +1322,7 @@ PRESET_SCENARIOS = {
     ),
     "📝 Daily Routine / Neutral Log": (
         "Completed the scheduled weekly sprint retrospective. Reviewed code coverage metrics, merged 4 pull requests, "
-        "and documented the upcoming milestone roadmap for engineering review."
+        "and documented the upcoming engineering roadmap for executive review."
     ),
     "🛡️ Severe Overwhelm & Seeking Support": (
         "I am feeling completely overwhelmed and hopeless with the constant pressure. I don't know if I can keep going anymore."
@@ -1394,7 +1443,7 @@ POPULAR_TAG_OPTIONS = [
     "#context-switching",
     "#team-sync",
     "#family",
-    "#milestone",
+    "#leadership",
     "#code-crunch",
 ]
 
@@ -2128,17 +2177,16 @@ def render_landing_hero_3d() -> str:
         var ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
         haloGroup.add(ring1);
 
-        var ring2Geo = new THREE.TorusGeometry(1.68, 0.014, 20, 90);
+        var ring2Geo = new THREE.TorusGeometry(1.70, 0.012, 20, 90);
         var ring2Mat = new THREE.MeshPhongMaterial({
-          color: 0xe6ca65,
-          emissive: 0x3d2b00,
+          color: 0x99f6e4,
+          emissive: 0x0f766e,
           specular: 0xffffff,
-          shininess: 100,
+          shininess: 120,
           transparent: true,
-          opacity: 0.48
+          opacity: 0.42
         });
         var ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-        ring2.rotation.y = 0.12;
         haloGroup.add(ring2);
 
         // 5. Orbiting Luminous Pearl
@@ -2381,6 +2429,193 @@ def render_landing_and_auth():
     align-items: center;
     gap: 6px;
 }
+
+/* ==========================================================================
+   AWARD-WINNING LUXURY EDITORIAL POLISH & AESTHETICS (Awwwards / Horology Grade)
+   ========================================================================== */
+
+/* Universal Editorial Serif Typography for Headings & Display Titles */
+h1, h2, h3, h4,
+[data-testid="stHeadingWithActionElements"] h1,
+[data-testid="stHeadingWithActionElements"] h2,
+[data-testid="stHeadingWithActionElements"] h3,
+[data-testid="stHeadingWithActionElements"] h4,
+[data-testid="stHeadingWithActionElements"] span,
+div[data-testid="stMarkdownContainer"] > h1,
+div[data-testid="stMarkdownContainer"] > h2,
+div[data-testid="stMarkdownContainer"] > h3,
+div[data-testid="stMarkdownContainer"] > h4,
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4,
+.editorial-serif, .editorial-title, .editorial-heading {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+  color: #044e47 !important;
+  letter-spacing: -0.025em !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+/* Crisp Clean Body & Label Typography */
+html, body, [data-testid="stAppViewContainer"],
+p, span, label, div,
+input, textarea, select, button,
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stWidgetLabel"] label,
+[data-baseweb="tab"] {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Secondary Button Upgrade: Pill Silhouette with Luminous Specular Rim */
+button[kind="secondary"],
+button[data-testid="baseButton-secondary"],
+.stButton > button[kind="secondary"],
+.stButton > button:not([kind="primary"]) {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.75) 100%) !important;
+  border: 1.5px solid rgba(204, 251, 241, 0.90) !important;
+  border-radius: 9999px !important;
+  color: #0f766e !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.05), inset 0 1px 1px #ffffff !important;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+button[kind="secondary"]:hover,
+button[data-testid="baseButton-secondary"]:hover,
+.stButton > button[kind="secondary"]:hover,
+.stButton > button:not([kind="primary"]):hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%) !important;
+  border-color: #14b8a6 !important;
+  color: #044e47 !important;
+  box-shadow: 0 8px 22px rgba(15, 118, 110, 0.14), inset 0 1px 1px #ffffff !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+button[kind="secondary"] *,
+button[data-testid="baseButton-secondary"] *,
+.stButton > button[kind="secondary"] *,
+button[kind="secondary"] p,
+button[data-testid="baseButton-secondary"] p {
+  color: #0f766e !important;
+  font-weight: 700 !important;
+}
+button[kind="secondary"]:hover *,
+button[data-testid="baseButton-secondary"]:hover *,
+.stButton > button[kind="secondary"]:hover * {
+  color: #044e47 !important;
+}
+
+/* Primary Button Upgrade: High-Impact Emerald Silk Pill */
+.stButton > button[kind="primary"],
+button[kind="primary"],
+button[data-testid="baseButton-primary"],
+.stFormSubmitButton > button[kind="primary"],
+div[data-testid="stFormSubmitButton"] button {
+  border-radius: 9999px !important;
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 45%, #14b8a6 100%) !important;
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.45) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+.stButton > button[kind="primary"]:hover,
+button[kind="primary"]:hover,
+button[data-testid="baseButton-primary"]:hover {
+  background: linear-gradient(135deg, #115e59 0%, #0f766e 50%, #0d9488 100%) !important;
+  box-shadow: 0 12px 30px rgba(15, 118, 110, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* Editorial Form Controls: Smooth Frosted Glass with Emerald Glow Focus */
+[data-testid="stTextInput"] div[data-baseweb="input"],
+[data-testid="stTextInput"] div[data-baseweb="base-input"],
+[data-testid="stTextArea"] div[data-baseweb="textarea"],
+[data-testid="stTextArea"] div[data-baseweb="base-input"],
+[data-baseweb="select"] > div,
+[data-baseweb="input"] > div,
+[data-baseweb="textarea"] {
+  border: 1.5px solid rgba(204, 251, 241, 0.90) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  color: #0f172a !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.92rem !important;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+}
+[data-testid="stTextInput"] div[data-baseweb="input"]:focus-within,
+[data-testid="stTextInput"] div[data-baseweb="base-input"]:focus-within,
+[data-testid="stTextArea"] div[data-baseweb="textarea"]:focus-within,
+[data-baseweb="select"] > div:focus-within {
+  border-color: #14b8a6 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.25), 0 8px 22px rgba(15, 118, 110, 0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Scenario Choice Tiles in Main View (Radio Buttons) */
+div[data-testid="stRadio"]:not([data-testid="stSidebar"] div[data-testid="stRadio"]) div[role="radiogroup"] {
+  gap: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+div[data-testid="stRadio"]:not([data-testid="stSidebar"] div[data-testid="stRadio"]) label {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 253, 250, 0.60) 100%) !important;
+  border: 1.5px solid rgba(204, 251, 241, 0.90) !important;
+  border-radius: 14px !important;
+  padding: 12px 18px !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.04) !important;
+}
+div[data-testid="stRadio"]:not([data-testid="stSidebar"] div[data-testid="stRadio"]) label:hover {
+  border-color: #14b8a6 !important;
+  background: rgba(240, 253, 250, 0.95) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 22px rgba(15, 118, 110, 0.10) !important;
+}
+div[data-testid="stRadio"]:not([data-testid="stSidebar"] div[data-testid="stRadio"]) label:has(input:checked) {
+  border-color: #0f766e !important;
+  background: linear-gradient(135deg, rgba(204, 251, 241, 0.85) 0%, rgba(240, 253, 250, 0.95) 100%) !important;
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.14), inset 0 1px 1px #ffffff !important;
+  transform: scale(1.01) !important;
+}
+
+/* Editorial Data Tables & DataFrames */
+[data-testid="stTable"], [data-testid="stDataFrame"], table {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 1.5px solid rgba(204, 251, 241, 0.85) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.06) !important;
+}
+table thead tr th, [data-testid="stTable"] th {
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important;
+  color: #ffffff !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  padding: 12px 16px !important;
+  border: none !important;
+}
+table tbody tr td, [data-testid="stTable"] td {
+  padding: 12px 16px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.88rem !important;
+  color: #334155 !important;
+  border-bottom: 1px solid rgba(204, 251, 241, 0.5) !important;
+}
+table tbody tr:nth-child(even) td {
+  background: rgba(240, 253, 250, 0.45) !important;
+}
+table tbody tr:hover td {
+  background: rgba(204, 251, 241, 0.40) !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -3824,17 +4059,16 @@ def render_zen_companion_3d_widget(scenario: str = "balanced") -> str:
     const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
     haloGroup.add(ring1);
 
-    const ring2Geo = new THREE.TorusGeometry(1.68, 0.014, 20, 90);
+    const ring2Geo = new THREE.TorusGeometry(1.70, 0.012, 20, 90);
     const ring2Mat = new THREE.MeshPhongMaterial({{
-      color: 0xe6ca65,
-      emissive: 0x3d2b00,
+      color: 0x99f6e4,
+      emissive: 0x0f766e,
       specular: 0xffffff,
-      shininess: 100,
+      shininess: 120,
       transparent: true,
-      opacity: 0.48
+      opacity: 0.42
     }});
     const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-    ring2.rotation.y = 0.12;
     haloGroup.add(ring2);
 
     // 5. Orbiting Luminous Pearl
@@ -5176,7 +5410,7 @@ def render_workspace():
                                 if "suggestion_feedback" not in st.session_state:
                                     st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
                                 st.session_state["suggestion_feedback"]["accepted"] += 1
-                                st.toast("Practice accepted! Recorded in your personal care milestones.", icon="🎯")
+                                st.toast("Practice accepted! Recorded in your personal care progress tracker.", icon="🎯")
                                 st.rerun()
                         with act_b2:
                             if st.button("❌ Decline / Skip", type="secondary", width="stretch", key="elevated_decline_rec_btn"):
@@ -5725,7 +5959,7 @@ def render_workspace():
             elif (df_recent["sentiment_label"] == "positive").sum() >= 4:
                 st.info(
                     "**Resilience & Morale Momentum**: Your recent check-ins reflect strong momentum and positive sentiment. "
-                    "This is a great window to capture creative ideas and celebrate milestones!"
+                    "This is a great window to capture creative ideas and celebrate team achievements!"
                 )
 
             # Charts Row
