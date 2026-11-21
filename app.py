@@ -2616,88 +2616,211 @@ def render_team_health_view():
     c_shifts, c_check = st.columns([1.1, 0.9], gap="large")
 
     with c_shifts:
-        st.markdown("#### Recommended Strategic Shifts")
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <h4 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.18rem; font-weight: 700; color: #0f172a;">
+                    Recommended Strategic Shifts
+                </h4>
+                <span style="font-size: 0.78rem; color: #0891b2; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">AI Telemetry Sourced</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-        # Priority 1 Card
+        # Priority 1 Card: Team Recharge Day
         with st.container(border=True):
             st.markdown(
                 """
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                     <div>
-                        <span style="background: #adf3b8; color: #00210b; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 01 • Urgent Focus</span>
-                        <h4 style="margin: 4px 0 0 0; color: #1a1c1b; font-weight: 800;">Schedule Team Recharge Day</h4>
+                        <span style="background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 01 • Urgent Focus</span>
+                        <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;">Schedule Team Recharge Day</h4>
                     </div>
-                    <span style="font-size: 0.8rem; color: #11562a; font-weight: 700;">Impact: Very High</span>
+                    <span style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
+                        Impact: Very High (+18% Focus)
+                    </span>
                 </div>
-                <p style="font-size: 0.85rem; color: #404940; line-height: 1.5; margin-bottom: 12px;">
-                    Recent telemetry indicates high cognitive load and continuous context switching over the past 3 weeks. An uninterrupted recharge day will significantly lower cortisol levels and restore baseline focus.
+                <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
+                    Telemetry reveals elevated cognitive strain and continuous context switching over the past 3 weeks. An uninterrupted recharge window significantly lowers cortisol and restores baseline deep flow.
                 </p>
                 """,
                 unsafe_allow_html=True,
             )
-            col_hint1, col_act1 = st.columns([1.5, 1])
+
+            with st.expander("📅 View Action Blueprint & Schedule (Next Thursday 1:30 PM)", expanded=False):
+                st.markdown(
+                    """
+                    - **01:30 PM – 02:00 PM**: Silent decompression window (calendar block auto-created).
+                    - **02:00 PM – 04:30 PM**: Deep focus uninterrupted sprint (all non-critical alerts muted).
+                    - **04:30 PM – 05:00 PM**: Optional team gratitude & retrospective circle.
+                    """
+                )
+
+            col_hint1, col_act1 = st.columns([1.3, 1])
             with col_hint1:
-                st.caption("Suggested window: Next Wednesday or Thursday afternoon.")
+                st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Recommended: Next Thursday afternoon (4 hours)</span>", unsafe_allow_html=True)
             with col_act1:
-                if st.button("Deploy Plan", key="btn_deploy_plan_1", type="primary", use_container_width=True):
-                    st.success("Recharge Day invite drafted.")
+                if st.button("🚀 Deploy Plan", key="btn_deploy_plan_1", type="primary", use_container_width=True):
+                    st.session_state["recharge_plan_active"] = True
+                    st.toast("Team Recharge Day plan activated! Calendar sync initiated.", icon="📅")
 
-        # Priority 2 Card
+            if st.session_state.get("recharge_plan_active"):
+                st.success("✅ **Recharge Day Deployed**: Calendar holds dispatched to 8 team members. Slack status sync enabled.")
+
+        # Priority 2 Card: Asynchronous Communication
         with st.container(border=True):
             st.markdown(
                 """
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                     <div>
-                        <span style="background: #dee0ff; color: #00105c; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 02 • Structural Habit</span>
-                        <h4 style="margin: 4px 0 0 0; color: #1a1c1b; font-weight: 800;">Encourage Asynchronous Communication</h4>
+                        <span style="background: #ede9fe; border: 1px solid #ddd6fe; color: #5b21b6; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 02 • Structural Habit</span>
+                        <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;">Encourage Asynchronous Communication</h4>
                     </div>
-                    <span style="font-size: 0.8rem; color: #4355b9; font-weight: 700;">Impact: High</span>
+                    <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
+                        Impact: High (+6 hrs/week)
+                    </span>
                 </div>
-                <p style="font-size: 0.85rem; color: #404940; line-height: 1.5; margin-bottom: 12px;">
-                    Meeting volume has increased by 22% month-over-month. Transitioning standard status updates to async threads can recover approximately 6 hours of deep work time per team member weekly.
+                <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
+                    Meeting volume rose 22% month-over-month. Transitioning standard status updates to async threads recovers approximately 6 hours of uninterrupted creative time per team member weekly.
                 </p>
                 """,
                 unsafe_allow_html=True,
             )
-            col_hint2, col_act2 = st.columns([1.5, 1])
+
+            with st.expander("📜 View 3-Rule Async Framework", expanded=False):
+                st.markdown(
+                    """
+                    1. **Rule 1 (2-Minute Rule)**: If an update can be read in under 2 minutes, document it asynchronously instead of scheduling a meeting.
+                    2. **Rule 2 (Quiet Mornings)**: Tue/Thu 09:00 AM – 12:00 PM are protected deep work zones (zero internal meetings).
+                    3. **Rule 3 (Async SLA)**: Team members have a 3-hour response window on Slack/Teams threads—no immediate interruption expectation.
+                    """
+                )
+
+            col_hint2, col_act2 = st.columns([1.3, 1])
             with col_hint2:
-                st.caption("Suggested action: Establish 'No-Meeting Mornings' on Tue/Thu.")
+                st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Action: Adopt 'No-Meeting Mornings' on Tue/Thu</span>", unsafe_allow_html=True)
             with col_act2:
-                if st.button("Send Guidelines", key="btn_deploy_plan_2", type="secondary", use_container_width=True):
-                    st.info("Guidelines distributed to team leads.")
+                if st.button("📢 Send Guidelines", key="btn_deploy_plan_2", type="secondary", use_container_width=True):
+                    st.session_state["async_guidelines_active"] = True
+                    st.toast("Async guidelines distributed to all team leads!", icon="📢")
+
+            if st.session_state.get("async_guidelines_active"):
+                st.info("ℹ️ **Guidelines Distributed**: Shared to `#engineering-general` and pinned in sprint confluence workspace.")
+
+        # Priority 3 Card: Friday Autonomic Buffer
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 03 • Autonomic Buffer</span>
+                        <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;">Establish Friday Focus Sanctuary (1:00 PM+)</h4>
+                    </div>
+                    <span style="background: #fdf4ff; border: 1px solid #f0abfc; color: #86198f; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
+                        Impact: Sustained (+25% Morale)
+                    </span>
+                </div>
+                <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
+                    Protects the final hours of the work week with zero deployment cutoffs and meeting embargoes, ensuring employees head into the weekend without unfinished anxiety.
+                </p>
+                """,
+                unsafe_allow_html=True,
+            )
+            col_hint3, col_act3 = st.columns([1.3, 1])
+            with col_hint3:
+                st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Policy: Zero external customer syncs after 1:00 PM Friday</span>", unsafe_allow_html=True)
+            with col_act3:
+                if st.button("🛡️ Activate Buffer", key="btn_deploy_plan_3", type="secondary", use_container_width=True):
+                    st.session_state["friday_buffer_active"] = True
+                    st.toast("Friday Focus Sanctuary active for this sprint cycle!", icon="🛡️")
+
+            if st.session_state.get("friday_buffer_active"):
+                st.success("✅ **Sanctuary Active**: Automated calendar protection rule applied for Friday 1:00 PM onwards.")
 
     with c_check:
-        st.markdown("#### Manager Micro-Interventions")
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <h4 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.18rem; font-weight: 700; color: #0f172a;">
+                    Manager Micro-Interventions
+                </h4>
+                <span style="font-size: 0.78rem; color: #0f766e; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Weekly Cadence</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Calculate completed interventions live
+        interventions_def = [
+            ("chk_interv_1", "Public shout-out & recognition in team channel", "Acknowledged contributors for clean release.", "📣 Recognition", True),
+            ("chk_interv_2", "Audit recurring calendar meetings", "Pruned 3 redundant recurring syncs to save 4.5 hrs.", "🗓️ Focus Time", True),
+            ("chk_interv_3", "Review workload balance in 1-on-1 touchpoints", "Shifted sprint deliverables to balance cognitive load.", "🤝 Equilibrium", True),
+            ("chk_interv_4", "Host unstructured coffee chat (30-min hangout)", "Casual team connection with zero agenda pressure.", "☕ Social Bond", False),
+            ("chk_interv_5", "Share somatic breathing reset before sprint planning", "Embedded 2-min box-breathing calming protocol.", "🌬️ Calm Reset", False),
+        ]
+
+        # Init state if needed
+        for k, _, _, _, def_val in interventions_def:
+            if k not in st.session_state:
+                st.session_state[k] = def_val
+
+        completed_count = sum(1 for k, _, _, _, _ in interventions_def if st.session_state.get(k, False))
+        comp_pct = int((completed_count / len(interventions_def)) * 100)
+
         with st.container(border=True):
-            st.caption("Select or check off actions taken this week to maintain team wellness scores:")
-            st.checkbox(
-                "Send appreciation shout-out in public channel",
-                value=True,
-                help="Acknowledged design lead for exceptional delivery.",
-                key="chk_interv_1",
+            # Dynamic Live Progress Card Header
+            st.markdown(
+                f"""
+                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%); border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #166534;">Leadership Care Index</span>
+                        <span style="background: #ffffff; border: 1px solid #86efac; color: #166534; font-size: 0.76rem; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
+                            {completed_count} / {len(interventions_def)} Completed ({comp_pct}%)
+                        </span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: #047857; margin-bottom: 8px;">
+                        {"🌟 Optimal cadence: Team resilience index elevated by +14%." if comp_pct >= 80 else ("🌿 Strong baseline: Consistent leadership support maintained." if comp_pct >= 60 else "⚠️ Action required: 2 more micro-actions recommended to protect resilience.")}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-            st.checkbox(
-                "Audit recurring calendar meetings",
-                value=True,
-                help="Cancelled 3 redundant status syncs.",
-                key="chk_interv_2",
-            )
-            st.checkbox(
-                "Review workload balance in 1-on-1s",
-                value=True,
-                help="Shifted sprint deliverables for Sarah and Alex.",
-                key="chk_interv_3",
-            )
-            st.checkbox(
-                "Host unstructured coffee chat (30-min hangout)",
-                value=False,
-                key="chk_interv_4",
-            )
-            st.checkbox(
-                "Share guided breathing resource before sprint planning",
-                value=False,
-                key="chk_interv_5",
-            )
+            st.progress(completed_count / len(interventions_def))
+
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            for k, label, note, tag, _ in interventions_def:
+                checked = st.checkbox(
+                    label,
+                    value=st.session_state.get(k, False),
+                    key=k,
+                    help=note,
+                )
+                if checked:
+                    st.markdown(
+                        f"<div style='margin: -8px 0 8px 26px; font-size: 0.74rem; color: #0f766e;'>✓ {note} <span style='background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; color: #475569;'>{tag}</span></div>",
+                        unsafe_allow_html=True,
+                    )
+
+            st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px dashed #cbd5e1;'/>", unsafe_allow_html=True)
+            c_int_b1, c_int_b2 = st.columns(2)
+            with c_int_b1:
+                if st.button("✨ Log All Completed", type="secondary", use_container_width=True, key="btn_complete_all_interv"):
+                    for k, _, _, _, _ in interventions_def:
+                        st.session_state[k] = True
+                    st.toast("All 5 Manager Micro-Interventions recorded for this sprint!", icon="🎉")
+                    st.rerun()
+            with c_int_b2:
+                if st.button("📋 Copy Care Summary", type="secondary", use_container_width=True, key="btn_copy_interv_summary"):
+                    st.toast("Summary copied to clipboard for 1-on-1 and sprint retrospective!", icon="📋")
+                    st.session_state["show_interv_summary"] = True
+
+            if st.session_state.get("show_interv_summary"):
+                st.info(
+                    f"**Weekly Leadership Care Log ({comp_pct}% MET)**:\n" +
+                    "\n".join([f"- [x] {lbl} ({tg})" for k, lbl, _, tg, _ in interventions_def if st.session_state.get(k)]) +
+                    ("\n\n*Remaining:*\n" + "\n".join([f"- [ ] {lbl}" for k, lbl, _, _, _ in interventions_def if not st.session_state.get(k)]) if comp_pct < 100 else "\n\n*All weekly targets achieved!*")
+                )
 
 
 
