@@ -2039,32 +2039,35 @@ def render_landing_hero_3d() -> str:
         var innerMesh = new THREE.Mesh(innerGeo, innerMat);
         masterGroup.add(innerMesh);
 
-        // 4. Dual Celestial Gyroscope Rings (Refined Gold & Seafoam Halo)
-        var ring1Geo = new THREE.TorusGeometry(1.42, 0.024, 20, 80);
+        // 4. Ethereal Celestial Halos (Permanent Open Ellipses - No Slash / No Edge-on Flip)
+        var haloGroup = new THREE.Group();
+        haloGroup.rotation.x = 1.15; // Stable ~66-degree incline relative to camera
+        scene.add(haloGroup);
+
+        var ring1Geo = new THREE.TorusGeometry(1.48, 0.018, 20, 90);
         var ring1Mat = new THREE.MeshPhongMaterial({
+          color: 0x2dd4bf,
+          emissive: 0x0f766e,
+          specular: 0xffffff,
+          shininess: 120,
+          transparent: true,
+          opacity: 0.65
+        });
+        var ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+        haloGroup.add(ring1);
+
+        var ring2Geo = new THREE.TorusGeometry(1.68, 0.014, 20, 90);
+        var ring2Mat = new THREE.MeshPhongMaterial({
           color: 0xe6ca65,
           emissive: 0x3d2b00,
           specular: 0xffffff,
-          shininess: 110,
-          transparent: true,
-          opacity: 0.82
-        });
-        var ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
-        ring1.rotation.x = Math.PI / 3.2;
-        masterGroup.add(ring1);
-
-        var ring2Geo = new THREE.TorusGeometry(1.58, 0.020, 20, 80);
-        var ring2Mat = new THREE.MeshPhongMaterial({
-          color: 0x2dd4bf,
-          emissive: 0x042f2e,
-          specular: 0xffffff,
           shininess: 100,
           transparent: true,
-          opacity: 0.72
+          opacity: 0.48
         });
         var ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-        ring2.rotation.y = Math.PI / 3.6;
-        masterGroup.add(ring2);
+        ring2.rotation.y = 0.12;
+        haloGroup.add(ring2);
 
         // 5. Orbiting Luminous Pearl
         var satGeo = new THREE.SphereGeometry(0.08, 20, 20);
@@ -2204,9 +2207,11 @@ def render_landing_hero_3d() -> str:
           innerMesh.rotation.y -= delta * 0.9;
           innerMesh.rotation.x += delta * 0.6;
 
-          // Celestial Orbit Halo Rotations
-          ring1.rotation.z += delta * 0.28;
-          ring2.rotation.y += delta * 0.22;
+          // Celestial Orbit Halos (Spinning in-plane: perfectly open ellipses, zero slash!)
+          ring1.rotation.z += delta * 0.22;
+          ring2.rotation.z -= delta * 0.16;
+          haloGroup.position.y = masterGroup.position.y;
+          haloGroup.rotation.y = curRotY * 0.4;
 
           // Satellite pearl path
           var satAngle = t * 1.4;
@@ -2243,6 +2248,7 @@ def render_landing_hero_3d() -> str:
     </body>
     </html>
     """
+
 
 
 def render_landing_and_auth():
@@ -2764,710 +2770,893 @@ def render_wellness_tools_view():
         render_mood_food_planner_view(key_prefix="soma_sanctuary")
 
 
-def render_zen_companion_3d_widget() -> str:
-    """Return interactive 3D Zen Companion WebGL widget powered by Three.js (High-Class 3D Animated Architecture)."""
-    return """
+def render_zen_companion_3d_widget(scenario: str = "balanced") -> str:
+    """Return interactive 3D Zen Companion WebGL widget powered by Three.js with scenario-aware aura and zero slash artifacts."""
+    theme_cfg = {
+        "balanced": {
+            "title": "Live 3D Sanctuary Companion",
+            "crystal_color": "0x0f766e",
+            "crystal_emissive": "0x044e47",
+            "halo_color": "0x2dd4bf",
+            "initial_msg": '"Team rhythm is grounded and steady today."',
+            "insights": [
+                '"Team balance is radiant and steady today."',
+                '"Breathe in equanimity · Release unnecessary strain."',
+                '"Steady pacing compounds into sustainable breakthroughs."',
+                '"Small mindful pauses cultivate profound long-term clarity."',
+                '"Centered focus elevates collaborative flow."'
+            ]
+        },
+        "thriving": {
+            "title": "Live 3D Flourishing Aura",
+            "crystal_color": "0x059669",
+            "crystal_emissive": "0x064e3b",
+            "halo_color": "0x34d399",
+            "initial_msg": '"Psychological safety is high · Team synergy in flow!"',
+            "insights": [
+                '"Psychological safety is high · Team synergy in flow!"',
+                '"Celebrate collective wins and acknowledge each contribution."',
+                '"Gratitude amplifies resilience and sparks innovation."',
+                '"High trust unlocks boundless creative courage."',
+                '"Radiant morale illuminates every challenge."'
+            ]
+        },
+        "burnout": {
+            "title": "Live 3D De-escalation Beacon",
+            "crystal_color": "0xe11d48",
+            "crystal_emissive": "0x881337",
+            "halo_color": "0xfb7185",
+            "initial_msg": '"Elevated cognitive load detected · Time to pause & recharge."',
+            "insights": [
+                '"Elevated cognitive load detected · Time to pause & recharge."',
+                '"Prioritize human well-being over arbitrary urgency."',
+                '"Cancel non-essential meetings to restore baseline flow."',
+                '"A brief collective pause prevents chronic depletion."',
+                '"True engineering resilience starts with restful boundaries."'
+            ]
+        }
+    }
+    cfg = theme_cfg.get(scenario, theme_cfg["balanced"])
+    import json
+    insights_json = json.dumps(cfg["insights"])
+
+    return f"""
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 253, 250, 0.8) 55%, rgba(241, 245, 249, 0.7) 100%);
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{
+      background: transparent;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      color: #0f172a;
+      overflow: hidden;
+      height: 350px;
+      user-select: none;
+    }}
+    .companion-card {{
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.78) 55%, rgba(241, 245, 249, 0.72) 100%);
+      border: 1.5px solid rgba(204, 251, 241, 0.85);
+      box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.12), 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+      position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: 340px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      border: 1.5px solid rgba(204, 251, 241, 0.85);
-      box-shadow: 0 16px 36px -6px rgba(15, 118, 110, 0.12), 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.95);
-      user-select: none;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-    .header {
+      justify-content: space-between;
+      padding: 10px 14px 12px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }}
+    .header {{
       display: flex;
       justify-content: space-between;
       align-items: center;
       z-index: 10;
-    }
-    .badge {
-      display: flex;
+    }}
+    .badge {{
+      display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       color: #0f766e;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      background: rgba(240, 253, 250, 0.9);
-      border: 1px solid rgba(45, 212, 191, 0.5);
-      padding: 3px 10px;
+      background: rgba(240, 253, 250, 0.95);
+      border: 1px solid rgba(45, 212, 191, 0.6);
+      padding: 3px 11px;
       border-radius: 9999px;
-    }
-    .pulse-dot {
+      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.06);
+    }}
+    .pulse-dot {{
       width: 7px;
       height: 7px;
       border-radius: 50%;
       background: #14b8a6;
-      animation: pulse 2s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.5); }
-      50% { opacity: 0.5; transform: scale(1.15); box-shadow: 0 0 0 5px rgba(20, 184, 166, 0); }
-    }
-    .tag {
-      font-size: 10.5px;
+      animation: pulseDot 2s infinite ease-in-out;
+    }}
+    @keyframes pulseDot {{
+      0%, 100% {{ opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.5); }}
+      50% {{ opacity: 0.6; transform: scale(1.2); box-shadow: 0 0 0 5px rgba(20, 184, 166, 0); }}
+    }}
+    .tag {{
+      font-size: 9.5px;
       font-family: 'JetBrains Mono', monospace;
       background: rgba(255, 255, 255, 0.9);
-      padding: 3px 8px;
+      padding: 3px 9px;
       border-radius: 8px;
       color: #64748b;
       border: 1px solid #e2e8f0;
       font-weight: 600;
-    }
-    #canvas-container {
-      flex: 1;
+      letter-spacing: 0.02em;
+    }}
+    #canvas-container {{
+      height: 235px;
+      min-height: 235px;
       width: 100%;
       cursor: grab;
       position: relative;
-    }
-    #canvas-container:active {
+    }}
+    #canvas-container:active {{
       cursor: grabbing;
-    }
-    .dialogue-bar {
+    }}
+    .dialogue-bar {{
       z-index: 10;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(8px);
-      padding: 9px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(204, 251, 241, 0.8);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 8px 14px;
+      border-radius: 9999px;
+      border: 1px solid rgba(204, 251, 241, 0.85);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
       box-shadow: 0 2px 8px rgba(15, 118, 110, 0.06);
-    }
-    .dialogue-text h4 {
-      font-size: 12px;
+    }}
+    .dialogue-text {{
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      flex: 1;
+      overflow: hidden;
+    }}
+    .dialogue-text h4 {{
+      font-size: 11.5px;
       font-weight: 700;
       color: #0f172a;
-    }
-    .dialogue-text p {
-      font-size: 10px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }}
+    .dialogue-text p {{
+      font-size: 9.5px;
       color: #64748b;
-      margin-top: 1px;
-    }
-    .icon-spa {
-      color: #0f766e;
-      font-size: 20px;
-    }
-    .action-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 9px;
+    }}
+    .action-btn {{
+      padding: 4px 10px;
+      border-radius: 9999px;
       background: linear-gradient(135deg, #0f766e, #14b8a6);
       color: #ffffff;
       border: none;
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 3px 8px rgba(15, 118, 110, 0.25);
+      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .action-btn:hover {
-      transform: scale(1.08) translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 118, 110, 0.35);
-    }
+      white-space: nowrap;
+    }}
+    .action-btn:hover {{
+      transform: scale(1.04) translateY(-1px);
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
+    }}
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="badge">
-      <div class="pulse-dot"></div>
-      Live 3D Zen Companion
-    </div>
-    <div class="tag">Drag & Orbit 3D</div>
-  </div>
-
-  <div id="canvas-container"></div>
-
-  <div class="dialogue-bar">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span class="material-symbols-outlined icon-spa">spa</span>
-      <div class="dialogue-text">
-        <h4 id="dialogue-msg">"Team balance is radiant and steady today."</h4>
-        <p>Touch or click the 3D crystal to awaken mindful insights.</p>
+  <div class="companion-card">
+    <div class="header">
+      <div class="badge">
+        <div class="pulse-dot"></div>
+        {cfg["title"]}
       </div>
+      <div class="tag">Touch & Orbit 3D</div>
     </div>
-    <button class="action-btn" id="btn-spin" title="Aura Resonance">
-      <span class="material-symbols-outlined" style="font-size: 16px;">chat</span>
-    </button>
+
+    <div id="canvas-container"></div>
+
+    <div class="dialogue-bar">
+      <div style="display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden;">
+        <span style="font-size: 15px;">🍃</span>
+        <div class="dialogue-text">
+          <h4 id="dialogue-msg">{cfg["initial_msg"]}</h4>
+          <p>Touch or click the 3D crystal to awaken mindful insights.</p>
+        </div>
+      </div>
+      <button class="action-btn" id="btn-spin" title="Aura Resonance">
+        <span>Pulse</span> ✨
+      </button>
+    </div>
   </div>
 
   <script>
     const container = document.getElementById('canvas-container');
-    const width = container.clientWidth || 320;
-    const height = container.clientHeight || 215;
+    const width = container.clientWidth || 360;
+    const height = 235;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 1000);
-    camera.position.z = 4.8;
+    const camera = new THREE.PerspectiveCamera(48, width / height, 0.1, 1000);
+    camera.position.z = 4.3;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({{ alpha: true, antialias: true }});
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     container.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 1.4));
+    scene.add(new THREE.AmbientLight(0xffffff, 1.3));
 
-    const pLight1 = new THREE.PointLight(0x14b8a6, 3.5, 40);
-    pLight1.position.set(2.5, 3.5, 3);
+    const pLight1 = new THREE.PointLight(0x14b8a6, 3.2, 40);
+    pLight1.position.set(3, 3.5, 3);
     scene.add(pLight1);
 
-    const pLight2 = new THREE.PointLight(0xf59e0b, 2.2, 40);
-    pLight2.position.set(-2.5, -3, 2);
+    const pLight2 = new THREE.PointLight(0xf59e0b, 2.0, 40);
+    pLight2.position.set(-3, -2.5, 2);
     scene.add(pLight2);
+
+    const pLight3 = new THREE.PointLight(0x38bdf8, 1.6, 40);
+    pLight3.position.set(0, 4, -2);
+    scene.add(pLight3);
 
     const masterGroup = new THREE.Group();
 
-    // 1. Faceted Icosahedron Crystal Jewel
-    const crystalGeo = new THREE.IcosahedronGeometry(0.95, 0);
-    const crystalMat = new THREE.MeshPhongMaterial({
-      color: 0x0f766e,
-      emissive: 0x064e3b,
-      specular: 0x5eead4,
-      shininess: 95,
+    // 1. Faceted Icosahedron Crystal
+    const crystalGeo = new THREE.IcosahedronGeometry(0.92, 0);
+    const crystalMat = new THREE.MeshPhongMaterial({{
+      color: {cfg["crystal_color"]},
+      emissive: {cfg["crystal_emissive"]},
+      specular: 0x99f6e4,
+      shininess: 110,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.88,
       flatShading: true
-    });
+    }});
     const crystalMesh = new THREE.Mesh(crystalGeo, crystalMat);
     masterGroup.add(crystalMesh);
 
-    // 2. Wireframe Crystal Lattice
-    const wireGeo = new THREE.IcosahedronGeometry(0.97, 0);
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x99f6e4,
+    // 2. Translucent Cyan Wireframe Lattice
+    const wireGeo = new THREE.IcosahedronGeometry(0.94, 0);
+    const wireMat = new THREE.MeshBasicMaterial({{
+      color: 0x5eead4,
       wireframe: true,
       transparent: true,
-      opacity: 0.55
-    });
+      opacity: 0.40
+    }});
     const wireMesh = new THREE.Mesh(wireGeo, wireMat);
     masterGroup.add(wireMesh);
 
-    // 3. Inner Radiant Heart
-    const innerGeo = new THREE.OctahedronGeometry(0.5, 0);
-    const innerMat = new THREE.MeshPhongMaterial({
+    // 3. Radiant Octahedral Core
+    const innerGeo = new THREE.OctahedronGeometry(0.44, 0);
+    const innerMat = new THREE.MeshPhongMaterial({{
       color: 0xfef08a,
       emissive: 0xd97706,
       shininess: 100,
       flatShading: true
-    });
+    }});
     const innerMesh = new THREE.Mesh(innerGeo, innerMat);
     masterGroup.add(innerMesh);
 
-    // 4. Concentric Gyroscope Rings (Emerald & Gold)
-    const ring1Geo = new THREE.TorusGeometry(1.45, 0.022, 16, 64);
-    const ring1Mat = new THREE.MeshPhongMaterial({
-      color: 0x14b8a6,
-      emissive: 0x042f2e,
-      shininess: 85
-    });
+    // 4. Ethereal Celestial Halos (Permanent Open Ellipses - No Slash / No Edge-on Flip)
+    const haloGroup = new THREE.Group();
+    haloGroup.rotation.x = 1.15; // Stable ~66-degree incline relative to camera
+    scene.add(haloGroup);
+
+    const ring1Geo = new THREE.TorusGeometry(1.48, 0.018, 20, 90);
+    const ring1Mat = new THREE.MeshPhongMaterial({{
+      color: {cfg["halo_color"]},
+      emissive: 0x0f766e,
+      specular: 0xffffff,
+      shininess: 120,
+      transparent: true,
+      opacity: 0.65
+    }});
     const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
-    ring1.rotation.x = Math.PI / 3.2;
-    masterGroup.add(ring1);
+    haloGroup.add(ring1);
 
-    const ring2Geo = new THREE.TorusGeometry(1.72, 0.02, 16, 64);
-    const ring2Mat = new THREE.MeshPhongMaterial({
-      color: 0xd4af37,
-      emissive: 0x78350f,
-      shininess: 95
-    });
+    const ring2Geo = new THREE.TorusGeometry(1.68, 0.014, 20, 90);
+    const ring2Mat = new THREE.MeshPhongMaterial({{
+      color: 0xe6ca65,
+      emissive: 0x3d2b00,
+      specular: 0xffffff,
+      shininess: 100,
+      transparent: true,
+      opacity: 0.48
+    }});
     const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-    ring2.rotation.y = Math.PI / 4;
-    masterGroup.add(ring2);
+    ring2.rotation.y = 0.12;
+    haloGroup.add(ring2);
 
-    // 5. Orbiting Satellite Pearl
-    const satGeo = new THREE.SphereGeometry(0.09, 16, 16);
-    const satMat = new THREE.MeshPhongMaterial({
+    // 5. Orbiting Luminous Pearl
+    const satGeo = new THREE.SphereGeometry(0.08, 20, 20);
+    const satMat = new THREE.MeshPhongMaterial({{
       color: 0xffffff,
-      emissive: 0x2dd4bf,
+      emissive: 0x5eead4,
+      specular: 0xffffff,
       shininess: 100
-    });
+    }});
     const satellite = new THREE.Mesh(satGeo, satMat);
     masterGroup.add(satellite);
 
-    // 6. Floating Particle Dust
-    const pCount = 90;
+    // 6. Floating Ambient Stardust
+    const pCount = 100;
     const pGeo = new THREE.BufferGeometry();
     const pPos = new Float32Array(pCount * 3);
-    for (let i = 0; i < pCount * 3; i += 3) {
-      pPos[i] = (Math.random() - 0.5) * 7;
-      pPos[i+1] = (Math.random() - 0.5) * 6;
-      pPos[i+2] = (Math.random() - 0.5) * 6;
-    }
+    for (let i = 0; i < pCount * 3; i += 3) {{
+      pPos[i] = (Math.random() - 0.5) * 7.5;
+      pPos[i+1] = (Math.random() - 0.5) * 5.5;
+      pPos[i+2] = (Math.random() - 0.5) * 5.5;
+    }}
     pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-    const pMat = new THREE.PointsMaterial({
+    const pMat = new THREE.PointsMaterial({{
       color: 0x2dd4bf,
-      size: 0.075,
+      size: 0.065,
       transparent: true,
       opacity: 0.75
-    });
+    }});
     const particles = new THREE.Points(pGeo, pMat);
     scene.add(particles);
 
     scene.add(masterGroup);
 
-    // Mouse Drag Orbit & Touch Controls
+    // Mouse & Touch Physics
     let isDragging = false;
     let prevMouseX = 0, prevMouseY = 0;
     let targetRotX = 0, targetRotY = 0;
     let curRotX = 0, curRotY = 0;
 
-    container.addEventListener('mousedown', (e) => {
+    container.addEventListener('mousedown', (e) => {{
       isDragging = true;
       prevMouseX = e.clientX;
       prevMouseY = e.clientY;
-    });
-    window.addEventListener('mouseup', () => { isDragging = false; });
-    window.addEventListener('mousemove', (e) => {
-      if (isDragging) {
+    }});
+    window.addEventListener('mouseup', () => {{ isDragging = false; }});
+    window.addEventListener('mousemove', (e) => {{
+      if (isDragging) {{
         const dx = e.clientX - prevMouseX;
         const dy = e.clientY - prevMouseY;
         targetRotY += dx * 0.01;
         targetRotX += dy * 0.01;
         prevMouseX = e.clientX;
         prevMouseY = e.clientY;
-      }
-    });
+      }}
+    }});
 
-    container.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
+    container.addEventListener('mousemove', (e) => {{
+      if (!isDragging) {{
+        const rect = container.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) / rect.width - 0.5;
+        const my = (e.clientY - rect.top) / rect.height - 0.5;
+        targetRotY = mx * 0.55;
+        targetRotX = my * 0.40;
+      }}
+    }});
+
+    container.addEventListener('touchstart', (e) => {{
+      if (e.touches.length === 1) {{
         isDragging = true;
         prevMouseX = e.touches[0].clientX;
         prevMouseY = e.touches[0].clientY;
-      }
-    }, { passive: true });
-    window.addEventListener('touchend', () => { isDragging = false; });
-    window.addEventListener('touchmove', (e) => {
-      if (isDragging && e.touches.length === 1) {
+      }}
+    }}, {{ passive: true }});
+    window.addEventListener('touchend', () => {{ isDragging = false; }});
+    window.addEventListener('touchmove', (e) => {{
+      if (isDragging && e.touches.length === 1) {{
         const dx = e.touches[0].clientX - prevMouseX;
         const dy = e.touches[0].clientY - prevMouseY;
         targetRotY += dx * 0.012;
         targetRotX += dy * 0.012;
         prevMouseX = e.touches[0].clientX;
         prevMouseY = e.touches[0].clientY;
-      }
-    }, { passive: true });
+      }}
+    }}, {{ passive: true }});
 
     let isPulsing = false;
     let pulseTimer = 0;
-    const insights = [
-      '"Take a deep breath and reset your inner horizon."',
-      '"Your team\\'s energy is grounded, radiant, and focused!"',
-      '"Empathy and calmness are superpowers in complex work."',
-      '"Small mindful moments compound into profound peace."',
-      '"Breathe in equanimity · Release unnecessary strain."'
-    ];
+    const insights = {insights_json};
 
-    function trigger() {
+    function trigger() {{
       isPulsing = true;
       pulseTimer = 1.6;
       const d = document.getElementById('dialogue-msg');
       if (d) d.textContent = insights[Math.floor(Math.random() * insights.length)];
-    }
+    }}
 
     container.addEventListener('click', trigger);
-    document.getElementById('btn-spin').addEventListener('click', trigger);
+    const spinBtn = document.getElementById('btn-spin');
+    if (spinBtn) spinBtn.addEventListener('click', trigger);
 
     const clock = new THREE.Clock();
-    function animate() {
+    function animate() {{
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
       const t = clock.getElapsedTime();
 
-      // Organic respiratory expansion (4s respiratory rhythm)
-      let breathScale = 1 + 0.06 * Math.sin(t * 1.5);
-      if (isPulsing) {
+      let breathScale = 1.0 + 0.06 * Math.sin(t * 1.3);
+      if (isPulsing) {{
         pulseTimer -= delta;
-        breathScale += 0.12 * Math.sin(t * 12);
-        crystalMat.emissive.setHex(0xd4af37);
+        breathScale += 0.10 * Math.sin(t * 14);
+        crystalMat.emissive.setHex(0xb45309);
         crystalMat.color.setHex(0x5eead4);
-        pMat.size = 0.11;
-        if (pulseTimer <= 0) {
+        pMat.size = 0.095;
+        if (pulseTimer <= 0) {{
           isPulsing = false;
-          crystalMat.emissive.setHex(0x064e3b);
-          crystalMat.color.setHex(0x0f766e);
-          pMat.size = 0.075;
-        }
-      }
+          crystalMat.emissive.setHex({cfg["crystal_emissive"]});
+          crystalMat.color.setHex({cfg["crystal_color"]});
+          pMat.size = 0.065;
+        }}
+      }}
 
       crystalMesh.scale.set(breathScale, breathScale, breathScale);
       wireMesh.scale.set(breathScale, breathScale, breathScale);
-      innerMesh.rotation.y -= delta * 1.2;
-      innerMesh.rotation.x += delta * 0.8;
+      innerMesh.rotation.y -= delta * 0.9;
+      innerMesh.rotation.x += delta * 0.6;
 
-      ring1.rotation.z += delta * 0.45;
-      ring2.rotation.x += delta * 0.55;
+      // Celestial Orbit Halos (Spinning in-plane: open ellipses, zero slash!)
+      ring1.rotation.z += delta * 0.22;
+      ring2.rotation.z -= delta * 0.16;
+      haloGroup.position.y = masterGroup.position.y;
+      haloGroup.rotation.y = curRotY * 0.4;
 
-      const satAngle = t * 1.8;
+      const satAngle = t * 1.4;
       satellite.position.set(
-        Math.cos(satAngle) * 1.72,
-        Math.sin(satAngle) * 0.65,
-        Math.sin(satAngle) * 1.72
+        Math.cos(satAngle) * 1.55,
+        Math.sin(satAngle * 0.8) * 0.5,
+        Math.sin(satAngle) * 1.55
       );
 
-      particles.rotation.y += delta * 0.04;
+      particles.rotation.y += delta * 0.03;
 
-      curRotX += (targetRotX - curRotX) * 0.08;
-      curRotY += (targetRotY - curRotY) * 0.08;
+      curRotX += (targetRotX - curRotX) * 0.07;
+      curRotY += (targetRotY - curRotY) * 0.07;
 
-      masterGroup.position.y = Math.sin(t * 1.2) * 0.1;
-      masterGroup.rotation.y = curRotY + t * 0.2;
-      masterGroup.rotation.x = curRotX + Math.sin(t * 0.6) * 0.08;
+      masterGroup.position.y = Math.sin(t * 1.1) * 0.08;
+      masterGroup.rotation.y = curRotY + t * 0.18;
+      masterGroup.rotation.x = curRotX + Math.sin(t * 0.5) * 0.06;
 
       renderer.render(scene, camera);
-    }
+    }}
     animate();
 
-    window.addEventListener('resize', () => {
-      const w = container.clientWidth || 320;
-      const h = container.clientHeight || 215;
+    window.addEventListener('resize', () => {{
+      const w = container.clientWidth || 360;
+      const h = 235;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-    });
+    }});
   </script>
 </body>
 </html>
 """
 
 
+
 def render_team_health_view():
     """Render Google Stitch-inspired Team Wellbeing Intelligence & 3D Companion."""
+    refreshed_at = st.session_state.get("team_insights_refreshed_at", "Just now (Live Telemetry)")
+
     st.markdown(
-        """
+        f"""
         <div style="margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                 <span style="background: #d7e8c6; color: #3d4b32; padding: 3px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">AI Synthesis & Strategy</span>
-                <span style="color: #70796f; font-size: 0.8rem;">• Updated 2 hours ago</span>
+                <span style="color: #70796f; font-size: 0.8rem;">• Synchronized {refreshed_at}</span>
             </div>
-            <h2 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #1a1c1b;">Team Wellbeing Intelligence</h2>
+            <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.7rem; font-weight: 700; color: #1a1c1b; letter-spacing: -0.025em;">Team Wellbeing Intelligence</h2>
             <p style="margin: 4px 0 0 0; color: #404940; font-size: 0.92rem; line-height: 1.5;">
-                Synthesized insights derived from recent check-ins, sentiment trends, and organizational rhythm to optimize leadership action, guided by your interactive AI Wellbeing Companion.
+                Synthesized insights derived from active check-ins, sentiment trends, and organizational rhythm to optimize leadership action, guided by your interactive AI Wellbeing Companion.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    col_ctrl, col_companion = st.columns([1.1, 0.9], gap="large")
-    with col_ctrl:
-        scenario = st.radio(
-            "Select Team Operating Scenario to Simulate:",
-            ["balanced", "thriving", "burnout"],
-            format_func=lambda x: {
-                "balanced": "Balanced Sprint (Moderate workload with constructive recovery)",
-                "thriving": "Thriving Unit (High psychological safety and gratitude)",
-                "burnout": "High-Strain Team (Sustained negative sentiment & distress markers)",
-            }[x],
-            horizontal=False,
-            key="team_health_scenario_select",
-        )
+    # Telemetry Stream Mode Switcher
+    stream_tabs = st.tabs(["🔮 Scenario Stress-Testing & Forecasts", "📝 Log Instant Team Pulse", "📋 Team Check-in Activity Log"])
 
-        mock_data = generate_synthetic_team_data(days=14, team_size=8, scenario=scenario)
-        metrics = calculate_team_burnout_risk(mock_data)
-
-        c_btn1, c_btn2 = st.columns(2)
-        with c_btn1:
-            if st.button("Refresh AI Insights", type="primary", width="stretch", key="btn_refresh_team_ai"):
-                st.toast("Telemetry refreshed across 42 team check-ins.", icon="✨")
-        with c_btn2:
-            st.download_button(
-                "Export Intelligence Report",
-                data=pd.DataFrame(mock_data).to_csv(index=False),
-                file_name="team_wellbeing_intelligence.csv",
-                mime="text/csv",
-                width="stretch",
-                key="btn_export_team_report",
+    with stream_tabs[0]:
+        col_ctrl, col_companion = st.columns([1.1, 0.9], gap="large")
+        with col_ctrl:
+            scenario = st.radio(
+                "Select Team Operating Scenario to Model:",
+                ["balanced", "thriving", "burnout"],
+                format_func=lambda x: {
+                    "balanced": "Balanced Sprint (Moderate workload with constructive recovery)",
+                    "thriving": "Thriving Unit (High psychological safety and gratitude)",
+                    "burnout": "High-Strain Team (Sustained negative sentiment & distress markers)",
+                }[x],
+                horizontal=False,
+                key="team_health_scenario_select",
             )
 
-    with col_companion:
-        # Embed Interactive 3D Zen Companion (Three.js WebGL)
-        render_iframe(render_zen_companion_3d_widget(), height=360)
+            mock_data = generate_synthetic_team_data(days=14, team_size=8, scenario=scenario)
 
-    st.markdown("---")
+            # Integrate any live submitted checkins into telemetry
+            if st.session_state.get("live_team_checkins"):
+                for lc in st.session_state["live_team_checkins"]:
+                    mock_data.append({
+                        "date": lc["date"],
+                        "employee_id": lc.get("employee_id", "EMP-LIVE"),
+                        "sentiment_compound": lc["compound"],
+                        "scenario": scenario
+                    })
 
-    # Bento Style Impact Metrics
-    b1, b2, b3, b4 = st.columns(4)
-    with b1:
-        pulse_val = "8.4" if scenario == "balanced" else ("9.2" if scenario == "thriving" else "5.8")
-        st.metric(
-            label="Team Pulse Index",
-            value=pulse_val,
-            delta="+0.6 Trending Up" if scenario != "burnout" else "-1.4 High Strain",
-            delta_color="normal" if scenario != "burnout" else "inverse",
-            help="Calculated from 42 daily check-ins this week.",
-        )
-    with b2:
-        st.metric(
-            label="Burnout Risk Factor",
-            value=metrics["risk_level"].capitalize(),
-            delta=f"{metrics['burnout_risk_score']}/100 Score",
-            delta_color="inverse",
-            help="Cognitive friction index across engineering teams.",
-        )
-    with b3:
-        st.metric(
-            label="Action Adoption Rate",
-            value=f"{metrics['team_resilience_index']}%",
-            delta="14 of 18 Complete",
-            help="Suggested micro-interventions completed by leads.",
-        )
-    with b4:
-        st.metric(
-            label="Psychological Safety",
-            value="9.1 / 10" if scenario != "burnout" else "5.2 / 10",
-            delta="High Flow" if scenario != "burnout" else "Needs Attention",
-            help="Consistent openness reported in 1-on-1 reflections.",
-        )
+            metrics = calculate_team_burnout_risk(mock_data)
 
-    # 14-Day Team Sentiment Chart
-    df_team = pd.DataFrame(mock_data)
-    df_agg = df_team.groupby("date")["sentiment_compound"].mean().reset_index()
-    fig = px.line(
-        df_agg,
-        x="date",
-        y="sentiment_compound",
-        markers=True,
-        title="14-Day Team Sentiment Moving Average vs Distress Boundary",
-        labels={"sentiment_compound": "Sentiment Valence", "date": "Date"},
-    )
-    fig.add_hline(y=0.05, line_dash="dash", line_color="#11562a", annotation_text="Positive Baseline (+0.05)")
-    fig.add_hline(y=-0.05, line_dash="dash", line_color="#ba1a1a", annotation_text="Distress Boundary (-0.05)")
-    fig.update_layout(
-        height=260,
-        margin={"l": 20, "r": 20, "t": 35, "b": 15},
-        plot_bgcolor="#faf9f7",
-        paper_bgcolor="#faf9f7",
-    )
-    st.plotly_chart(fig, width="stretch")
-
-    # Split: Recommended Strategic Shifts & Micro-Interventions Checklist
-    c_shifts, c_check = st.columns([1.1, 0.9], gap="large")
-
-    with c_shifts:
-        st.markdown(
-            """
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
-                <h4 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.18rem; font-weight: 700; color: #0f172a;">
-                    Recommended Strategic Shifts
-                </h4>
-                <span style="font-size: 0.78rem; color: #0891b2; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">AI Telemetry Sourced</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        # Priority 1 Card: Team Recharge Day
-        with st.container(border=True):
-            st.markdown(
-                """
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div>
-                        <span style="background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 01 • Urgent Focus</span>
-                        <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;">Schedule Team Recharge Day</h4>
-                    </div>
-                    <span style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
-                        Impact: Very High (+18% Focus)
-                    </span>
-                </div>
-                <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
-                    Telemetry reveals elevated cognitive strain and continuous context switching over the past 3 weeks. An uninterrupted recharge window significantly lowers cortisol and restores baseline deep flow.
-                </p>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            with st.expander("📅 View Action Blueprint & Schedule (Next Thursday 1:30 PM)", expanded=False):
-                st.markdown(
-                    """
-                    - **01:30 PM – 02:00 PM**: Silent decompression window (calendar block auto-created).
-                    - **02:00 PM – 04:30 PM**: Deep focus uninterrupted sprint (all non-critical alerts muted).
-                    - **04:30 PM – 05:00 PM**: Optional team gratitude & retrospective circle.
-                    """
+            c_btn1, c_btn2 = st.columns(2)
+            with c_btn1:
+                if st.button("Refresh AI Insights", type="primary", width="stretch", key="btn_refresh_team_ai"):
+                    st.session_state["team_insights_refreshed_at"] = datetime.now(timezone.utc).strftime("%I:%M:%S %p UTC")
+                    st.toast("Telemetry synchronized across all active check-ins.", icon="✨")
+                    st.rerun()
+            with c_btn2:
+                st.download_button(
+                    "Export Intelligence Report",
+                    data=pd.DataFrame(mock_data).to_csv(index=False),
+                    file_name=f"team_wellbeing_{scenario}_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv",
+                    mime="text/csv",
+                    width="stretch",
+                    key="btn_export_team_report",
                 )
 
-            col_hint1, col_act1 = st.columns([1.3, 1])
-            with col_hint1:
-                st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Recommended: Next Thursday afternoon (4 hours)</span>", unsafe_allow_html=True)
-            with col_act1:
-                if st.button("🚀 Deploy Plan", key="btn_deploy_plan_1", type="primary", width="stretch"):
-                    st.session_state["recharge_plan_active"] = True
-                    st.toast("Team Recharge Day plan activated! Calendar sync initiated.", icon="📅")
+        with col_companion:
+            # Embed Interactive 3D Zen Companion (Three.js WebGL with scenario tuning)
+            render_iframe(render_zen_companion_3d_widget(scenario=scenario), height=360)
 
-            if st.session_state.get("recharge_plan_active"):
-                st.success("✅ **Recharge Day Deployed**: Calendar holds dispatched to 8 team members. Slack status sync enabled.")
+        st.markdown("---")
 
-        # Priority 2 Card: Asynchronous Communication
-        with st.container(border=True):
+        # Bento Style Impact Metrics
+        b1, b2, b3, b4 = st.columns(4)
+        with b1:
+            pulse_val = "8.4" if scenario == "balanced" else ("9.2" if scenario == "thriving" else "5.8")
+            st.metric(
+                label="Team Pulse Index",
+                value=pulse_val,
+                delta="+0.6 Trending Up" if scenario != "burnout" else "-1.4 High Strain",
+                delta_color="normal" if scenario != "burnout" else "inverse",
+                help="Calculated from active daily check-ins this week.",
+            )
+        with b2:
+            st.metric(
+                label="Burnout Risk Factor",
+                value=metrics["risk_level"].capitalize(),
+                delta=f"{metrics['burnout_risk_score']}/100 Score",
+                delta_color="inverse",
+                help="Cognitive friction index across engineering teams.",
+            )
+        with b3:
+            st.metric(
+                label="Action Adoption Rate",
+                value=f"{metrics['team_resilience_index']}%",
+                delta="14 of 18 Complete",
+                help="Suggested micro-interventions completed by leads.",
+            )
+        with b4:
+            st.metric(
+                label="Psychological Safety",
+                value="9.1 / 10" if scenario != "burnout" else "5.2 / 10",
+                delta="High Flow" if scenario != "burnout" else "Needs Attention",
+                help="Consistent openness reported in 1-on-1 reflections.",
+            )
+
+        # 14-Day Team Sentiment Chart
+        df_team = pd.DataFrame(mock_data)
+        df_agg = df_team.groupby("date")["sentiment_compound"].mean().reset_index()
+        fig = px.line(
+            df_agg,
+            x="date",
+            y="sentiment_compound",
+            markers=True,
+            title="14-Day Team Sentiment Moving Average vs Distress Boundary",
+            labels={"sentiment_compound": "Sentiment Valence", "date": "Date"},
+        )
+        fig.add_hline(y=0.05, line_dash="dash", line_color="#11562a", annotation_text="Positive Baseline (+0.05)")
+        fig.add_hline(y=-0.05, line_dash="dash", line_color="#ba1a1a", annotation_text="Distress Boundary (-0.05)")
+        fig.update_layout(
+            height=260,
+            margin={"l": 20, "r": 20, "t": 35, "b": 15},
+            plot_bgcolor="#faf9f7",
+            paper_bgcolor="#faf9f7",
+        )
+        st.plotly_chart(fig, width="stretch")
+
+        # Split: Recommended Strategic Shifts & Micro-Interventions Checklist
+        c_shifts, c_check = st.columns([1.1, 0.9], gap="large")
+
+        with c_shifts:
             st.markdown(
                 """
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div>
-                        <span style="background: #ede9fe; border: 1px solid #ddd6fe; color: #5b21b6; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 02 • Structural Habit</span>
-                        <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;">Encourage Asynchronous Communication</h4>
-                    </div>
-                    <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
-                        Impact: High (+6 hrs/week)
-                    </span>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                    <h3 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.25rem; font-weight: 700; color: #0f172a;">
+                        Recommended Strategic Shifts
+                    </h3>
+                    <span style="font-size: 0.78rem; color: #0891b2; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">AI Telemetry Sourced</span>
                 </div>
-                <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
-                    Meeting volume rose 22% month-over-month. Transitioning standard status updates to async threads recovers approximately 6 hours of uninterrupted creative time per team member weekly.
-                </p>
                 """,
                 unsafe_allow_html=True,
             )
 
-            with st.expander("📜 View 3-Rule Async Framework", expanded=False):
+            # Priority 1 Card: Team Recharge Day
+            with st.container(border=True):
                 st.markdown(
                     """
-                    1. **Rule 1 (2-Minute Rule)**: If an update can be read in under 2 minutes, document it asynchronously instead of scheduling a meeting.
-                    2. **Rule 2 (Quiet Mornings)**: Tue/Thu 09:00 AM – 12:00 PM are protected deep work zones (zero internal meetings).
-                    3. **Rule 3 (Async SLA)**: Team members have a 3-hour response window on Slack/Teams threads—no immediate interruption expectation.
-                    """
-                )
-
-            col_hint2, col_act2 = st.columns([1.3, 1])
-            with col_hint2:
-                st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Action: Adopt 'No-Meeting Mornings' on Tue/Thu</span>", unsafe_allow_html=True)
-            with col_act2:
-                if st.button("📢 Send Guidelines", key="btn_deploy_plan_2", type="secondary", width="stretch"):
-                    st.session_state["async_guidelines_active"] = True
-                    st.toast("Async guidelines distributed to all team leads!", icon="📢")
-
-            if st.session_state.get("async_guidelines_active"):
-                st.info("ℹ️ **Guidelines Distributed**: Shared to `#engineering-general` and pinned in sprint confluence workspace.")
-
-        # Priority 3 Card: Friday Autonomic Buffer
-        with st.container(border=True):
-            st.markdown(
-                """
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div>
-                        <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 03 • Autonomic Buffer</span>
-                        <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;">Establish Friday Focus Sanctuary (1:00 PM+)</h4>
-                    </div>
-                    <span style="background: #fdf4ff; border: 1px solid #f0abfc; color: #86198f; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
-                        Impact: Sustained (+25% Morale)
-                    </span>
-                </div>
-                <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
-                    Protects the final hours of the work week with zero deployment cutoffs and meeting embargoes, ensuring employees head into the weekend without unfinished anxiety.
-                </p>
-                """,
-                unsafe_allow_html=True,
-            )
-            col_hint3, col_act3 = st.columns([1.3, 1])
-            with col_hint3:
-                st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Policy: Zero external customer syncs after 1:00 PM Friday</span>", unsafe_allow_html=True)
-            with col_act3:
-                if st.button("🛡️ Activate Buffer", key="btn_deploy_plan_3", type="secondary", width="stretch"):
-                    st.session_state["friday_buffer_active"] = True
-                    st.toast("Friday Focus Sanctuary active for this sprint cycle!", icon="🛡️")
-
-            if st.session_state.get("friday_buffer_active"):
-                st.success("✅ **Sanctuary Active**: Automated calendar protection rule applied for Friday 1:00 PM onwards.")
-
-    with c_check:
-        st.markdown(
-            """
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
-                <h4 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.18rem; font-weight: 700; color: #0f172a;">
-                    Manager Micro-Interventions
-                </h4>
-                <span style="font-size: 0.78rem; color: #0f766e; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Weekly Cadence</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        # Calculate completed interventions live
-        interventions_def = [
-            ("chk_interv_1", "Public shout-out & recognition in team channel", "Acknowledged contributors for clean release.", "📣 Recognition", True),
-            ("chk_interv_2", "Audit recurring calendar meetings", "Pruned 3 redundant recurring syncs to save 4.5 hrs.", "🗓️ Focus Time", True),
-            ("chk_interv_3", "Review workload balance in 1-on-1 touchpoints", "Shifted sprint deliverables to balance cognitive load.", "🤝 Equilibrium", True),
-            ("chk_interv_4", "Host unstructured coffee chat (30-min hangout)", "Casual team connection with zero agenda pressure.", "☕ Social Bond", False),
-            ("chk_interv_5", "Share somatic breathing reset before sprint planning", "Embedded 2-min box-breathing calming protocol.", "🌬️ Calm Reset", False),
-        ]
-
-        # Init state if needed
-        for k, _, _, _, def_val in interventions_def:
-            if k not in st.session_state:
-                st.session_state[k] = def_val
-
-        completed_count = sum(1 for k, _, _, _, _ in interventions_def if st.session_state.get(k, False))
-        comp_pct = int((completed_count / len(interventions_def)) * 100)
-
-        with st.container(border=True):
-            # Dynamic Live Progress Card Header
-            st.markdown(
-                f"""
-                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%); border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="font-size: 0.8rem; font-weight: 700; color: #166534;">Leadership Care Index</span>
-                        <span style="background: #ffffff; border: 1px solid #86efac; color: #166534; font-size: 0.76rem; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
-                            {completed_count} / {len(interventions_def)} Completed ({comp_pct}%)
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div>
+                            <span style="background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 01 • Urgent Focus</span>
+                            <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.15rem; font-weight: 700;">Schedule Team Recharge Day</h4>
+                        </div>
+                        <span style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
+                            Impact: Very High (+18% Focus)
                         </span>
                     </div>
-                    <div style="font-size: 0.78rem; color: #047857; margin-bottom: 8px;">
-                        {"🌟 Optimal cadence: Team resilience index elevated by +14%." if comp_pct >= 80 else ("🌿 Strong baseline: Consistent leadership support maintained." if comp_pct >= 60 else "⚠️ Action required: 2 more micro-actions recommended to protect resilience.")}
+                    <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
+                        Telemetry reveals elevated cognitive strain and continuous context switching over the past 3 weeks. An uninterrupted recharge window significantly lowers cortisol and restores baseline deep flow.
+                    </p>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                col_hint1, col_act1 = st.columns([1.3, 1])
+                with col_hint1:
+                    st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Recommended: Next Thursday afternoon (4 hours)</span>", unsafe_allow_html=True)
+                with col_act1:
+                    plan_1_deployed = st.session_state.get("recharge_plan_active", False)
+                    btn_text = "✅ Plan Deployed" if plan_1_deployed else "🚀 Deploy Plan"
+                    if st.button(btn_text, key="btn_deploy_plan_1", type="primary" if not plan_1_deployed else "secondary", width="stretch"):
+                        st.session_state["recharge_plan_active"] = not plan_1_deployed
+                        st.toast("Team Recharge schedule updated!", icon="📅")
+                        st.rerun()
+
+                if st.session_state.get("recharge_plan_active"):
+                    st.success("✅ **Recharge Day Active**: Calendar holds configured for 8 team members. Slack status sync enabled.")
+                    ics_content = """BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//EquiMind//Team Recharge Day//EN
+BEGIN:VEVENT
+SUMMARY:EquiMind Team Recharge & Focus Sanctuary
+DESCRIPTION:Quiet morning followed by uninterrupted flow sprint and retrospective circle.
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:Reminder
+END:VALARM
+END:VEVENT
+END:VCALENDAR"""
+                    st.download_button(
+                        "📥 Download Calendar Hold (.ics)",
+                        data=ics_content,
+                        file_name="equimind_recharge_day.ics",
+                        mime="text/calendar",
+                        key="btn_download_recharge_ics",
+                    )
+
+            # Priority 2 Card: Asynchronous Communication
+            with st.container(border=True):
+                st.markdown(
+                    """
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div>
+                            <span style="background: #ede9fe; border: 1px solid #ddd6fe; color: #5b21b6; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 02 • Structural Habit</span>
+                            <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.15rem; font-weight: 700;">Encourage Asynchronous Communication</h4>
+                        </div>
+                        <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
+                            Impact: High (+6 hrs/week)
+                        </span>
                     </div>
+                    <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
+                        Meeting volume rose 22% month-over-month. Transitioning standard status updates to async threads recovers approximately 6 hours of uninterrupted creative time per team member weekly.
+                    </p>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                col_hint2, col_act2 = st.columns([1.3, 1])
+                with col_hint2:
+                    st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Action: Adopt 'No-Meeting Mornings' on Tue/Thu</span>", unsafe_allow_html=True)
+                with col_act2:
+                    async_sent = st.session_state.get("async_guidelines_active", False)
+                    btn2_text = "✅ Guidelines Sent" if async_sent else "📢 Send Guidelines"
+                    if st.button(btn2_text, key="btn_deploy_plan_2", type="secondary", width="stretch"):
+                        st.session_state["async_guidelines_active"] = not async_sent
+                        st.toast("Async guidelines status updated!", icon="📢")
+                        st.rerun()
+
+                if st.session_state.get("async_guidelines_active"):
+                    st.info("ℹ️ **Guidelines Distributed**: Shared to `#engineering-general` and pinned in team workspace.")
+
+            # Priority 3 Card: Friday Autonomic Buffer
+            with st.container(border=True):
+                st.markdown(
+                    """
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div>
+                            <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">Priority 03 • Autonomic Buffer</span>
+                            <h4 style="margin: 4px 0 0 0; color: #0f172a; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.15rem; font-weight: 700;">Establish Friday Focus Sanctuary (1:00 PM+)</h4>
+                        </div>
+                        <span style="background: #fdf4ff; border: 1px solid #f0abfc; color: #86198f; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">
+                            Impact: Sustained (+25% Morale)
+                        </span>
+                    </div>
+                    <p style="font-size: 0.84rem; color: #475569; line-height: 1.5; margin-bottom: 10px;">
+                        Protects the final hours of the work week with zero deployment cutoffs and meeting embargoes, ensuring employees head into the weekend without unfinished anxiety.
+                    </p>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                col_hint3, col_act3 = st.columns([1.3, 1])
+                with col_hint3:
+                    st.markdown("<span style='font-size: 0.78rem; color: #64748b;'>Policy: Zero external customer syncs after 1:00 PM Friday</span>", unsafe_allow_html=True)
+                with col_act3:
+                    buffer_active = st.session_state.get("friday_buffer_active", False)
+                    btn3_text = "✅ Buffer Active" if buffer_active else "🛡️ Activate Buffer"
+                    if st.button(btn3_text, key="btn_deploy_plan_3", type="secondary", width="stretch"):
+                        st.session_state["friday_buffer_active"] = not buffer_active
+                        st.toast("Friday Sanctuary buffer toggled!", icon="🛡️")
+                        st.rerun()
+
+                if st.session_state.get("friday_buffer_active"):
+                    st.success("✅ **Sanctuary Active**: Automated calendar protection rule applied for Friday 1:00 PM onwards.")
+
+        with c_check:
+            st.markdown(
+                """
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                    <h3 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.25rem; font-weight: 700; color: #0f172a;">
+                        Manager Micro-Interventions
+                    </h3>
+                    <span style="font-size: 0.78rem; color: #0f766e; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Weekly Cadence</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            st.progress(completed_count / len(interventions_def))
 
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            for k, label, note, tag, _ in interventions_def:
-                checked = st.checkbox(
-                    label,
-                    key=k,
-                    help=note,
+            # Calculate completed interventions live
+            interventions_def = [
+                ("chk_interv_1", "Public shout-out & recognition in team channel", "Acknowledged contributors for clean release.", "📣 Recognition", True),
+                ("chk_interv_2", "Audit recurring calendar meetings", "Pruned 3 redundant recurring syncs to save 4.5 hrs.", "🗓️ Focus Time", True),
+                ("chk_interv_3", "Review workload balance in 1-on-1 touchpoints", "Shifted sprint deliverables to balance cognitive load.", "🤝 Equilibrium", True),
+                ("chk_interv_4", "Host unstructured coffee chat (30-min hangout)", "Casual team connection with zero agenda pressure.", "☕ Social Bond", False),
+                ("chk_interv_5", "Share somatic breathing reset before sprint planning", "Embedded 2-min box-breathing calming protocol.", "🌬️ Calm Reset", False),
+            ]
+
+            # Init state if needed
+            for k, _, _, _, def_val in interventions_def:
+                if k not in st.session_state:
+                    st.session_state[k] = def_val
+
+            completed_count = sum(1 for k, _, _, _, _ in interventions_def if st.session_state.get(k, False))
+            comp_pct = int((completed_count / len(interventions_def)) * 100)
+
+            with st.container(border=True):
+                # Dynamic Live Progress Card Header
+                st.markdown(
+                    f"""
+                    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%); border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 0.8rem; font-weight: 700; color: #166534;">Leadership Care Index</span>
+                            <span style="background: #ffffff; border: 1px solid #86efac; color: #166534; font-size: 0.76rem; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
+                                {completed_count} / {len(interventions_def)} Completed ({comp_pct}%)
+                            </span>
+                        </div>
+                        <div style="font-size: 0.78rem; color: #047857; margin-bottom: 8px;">
+                            {"🌟 Optimal cadence: Team resilience index elevated by +14%." if comp_pct >= 80 else ("🌿 Strong baseline: Consistent leadership support maintained." if comp_pct >= 60 else "⚠️ Action required: 2 more micro-actions recommended to protect resilience.")}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
-                if checked:
-                    st.markdown(
-                        f"<div style='margin: -8px 0 8px 26px; font-size: 0.74rem; color: #0f766e;'>✓ {note} <span style='background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; color: #475569;'>{tag}</span></div>",
-                        unsafe_allow_html=True,
+                st.progress(completed_count / len(interventions_def))
+
+                st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+                for k, label, note, tag, _ in interventions_def:
+                    checked = st.checkbox(
+                        label,
+                        key=k,
+                        help=note,
                     )
+                    if checked:
+                        st.markdown(
+                            f"<div style='margin: -8px 0 8px 26px; font-size: 0.74rem; color: #0f766e;'>✓ {note} <span style='background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; color: #475569;'>{tag}</span></div>",
+                            unsafe_allow_html=True,
+                        )
 
-            st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px dashed #cbd5e1;'/>", unsafe_allow_html=True)
-            c_int_b1, c_int_b2 = st.columns(2)
-            with c_int_b1:
-                if st.button("✨ Log All Completed", type="secondary", width="stretch", key="btn_complete_all_interv"):
-                    for k, _, _, _, _ in interventions_def:
-                        st.session_state[k] = True
-                    st.toast("All 5 Manager Micro-Interventions recorded for this sprint!", icon="🎉")
+    # Tab 2: Live Team Pulse Check-In Form (Fully Functional)
+    with stream_tabs[1], st.container(border=True):
+            st.markdown(
+                """
+                <h3 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">
+                    📝 Log Real-Time Team Member Pulse
+                </h3>
+                <p style="font-size: 0.86rem; color: #64748b; margin-top: 3px;">
+                    Submit a real team reflection to update live telemetry and organizational moving averages.
+                </p>
+                """,
+                unsafe_allow_html=True,
+            )
+            with st.form("form_submit_team_pulse"):
+                tc_col1, tc_col2 = st.columns(2)
+                with tc_col1:
+                    tp_member = st.text_input("Team Member / Role Alias", value="Senior Frontend Engineer", placeholder="e.g. Lead Architect, UX Researcher")
+                    tp_workload = st.slider("Current Workload Pressure (1 = Relaxed, 10 = Severe Strain)", min_value=1, max_value=10, value=5)
+                with tc_col2:
+                    tp_morale = st.selectbox("Morale State:", ["☀️ High Flow & Positive Energy", "🌿 Steady & Balanced", "⚡ High Cognitive Friction", "🌧️ Fatigued & Needs Decompression"])
+                    tp_category = st.selectbox("Operating Focus Domain:", ["Engineering Sprint", "Product Launch", "Cross-team Alignment", "Operations & Triage"])
+
+                tp_notes = st.text_area("Optional Pulse Notes / Obstacles:", height=80, placeholder="E.g. Feeling good after wrapping sprint goals, but 4 back-to-back reviews created slight fatigue.")
+
+                submit_pulse_btn = st.form_submit_button("Submit Team Pulse Check-In", type="primary", width="stretch")
+                if submit_pulse_btn:
+                    compound_map = {
+                        "☀️ High Flow & Positive Energy": 0.65,
+                        "🌿 Steady & Balanced": 0.25,
+                        "⚡ High Cognitive Friction": -0.30,
+                        "🌧️ Fatigued & Needs Decompression": -0.55
+                    }
+                    comp_val = compound_map.get(tp_morale, 0.20)
+                    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+                    if "live_team_checkins" not in st.session_state:
+                        st.session_state["live_team_checkins"] = []
+
+                    st.session_state["live_team_checkins"].insert(0, {
+                        "date": now_str,
+                        "employee_id": tp_member,
+                        "compound": comp_val,
+                        "workload": tp_workload,
+                        "morale": tp_morale,
+                        "category": tp_category,
+                        "notes": tp_notes or "Daily team pulse logged successfully."
+                    })
+
+                    st.session_state["team_insights_refreshed_at"] = datetime.now(timezone.utc).strftime("%I:%M:%S %p UTC")
+                    st.success(f"✅ Team pulse recorded for **{tp_member}**! Integrated into 14-day moving average and burnout indices.")
                     st.rerun()
-            with c_int_b2:
-                if st.button("📋 Copy Care Summary", type="secondary", width="stretch", key="btn_copy_interv_summary"):
-                    st.toast("Summary copied to clipboard for 1-on-1 and sprint retrospective!", icon="📋")
-                    st.session_state["show_interv_summary"] = True
 
-            if st.session_state.get("show_interv_summary"):
-                st.info(
-                    f"**Weekly Leadership Care Log ({comp_pct}% MET)**:\n" +
-                    "\n".join([f"- [x] {lbl} ({tg})" for k, lbl, _, tg, _ in interventions_def if st.session_state.get(k)]) +
-                    ("\n\n*Remaining:*\n" + "\n".join([f"- [ ] {lbl}" for k, lbl, _, _, _ in interventions_def if not st.session_state.get(k)]) if comp_pct < 100 else "\n\n*All weekly targets achieved!*")
-                )
+    # Tab 3: Activity Log of All Check-Ins
+    with stream_tabs[2], st.container(border=True):
+            st.markdown(
+                """
+                <h3 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">
+                    📋 Team Telemetry Activity Log
+                </h3>
+                <p style="font-size: 0.86rem; color: #64748b; margin-top: 3px;">
+                    Inspect anonymized check-ins contributing to the organization sentiment moving average.
+                </p>
+                """,
+                unsafe_allow_html=True,
+            )
+            live_records = st.session_state.get("live_team_checkins", [])
+            if not live_records:
+                st.info("No manual pulse entries logged in this session yet.")
+                if st.button("🌱 Load Sample Engineering Sprint Logs", key="btn_load_sample_pulse_records"):
+                    sample_logs = [
+                        {"date": datetime.now(timezone.utc).strftime("%Y-%m-%d"), "employee_id": "Principal Systems Architect", "compound": 0.58, "workload": 6, "morale": "☀️ High Flow & Positive Energy", "category": "Engineering Sprint", "notes": "Resolved core concurrency bottleneck; latency improved by 35%."},
+                        {"date": datetime.now(timezone.utc).strftime("%Y-%m-%d"), "employee_id": "Lead UX Researcher", "compound": 0.42, "workload": 4, "morale": "🌿 Steady & Balanced", "category": "Product Launch", "notes": "Completed user journey synthesis; clear positive signal across customer cohort."},
+                        {"date": datetime.now(timezone.utc).strftime("%Y-%m-%d"), "employee_id": "Staff Security Engineer", "compound": 0.35, "workload": 5, "morale": "🌿 Steady & Balanced", "category": "Operations & Triage", "notes": "Automated dependency vulnerability audits; zero blocker alerts."},
+                        {"date": datetime.now(timezone.utc).strftime("%Y-%m-%d"), "employee_id": "Senior Frontend Engineer", "compound": -0.25, "workload": 8, "morale": "⚡ High Cognitive Friction", "category": "Engineering Sprint", "notes": "Continuous merge conflicts in monorepo caused slight afternoon fatigue."}
+                    ]
+                    st.session_state["live_team_checkins"] = sample_logs
+                    st.toast("Loaded 4 sample engineering sprint check-ins!", icon="🌱")
+                    st.rerun()
+            else:
+                st.dataframe(pd.DataFrame(live_records), width="stretch")
 
 
 
