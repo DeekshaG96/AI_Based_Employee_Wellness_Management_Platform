@@ -223,40 +223,48 @@ header[data-testid="stHeader"] {
 
 /* Refined Luxury Typography Hierarchy */
 h1 {
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 2.1rem !important;
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+  font-size: 2.2rem !important;
   font-weight: 700 !important;
   line-height: 1.2 !important;
-  letter-spacing: -0.03em !important;
+  letter-spacing: -0.025em !important;
   color: #0f172a !important;
   margin-bottom: 0.75rem !important;
 }
 
 h2 {
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 1.5rem !important;
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+  font-size: 1.65rem !important;
   font-weight: 700 !important;
-  line-height: 1.3 !important;
-  letter-spacing: -0.025em !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em !important;
   color: #0f172a !important;
   margin-top: 1.25rem !important;
   margin-bottom: 0.5rem !important;
 }
 
 h3 {
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 1.25rem !important;
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+  font-size: 1.35rem !important;
   font-weight: 700 !important;
-  line-height: 1.35 !important;
-  letter-spacing: -0.02em !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.015em !important;
   color: #0f172a !important;
   margin-top: 0.9rem !important;
   margin-bottom: 0.45rem !important;
 }
 
-h4, h5, h6 {
+h4 {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--slate-900) !important;
+}
+
+h5, h6 {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 1.05rem !important;
+  font-size: 0.95rem !important;
   font-weight: 600 !important;
   color: var(--slate-800) !important;
 }
@@ -619,7 +627,6 @@ button[data-testid="baseButton-secondary"]:hover,
   box-shadow: var(--shadow-subtle) !important;
   transition: var(--transition-smooth) !important;
 }
-}
 
 /* Sidebar Cool Breezy Luminous Styling */
 [data-testid="stSidebar"] {
@@ -716,11 +723,13 @@ button[data-testid="baseButton-secondary"]:hover,
   padding: 0 !important;
 }
 
-/* Eradicate ONLY the radio circle and inner dot */
+/* Eradicate ONLY the radio circle and inner dot across all Streamlit versions */
 [data-testid="stSidebar"] [data-testid="stRadio"] div[class*="e1dm8mpf4"],
 [data-testid="stSidebar"] [data-testid="stRadio"] div[class*="e1dm8mpf5"],
 [data-testid="stSidebar"] [data-testid="stRadio"] input[type="radio"],
-[data-testid="stSidebar"] [data-testid="stRadio"] [data-testid="stRadioGroupIndicator"] {
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-testid="stRadioGroupIndicator"],
+[data-testid="stSidebar"] [data-testid="stRadio"] div[data-baseweb="radio"] > div:first-child,
+[data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child:not([data-testid="stMarkdownContainer"]) {
   display: none !important;
   visibility: hidden !important;
   width: 0 !important;
@@ -744,7 +753,8 @@ button[data-testid="baseButton-secondary"]:hover,
 }
 
 /* Nav Option Tiles: Crisp, Classy, Luminous Standard */
-[data-testid="stSidebar"] [data-testid="stRadioOption"] {
+[data-testid="stSidebar"] [data-testid="stRadioOption"],
+[data-testid="stSidebar"] [data-testid="stRadio"] label {
   background: transparent !important;
   border: 1px solid transparent !important;
   border-left: 3.5px solid transparent !important;
@@ -760,30 +770,36 @@ button[data-testid="baseButton-secondary"]:hover,
   box-shadow: none !important;
 }
 
-[data-testid="stSidebar"] [data-testid="stRadioOption"]:hover {
+[data-testid="stSidebar"] [data-testid="stRadioOption"]:hover,
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
   background: rgba(240, 253, 250, 0.85) !important;
   border-color: rgba(204, 251, 241, 0.8) !important;
   border-left: 3.5px solid #14b8a6 !important;
+  transform: translateX(2px) !important;
 }
 
 /* Active Nav Tile: Classy Mint-Teal Glow */
 [data-testid="stSidebar"] div[data-selected="true"] [data-testid="stRadioOption"],
 [data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"],
 [data-testid="stSidebar"] [data-testid="stRadioOption"]:has([class*="e1dm8mpf4"][data-selected="true"]),
-[data-testid="stSidebar"] [data-testid="stRadioOption"]:has(input:checked) {
+[data-testid="stSidebar"] [data-testid="stRadioOption"]:has(input:checked),
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {
   background: linear-gradient(90deg, #ecfdf5 0%, #f0fdfa 100%) !important;
   border: 1px solid #a7f3d0 !important;
   border-left: 3.5px solid #059669 !important;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12) !important;
+  transform: translateX(2px) !important;
 }
 
 /* Typography inside Nav Options */
-[data-testid="stSidebar"] [data-testid="stRadioOption"] [data-testid="stMarkdownContainer"] {
+[data-testid="stSidebar"] [data-testid="stRadioOption"] [data-testid="stMarkdownContainer"],
+[data-testid="stSidebar"] [data-testid="stRadio"] label [data-testid="stMarkdownContainer"] {
   width: 100% !important;
   display: block !important;
   visibility: visible !important;
 }
-[data-testid="stSidebar"] [data-testid="stRadioOption"] [data-testid="stMarkdownContainer"] * {
+[data-testid="stSidebar"] [data-testid="stRadioOption"] [data-testid="stMarkdownContainer"] *,
+[data-testid="stSidebar"] [data-testid="stRadio"] label [data-testid="stMarkdownContainer"] * {
   color: #475569 !important;
   font-size: 0.84rem !important;
   font-weight: 500 !important;
@@ -792,12 +808,14 @@ button[data-testid="baseButton-secondary"]:hover,
   opacity: 1 !important;
   transition: color 0.15s ease !important;
 }
-[data-testid="stSidebar"] [data-testid="stRadioOption"]:hover [data-testid="stMarkdownContainer"] * {
+[data-testid="stSidebar"] [data-testid="stRadioOption"]:hover [data-testid="stMarkdownContainer"] *,
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover [data-testid="stMarkdownContainer"] * {
   color: #0f766e !important;
 }
 [data-testid="stSidebar"] div[data-selected="true"] [data-testid="stRadioOption"] [data-testid="stMarkdownContainer"] *,
 [data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] [data-testid="stMarkdownContainer"] *,
-[data-testid="stSidebar"] [data-testid="stRadioOption"]:has(input:checked) [data-testid="stMarkdownContainer"] * {
+[data-testid="stSidebar"] [data-testid="stRadioOption"]:has(input:checked) [data-testid="stMarkdownContainer"] *,
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) [data-testid="stMarkdownContainer"] * {
   color: #065f46 !important;
   font-weight: 700 !important;
 }
@@ -3464,20 +3482,20 @@ def render_recommendations_view():
     # High-Class Luxury Header Banner
     st.markdown(
         f"""
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 24px; box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04); margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.72) 55%, rgba(248, 250, 252, 0.90) 100%); border: 1.5px solid rgba(204, 251, 241, 0.85); border-radius: 20px; padding: 20px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 1); margin-bottom: 20px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transform-style: preserve-3d; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <div>
-                    <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Care Pathways & Daily Remedies</h3>
-                    <p style="margin: 3px 0 0 0; font-size: 0.84rem; color: #64748b;">Holistic micro-interventions blending somatic yoga, restorative breathwork, cognitive reframing, and nutrition.</p>
+                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Care Pathways & Daily Remedies</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Holistic micro-interventions blending somatic yoga, restorative breathwork, cognitive reframing, and nutrition.</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 20px; padding: 5px 13px; font-size: 0.78rem; color: #166534; font-weight: 700;">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #166534; font-weight: 700; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);">
                         🌱 <strong>{fb.get('accepted', 4)} Practices Completed</strong>
                     </div>
-                    <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 20px; padding: 5px 13px; font-size: 0.78rem; color: #854d0e; font-weight: 700;">
+                    <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #92400e; font-weight: 700; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);">
                         ☀️ <strong>3-Day Streak</strong>
                     </div>
-                    <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 20px; padding: 5px 13px; font-size: 0.78rem; color: #0f766e; font-weight: 700;">
+                    <div style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #99f6e4; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #0f766e; font-weight: 700; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12);">
                         ✨ <strong>{accept_rate:.0f}% Mindful Alignment</strong>
                     </div>
                 </div>
@@ -3780,27 +3798,27 @@ def render_sidebar():
         count_display = str(entry_count) if entry_count is not None else "0"
         st.markdown(
             f"""
-            <div class="sidebar-brand-box">
-                <div class="sidebar-logo">✨</div>
+            <div class="sidebar-brand-box" style="display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(204, 251, 241, 0.85); margin-bottom: 12px;">
+                <div class="sidebar-logo" style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); display: grid; place-items: center; color: #ffffff; font-size: 1.15rem; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4);">🌿</div>
                 <div class="sidebar-brand-text">
-                    <span class="brand-logo-text" style="font-size: 1.65rem; line-height: 1.1;">EquiMind</span>
-                    <small style="color: #0d9488; font-size: 0.68rem; font-weight: 600; display: block;">Mental Wellness Platform</small>
+                    <span class="brand-logo-text" style="font-size: 1.65rem; line-height: 1.1; letter-spacing: -0.02em;">EquiMind</span>
+                    <small style="color: #0f766e; font-size: 0.68rem; font-weight: 600; display: block; letter-spacing: 0.04em;">Mental Wellness Platform</small>
                 </div>
             </div>
-            <div class="sidebar-user-card" style="padding: 10px 12px; margin-bottom: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #0d9488, #14b8a6); display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 700; font-size: 0.82rem; box-shadow: 0 2px 6px rgba(13,148,136,0.25);">
+            <div class="sidebar-user-card" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 253, 250, 0.75)); border: 1px solid rgba(204, 251, 241, 0.85); border-radius: 14px; padding: 11px 14px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(15, 118, 110, 0.06); backdrop-filter: blur(8px);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: #ffffff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.92rem; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.28);">
                         {initial}
                     </div>
                     <div>
-                        <div class="user-title" style="margin: 0; font-size: 0.84rem; color: #0f172a; font-weight: 700;">{user_name}</div>
-                        <div class="user-email" style="margin: 0; font-size: 0.68rem; color: #64748b;">{user_email}</div>
+                        <div class="user-title" style="margin: 0; font-size: 0.86rem; color: #0f172a; font-weight: 700;">{user_name}</div>
+                        <div class="user-email" style="margin: 0; font-size: 0.70rem; color: #64748b;">{user_email}</div>
                     </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 5px; border-top: 1px solid #f1f5f9; font-size: 0.72rem;">
-                    <span style="color: #0284c7; font-weight: 700;">{count_display} reflections</span>
-                    <span style="color: #059669; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 4px #10b981;"></span> Active
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(204, 251, 241, 0.6); font-size: 0.74rem;">
+                    <span style="color: #0f766e; font-weight: 700;">{count_display} reflections</span>
+                    <span style="color: #059669; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span> Active
                     </span>
                 </div>
             </div>
@@ -3855,26 +3873,28 @@ def render_workspace():
     # High-Class Luxury Header Banner (Clutter-Free, Standard, Aesthetic)
     st.markdown(
         f"""
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 24px; box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04); margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <div style="width: 44px; height: 44px; min-width: 44px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 700; font-size: 1.15rem; box-shadow: 0 4px 14px rgba(15, 118, 110, 0.2);">
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.72) 55%, rgba(248, 250, 252, 0.90) 100%); border: 1.5px solid rgba(204, 251, 241, 0.85); border-radius: 20px; padding: 20px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 1); margin-bottom: 20px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transform-style: preserve-3d; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 46px; height: 46px; min-width: 46px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: #ffffff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.3rem; box-shadow: 0 4px 14px rgba(15, 118, 110, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.4);">
                         {initial}
                     </div>
                     <div>
-                        <div style="font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; line-height: 1.2;">Welcome back, {active_user_name}</div>
-                        <div style="font-size: 0.82rem; color: #64748b; margin-top: 2px;">Your quiet space for mindful reflection, emotional clarity, and wellness.</div>
+                        <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 700; color: #0f172a; letter-spacing: -0.025em; line-height: 1.2;">
+                            Welcome back, <span style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{active_user_name}</span>
+                        </div>
+                        <div style="font-size: 0.86rem; color: #64748b; margin-top: 3px; font-weight: 400;">Your quiet space for mindful reflection, emotional clarity, and wellness.</div>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 20px; padding: 5px 13px; font-size: 0.78rem; color: #854d0e; font-weight: 600;">
-                        ☀️ <strong>3-Day Streak</strong>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #92400e; font-weight: 700; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12); display: inline-flex; align-items: center; gap: 6px;">
+                        <span>☀️</span> <span>3-Day Streak</span>
                     </div>
-                    <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 20px; padding: 5px 13px; font-size: 0.78rem; color: #166534; font-weight: 600;">
-                        🌿 <strong>Centered & Calm</strong>
+                    <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #166534; font-weight: 700; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12); display: inline-flex; align-items: center; gap: 6px;">
+                        <span>🌿</span> <span>Centered & Calm</span>
                     </div>
-                    <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 20px; padding: 5px 13px; font-size: 0.78rem; color: #0f766e; font-weight: 600;">
-                        🔒 <strong>100% Private</strong>
+                    <div style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #99f6e4; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #0f766e; font-weight: 700; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12); display: inline-flex; align-items: center; gap: 6px;">
+                        <span>🔒</span> <span>100% Private</span>
                     </div>
                 </div>
             </div>
@@ -3894,10 +3914,10 @@ def render_workspace():
             )
             st.markdown(
                 f"""
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <div>
-                        <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.28rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Daily Reflection</h3>
-                        <p style="margin: 3px 0 0 0; font-size: 0.84rem; color: #64748b;">How is your heart today? Choose a mood pill or write freely — a safe, calm space to reflect.</p>
+                        <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.7rem; font-weight: 700; color: #0f172a; letter-spacing: -0.025em;">Daily Reflection</h2>
+                        <p style="margin: 4px 0 0 0; font-size: 0.88rem; color: #64748b;">How is your heart today? Choose a mood pill or write freely — a safe, calm space to reflect.</p>
                     </div>
                     <div>{mood_badge_html}</div>
                 </div>
@@ -4148,11 +4168,11 @@ def render_workspace():
                     st.markdown("---")
                     st.markdown(
                         f"""
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 20px; box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05); margin: 10px 0 14px 0;">
+                        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.72) 100%); border: 1px solid rgba(204, 251, 241, 0.85); border-radius: 16px; padding: 18px 22px; box-shadow: 0 8px 24px -4px rgba(15, 118, 110, 0.08); margin: 12px 0 16px 0; backdrop-filter: blur(10px);">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                                 <div>
                                     <div style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">✨ Instant Personalized Care</div>
-                                    <h3 style="margin: 2px 0 0 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #0f172a;">Personalized Recommendation & Yoga Remedy</h3>
+                                    <h3 style="margin: 3px 0 0 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: #0f172a; letter-spacing: -0.015em;">Personalized Recommendation & Yoga Remedy</h3>
                                 </div>
                                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                     <span style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; color: #0891b2; font-weight: 700;">Emotion: {dominant_str}</span>
