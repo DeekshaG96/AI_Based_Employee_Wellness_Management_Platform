@@ -114,42 +114,42 @@ def svg_icon(name: str, size: int = 16, color: str = "currentColor", extra_class
     return template.format(size=size, color=color, extra=extra_classes)
 
 
-# EquiMind Executive Visual System: High-Class Luxury Aesthetic & Elegant Cursive Brand
+# EquiMind Executive Visual System: High-Class Luxury Aesthetic & Editorial Serif Brand
 CUSTOM_CSS = """<style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@400;500;600;700;800&family=Playball&family=Alex+Brush&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@400;500;600;700;800&display=swap');
 
-/* High-Class Brand Typography */
+/* High-Class Editorial Brand Typography */
 .brand-logo-text {
-    font-family: 'Playball', 'Alex Brush', cursive !important;
-    font-size: 2.2rem !important;
+    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+    font-size: 2.15rem !important;
     font-weight: 700 !important;
-    line-height: 1.15 !important;
-    letter-spacing: 0.02em !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.02em !important;
     background: linear-gradient(135deg, #044e47 0%, #0f766e 40%, #14b8a6 75%, #2dd4bf 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 8px rgba(20, 184, 166, 0.25));
+    filter: drop-shadow(0 2px 8px rgba(20, 184, 166, 0.22));
     display: inline-block;
 }
 
 .disney-brand-title {
-    font-family: 'Playball', 'Alex Brush', cursive !important;
-    font-size: 3.2rem !important;
+    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+    font-size: 3.1rem !important;
     font-weight: 700 !important;
-    line-height: 1.15 !important;
-    letter-spacing: 0.02em !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.025em !important;
     background: linear-gradient(135deg, #044e47 0%, #0f766e 40%, #14b8a6 75%, #2dd4bf 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 10px rgba(20, 184, 166, 0.25));
+    filter: drop-shadow(0 2px 10px rgba(20, 184, 166, 0.22));
     display: inline-block;
 }
 .disney-brand-title-sm {
-    font-family: 'Playball', 'Alex Brush', cursive !important;
-    font-size: 1.9rem !important;
+    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+    font-size: 1.85rem !important;
     font-weight: 700 !important;
-    line-height: 1.15 !important;
-    letter-spacing: 0.02em !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.02em !important;
     background: linear-gradient(135deg, #044e47 0%, #0f766e 50%, #14b8a6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1817,7 +1817,7 @@ def render_landing_hero_3d() -> str:
     <html lang="en">
     <head>
       <meta charset="utf-8">
-      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
       <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1826,43 +1826,44 @@ def render_landing_hero_3d() -> str:
           font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
           color: #0f172a;
           overflow: hidden;
-          height: 295px;
+          height: 350px;
           user-select: none;
         }
         .hero-3d-card {
           width: 100%;
           height: 100%;
-          border-radius: 18px;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 253, 250, 0.72) 55%, rgba(241, 245, 249, 0.65) 100%);
+          border-radius: 20px;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.78) 55%, rgba(241, 245, 249, 0.72) 100%);
           border: 1.5px solid rgba(204, 251, 241, 0.85);
-          box-shadow: 0 16px 36px -6px rgba(15, 118, 110, 0.12), 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+          box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.14), 0 4px 16px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.95);
           position: relative;
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
         }
         .card-topbar {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 8px 14px 2px;
+          padding: 10px 16px 4px;
           z-index: 5;
         }
         .aura-badge {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(240, 253, 250, 0.9);
+          background: rgba(240, 253, 250, 0.95);
           border: 1px solid rgba(45, 212, 191, 0.6);
           color: #0f766e;
           font-size: 10px;
           font-weight: 700;
-          padding: 3px 10px;
+          padding: 3px 11px;
           border-radius: 9999px;
           text-transform: uppercase;
           letter-spacing: 0.08em;
+          box-shadow: 0 2px 6px rgba(15, 118, 110, 0.06);
         }
         .pulse-dot {
           width: 7px;
@@ -1873,20 +1874,22 @@ def render_landing_hero_3d() -> str:
         }
         @keyframes pulse3D {
           0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.5); }
-          50% { transform: scale(1.15); opacity: 0.8; box-shadow: 0 0 0 5px rgba(20, 184, 166, 0); }
+          50% { transform: scale(1.2); opacity: 0.8; box-shadow: 0 0 0 5px rgba(20, 184, 166, 0); }
         }
         .hint-badge {
-          font-size: 10px;
+          font-size: 9.5px;
           font-family: 'JetBrains Mono', monospace;
           color: #64748b;
-          background: rgba(255, 255, 255, 0.85);
+          background: rgba(255, 255, 255, 0.9);
           border: 1px solid #e2e8f0;
-          padding: 2px 8px;
+          padding: 3px 9px;
           border-radius: 8px;
           font-weight: 600;
+          letter-spacing: 0.02em;
         }
         #webgl-viewport {
-          flex: 1;
+          height: 250px;
+          min-height: 250px;
           width: 100%;
           cursor: grab;
           position: relative;
@@ -1895,7 +1898,7 @@ def render_landing_hero_3d() -> str:
           cursor: grabbing;
         }
         .card-bottombar {
-          padding: 4px 12px 8px;
+          padding: 6px 14px 12px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -1904,27 +1907,29 @@ def render_landing_hero_3d() -> str:
         .affirmation-pill {
           display: flex;
           align-items: center;
-          gap: 8px;
-          background: rgba(255, 255, 255, 0.92);
-          border: 1px solid rgba(204, 251, 241, 0.8);
-          border-radius: 20px;
-          padding: 4px 12px;
-          font-size: 11px;
+          gap: 10px;
+          background: rgba(255, 255, 255, 0.95);
+          border: 1px solid rgba(204, 251, 241, 0.85);
+          border-radius: 9999px;
+          padding: 6px 14px;
+          font-size: 11.5px;
           color: #0f766e;
           font-weight: 600;
-          box-shadow: 0 2px 6px rgba(15, 118, 110, 0.05);
+          box-shadow: 0 2px 8px rgba(15, 118, 110, 0.06);
           width: 100%;
           justify-content: space-between;
         }
         .touch-tag {
           font-size: 9px;
           text-transform: uppercase;
-          background: #ccfbf1;
+          background: linear-gradient(135deg, #ccfbf1, #99f6e4);
           color: #0f766e;
-          padding: 2px 7px;
-          border-radius: 8px;
+          padding: 3px 8px;
+          border-radius: 9999px;
           font-weight: 700;
           letter-spacing: 0.05em;
+          white-space: nowrap;
+          cursor: pointer;
         }
       </style>
     </head>
@@ -1951,58 +1956,62 @@ def render_landing_hero_3d() -> str:
         var container = document.getElementById('webgl-viewport');
         if (!container || typeof THREE === 'undefined') return;
 
-        var width = container.clientWidth || 400;
-        var height = container.clientHeight || 210;
+        var width = container.clientWidth || 440;
+        var height = 250;
 
         var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-        camera.position.z = 4.6;
+        var camera = new THREE.PerspectiveCamera(48, width / height, 0.1, 1000);
+        camera.position.z = 4.3;
 
         var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         container.appendChild(renderer.domElement);
 
-        var ambLight = new THREE.AmbientLight(0xffffff, 1.4);
+        var ambLight = new THREE.AmbientLight(0xffffff, 1.3);
         scene.add(ambLight);
 
-        var pLight1 = new THREE.PointLight(0x14b8a6, 3.5, 40);
-        pLight1.position.set(3, 4, 3);
+        var pLight1 = new THREE.PointLight(0x14b8a6, 3.2, 40);
+        pLight1.position.set(3, 3.5, 3);
         scene.add(pLight1);
 
-        var pLight2 = new THREE.PointLight(0xf59e0b, 2.2, 40);
-        pLight2.position.set(-3, -3, 2);
+        var pLight2 = new THREE.PointLight(0xf59e0b, 2.0, 40);
+        pLight2.position.set(-3, -2.5, 2);
         scene.add(pLight2);
+
+        var pLight3 = new THREE.PointLight(0x38bdf8, 1.6, 40);
+        pLight3.position.set(0, 4, -2);
+        scene.add(pLight3);
 
         var masterGroup = new THREE.Group();
 
-        // 1. Faceted Icosahedron Crystal Jewel
-        var crystalGeo = new THREE.IcosahedronGeometry(0.95, 0);
+        // 1. Faceted Emerald-Teal Icosahedron Crystal
+        var crystalGeo = new THREE.IcosahedronGeometry(0.92, 0);
         var crystalMat = new THREE.MeshPhongMaterial({
           color: 0x0f766e,
-          emissive: 0x064e3b,
-          specular: 0x5eead4,
-          shininess: 95,
+          emissive: 0x044e47,
+          specular: 0x99f6e4,
+          shininess: 110,
           transparent: true,
-          opacity: 0.85,
+          opacity: 0.88,
           flatShading: true
         });
         var crystalMesh = new THREE.Mesh(crystalGeo, crystalMat);
         masterGroup.add(crystalMesh);
 
-        // 2. Wireframe Crystal Lattice Overlay
-        var wireGeo = new THREE.IcosahedronGeometry(0.97, 0);
+        // 2. Translucent Cyan Wireframe Lattice
+        var wireGeo = new THREE.IcosahedronGeometry(0.94, 0);
         var wireMat = new THREE.MeshBasicMaterial({
-          color: 0x99f6e4,
+          color: 0x5eead4,
           wireframe: true,
           transparent: true,
-          opacity: 0.55
+          opacity: 0.40
         });
         var wireMesh = new THREE.Mesh(wireGeo, wireMat);
         masterGroup.add(wireMesh);
 
-        // 3. Inner Radiant Octahedral Core
-        var innerGeo = new THREE.OctahedronGeometry(0.48, 0);
+        // 3. Radiant Octahedral Amber-Gold Heart
+        var innerGeo = new THREE.OctahedronGeometry(0.44, 0);
         var innerMat = new THREE.MeshPhongMaterial({
           color: 0xfef08a,
           emissive: 0xd97706,
@@ -2012,50 +2021,57 @@ def render_landing_hero_3d() -> str:
         var innerMesh = new THREE.Mesh(innerGeo, innerMat);
         masterGroup.add(innerMesh);
 
-        // 4. Concentric Gyroscope Rings (Gold & Emerald)
-        var ring1Geo = new THREE.TorusGeometry(1.42, 0.022, 16, 64);
+        // 4. Dual Celestial Gyroscope Rings (Refined Gold & Seafoam Halo)
+        var ring1Geo = new THREE.TorusGeometry(1.42, 0.024, 20, 80);
         var ring1Mat = new THREE.MeshPhongMaterial({
-          color: 0x14b8a6,
-          emissive: 0x042f2e,
-          shininess: 80
+          color: 0xe6ca65,
+          emissive: 0x3d2b00,
+          specular: 0xffffff,
+          shininess: 110,
+          transparent: true,
+          opacity: 0.82
         });
         var ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
         ring1.rotation.x = Math.PI / 3.2;
         masterGroup.add(ring1);
 
-        var ring2Geo = new THREE.TorusGeometry(1.68, 0.02, 16, 64);
+        var ring2Geo = new THREE.TorusGeometry(1.58, 0.020, 20, 80);
         var ring2Mat = new THREE.MeshPhongMaterial({
-          color: 0xd4af37,
-          emissive: 0x78350f,
-          shininess: 90
+          color: 0x2dd4bf,
+          emissive: 0x042f2e,
+          specular: 0xffffff,
+          shininess: 100,
+          transparent: true,
+          opacity: 0.72
         });
         var ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-        ring2.rotation.y = Math.PI / 4;
+        ring2.rotation.y = Math.PI / 3.6;
         masterGroup.add(ring2);
 
-        // 5. Orbiting Satellite Pearl
-        var satGeo = new THREE.SphereGeometry(0.09, 16, 16);
+        // 5. Orbiting Luminous Pearl
+        var satGeo = new THREE.SphereGeometry(0.08, 20, 20);
         var satMat = new THREE.MeshPhongMaterial({
           color: 0xffffff,
-          emissive: 0x2dd4bf,
+          emissive: 0x5eead4,
+          specular: 0xffffff,
           shininess: 100
         });
         var satellite = new THREE.Mesh(satGeo, satMat);
         masterGroup.add(satellite);
 
-        // 6. Floating Star Particle Constellation
-        var pCount = 100;
+        // 6. Floating Ambient Stardust Constellation
+        var pCount = 110;
         var pGeo = new THREE.BufferGeometry();
         var pPos = new Float32Array(pCount * 3);
         for (var i = 0; i < pCount * 3; i += 3) {
           pPos[i] = (Math.random() - 0.5) * 7.5;
-          pPos[i+1] = (Math.random() - 0.5) * 6;
-          pPos[i+2] = (Math.random() - 0.5) * 6;
+          pPos[i+1] = (Math.random() - 0.5) * 5.5;
+          pPos[i+2] = (Math.random() - 0.5) * 5.5;
         }
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
         var pMat = new THREE.PointsMaterial({
           color: 0x2dd4bf,
-          size: 0.075,
+          size: 0.065,
           transparent: true,
           opacity: 0.75
         });
@@ -2064,7 +2080,7 @@ def render_landing_hero_3d() -> str:
 
         scene.add(masterGroup);
 
-        // Mouse Parallax & Drag Orbit
+        // Mouse Parallax & Drag Orbit Physics
         var isDragging = false;
         var prevMouseX = 0, prevMouseY = 0;
         var targetRotX = 0, targetRotY = 0;
@@ -2089,7 +2105,18 @@ def render_landing_hero_3d() -> str:
           }
         });
 
-        // Touch support
+        // Ambient Mouse Hover Parallax Tilt
+        container.addEventListener('mousemove', function(e) {
+          if (!isDragging) {
+            var rect = container.getBoundingClientRect();
+            var mx = (e.clientX - rect.left) / rect.width - 0.5;
+            var my = (e.clientY - rect.top) / rect.height - 0.5;
+            targetRotY = mx * 0.55;
+            targetRotX = my * 0.40;
+          }
+        });
+
+        // Touch support for mobile and tablets
         container.addEventListener('touchstart', function(e) {
           if (e.touches.length === 1) {
             isDragging = true;
@@ -2111,7 +2138,7 @@ def render_landing_hero_3d() -> str:
           }
         }, { passive: true });
 
-        // Click Pulse Affirmation
+        // Click Pulse Affirmation Wave
         var isPulsing = false;
         var pulseTimer = 0;
         var affirmations = [
@@ -2138,57 +2165,57 @@ def render_landing_hero_3d() -> str:
           var delta = clock.getDelta();
           var t = clock.getElapsedTime();
 
-          // Organic breathing expansion
-          var breathScale = 1 + 0.06 * Math.sin(t * 1.5);
+          // Organic Pranayama Diaphragmatic Breathing
+          var breathScale = 1.0 + 0.06 * Math.sin(t * 1.3);
           if (isPulsing) {
             pulseTimer -= delta;
-            breathScale += 0.12 * Math.sin(t * 12);
-            crystalMat.emissive.setHex(0xd4af37);
+            breathScale += 0.10 * Math.sin(t * 14);
+            crystalMat.emissive.setHex(0xb45309);
             crystalMat.color.setHex(0x5eead4);
-            pMat.size = 0.11;
+            pMat.size = 0.095;
             if (pulseTimer <= 0) {
               isPulsing = false;
-              crystalMat.emissive.setHex(0x064e3b);
+              crystalMat.emissive.setHex(0x044e47);
               crystalMat.color.setHex(0x0f766e);
-              pMat.size = 0.075;
+              pMat.size = 0.065;
             }
           }
 
           crystalMesh.scale.set(breathScale, breathScale, breathScale);
           wireMesh.scale.set(breathScale, breathScale, breathScale);
-          innerMesh.rotation.y -= delta * 1.2;
-          innerMesh.rotation.x += delta * 0.8;
+          innerMesh.rotation.y -= delta * 0.9;
+          innerMesh.rotation.x += delta * 0.6;
 
-          // Orbit rings
-          ring1.rotation.z += delta * 0.45;
-          ring2.rotation.x += delta * 0.55;
+          // Celestial Orbit Halo Rotations
+          ring1.rotation.z += delta * 0.28;
+          ring2.rotation.y += delta * 0.22;
 
           // Satellite pearl path
-          var satAngle = t * 1.8;
+          var satAngle = t * 1.4;
           satellite.position.set(
-            Math.cos(satAngle) * 1.68,
-            Math.sin(satAngle) * 0.6,
-            Math.sin(satAngle) * 1.68
+            Math.cos(satAngle) * 1.55,
+            Math.sin(satAngle * 0.8) * 0.5,
+            Math.sin(satAngle) * 1.55
           );
 
           // Particles gentle drift
-          particles.rotation.y += delta * 0.04;
+          particles.rotation.y += delta * 0.03;
 
-          // Smooth damping rotation
-          curRotX += (targetRotX - curRotX) * 0.08;
-          curRotY += (targetRotY - curRotY) * 0.08;
+          // Smooth damping rotation physics
+          curRotX += (targetRotX - curRotX) * 0.07;
+          curRotY += (targetRotY - curRotY) * 0.07;
 
-          masterGroup.position.y = Math.sin(t * 1.2) * 0.1;
-          masterGroup.rotation.y = curRotY + t * 0.2;
-          masterGroup.rotation.x = curRotX + Math.sin(t * 0.6) * 0.08;
+          masterGroup.position.y = Math.sin(t * 1.1) * 0.08;
+          masterGroup.rotation.y = curRotY + t * 0.18;
+          masterGroup.rotation.x = curRotX + Math.sin(t * 0.5) * 0.06;
 
           renderer.render(scene, camera);
         }
         animate();
 
         window.addEventListener('resize', function() {
-          var w = container.clientWidth || 400;
-          var h = container.clientHeight || 210;
+          var w = container.clientWidth || 440;
+          var h = 250;
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
           renderer.setSize(w, h);
@@ -2267,8 +2294,8 @@ def render_landing_and_auth():
     <div class="brand-left">
         <div class="brand-badge-icon">🌿</div>
         <div>
-            <span class="disney-brand-title" style="font-size: 2.5rem; line-height: 1;">EquiMind</span>
-            <span style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.05rem; color: #0f766e; margin-left: 8px; font-weight: 600;">
+            <span class="disney-brand-title" style="font-size: 2.35rem; line-height: 1.1; letter-spacing: -0.02em;">EquiMind</span>
+            <span style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.05rem; color: #0f766e; margin-left: 8px; font-weight: 600;">
                 · Emotional Wellness & Resilience
             </span>
         </div>
@@ -2290,8 +2317,11 @@ def render_landing_and_auth():
     <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(204, 251, 241, 0.65); border: 1px solid rgba(45, 212, 191, 0.5); padding: 5px 14px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #0f766e; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; backdrop-filter: blur(8px);">
         🍃 Serene Mindfulness & Emotional Resilience
     </div>
-    <h1 style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 3.35rem; font-weight: 700; color: #0f172a; line-height: 1.14; margin: 0 0 16px 0; letter-spacing: -0.02em;">
-        Cultivate Inner Calm,<br>Elevate Emotional Clarity
+    <h1 style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 3.25rem; font-weight: 700; color: #0f172a; line-height: 1.15; margin: 0 0 16px 0; letter-spacing: -0.025em;">
+        Cultivate Inner Calm,<br>
+        <span style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 50%, #0284c7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Elevate Emotional Clarity
+        </span>
     </h1>
     <p style="font-size: 1.02rem; color: #475569; line-height: 1.72; max-width: 500px; margin-bottom: 18px;">
         Leave the noise of everyday pressure at the door. Step into a refined wellness space designed to transform emotional fatigue into serene clarity through gentle breathwork, restorative yoga remedies, and private reflective journaling.
@@ -2300,7 +2330,7 @@ def render_landing_and_auth():
 """, unsafe_allow_html=True)
 
         try:
-            render_iframe(render_landing_hero_3d(), height=305)
+            render_iframe(render_landing_hero_3d(), height=365)
         except Exception:
             pass
 
@@ -2334,8 +2364,8 @@ def render_landing_and_auth():
     with col_card, st.container(border=True):
         st.markdown("""
 <div style="text-align: center; margin-bottom: 14px;">
-    <div class="disney-brand-title" style="font-size: 2.85rem; line-height: 1;">EquiMind</div>
-    <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.05rem; color: #0f766e; margin-top: 2px;">
+    <div class="disney-brand-title" style="font-size: 2.75rem; line-height: 1.1; letter-spacing: -0.02em;">EquiMind</div>
+    <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.05rem; color: #0f766e; margin-top: 2px;">
         Emotional Wellness Sanctuary
     </div>
 </div>
