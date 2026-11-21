@@ -4982,7 +4982,7 @@ def render_workspace():
     elif active_nav.startswith("👥"):
         render_team_health_view()
 
-    elif active_nav.startswith("🛡️") or active_nav.startswith("🔬"):
+    elif active_nav.startswith(("🛡️", "🔬")):
         st.markdown("#### Enterprise SLA & Architecture Trust Hub")
         st.caption("Milestone 3 deliverables verification, performance telemetry, and enterprise governance resources.")
 
