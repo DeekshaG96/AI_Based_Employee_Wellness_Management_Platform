@@ -83,7 +83,7 @@ def get_mood_food_plan(emotion: str, dietary_pref: str = "any") -> dict[str, Any
             "Deep-fried fast foods high in trans-fats that increase neuroinflammatory markers",
         ]
         hydration_tip = "Sip room-temperature water infused with fresh lemon and a pinch of Celtic sea salt for cellular electrolyte balance."
-        scientific_basis = "Supported by Harvard Nutritional Psychiatry and the SMILES trial: magnesium and omega-3 polyunsaturated fats down-regulate hypothalamic-pituitary-adrenal (HPA) axis overdrive."
+        scientific_basis = "Nutritional neuroscience framework: bioavailable magnesium, L-theanine, and omega-3 fatty acids down-regulate adrenal cortisol and restore autonomic nervous system balance."
 
     elif emo in ("anger", "annoyance", "disapproval", "disgust"):
         category = "irritability_anger"

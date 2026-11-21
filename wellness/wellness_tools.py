@@ -150,54 +150,60 @@ def get_cognitive_reframes(emotion: str) -> dict[str, Any]:
 
 
 def render_box_breathing_widget() -> str:
-    """Generate self-contained HTML/CSS/JS animated interactive breathwork widget."""
+    """Generate self-contained HTML/CSS/JS animated interactive 3D breathwork widget."""
     return """
-    <div id="boxBreath" class="boxBreath-container" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin:12px 0;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+    <div id="boxBreath" class="boxBreath-container" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,253,250,0.7) 100%); border:1.5px solid rgba(204,251,241,0.85); border-radius:18px; padding:22px; box-shadow:0 16px 36px -6px rgba(15,118,110,0.12), 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.95); margin:12px 0; perspective:1000px; backdrop-filter:blur(10px);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid rgba(204,251,241,0.8); padding-bottom:12px;">
             <div>
-                <span style="font-size:0.7rem; font-weight:700; color:#0f766e; text-transform:uppercase; letter-spacing:0.06em;">Somatic Autonomic Regulation</span>
-                <h4 style="margin:2px 0 0 0; color:#0f172a; font-size:1.05rem; font-weight:800;">Clinical Breathwork Pacer</h4>
+                <span style="font-size:0.7rem; font-weight:700; color:#0f766e; text-transform:uppercase; letter-spacing:0.08em; background:#ccfbf1; padding:2px 8px; border-radius:12px;">3D Somatic Regulation</span>
+                <h4 style="margin:4px 0 0 0; color:#0f172a; font-size:1.1rem; font-weight:800; letter-spacing:-0.01em;">Clinical 3D Breathwork Pacer</h4>
             </div>
             <div style="display:flex; gap:6px;">
-                <button id="pacer-btn-box" onclick="selectProtocol('box')" style="padding:4px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; border:1px solid #0f766e; background:#0f766e; color:#ffffff; cursor:pointer; transition:all 0.2s;">Box (4-4-4-4)</button>
-                <button id="pacer-btn-sigh" onclick="selectProtocol('sigh')" style="padding:4px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#475569; cursor:pointer; transition:all 0.2s;">Sigh (2-1-6)</button>
-                <button id="pacer-btn-478" onclick="selectProtocol('478')" style="padding:4px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#475569; cursor:pointer; transition:all 0.2s;">4-7-8 Calm</button>
+                <button id="pacer-btn-box" onclick="selectProtocol('box')" style="padding:5px 12px; border-radius:10px; font-size:0.75rem; font-weight:700; border:1px solid #0f766e; background:linear-gradient(135deg, #0f766e, #14b8a6); color:#ffffff; cursor:pointer; box-shadow:0 2px 6px rgba(15,118,110,0.25); transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);">Box (4-4-4-4)</button>
+                <button id="pacer-btn-sigh" onclick="selectProtocol('sigh')" style="padding:5px 12px; border-radius:10px; font-size:0.75rem; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#475569; cursor:pointer; transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);">Sigh (2-1-6)</button>
+                <button id="pacer-btn-478" onclick="selectProtocol('478')" style="padding:5px 12px; border-radius:10px; font-size:0.75rem; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#475569; cursor:pointer; transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);">4-7-8 Calm</button>
             </div>
         </div>
 
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 0;">
-            <div style="position:relative; width:190px; height:190px; display:flex; align-items:center; justify-content:center;">
-                <!-- Expanding visual pulse ring -->
-                <div id="pacer-ring" style="position:absolute; width:150px; height:150px; border-radius:50%; border:2px dashed #99f6e4; opacity:0.6; transition:transform 0.4s ease-out;"></div>
-                <!-- Main breathing orb -->
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px 0; perspective:800px;">
+            <div style="position:relative; width:220px; height:220px; display:flex; align-items:center; justify-content:center; transform-style:preserve-3d;">
+                <!-- 3D Gyroscope Orbital Ring 1 -->
+                <div id="pacer-ring-1" style="position:absolute; width:190px; height:190px; border-radius:50%; border:2px dashed rgba(45,212,191,0.6); transform:rotateX(65deg) rotateZ(0deg); transition:transform 0.5s ease-out; pointer-events:none;"></div>
+                <!-- 3D Gyroscope Orbital Ring 2 -->
+                <div id="pacer-ring-2" style="position:absolute; width:165px; height:165px; border-radius:50%; border:1.5px solid rgba(212,175,55,0.45); transform:rotateY(60deg) rotateZ(0deg); transition:transform 0.5s ease-out; pointer-events:none;"></div>
+                <!-- 3D Expanding Pulse Glow -->
+                <div id="pacer-glow" style="position:absolute; width:130px; height:130px; border-radius:50%; background:radial-gradient(circle, rgba(45,212,191,0.35) 0%, rgba(15,118,110,0) 70%); filter:blur(10px); transition:transform 4s cubic-bezier(0.4,0,0.2,1); pointer-events:none;"></div>
+                <!-- Main 3D Breathing Crystal Orb -->
                 <div id="pacer-orb" style="
-                    width: 90px;
-                    height: 90px;
+                    width: 98px;
+                    height: 98px;
                     border-radius: 50%;
-                    background: radial-gradient(circle at 35% 35%, #34d399 0%, #0f766e 100%);
-                    box-shadow: 0 0 24px rgba(15, 118, 110, 0.35);
-                    transform: scale(1);
-                    transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), background 1s ease;
+                    background: radial-gradient(circle at 35% 30%, #5eead4 0%, #14b8a6 45%, #0f766e 85%, #042f2e 100%);
+                    box-shadow: 0 16px 36px -4px rgba(15, 118, 110, 0.45), 0 0 20px rgba(45, 212, 191, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -4px 10px rgba(4, 47, 46, 0.5);
+                    transform: scale(1) translateZ(20px);
+                    transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), background 1s ease, box-shadow 1s ease;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
                     color: #ffffff;
+                    z-index: 5;
+                    cursor: pointer;
                 ">
-                    <span id="pacer-phase" style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; text-shadow:0 1px 2px rgba(0,0,0,0.3);">Inhale</span>
-                    <span id="pacer-seconds" style="font-size:1.3rem; font-weight:800; line-height:1; text-shadow:0 1px 3px rgba(0,0,0,0.4);">4</span>
+                    <span id="pacer-phase" style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; text-shadow:0 1px 3px rgba(0,0,0,0.4);">Inhale</span>
+                    <span id="pacer-seconds" style="font-size:1.4rem; font-weight:800; line-height:1; text-shadow:0 2px 4px rgba(0,0,0,0.5);">4</span>
                 </div>
             </div>
 
-            <p id="pacer-instruction" style="margin:14px 0 8px 0; font-size:0.82rem; color:#475569; text-align:center; min-height:22px; font-weight:500;">
+            <p id="pacer-instruction" style="margin:16px 0 10px 0; font-size:0.86rem; color:#334155; text-align:center; min-height:24px; font-weight:600; text-shadow:0 1px 2px rgba(255,255,255,0.8);">
                 Breathe in slowly through your nose, expanding your diaphragm.
             </p>
 
             <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
                 <button id="pacer-toggle-btn" onclick="togglePacer()" style="
-                    padding: 6px 16px;
-                    border-radius: 8px;
-                    background: #0f766e;
+                    padding: 6px 18px;
+                    border-radius: 10px;
+                    background: linear-gradient(135deg, #0f766e, #14b8a6);
                     color: #ffffff;
                     border: none;
                     font-size: 0.82rem;
@@ -206,9 +212,10 @@ def render_box_breathing_widget() -> str:
                     display: flex;
                     align-items: center;
                     gap: 6px;
-                    box-shadow: 0 2px 4px rgba(15, 118, 110, 0.2);
+                    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+                    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
                 ">Pause Pacer</button>
-                <span id="pacer-cycle-count" style="font-size:0.75rem; font-weight:600; color:#64748b;">Cycle 1</span>
+                <span id="pacer-cycle-count" style="font-size:0.76rem; font-weight:700; color:#0f766e; background:#ccfbf1; padding:3px 10px; border-radius:12px;">Cycle 1</span>
             </div>
         </div>
 
@@ -218,26 +225,26 @@ def render_box_breathing_widget() -> str:
                 box: {
                     name: 'Box Breathing (4-4-4-4)',
                     phases: [
-                        { name: 'Inhale', sec: 4, scale: 1.8, bg: 'radial-gradient(circle at 35% 35%, #34d399 0%, #0f766e 100%)', text: 'Breathe in slowly through your nose, expanding your diaphragm.' },
-                        { name: 'Hold', sec: 4, scale: 1.8, bg: 'radial-gradient(circle at 35% 35%, #60a5fa 0%, #1d4ed8 100%)', text: 'Gently suspend breath with soft shoulders and relaxed jaw.' },
-                        { name: 'Exhale', sec: 4, scale: 1.0, bg: 'radial-gradient(circle at 35% 35%, #38bdf8 0%, #0369a1 100%)', text: 'Release smoothly through your mouth, dropping stress.' },
-                        { name: 'Hold', sec: 4, scale: 1.0, bg: 'radial-gradient(circle at 35% 35%, #94a3b8 0%, #475569 100%)', text: 'Rest peacefully at the calm bottom of the breath.' }
+                        { name: 'Inhale', sec: 4, scale: 1.75, bg: 'radial-gradient(circle at 35% 30%, #5eead4 0%, #14b8a6 45%, #0f766e 85%, #042f2e 100%)', text: 'Breathe in slowly through your nose, expanding your diaphragm.' },
+                        { name: 'Hold', sec: 4, scale: 1.75, bg: 'radial-gradient(circle at 35% 30%, #93c5fd 0%, #3b82f6 45%, #1d4ed8 85%, #1e3a8a 100%)', text: 'Gently suspend breath with soft shoulders and relaxed jaw.' },
+                        { name: 'Exhale', sec: 4, scale: 1.0, bg: 'radial-gradient(circle at 35% 30%, #7dd3fc 0%, #0284c7 45%, #0369a1 85%, #0c4a6e 100%)', text: 'Release smoothly through your mouth, dropping stress.' },
+                        { name: 'Hold', sec: 4, scale: 1.0, bg: 'radial-gradient(circle at 35% 30%, #cbd5e1 0%, #64748b 45%, #334155 85%, #0f172a 100%)', text: 'Rest peacefully at the calm bottom of the breath.' }
                     ]
                 },
                 sigh: {
                     name: 'Stanford Cyclic Sighing (2-1-6)',
                     phases: [
-                        { name: 'Inhale 1', sec: 2, scale: 1.4, bg: 'radial-gradient(circle at 35% 35%, #34d399 0%, #0f766e 100%)', text: 'First smooth inhale through the nose.' },
-                        { name: 'Sip Air', sec: 1, scale: 1.9, bg: 'radial-gradient(circle at 35% 35%, #fbbf24 0%, #d97706 100%)', text: 'Sharp second top-up sip to fully open lung alveoli.' },
-                        { name: 'Long Exhale', sec: 6, scale: 1.0, bg: 'radial-gradient(circle at 35% 35%, #38bdf8 0%, #0369a1 100%)', text: 'Slow, long, audible exhale through open mouth.' }
+                        { name: 'Inhale 1', sec: 2, scale: 1.4, bg: 'radial-gradient(circle at 35% 30%, #5eead4 0%, #14b8a6 45%, #0f766e 85%, #042f2e 100%)', text: 'First smooth inhale through the nose.' },
+                        { name: 'Sip Air', sec: 1, scale: 1.85, bg: 'radial-gradient(circle at 35% 30%, #fde047 0%, #f59e0b 45%, #d97706 85%, #78350f 100%)', text: 'Sharp second top-up sip to fully open lung alveoli.' },
+                        { name: 'Long Exhale', sec: 6, scale: 1.0, bg: 'radial-gradient(circle at 35% 30%, #7dd3fc 0%, #0284c7 45%, #0369a1 85%, #0c4a6e 100%)', text: 'Slow, long, audible exhale through open mouth.' }
                     ]
                 },
                 '478': {
                     name: '4-7-8 Relaxing Breath',
                     phases: [
-                        { name: 'Inhale', sec: 4, scale: 1.7, bg: 'radial-gradient(circle at 35% 35%, #34d399 0%, #0f766e 100%)', text: 'Inhale quietly through your nose for 4 seconds.' },
-                        { name: 'Hold', sec: 7, scale: 1.7, bg: 'radial-gradient(circle at 35% 35%, #818cf8 0%, #4f46e5 100%)', text: 'Gently hold breath for 7 seconds to activate vagal brake.' },
-                        { name: 'Exhale', sec: 8, scale: 1.0, bg: 'radial-gradient(circle at 35% 35%, #f472b6 0%, #db2777 100%)', text: 'Slow whoosh exhale through mouth for 8 seconds.' }
+                        { name: 'Inhale', sec: 4, scale: 1.65, bg: 'radial-gradient(circle at 35% 30%, #5eead4 0%, #14b8a6 45%, #0f766e 85%, #042f2e 100%)', text: 'Inhale quietly through your nose for 4 seconds.' },
+                        { name: 'Hold', sec: 7, scale: 1.65, bg: 'radial-gradient(circle at 35% 30%, #a5b4fc 0%, #6366f1 45%, #4338ca 85%, #312e81 100%)', text: 'Gently hold breath for 7 seconds to activate vagal brake.' },
+                        { name: 'Exhale', sec: 8, scale: 1.0, bg: 'radial-gradient(circle at 35% 30%, #f472b6 0%, #db2777 45%, #9d174d 85%, #500724 100%)', text: 'Slow whoosh exhale through mouth for 8 seconds.' }
                     ]
                 }
             };
@@ -248,6 +255,7 @@ def render_box_breathing_widget() -> str:
             var isRunning = true;
             var cycle = 1;
             var intervalTimer = null;
+            var ringAngle = 0;
 
             window.selectProtocol = function(key) {
                 currentProtoKey = key;
@@ -257,13 +265,15 @@ def render_box_breathing_widget() -> str:
                     var btn = document.getElementById('pacer-btn-' + k);
                     if (btn) {
                         if (k === key) {
-                            btn.style.background = '#0f766e';
+                            btn.style.background = 'linear-gradient(135deg, #0f766e, #14b8a6)';
                             btn.style.color = '#ffffff';
                             btn.style.borderColor = '#0f766e';
+                            btn.style.boxShadow = '0 2px 6px rgba(15,118,110,0.25)';
                         } else {
                             btn.style.background = '#ffffff';
                             btn.style.color = '#475569';
                             btn.style.borderColor = '#cbd5e1';
+                            btn.style.boxShadow = 'none';
                         }
                     }
                 });
@@ -275,7 +285,7 @@ def render_box_breathing_widget() -> str:
                 var btn = document.getElementById('pacer-toggle-btn');
                 if (btn) {
                     btn.textContent = isRunning ? 'Pause Pacer' : 'Resume Pacer';
-                    btn.style.background = isRunning ? '#0f766e' : '#334155';
+                    btn.style.background = isRunning ? 'linear-gradient(135deg, #0f766e, #14b8a6)' : '#475569';
                 }
             };
 
@@ -285,6 +295,7 @@ def render_box_breathing_widget() -> str:
                 remainingSec = p.sec;
 
                 var orb = document.getElementById('pacer-orb');
+                var glow = document.getElementById('pacer-glow');
                 var phaseLabel = document.getElementById('pacer-phase');
                 var secLabel = document.getElementById('pacer-seconds');
                 var inst = document.getElementById('pacer-instruction');
@@ -296,9 +307,13 @@ def render_box_breathing_widget() -> str:
                 if (cycleLabel) cycleLabel.textContent = 'Cycle ' + cycle;
 
                 if (orb) {
-                    orb.style.transition = 'transform ' + p.sec + 's cubic-bezier(0.4, 0, 0.2, 1), background 0.8s ease';
-                    orb.style.transform = 'scale(' + p.scale + ')';
+                    orb.style.transition = 'transform ' + p.sec + 's cubic-bezier(0.4, 0, 0.2, 1), background 0.8s ease, box-shadow 0.8s ease';
+                    orb.style.transform = 'scale(' + p.scale + ') translateZ(20px)';
                     orb.style.background = p.bg;
+                }
+                if (glow) {
+                    glow.style.transition = 'transform ' + p.sec + 's cubic-bezier(0.4, 0, 0.2, 1)';
+                    glow.style.transform = 'scale(' + (p.scale * 1.3) + ')';
                 }
             }
 
@@ -308,6 +323,13 @@ def render_box_breathing_widget() -> str:
                 remainingSec--;
                 var secLabel = document.getElementById('pacer-seconds');
                 if (secLabel) secLabel.textContent = Math.max(0, remainingSec);
+
+                // Subtle 3D Ring Rotation
+                ringAngle = (ringAngle + 12) % 360;
+                var r1 = document.getElementById('pacer-ring-1');
+                var r2 = document.getElementById('pacer-ring-2');
+                if (r1) r1.style.transform = 'rotateX(65deg) rotateZ(' + ringAngle + 'deg)';
+                if (r2) r2.style.transform = 'rotateY(60deg) rotateZ(' + (-ringAngle * 0.8) + 'deg)';
 
                 if (remainingSec <= 0) {
                     phaseIdx++;
@@ -725,34 +747,74 @@ def render_zen_companion_studio_widget(user_name: str = "Alex Rivera") -> str:
 
         var mainGroup = new THREE.Group();
 
+        // 1. Faceted Icosahedron Crystal Jewel
+        var crystalGeo = new THREE.IcosahedronGeometry(0.95, 0);
         var coreMat = new THREE.MeshPhongMaterial({{
           color: 0x0f766e,
-          emissive: 0x09332f,
+          emissive: 0x064e3b,
+          specular: 0x5eead4,
           shininess: 95,
           transparent: true,
-          opacity: 0.88
+          opacity: 0.86,
+          flatShading: true
         }});
-        var coreMesh = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), coreMat);
-        mainGroup.add(coreMesh);
+        var crystalMesh = new THREE.Mesh(crystalGeo, coreMat);
+        mainGroup.add(crystalMesh);
 
-        var innerMat = new THREE.MeshPhongMaterial({{ color: 0xffffff, emissive: 0x10b981, shininess: 100 }});
-        var innerMesh = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 24), innerMat);
+        // 2. Wireframe Crystal Lattice
+        var wireGeo = new THREE.IcosahedronGeometry(0.97, 0);
+        var wireMat = new THREE.MeshBasicMaterial({{
+          color: 0x99f6e4,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.55
+        }});
+        var wireMesh = new THREE.Mesh(wireGeo, wireMat);
+        mainGroup.add(wireMesh);
+
+        // 3. Inner Radiant Heart Core
+        var innerGeo = new THREE.OctahedronGeometry(0.5, 0);
+        var innerMat = new THREE.MeshPhongMaterial({{
+          color: 0xfef08a,
+          emissive: 0xd97706,
+          shininess: 100,
+          flatShading: true
+        }});
+        var innerMesh = new THREE.Mesh(innerGeo, innerMat);
         mainGroup.add(innerMesh);
 
-        var petalGroup = new THREE.Group();
-        var petalCount = 6;
-        for (var i = 0; i < petalCount; i++) {{
-          var angle = (i / petalCount) * Math.PI * 2;
-          var petal = new THREE.Mesh(
-            new THREE.ConeGeometry(0.22, 1.15, 16),
-            new THREE.MeshPhongMaterial({{ color: 0x14b8a6, shininess: 80, flatShading: true }})
-          );
-          petal.rotation.z = Math.PI / 3;
-          petal.position.set(Math.cos(angle) * 1.55, Math.sin(angle) * 1.55, 0);
-          petalGroup.add(petal);
-        }}
-        mainGroup.add(petalGroup);
+        // 4. Concentric Gyroscope Rings (Emerald & Gold)
+        var ring1Geo = new THREE.TorusGeometry(1.45, 0.022, 16, 64);
+        var ring1Mat = new THREE.MeshPhongMaterial({{
+          color: 0x14b8a6,
+          emissive: 0x042f2e,
+          shininess: 85
+        }});
+        var ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+        ring1.rotation.x = Math.PI / 3.2;
+        mainGroup.add(ring1);
 
+        var ring2Geo = new THREE.TorusGeometry(1.72, 0.02, 16, 64);
+        var ring2Mat = new THREE.MeshPhongMaterial({{
+          color: 0xd4af37,
+          emissive: 0x78350f,
+          shininess: 95
+        }});
+        var ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+        ring2.rotation.y = Math.PI / 4;
+        mainGroup.add(ring2);
+
+        // 5. Orbiting Satellite Pearl
+        var satGeo = new THREE.SphereGeometry(0.09, 16, 16);
+        var satMat = new THREE.MeshPhongMaterial({{
+          color: 0xffffff,
+          emissive: 0x2dd4bf,
+          shininess: 100
+        }});
+        var satellite = new THREE.Mesh(satGeo, satMat);
+        mainGroup.add(satellite);
+
+        // 6. Floating Particle Dust
         var pCount = 120;
         var pGeo = new THREE.BufferGeometry();
         var pPos = new Float32Array(pCount * 3);
@@ -768,12 +830,47 @@ def render_zen_companion_studio_widget(user_name: str = "Alex Rivera") -> str:
 
         scene.add(mainGroup);
 
-        var mouseX = 0, mouseY = 0;
-        container.addEventListener('mousemove', function(e) {{
-          var rect = container.getBoundingClientRect();
-          mouseX = ((e.clientX - rect.left) / container.clientWidth - 0.5) * 0.8;
-          mouseY = ((e.clientY - rect.top) / container.clientHeight - 0.5) * 0.8;
+        // Mouse Drag Orbit Controls
+        var isDragging = false;
+        var prevMouseX = 0, prevMouseY = 0;
+        var targetRotX = 0, targetRotY = 0;
+        var curRotX = 0, curRotY = 0;
+
+        container.addEventListener('mousedown', function(e) {{
+          isDragging = true;
+          prevMouseX = e.clientX;
+          prevMouseY = e.clientY;
         }});
+        window.addEventListener('mouseup', function() {{ isDragging = false; }});
+        window.addEventListener('mousemove', function(e) {{
+          if (isDragging) {{
+            var dx = e.clientX - prevMouseX;
+            var dy = e.clientY - prevMouseY;
+            targetRotY += dx * 0.01;
+            targetRotX += dy * 0.01;
+            prevMouseX = e.clientX;
+            prevMouseY = e.clientY;
+          }}
+        }});
+
+        container.addEventListener('touchstart', function(e) {{
+          if (e.touches.length === 1) {{
+            isDragging = true;
+            prevMouseX = e.touches[0].clientX;
+            prevMouseY = e.touches[0].clientY;
+          }}
+        }}, {{ passive: true }});
+        window.addEventListener('touchend', function() {{ isDragging = false; }});
+        window.addEventListener('touchmove', function(e) {{
+          if (isDragging && e.touches.length === 1) {{
+            var dx = e.touches[0].clientX - prevMouseX;
+            var dy = e.touches[0].clientY - prevMouseY;
+            targetRotY += dx * 0.012;
+            targetRotX += dy * 0.012;
+            prevMouseX = e.touches[0].clientX;
+            prevMouseY = e.touches[0].clientY;
+          }}
+        }}, {{ passive: true }});
 
         var isInteracting = false;
         var interactTimer = 0;
@@ -864,10 +961,18 @@ def render_zen_companion_studio_widget(user_name: str = "Alex Rivera") -> str:
             }}
           }}
 
-          mainGroup.position.y = Math.sin(t * 1.4) * 0.12;
-          mainGroup.rotation.y += (t * 0.35 + mouseX - mainGroup.rotation.y) * 0.08 + (isInteracting ? 0.18 : 0);
-          mainGroup.rotation.x = Math.sin(t * 0.7) * 0.1 + mouseY;
-          petalGroup.rotation.z += (isInteracting ? -0.12 : -0.006);
+          innerMesh.rotation.y -= delta * 1.2;
+          innerMesh.rotation.x += delta * 0.8;
+
+          ring1.rotation.z += delta * 0.45;
+          ring2.rotation.x += delta * 0.55;
+
+          var satAngle = t * 1.8;
+          satellite.position.set(
+            Math.cos(satAngle) * 1.72,
+            Math.sin(satAngle) * 0.65,
+            Math.sin(satAngle) * 1.72
+          );
 
           // Gentle breathing rhythm scale
           var targetScale = breathPhases[bPhaseIdx].scale;
@@ -875,6 +980,13 @@ def render_zen_companion_studio_widget(user_name: str = "Alex Rivera") -> str:
           mainGroup.scale.set(breathPulse, breathPulse, breathPulse);
 
           particles.rotation.y += (isInteracting ? 0.06 : 0.0009);
+
+          curRotX += (targetRotX - curRotX) * 0.08;
+          curRotY += (targetRotY - curRotY) * 0.08;
+
+          mainGroup.position.y = Math.sin(t * 1.4) * 0.12;
+          mainGroup.rotation.y = curRotY + t * 0.2;
+          mainGroup.rotation.x = curRotX + Math.sin(t * 0.7) * 0.08;
 
           renderer.render(scene, camera);
         }}

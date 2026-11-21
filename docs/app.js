@@ -77,79 +77,144 @@
     pointLight.position.set(2, 4, 3);
     companionScene.add(pointLight);
 
-    const pointLightWarm = new THREE.PointLight(0xd4a373, 2.5, 50);
+    const pointLightWarm = new THREE.PointLight(0xd4af37, 2.5, 50);
     pointLightWarm.position.set(-2, -3, 2);
     companionScene.add(pointLightWarm);
 
     companionGroup = new THREE.Group();
 
-    // Outer translucent energy core
-    const coreGeometry = new THREE.SphereGeometry(1.0, 32, 32);
+    // 1. Faceted Icosahedron Crystal Jewel
+    const crystalGeo = new THREE.IcosahedronGeometry(0.95, 0);
     coreMaterial = new THREE.MeshPhongMaterial({
       color: 0x2e6f40,
       emissive: 0x14361d,
-      shininess: 90,
+      specular: 0x92d69d,
+      shininess: 95,
       transparent: true,
-      opacity: 0.88
+      opacity: 0.88,
+      flatShading: true
     });
-    const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
-    companionGroup.add(coreMesh);
+    const crystalMesh = new THREE.Mesh(crystalGeo, coreMaterial);
+    companionGroup.add(crystalMesh);
 
-    // Inner glowing heart
-    const innerGeometry = new THREE.SphereGeometry(0.55, 24, 24);
+    // 2. Wireframe Crystal Lattice Overlay
+    const wireGeo = new THREE.IcosahedronGeometry(0.97, 0);
+    const wireMat = new THREE.MeshBasicMaterial({
+      color: 0x92d69d,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.5
+    });
+    const wireMesh = new THREE.Mesh(wireGeo, wireMat);
+    companionGroup.add(wireMesh);
+
+    // 3. Inner Glowing Heart
+    const innerGeometry = new THREE.OctahedronGeometry(0.5, 0);
     const innerMaterial = new THREE.MeshPhongMaterial({
       color: 0xfaf9f7,
       emissive: 0x2e6f40,
-      shininess: 100
+      shininess: 100,
+      flatShading: true
     });
     innerMesh = new THREE.Mesh(innerGeometry, innerMaterial);
     companionGroup.add(innerMesh);
 
-    // 6 Orbiting Zen Lotus Petals
-    const petalCount = 6;
-    petalGroup = new THREE.Group();
-    for (let i = 0; i < petalCount; i++) {
-      const angle = (i / petalCount) * Math.PI * 2;
-      const leafShape = new THREE.ConeGeometry(0.25, 1.2, 16);
-      const leafMat = new THREE.MeshPhongMaterial({
-        color: 0x40916c,
-        shininess: 80,
-        flatShading: true
-      });
-      const leaf = new THREE.Mesh(leafShape, leafMat);
-      leaf.rotation.z = Math.PI / 3;
-      leaf.position.set(Math.cos(angle) * 1.6, Math.sin(angle) * 1.6, 0);
-      petalGroup.add(leaf);
-    }
-    companionGroup.add(petalGroup);
+    // 4. Concentric Gyroscope Rings (Emerald & Gold)
+    const ring1Geo = new THREE.TorusGeometry(1.45, 0.022, 16, 64);
+    const ring1Mat = new THREE.MeshPhongMaterial({
+      color: 0x2e6f40,
+      emissive: 0x0a2612,
+      shininess: 85
+    });
+    const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+    ring1.rotation.x = Math.PI / 3.2;
+    companionGroup.add(ring1);
 
-    // 80 Floating Aura Particles
-    const particleCount = 80;
+    const ring2Geo = new THREE.TorusGeometry(1.72, 0.02, 16, 64);
+    const ring2Mat = new THREE.MeshPhongMaterial({
+      color: 0xd4af37,
+      emissive: 0x5c4205,
+      shininess: 95
+    });
+    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+    ring2.rotation.y = Math.PI / 4;
+    companionGroup.add(ring2);
+
+    // 5. Orbiting Satellite Pearl
+    const satGeo = new THREE.SphereGeometry(0.09, 16, 16);
+    const satMat = new THREE.MeshPhongMaterial({
+      color: 0xffffff,
+      emissive: 0x2e6f40,
+      shininess: 100
+    });
+    const satellite = new THREE.Mesh(satGeo, satMat);
+    companionGroup.add(satellite);
+
+    // 6. Floating Aura Particles
+    const particleCount = 100;
     const particleGeometry = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount * 3; i += 3) {
-      particlePositions[i] = (Math.random() - 0.5) * 7;
-      particlePositions[i + 1] = (Math.random() - 0.5) * 7;
-      particlePositions[i + 2] = (Math.random() - 0.5) * 7;
+      particlePositions[i] = (Math.random() - 0.5) * 7.5;
+      particlePositions[i + 1] = (Math.random() - 0.5) * 6;
+      particlePositions[i + 2] = (Math.random() - 0.5) * 6;
     }
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
     const particleMaterial = new THREE.PointsMaterial({
       color: 0x40916c,
-      size: 0.07,
+      size: 0.075,
       transparent: true,
-      opacity: 0.7
+      opacity: 0.75
     });
     particles = new THREE.Points(particleGeometry, particleMaterial);
     companionScene.add(particles);
 
     companionScene.add(companionGroup);
 
-    // Mouse Tracking Parallax
-    container.addEventListener('mousemove', (e) => {
+    // Mouse Tracking Parallax & Drag Orbit
+    let isDragging = false;
+    let prevMouseX = 0, prevMouseY = 0;
+    let targetRotX = 0, targetRotY = 0;
+    let curRotX = 0, curRotY = 0;
+
+    container.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    window.addEventListener('mousemove', (e) => {
       const rect = container.getBoundingClientRect();
       companionMouseX = ((e.clientX - rect.left) / container.clientWidth - 0.5) * 0.8;
       companionMouseY = ((e.clientY - rect.top) / container.clientHeight - 0.5) * 0.8;
+      if (isDragging) {
+        const dx = e.clientX - prevMouseX;
+        const dy = e.clientY - prevMouseY;
+        targetRotY += dx * 0.01;
+        targetRotX += dy * 0.01;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      }
     });
+
+    container.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        prevMouseX = e.touches[0].clientX;
+        prevMouseY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+    window.addEventListener('touchend', () => { isDragging = false; });
+    window.addEventListener('touchmove', (e) => {
+      if (isDragging && e.touches.length === 1) {
+        const dx = e.touches[0].clientX - prevMouseX;
+        const dy = e.touches[0].clientY - prevMouseY;
+        targetRotY += dx * 0.012;
+        targetRotX += dy * 0.012;
+        prevMouseX = e.touches[0].clientX;
+        prevMouseY = e.touches[0].clientY;
+      }
+    }, { passive: true });
 
     // Interactive Click: Spin acceleration, Gold Aura Burst & Mindful Insight
     container.addEventListener('click', triggerCompanionInteraction);
@@ -163,8 +228,11 @@
       const delta = clock.getDelta();
       const elapsedTime = clock.getElapsedTime();
 
+      // Organic respiratory expansion
+      let breathScale = 1 + 0.06 * Math.sin(elapsedTime * 1.5);
       if (isCompanionInteracting) {
         companionInteractionTimer -= delta;
+        breathScale += 0.12 * Math.sin(elapsedTime * 12);
         coreMaterial.emissive.setHex(0xd4af37); // Golden radiance
         coreMaterial.color.setHex(0x92d69d);
         particles.material.size = 0.12;
@@ -172,20 +240,33 @@
           isCompanionInteracting = false;
           coreMaterial.emissive.setHex(0x14361d);
           coreMaterial.color.setHex(0x2e6f40);
-          particles.material.size = 0.07;
+          particles.material.size = 0.075;
         }
       }
 
-      companionGroup.position.y = Math.sin(elapsedTime * 1.5) * 0.15;
-      companionGroup.rotation.y += (elapsedTime * 0.35 + companionMouseX - companionGroup.rotation.y) * 0.1 + (isCompanionInteracting ? 0.2 : 0);
-      companionGroup.rotation.x = Math.sin(elapsedTime * 0.7) * 0.12 + companionMouseY;
+      crystalMesh.scale.set(breathScale, breathScale, breathScale);
+      wireMesh.scale.set(breathScale, breathScale, breathScale);
+      innerMesh.rotation.y -= delta * 1.2;
+      innerMesh.rotation.x += delta * 0.8;
 
-      petalGroup.rotation.z += (isCompanionInteracting ? -0.15 : -0.007);
+      ring1.rotation.z += delta * 0.45;
+      ring2.rotation.x += delta * 0.55;
 
-      const scale = 1 + Math.sin(elapsedTime * 2.2) * 0.06 + (isCompanionInteracting ? 0.15 * Math.sin(elapsedTime * 10) : 0);
-      innerMesh.scale.set(scale, scale, scale);
+      const satAngle = elapsedTime * 1.8;
+      satellite.position.set(
+        Math.cos(satAngle) * 1.72,
+        Math.sin(satAngle) * 0.65,
+        Math.sin(satAngle) * 1.72
+      );
 
       particles.rotation.y += (isCompanionInteracting ? 0.08 : 0.0008);
+
+      curRotX += (targetRotX - curRotX) * 0.08;
+      curRotY += (targetRotY - curRotY) * 0.08;
+
+      companionGroup.position.y = Math.sin(elapsedTime * 1.5) * 0.12;
+      companionGroup.rotation.y = curRotY + elapsedTime * 0.25 + companionMouseX * 0.2;
+      companionGroup.rotation.x = curRotX + Math.sin(elapsedTime * 0.7) * 0.08 + companionMouseY * 0.2;
 
       companionRenderer.render(companionScene, companionCamera);
     }

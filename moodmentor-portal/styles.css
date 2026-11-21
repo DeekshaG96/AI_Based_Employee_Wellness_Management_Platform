@@ -12,6 +12,8 @@
   --on-surface: #1a1c1b;
   --on-surface-variant: #404940;
   --outline-variant: #c0c9bd;
+  --card-3d-shadow: 0 14px 34px -6px rgba(46, 111, 64, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --card-3d-hover: 0 24px 52px -10px rgba(46, 111, 64, 0.22), 0 10px 22px -4px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 body {
@@ -20,16 +22,62 @@ body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  perspective: 1200px;
 }
 
-/* Subtle Smooth Transitions */
+/* 3D Keyframe Animations */
+@keyframes float3D {
+  0%, 100% {
+    transform: perspective(1000px) translateY(0px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: perspective(1000px) translateY(-6px) rotateX(2deg) rotateY(-1.5deg);
+  }
+}
+
+@keyframes pulseGlow3D {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(46, 111, 64, 0.22), 0 8px 24px rgba(46, 111, 64, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(46, 111, 64, 0.45), 0 16px 40px rgba(46, 111, 64, 0.2);
+  }
+}
+
+/* Subtle Smooth Transitions & 3D Tactile Physics */
 button, a, input, textarea {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+button:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* 3D Card Hover & Kinetic Tilt */
+.bg-surface-container-low, [class*="bg-surface-container-low"] {
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+  box-shadow: var(--card-3d-shadow);
+}
+
+.bg-surface-container-low:hover, [class*="bg-surface-container-low"]:hover {
+  transform: perspective(1000px) translateY(-5px) rotateX(1.8deg) scale(1.012);
+  box-shadow: var(--card-3d-hover);
 }
 
 /* 3D Canvas Responsive Wrapper */
+#companion-container {
+  cursor: grab;
+  perspective: 1000px;
+}
+#companion-container:active {
+  cursor: grabbing;
+}
 #companion-container canvas {
   display: block !important;
   max-width: 100% !important;
-  border-radius: 12px;
+  border-radius: 14px;
 }
