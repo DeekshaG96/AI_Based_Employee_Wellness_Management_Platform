@@ -3,7 +3,7 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     NLTK_DATA=/usr/local/share/nltk_data \
-    PORT=8501
+    PORT=7860
 
 WORKDIR /app
 COPY requirements-ui.txt ./requirements-ui.txt
@@ -19,12 +19,12 @@ COPY app.py ./app.py
 COPY data ./data
 COPY moodmentor-portal ./moodmentor-portal
 COPY moodmentor-portal.zip ./moodmentor-portal.zip
-RUN useradd --create-home --uid 10001 appuser \
+RUN useradd --create-home --uid 1000 appuser \
     && chown -R appuser:appuser /app
 USER appuser
 
-EXPOSE 8501
+EXPOSE 7860
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health')"
+  CMD python -c "import urllib.request, os; p = os.environ.get('PORT', '7860'); urllib.request.urlopen(f'http://127.0.0.1:{p}/_stcore/health')"
 
-CMD ["sh", "-c", "streamlit run app.py --server.address=0.0.0.0 --server.port=${PORT} --server.headless=true"]
+CMD ["sh", "-c", "streamlit run app.py --server.address=0.0.0.0 --server.port=${PORT:-7860} --server.headless=true"]
