@@ -1,11 +1,12 @@
 ## Description
 Provide a concise summary of the changes made and the issue or milestone requirement addressed.
 
-## Milestone / Area
-- [ ] Milestone 1: Ingestion, Preprocessing, VADER Sentiment & SQLite
-- [ ] Milestone 2: Deep Emotion Classification (BERT/DistilBERT)
-- [ ] Milestone 3: Recommendation Engine & REST API
-- [ ] Milestone 4: Packaging, Testing, & CLI
+## Functional Area
+- [ ] Core NLP: Ingestion, Preprocessing & VADER Sentiment
+- [ ] Emotion Telemetry: Transformer & Multi-Label Classification
+- [ ] Wellness Engine: Somatic Care, Yoga Remedies, Meditation & Nutrition
+- [ ] Platform API: FastAPI Backend & Endpoints
+- [ ] UI & Frontend: Streamlit Experience & Visualizations
 
 ## Checklist
 - [ ] My code follows the repository style guidelines (`ruff check .` passes).

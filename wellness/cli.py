@@ -1,4 +1,4 @@
-"""Command-line interface for Milestone 1 analysis."""
+"""Command-line interface for MoodMentor text and file analysis."""
 
 import argparse
 import json
