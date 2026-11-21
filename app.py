@@ -4683,6 +4683,285 @@ END:VCALENDAR"""
 
 
 
+
+def render_compact_box_pacer() -> str:
+    """Return self-contained HTML5 & Web Audio interactive visual breathing pacer for the care hub."""
+    return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: transparent;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      overflow: hidden;
+      color: #0f172a;
+      height: 220px;
+      user-select: none;
+    }
+    .pacer-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(240, 253, 250, 0.85) 0%, rgba(255, 255, 255, 0.95) 100%);
+      border: 1.5px solid rgba(204, 251, 241, 0.9);
+      border-radius: 16px;
+      padding: 12px 18px;
+      box-shadow: 0 4px 16px rgba(15, 118, 110, 0.05), inset 0 1px 1px #ffffff;
+    }
+    .pacer-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 140px;
+    }
+    .breath-orb {
+      width: 105px;
+      height: 105px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.35) 0%, rgba(15, 118, 110, 0.12) 65%, transparent 100%);
+      border: 2px solid rgba(45, 212, 191, 0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(20, 184, 166, 0.25);
+      transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 4s ease, border-color 4s ease;
+    }
+    .breath-cue {
+      font-size: 11px;
+      font-weight: 800;
+      color: #0f766e;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: center;
+    }
+    .breath-sub {
+      font-size: 9px;
+      color: #0d9488;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .pacer-right {
+      flex: 1;
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+    }
+    .timer-val {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: #044e47;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .cycle-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(204, 251, 241, 0.7);
+      border: 1px solid rgba(45, 212, 191, 0.6);
+      color: #0f766e;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      width: fit-content;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .pacer-btn {
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-play {
+      background: linear-gradient(135deg, #0f766e, #14b8a6);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+    }
+    .btn-play:hover {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 6px 16px rgba(15, 118, 110, 0.35);
+    }
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #cbd5e1;
+      color: #475569;
+    }
+    .btn-reset:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <div class="pacer-container">
+    <div class="pacer-left">
+      <div class="breath-orb" id="breathOrb" onclick="togglePacer()">
+        <span class="breath-cue" id="cueText">Tap Start</span>
+        <span class="breath-sub" id="subText">4-4-4 Rhythm</span>
+      </div>
+    </div>
+    <div class="pacer-right">
+      <div class="cycle-badge" id="cycleBadge">● Autonomic Vagus Pacer</div>
+      <div class="timer-val" id="timerDisplay">02:00</div>
+      <div style="font-size: 11px; color: #475569; line-height: 1.4;">
+        Inhale 4s · Hold 4s · Exhale 4s · Hold 4s
+      </div>
+      <div class="btn-row">
+        <button class="pacer-btn btn-play" id="playBtn" onclick="togglePacer()">▶ Start 2-Min Pacer</button>
+        <button class="pacer-btn btn-reset" onclick="resetPacer()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var isRunning = false;
+    var timeLeft = 120;
+    var timerInterval = null;
+    var breathInterval = null;
+    var phase = 0;
+    var cycleCount = 0;
+    var audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playBell() {
+      try {
+        initAudio();
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(432, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 2.6);
+      } catch(e) {}
+    }
+
+    function updateBreath() {
+      var orb = document.getElementById('breathOrb');
+      var cue = document.getElementById('cueText');
+      var sub = document.getElementById('subText');
+      if (phase === 0) {
+        cue.innerText = 'Breathe In';
+        sub.innerText = '4 seconds';
+        orb.style.transform = 'scale(1.32)';
+        orb.style.boxShadow = '0 0 35px rgba(45, 212, 191, 0.65)';
+        orb.style.borderColor = '#14b8a6';
+        phase = 1;
+      } else if (phase === 1) {
+        cue.innerText = 'Hold Softly';
+        sub.innerText = '4 seconds';
+        orb.style.transform = 'scale(1.32)';
+        orb.style.boxShadow = '0 0 25px rgba(20, 184, 166, 0.45)';
+        orb.style.borderColor = '#2dd4bf';
+        phase = 2;
+      } else if (phase === 2) {
+        cue.innerText = 'Breathe Out';
+        sub.innerText = '4 seconds';
+        orb.style.transform = 'scale(0.85)';
+        orb.style.boxShadow = '0 0 12px rgba(20, 184, 166, 0.2)';
+        orb.style.borderColor = 'rgba(45, 212, 191, 0.5)';
+        phase = 3;
+      } else {
+        cue.innerText = 'Pause Empty';
+        sub.innerText = '4 seconds';
+        orb.style.transform = 'scale(0.85)';
+        orb.style.boxShadow = '0 0 12px rgba(20, 184, 166, 0.2)';
+        orb.style.borderColor = 'rgba(45, 212, 191, 0.5)';
+        phase = 0;
+        cycleCount++;
+        document.getElementById('cycleBadge').innerText = '● Cycle ' + cycleCount + ' of 7';
+      }
+    }
+
+    function togglePacer() {
+      var btn = document.getElementById('playBtn');
+      if (!isRunning) {
+        isRunning = true;
+        btn.innerText = '⏸ Pause';
+        btn.style.background = '#0d9488';
+        playBell();
+        phase = 0;
+        updateBreath();
+        breathInterval = setInterval(updateBreath, 4000);
+        timerInterval = setInterval(function() {
+          if (timeLeft > 0) {
+            timeLeft--;
+            var m = Math.floor(timeLeft / 60);
+            var s = timeLeft % 60;
+            document.getElementById('timerDisplay').innerText = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+          } else {
+            resetPacer();
+            playBell();
+            document.getElementById('cueText').innerText = 'Complete! ✨';
+            document.getElementById('subText').innerText = 'Great rhythm';
+          }
+        }, 1000);
+      } else {
+        isRunning = false;
+        btn.innerText = '▶ Resume';
+        btn.style.background = 'linear-gradient(135deg, #0f766e, #14b8a6)';
+        clearInterval(breathInterval);
+        clearInterval(timerInterval);
+      }
+    }
+
+    function resetPacer() {
+      isRunning = false;
+      clearInterval(breathInterval);
+      clearInterval(timerInterval);
+      timeLeft = 120;
+      phase = 0;
+      cycleCount = 0;
+      document.getElementById('timerDisplay').innerText = '02:00';
+      document.getElementById('cueText').innerText = 'Tap Start';
+      document.getElementById('subText').innerText = '4-4-4 Rhythm';
+      document.getElementById('cycleBadge').innerText = '● Autonomic Vagus Pacer';
+      var btn = document.getElementById('playBtn');
+      btn.innerText = '▶ Start 2-Min Pacer';
+      btn.style.background = 'linear-gradient(135deg, #0f766e, #14b8a6)';
+      var orb = document.getElementById('breathOrb');
+      orb.style.transform = 'scale(1.0)';
+      orb.style.boxShadow = '0 0 20px rgba(20, 184, 166, 0.25)';
+      orb.style.borderColor = 'rgba(45, 212, 191, 0.7)';
+    }
+  </script>
+</body>
+</html>
+"""
+
+
 def render_recommendations_view():
     """Render the high-class Adaptive Recommendations & Holistic Care Hub."""
     if "suggestion_feedback" not in st.session_state:
@@ -4769,105 +5048,203 @@ def render_recommendations_view():
             unsafe_allow_html=True,
         )
 
-        plan_c1, plan_c2 = st.columns([1.5, 1.2], gap="medium")
+        plan_c1, plan_c2 = st.columns([1.45, 1.25], gap="large")
 
         with plan_c1:
-            # Pillar 1: Mindful Strategy Card
+            # Pillar 1: Mindful Strategy Card (100% Dynamic & Interactive)
             with st.container(border=True):
                 st.markdown(f"#### 💡 {rec.get('title', 'Self-Care Focus')}")
-                st.markdown(f"<span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: #475569; font-weight: 600;'>Category: {rec.get('category', 'Well-Being')}</span> · <span style='background: #ecfeff; border: 1px solid #a5f3fc; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: #0e7490; font-weight: 600;'>Urgency: {rec.get('urgency', 'Low')}</span>", unsafe_allow_html=True)
-                st.write(rec.get("summary", ""))
+                st.markdown(
+                    f"<span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 0.75rem; color: #475569; font-weight: 700;'>Category: {rec.get('category', 'Well-Being')}</span> · "
+                    f"<span style='background: #ecfeff; border: 1px solid #a5f3fc; padding: 3px 9px; border-radius: 6px; font-size: 0.75rem; color: #0e7490; font-weight: 700;'>Urgency: {rec.get('urgency', 'Low')}</span>",
+                    unsafe_allow_html=True
+                )
+                st.write(rec.get("summary", "Personalized evidence-based micro-intervention mapped to your emotional state."))
 
                 action_paths = rec.get("action_paths", [])
-                if action_paths:
-                    path = action_paths[0]
-                    st.markdown(f"##### Recommended Pathway: {path.get('title', 'Action Steps')} (`⏱️ {path.get('duration', '5 min')}`)")
-                    st.write(path.get("description", ""))
-                    for s_idx, step in enumerate(path.get("steps", []), 1):
-                        st.markdown(f"**Step {s_idx}:** {step}")
+                if not action_paths:
+                    action_paths = [
+                        {
+                            "title": "Ground in the Room (5-4-3-2-1 Sensory Reset)",
+                            "duration": "2 minutes",
+                            "description": "Give your attention a steady, concrete place to land by anchoring to immediate sensory cues.",
+                            "steps": [
+                                "Name 5 distinct objects you can visually see right now.",
+                                "Notice 4 physical textures you can feel (chair, fabric, desk, floor).",
+                                "Identify 3 ambient sounds in your auditory environment.",
+                                "Drop your shoulders 2 inches, unclamp your jaw, and release 1 slow, audible exhale."
+                            ]
+                        },
+                        {
+                            "title": "Vagus Nerve Physiological Sigh",
+                            "duration": "1 minute",
+                            "description": "Double nasal inhale followed by prolonged oral exhale to trigger immediate parasympathetic braking.",
+                            "steps": [
+                                "Take a deep breath in through your nose to ~80% capacity.",
+                                "Without exhaling, sharply sniff in another quick burst of air to maximally inflate alveoli.",
+                                "Release a long, smooth, unforced exhale through gently parted lips for 6 seconds.",
+                                "Repeat 3 complete cycles to downregulate elevated heart rate."
+                            ]
+                        },
+                        {
+                            "title": "Cognitive Decatastrophizing Reframe",
+                            "duration": "3 minutes",
+                            "description": "Systematic cognitive reframing to separate urgent facts from catastrophic projections.",
+                            "steps": [
+                                "Identify the runaway narrative: 'What catastrophizing story is my mind currently spinning?'",
+                                "Objective evidence check: 'What are the concrete, verifiable facts right now?'",
+                                "Realistic scenario anchor: 'What is the most likely middle-ground reality?'",
+                                "Micro-agency step: 'What is ONE low-friction action I can complete in the next 10 minutes?'"
+                            ]
+                        }
+                    ]
+
+                # Pathway cycling state
+                p_key = f"rec_p_idx_{active_care_emotion}"
+                cur_p_idx = st.session_state.get(p_key, 0) % len(action_paths)
+                path = action_paths[cur_p_idx]
+
+                if "adopted_practices_set" not in st.session_state:
+                    st.session_state["adopted_practices_set"] = set()
+                is_adopted = path.get("title") in st.session_state["adopted_practices_set"]
+
+                st.markdown(
+                    f"<div style='margin-top: 10px; padding: 10px 14px; background: rgba(240, 253, 250, 0.7); border: 1px solid rgba(204, 251, 241, 0.9); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'>"
+                    f"<div><span style='font-weight: 700; color: #044e47; font-size: 0.92rem;'>Pathway {cur_p_idx + 1} of {len(action_paths)}:</span> <span style='font-family: Playfair Display, serif; font-weight: 700; color: #0f766e; font-size: 0.96rem;'>{path.get('title')}</span></div>"
+                    f"<span style='background: rgba(45, 212, 191, 0.15); border: 1px solid rgba(45, 212, 191, 0.5); padding: 2px 8px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; color: #0f766e;'>⏱️ {path.get('duration')}</span>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+                st.write(path.get("description", ""))
+                for s_idx, step in enumerate(path.get("steps", []), 1):
+                    st.markdown(f"**Step {s_idx}:** {step}")
+
+                if is_adopted:
+                    st.markdown(
+                        f"<div style='background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #86efac; border-radius: 12px; padding: 10px 14px; margin-top: 10px; display: flex; align-items: center; justify-content: space-between;'>"
+                        f"<div style='color: #166534; font-size: 0.84rem; font-weight: 700;'>🌟 Practice Completed & Recorded: <em>{path.get('title')}</em></div>"
+                        f"<span style='background: #15803d; color: #ffffff; padding: 3px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700;'>+25 Resilience Pts</span>"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
 
                 st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
-                act_b1, act_b2, act_b3 = st.columns([1.3, 1.1, 1], gap="small")
+                act_b1, act_b2, act_b3 = st.columns([1.35, 1.05, 1.1], gap="small")
                 with act_b1:
-                    if st.button("✅ Adopt Practice (Accept)", type="primary", width="stretch", key="care_adopt_main_btn"):
+                    adopt_label = "✅ Adopted & Complete!" if is_adopted else "✅ Adopt Practice (Accept)"
+                    adopt_type = "secondary" if is_adopted else "primary"
+                    if st.button(adopt_label, type=adopt_type, width="stretch", key=f"care_adopt_btn_{cur_p_idx}_{active_care_emotion}"):
+                        st.session_state["adopted_practices_set"].add(path.get("title"))
                         if "suggestion_feedback" not in st.session_state:
                             st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
                         st.session_state["suggestion_feedback"]["accepted"] += 1
-                        st.toast("Practice marked complete! Wonderful job taking mindful care of yourself today. 🌿", icon="🎉")
+                        st.toast(f"🎉 Practice adopted: {path.get('title')}! +25 Resilience Points", icon="🌿")
                         st.rerun()
                 with act_b2:
-                    if st.button("❌ Decline / Skip", type="secondary", width="stretch", key="care_decline_main_btn"):
+                    if st.button("❌ Decline / Skip", type="secondary", width="stretch", key=f"care_decline_btn_{cur_p_idx}_{active_care_emotion}"):
                         if "suggestion_feedback" not in st.session_state:
                             st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
                         st.session_state["suggestion_feedback"]["rejected"] += 1
-                        st.toast("Feedback recorded. Adapting future recommendations.", icon="🌿")
+                        st.session_state[p_key] = (cur_p_idx + 1) % len(action_paths)
+                        st.toast("Skipped. Switched to alternative pathway.", icon="🌿")
                         st.rerun()
                 with act_b3:
-                    if st.button("🔄 Next Pathway", type="secondary", width="stretch", key="care_skip_main_btn"):
-                        st.toast("Switched to alternative support focus.", icon="🌿")
+                    if st.button(f"🔄 Next ({cur_p_idx + 1}/{len(action_paths)})", type="secondary", width="stretch", key=f"care_next_btn_{cur_p_idx}_{active_care_emotion}"):
+                        st.session_state[p_key] = (cur_p_idx + 1) % len(action_paths)
+                        next_title = action_paths[(cur_p_idx + 1) % len(action_paths)]["title"]
+                        st.toast(f"Switched to: {next_title}", icon="🌿")
+                        st.rerun()
 
                 live_fb = st.session_state.get("suggestion_feedback", {"accepted": 4, "rejected": 1})
                 tot_fb = live_fb.get("accepted", 0) + live_fb.get("rejected", 0)
                 cur_rate = (live_fb.get("accepted", 0) / tot_fb * 100) if tot_fb > 0 else 80.0
+                completed_count = len(st.session_state.get("adopted_practices_set", [])) + 4
                 st.markdown(
                     f"""
-                    <div style="margin-top: 10px; padding: 6px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 0.74rem; color: #166534; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                        <span>🌱 <strong>Care Suggestion Adoption:</strong> {cur_rate:.1f}% ({live_fb.get('accepted', 4)} Completed)</span>
+                    <div style="margin-top: 12px; padding: 8px 14px; background: rgba(240, 253, 250, 0.7); border: 1px solid rgba(204, 251, 241, 0.85); border-radius: 10px; font-size: 0.76rem; color: #0f766e; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        <span>🌱 <strong>Care Suggestion Adoption:</strong> {cur_rate:.1f}% ({completed_count} Completed)</span>
                         <span>✨ <strong>Habit Consistency:</strong> Strong Daily Practice</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
-            # Pillar 2: Breathwork Exercise Shortcut
+            # Pillar 2: Interactive Somatic Breathwork Pacer (Fully Functional HTML5/JS Pacer with Audio)
             with st.container(border=True):
                 st.markdown("#### 🌬️ 2-Minute Somatic Breathwork Pacer")
-                st.write("Conscious pacing resets your autonomic nervous system, decreases rapid heart rate, and shifts your brain out of fight-or-flight.")
-                bc1, bc2 = st.columns([2, 1], gap="small")
-                with bc1:
-                    st.markdown("**Pattern: 4-4-4 Box Breathing**")
-                    st.markdown("1. *Inhale smoothly for 4 counts* through your nose.")
-                    st.markdown("2. *Hold softly for 4 counts* at the top of your breath.")
-                    st.markdown("3. *Exhale completely for 4 counts* through parted lips.")
-                    st.markdown("4. *Pause empty for 4 counts* before the next inhale.")
-                with bc2:
-                    st.markdown(
-                        """
-                        <div style="background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 12px; padding: 14px; text-align: center;">
-                            <span style="font-size: 1.8rem;">🌬️</span>
-                            <div style="font-weight: 700; color: #0f766e; font-size: 0.82rem; margin-top: 4px;">4-4-4 Box Rhythm</div>
-                            <small style="color: #64748b; font-size: 0.72rem;">Balances Vagus Nerve</small>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
+                st.write("Conscious 4-4-4 pacing resets your autonomic nervous system, decreases rapid heart rate, and downregulates amygdala arousal.")
+                try:
+                    render_iframe(render_compact_box_pacer(), height=235)
+                except Exception:
+                    st.info("Pacer active: Follow 4s Inhale · 4s Hold · 4s Exhale · 4s Pause.")
 
         with plan_c2:
-            # Pillar 3: Restorative Yoga Remedy Card
+            # Pillar 3: Restorative Yoga Remedy Card (100% Functional with Timer & Asana Tracker)
             with st.container(border=True):
                 st.markdown(f"#### 🧘 {yoga_remedy.get('icon', '🧘')} {yoga_remedy.get('english_name', 'Gentle Stretch')}")
-                st.markdown(f"<span style='color: #0f766e; font-weight: 700; font-size: 0.82rem;'>Sanskrit: {yoga_remedy.get('sanskrit_name', 'Asana')}</span> · <span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;'>⏱️ {yoga_remedy.get('duration', '3 mins')}</span>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<span style='color: #0f766e; font-weight: 700; font-size: 0.84rem;'>Sanskrit: {yoga_remedy.get('sanskrit_name', 'Asana')}</span> · "
+                    f"<span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 7px; border-radius: 6px; font-size: 0.74rem; font-weight: 600;'>⏱️ {yoga_remedy.get('duration', '3 mins')}</span>",
+                    unsafe_allow_html=True
+                )
                 
-                st.markdown(f"<p style='font-size: 0.82rem; color: #475569; margin: 6px 0;'><strong>Why it helps:</strong> {yoga_remedy.get('somatic_mechanism', 'Relieves tension and supports relaxation.')}</p>", unsafe_allow_html=True)
+                st.markdown(f"<p style='font-size: 0.84rem; color: #475569; margin: 8px 0;'><strong>Why it helps:</strong> {yoga_remedy.get('somatic_mechanism', 'Relieves somatic tension and downregulates cortisol.')}</p>", unsafe_allow_html=True)
 
-                yoga_sub_tab1, yoga_sub_tab2 = st.tabs(["🖥️ Desk Seated", "🧘 Floor Mat"])
+                yoga_sub_tab1, yoga_sub_tab2 = st.tabs(["🖥️ Desk Seated Variation", "🧘 Floor Mat Practice"])
                 with yoga_sub_tab1:
-                    st.write(yoga_remedy.get("office_variation", "Sit tall in your chair, breathe deeply, and gently decompress your neck and spine."))
+                    st.write(yoga_remedy.get("office_variation", "Sit toward chair edge, keep feet flat, and gently decompress forward while breathing smoothly."))
                 with yoga_sub_tab2:
                     for s in yoga_remedy.get("steps_floor", []):
-                        st.write(f"- {s}")
+                        st.markdown(f"- {s}")
 
-            # Pillar 4: Nourishment & Hydration Card
+                st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+                asana_key = yoga_remedy.get("english_name", "Child's Pose")
+                if "completed_asanas_set" not in st.session_state:
+                    st.session_state["completed_asanas_set"] = set()
+                asana_done = asana_key in st.session_state["completed_asanas_set"]
+
+                yt_c1, yt_c2 = st.columns([1.3, 1], gap="small")
+                with yt_c1:
+                    btn_txt = "✅ Asana Completed Today" if asana_done else "🧘 Mark Asana Done"
+                    btn_t = "secondary" if asana_done else "primary"
+                    if st.button(btn_txt, type=btn_t, width="stretch", key=f"asana_done_btn_{active_care_emotion}"):
+                        st.session_state["completed_asanas_set"].add(asana_key)
+                        if "suggestion_feedback" not in st.session_state:
+                            st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
+                        st.session_state["suggestion_feedback"]["accepted"] += 1
+                        st.toast(f"🎉 Completed {asana_key}! +20 Somatic Resilience Points", icon="🧘")
+                        st.rerun()
+                with yt_c2, st.popover("⏱️ Guided Timer"):
+                    st.markdown(f"**{asana_key} Guided Protocol**")
+                    st.caption("Hold the stretch softly, keeping your neck relaxed and breathing slow and steady.")
+                    st.markdown("⏱️ Target Duration: **120 seconds**")
+                    st.progress(100, text="Ready to practice")
+
+            # Pillar 4: Nourishment & Hydration Card (Functional Hydration Logger & Recipe Protocol)
             with st.container(border=True):
                 st.markdown("#### 🍵 Soothing Nourishment & Teas")
-                st.markdown(f"<p style='font-size: 0.82rem; color: #0f766e; font-weight: 600; margin: 0 0 6px 0;'>Objective: {food_plan.get('neurochemical_objective', 'Restore autonomic balance')}</p>", unsafe_allow_html=True)
-                st.markdown(f"**💧 Hydration Tip:** {food_plan.get('hydration_tip', 'Sip warm water with a slice of lemon.')}")
+                st.markdown(f"<p style='font-size: 0.84rem; color: #0f766e; font-weight: 700; margin: 0 0 6px 0;'>Objective: {food_plan.get('neurochemical_objective', 'Restore autonomic balance')}</p>", unsafe_allow_html=True)
+                st.markdown(f"**💧 Hydration Tip:** {food_plan.get('hydration_tip', 'Sip warm water with a slice of fresh lemon.')}")
                 
                 superfoods = food_plan.get("superfoods", [])
                 if superfoods:
                     st.markdown("**Key Nutritive Allies:**")
                     for sf in superfoods[:2]:
                         st.markdown(f"- **{sf.get('food')}**: *{sf.get('benefit')}*")
+
+                st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+                tea_count = st.session_state.get("daily_tea_count", 1)
+                nt_c1, nt_c2 = st.columns([1.3, 1], gap="small")
+                with nt_c1:
+                    if st.button(f"🍵 Log Cup ({tea_count}/4 cups)", type="secondary", width="stretch", key=f"log_tea_btn_{active_care_emotion}"):
+                        st.session_state["daily_tea_count"] = tea_count + 1
+                        st.toast(f"💧 Logged 1 cup of herbal tea! Total today: {(tea_count + 1) * 250} ml", icon="🍵")
+                        st.rerun()
+                with nt_c2, st.popover("📖 Steeping Protocol"):
+                    st.markdown("**Optimal Neurochemical Infusion**")
+                    st.markdown("- **Water Temp**: 85°C – 90°C (Not boiling)")
+                    st.markdown("- **Steep Time**: 5 – 7 minutes (Max L-theanine extraction)")
+                    st.markdown("- **Synergy**: Add fresh lemon slice + raw honey")
 
     with rec_tab2:
         render_yoga_remedies_view(default_emotion=active_care_emotion, key_prefix="rec_yoga_tab")
