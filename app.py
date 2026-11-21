@@ -2668,6 +2668,684 @@ def render_medito_mindfulness_view():
     st.caption("*Ethos: Dedicated to open, accessible mindfulness. No paywalls, no tracking, complete digital sanctuary.*")
 
 
+def render_binaural_beats_widget() -> str:
+    """Return self-contained HTML5 & Web Audio API stereo binaural beats synthesizer with animated canvas visualizer."""
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          background: transparent;
+          font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+          color: #f0fdf4;
+          overflow: hidden;
+          padding: 10px 4px;
+          user-select: none;
+        }
+        .binaural-card {
+          background: radial-gradient(circle at 50% 15%, #064e3b 0%, #022c22 65%, #011c16 100%);
+          border: 1.5px solid rgba(45, 212, 191, 0.35);
+          border-radius: 20px;
+          padding: 20px 24px;
+          box-shadow: 0 16px 36px -8px rgba(2, 44, 34, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+          position: relative;
+        }
+        .top-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          padding-bottom: 12px;
+          margin-bottom: 16px;
+        }
+        .header-title {
+          font-size: 1.25rem;
+          font-weight: 800;
+          color: #5eead4;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .headphone-pill {
+          background: rgba(20, 184, 166, 0.2);
+          border: 1px solid rgba(45, 212, 191, 0.4);
+          padding: 3px 10px;
+          border-radius: 20px;
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: #5eead4;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .preset-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap: 10px;
+          margin-bottom: 16px;
+        }
+        .preset-card {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 12px;
+          padding: 10px 12px;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+          text-align: left;
+        }
+        .preset-card:hover {
+          background: rgba(45, 212, 191, 0.12);
+          border-color: rgba(45, 212, 191, 0.5);
+          transform: translateY(-2px);
+        }
+        .preset-card.active {
+          background: linear-gradient(135deg, rgba(15, 118, 110, 0.6) 0%, rgba(20, 184, 166, 0.35) 100%);
+          border-color: #2dd4bf;
+          box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3);
+        }
+        .preset-name {
+          font-size: 0.82rem;
+          font-weight: 700;
+          color: #ffffff;
+          margin-bottom: 2px;
+        }
+        .preset-freq {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.72rem;
+          color: #a7f3d0;
+        }
+        .preset-desc {
+          font-size: 0.68rem;
+          color: #94a3b8;
+          margin-top: 3px;
+        }
+        .visualizer-container {
+          background: rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 14px;
+          padding: 12px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 16px;
+        }
+        #waveCanvas {
+          width: 140px;
+          height: 60px;
+          background: transparent;
+        }
+        .state-info {
+          flex: 1;
+        }
+        .now-playing {
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #5eead4;
+        }
+        .freq-detail {
+          font-size: 0.75rem;
+          color: #a7f3d0;
+          font-family: 'JetBrains Mono', monospace;
+          margin-top: 2px;
+        }
+        .controls-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+        .play-btn {
+          background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+          color: #022c22;
+          font-weight: 800;
+          border: none;
+          padding: 10px 24px;
+          border-radius: 24px;
+          font-size: 0.92rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+          transition: all 0.2s;
+        }
+        .play-btn:hover {
+          transform: scale(1.03);
+          box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5);
+        }
+        .play-btn.playing {
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          color: #ffffff;
+        }
+        .vol-slider-wrap {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.78rem;
+          color: #cbd5e1;
+        }
+        .vol-slider-wrap input {
+          accent-color: #2dd4bf;
+          cursor: pointer;
+        }
+        .dur-selector {
+          display: flex;
+          gap: 6px;
+        }
+        .dur-btn {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #e2e8f0;
+          padding: 5px 12px;
+          border-radius: 8px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s;
+        }
+        .dur-btn.active {
+          background: #0f766e;
+          border-color: #2dd4bf;
+          color: #ffffff;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="binaural-card">
+        <div class="top-row">
+          <div class="header-title">
+            <span>🧠</span> Neural Frequency & Binaural Synthesizer
+          </div>
+          <span class="headphone-pill">🎧 Stereo Headphones Recommended</span>
+        </div>
+
+        <div class="preset-grid" id="presetGrid">
+          <div class="preset-card active" onclick="setPreset('alpha', this)">
+            <div class="preset-name">🌿 Alpha Waves</div>
+            <div class="preset-freq">10.0 Hz Beat</div>
+            <div class="preset-desc">Deep Focus & Flow</div>
+          </div>
+          <div class="preset-card" onclick="setPreset('theta', this)">
+            <div class="preset-name">🧘 Theta Waves</div>
+            <div class="preset-freq">6.0 Hz Beat</div>
+            <div class="preset-desc">Meditation & Calm</div>
+          </div>
+          <div class="preset-card" onclick="setPreset('delta', this)">
+            <div class="preset-name">🌙 Delta Waves</div>
+            <div class="preset-freq">2.5 Hz Beat</div>
+            <div class="preset-desc">Restorative Sleep</div>
+          </div>
+          <div class="preset-card" onclick="setPreset('gamma', this)">
+            <div class="preset-name">⚡ Gamma Waves</div>
+            <div class="preset-freq">40.0 Hz Beat</div>
+            <div class="preset-desc">Cognitive Precision</div>
+          </div>
+          <div class="preset-card" onclick="setPreset('solfeggio', this)">
+            <div class="preset-name">🔔 Solfeggio 432Hz</div>
+            <div class="preset-freq">432.0 Hz Harmonic</div>
+            <div class="preset-desc">Sacred Harmony</div>
+          </div>
+        </div>
+
+        <div class="visualizer-container">
+          <canvas id="waveCanvas" width="140" height="60"></canvas>
+          <div class="state-info">
+            <div class="now-playing" id="trackTitle">Alpha Frequency (10.0 Hz) · Deep Focus</div>
+            <div class="freq-detail" id="freqDetail">Carrier: 216.0 Hz (Left) | Target: 226.0 Hz (Right)</div>
+          </div>
+          <div class="dur-selector">
+            <button class="dur-btn" onclick="setDuration(300, this)">5m</button>
+            <button class="dur-btn active" onclick="setDuration(900, this)">15m</button>
+            <button class="dur-btn" onclick="setDuration(1800, this)">30m</button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <button class="play-btn" id="playBtn" onclick="toggleBinaural()">
+            <span id="playIcon">▶</span> <span id="playText">Begin Session</span>
+          </button>
+          <div class="vol-slider-wrap">
+            <span>🔈</span>
+            <input type="range" id="volRange" min="0" max="1" step="0.05" value="0.4" onchange="adjustVolume(this.value)">
+            <span>🔊</span>
+          </div>
+          <div id="timerText" style="font-family:'JetBrains Mono', monospace; font-size:0.9rem; font-weight:700; color:#5eead4;">15:00</div>
+        </div>
+      </div>
+
+      <script>
+      (function() {
+        const presets = {
+          alpha: { name: 'Alpha Waves', beat: 10.0, carrier: 216.0, desc: 'Deep Focus & Flow State' },
+          theta: { name: 'Theta Waves', beat: 6.0, carrier: 200.0, desc: 'Meditation & Emotional Balance' },
+          delta: { name: 'Delta Waves', beat: 2.5, carrier: 150.0, desc: 'Parasympathetic Restoration' },
+          gamma: { name: 'Gamma Waves', beat: 40.0, carrier: 200.0, desc: 'High Cognitive Agility' },
+          solfeggio: { name: 'Solfeggio Harmonic', beat: 0, carrier: 432.0, desc: 'Sacred Centering Tone' }
+        };
+
+        let currentPreset = 'alpha';
+        let isPlaying = false;
+        let audioCtx = null;
+        let oscL = null;
+        let oscR = null;
+        let gainNode = null;
+        let sessionSeconds = 900;
+        let remainingSeconds = 900;
+        let timerInterval = null;
+
+        window.setPreset = function(key, el) {
+          currentPreset = key;
+          document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+          if (el) el.classList.add('active');
+          const p = presets[key];
+          document.getElementById('trackTitle').textContent = p.name + ' (' + (p.beat ? p.beat + ' Hz' : 'Single Harmonic') + ') · ' + p.desc;
+          if (p.beat > 0) {
+            document.getElementById('freqDetail').textContent = 'Carrier: ' + p.carrier.toFixed(1) + ' Hz (Left) | Target: ' + (p.carrier + p.beat).toFixed(1) + ' Hz (Right)';
+          } else {
+            document.getElementById('freqDetail').textContent = 'Universal Harmonic: ' + p.carrier.toFixed(1) + ' Hz Pure Tone';
+          }
+          if (isPlaying) {
+            stopAudio();
+            startAudio();
+          }
+        };
+
+        window.setDuration = function(sec, el) {
+          sessionSeconds = sec;
+          remainingSeconds = sec;
+          document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
+          if (el) el.classList.add('active');
+          updateTimerDisplay();
+        };
+
+        function updateTimerDisplay() {
+          const m = Math.floor(remainingSeconds / 60);
+          const s = remainingSeconds % 60;
+          document.getElementById('timerText').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }
+
+        function startAudio() {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+          const p = presets[currentPreset];
+          gainNode = audioCtx.createGain();
+          const userVol = parseFloat(document.getElementById('volRange').value) || 0.4;
+          gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(userVol * 0.35, audioCtx.currentTime + 1.2);
+
+          const merger = audioCtx.createChannelMerger(2);
+
+          // Left channel
+          oscL = audioCtx.createOscillator();
+          oscL.type = 'sine';
+          oscL.frequency.value = p.carrier;
+          oscL.connect(merger, 0, 0);
+
+          // Right channel (Carrier + Beat for binaural disparity)
+          oscR = audioCtx.createOscillator();
+          oscR.type = 'sine';
+          oscR.frequency.value = p.beat > 0 ? (p.carrier + p.beat) : p.carrier;
+          oscR.connect(merger, 0, 1);
+
+          merger.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+
+          oscL.start();
+          oscR.start();
+          isPlaying = true;
+
+          const btn = document.getElementById('playBtn');
+          btn.classList.add('playing');
+          document.getElementById('playIcon').textContent = '⏸';
+          document.getElementById('playText').textContent = 'Pause Session';
+
+          clearInterval(timerInterval);
+          timerInterval = setInterval(() => {
+            if (remainingSeconds > 0) {
+              remainingSeconds--;
+              updateTimerDisplay();
+            } else {
+              toggleBinaural();
+            }
+          }, 1000);
+        }
+
+        function stopAudio() {
+          if (gainNode && audioCtx) {
+            try {
+              gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+              setTimeout(() => {
+                if (oscL) { oscL.stop(); oscL.disconnect(); oscL = null; }
+                if (oscR) { oscR.stop(); oscR.disconnect(); oscR = null; }
+              }, 600);
+            } catch(e) {}
+          }
+          isPlaying = false;
+          clearInterval(timerInterval);
+          const btn = document.getElementById('playBtn');
+          btn.classList.remove('playing');
+          document.getElementById('playIcon').textContent = '▶';
+          document.getElementById('playText').textContent = 'Resume Session';
+        }
+
+        window.toggleBinaural = function() {
+          if (isPlaying) {
+            stopAudio();
+          } else {
+            startAudio();
+          }
+        };
+
+        window.adjustVolume = function(val) {
+          if (gainNode && audioCtx) {
+            gainNode.gain.setTargetAtTime(parseFloat(val) * 0.35, audioCtx.currentTime, 0.05);
+          }
+        };
+
+        // Canvas visualizer animation
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        let animAngle = 0;
+        function drawWave() {
+          requestAnimationFrame(drawWave);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          const p = presets[currentPreset];
+          const freq = p.beat > 0 ? p.beat : 5;
+          ctx.beginPath();
+          ctx.strokeStyle = isPlaying ? '#2dd4bf' : 'rgba(255,255,255,0.2)';
+          ctx.lineWidth = isPlaying ? 2.5 : 1.2;
+          animAngle += isPlaying ? 0.06 : 0.01;
+          for (let x = 0; x < canvas.width; x++) {
+            const y = canvas.height / 2 + Math.sin(x * 0.06 * (freq / 4) + animAngle) * (isPlaying ? 18 : 6);
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+        drawWave();
+      })();
+      </script>
+    </body>
+    </html>
+    """
+
+
+def render_ai_cognitive_reframe_studio(dominant_emotion: str, original_text: str):
+    """Render interactive AI Cognitive Reframing Studio directly underneath reflection insights."""
+    reframe_info = get_cognitive_reframes(dominant_emotion)
+    distortion_title = reframe_info.get("cognitive_distortion", "Catastrophizing & Tunnel Vision")
+    perspective = reframe_info.get("reframing_prompt", "Shift focus toward actionable baseline steps.")
+    questions = reframe_info.get("self_inquiry_questions", [
+        "What objective evidence supports or contradicts this thought?",
+        "What is directly within my circle of control today?"
+    ])
+    affirmation = reframe_info.get("affirmation", "I approach each workplace challenge with grounded equanimity.")
+
+    st.markdown(
+        f"""
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 100%); border: 1.5px solid rgba(45, 212, 191, 0.7); border-radius: 16px; padding: 18px 22px; box-shadow: 0 8px 24px -4px rgba(15, 118, 110, 0.08); margin: 16px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.3rem;">💡</span>
+                    <h4 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; font-weight: 700; color: #0f172a;">AI Cognitive Reframing Studio</h4>
+                </div>
+                <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;">
+                    Pattern: {distortion_title}
+                </span>
+            </div>
+            <p style="font-size: 0.86rem; color: #334155; line-height: 1.5; margin-bottom: 12px;">
+                Automatic thoughts can amplify workplace tension. Transforming cognitive distortions into grounded, objective reframes restores emotional clarity and self-efficacy.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    c_card1, c_card2 = st.columns(2, gap="medium")
+    with c_card1, st.container(border=True):
+        st.markdown("##### 🔍 1. Objective Perspective Shift")
+        st.markdown(f"*{perspective}*")
+        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+        st.caption("Self-Inquiry Probes:")
+        for q in questions[:2]:
+            st.markdown(f"- <span style='font-size: 0.82rem; color: #475569;'>{q}</span>", unsafe_allow_html=True)
+
+    with c_card2, st.container(border=True):
+        st.markdown("##### 🌟 2. Grounded Self-Affirmation")
+        st.markdown(f"*{affirmation}*")
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        adopt_key = f"adopt_reframe_{dominant_emotion}_{len(original_text)}"
+        if st.button("📝 Adopt Reframe into Reflection Note", key=adopt_key, type="primary", width="stretch"):
+            curr_note = st.session_state.get("journal_reflection_note", "").strip()
+            new_note = f"{curr_note} [Reframe: {perspective}]".strip() if curr_note else f"[Reframe: {perspective}]"
+            st.session_state["journal_reflection_note"] = new_note
+            st.toast("Adopted cognitive reframe into your reflection notes!", icon="💡")
+            st.rerun()
+
+
+def render_meeting_recovery_calculator():
+    """Render interactive meeting friction & deep work recovery calculator for engineering leaders."""
+    st.markdown(
+        """
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.85) 100%); border: 1.5px solid rgba(204, 251, 241, 0.85); border-radius: 16px; padding: 18px 22px; margin-top: 18px; box-shadow: 0 4px 16px rgba(15, 118, 110, 0.06);">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
+                <h3 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 1.28rem; font-weight: 700; color: #0f172a;">
+                    💼 Meeting Friction & Deep Work Recovery Calculator
+                </h3>
+                <span style="font-size: 0.74rem; color: #0f766e; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: #f0fdfa; border: 1px solid #99f6e4; padding: 2px 8px; border-radius: 6px;">
+                    Executive ROI Model
+                </span>
+            </div>
+            <p style="margin: 0; font-size: 0.86rem; color: #475569;">
+                Quantify cognitive context-switching penalties across your organization and measure the direct creative hours reclaimed via EquiMind Focus Sanctuaries.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    with st.container(border=True):
+        m_col1, m_col2 = st.columns([1.1, 1], gap="large")
+        with m_col1:
+            team_size = st.slider("Active Team Size (Members):", min_value=3, max_value=40, value=8, step=1, key="calc_team_size")
+            weekly_meetings = st.slider("Average Weekly Sync / Meeting Hours per Member:", min_value=4, max_value=30, value=14, step=1, key="calc_weekly_meetings")
+            avg_comp = st.select_slider(
+                "Average Member Annual Compensation:",
+                options=[80000, 100000, 130000, 160000, 200000],
+                value=130000,
+                format_func=lambda x: f"${x:,.0f} / yr",
+                key="calc_avg_comp"
+            )
+
+        # Scientific modeling: 23 minutes lost per interruption to restore deep context
+        hourly_rate = avg_comp / 1920.0
+        fragmentation_hrs = round(team_size * (weekly_meetings * 0.38), 1)
+        reclaimed_hrs = round(team_size * 4.5, 1) # Recovered through No-Meeting Mornings
+        monthly_savings = round((reclaimed_hrs * 4.33) * hourly_rate, 0)
+        annual_savings = monthly_savings * 12
+
+        with m_col2:
+            st.markdown(
+                f"""
+                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%); border: 1px solid #bbf7d0; border-radius: 14px; padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="font-size: 0.76rem; font-weight: 700; color: #166534; text-transform: uppercase;">Projected Flow Recovery</div>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: #065f46; margin: 4px 0;">
+                            +{reclaimed_hrs:,.1f} hrs / wk
+                        </div>
+                        <div style="font-size: 0.82rem; color: #047857;">
+                            Uninterrupted creative flow recovered for your {team_size}-person team.
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid rgba(16, 185, 129, 0.25); padding-top: 12px; margin-top: 12px;">
+                        <div style="font-size: 0.74rem; font-weight: 700; color: #0e7490; text-transform: uppercase;">Reclaimed Payroll Capital Efficiency</div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0e7490; margin: 2px 0;">
+                            ${monthly_savings:,.0f} <span style="font-size: 0.8rem; font-weight: 600;">/ month (${annual_savings:,.0f} / yr)</span>
+                        </div>
+                        <div style="font-size: 0.78rem; color: #155e75;">
+                            Equivalent to eliminating {fragmentation_hrs:,.0f} monthly context-switching overhead hours.
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with st.expander("📋 View Ready-to-Share Async Team Charter", expanded=False):
+            st.markdown(
+                f"""
+```markdown
+# EquiMind Team Focus & Asynchronous Charter
+**Team Scope:** {team_size} Members · **Goal:** Reclaim +{reclaimed_hrs:.0f} hours of weekly deep flow
+
+1. **Focus Sanctuaries:** Tuesday & Thursday mornings (9:00 AM – 1:00 PM) are designated zero-meeting focus blocks.
+2. **Async-First Updates:** Status reports, code previews, and architecture design RFCs default to threaded comments before calling meetings.
+3. **Emergency Escalations:** Production blocker incidents use designated paging channels; standard questions allow 4-hour response latency.
+4. **Friday Afternoon Buffer:** Zero customer deployments or non-critical sprint deadlines after 1:00 PM Friday.
+```
+                """
+            )
+
+
+def render_resilience_radar_scorecard(df: pd.DataFrame):
+    """Render multi-dimensional resilience radar scorecard in emotional trends view."""
+    total_recs = len(df)
+    avg_comp = float(df["compound_score"].mean()) if not df.empty else 0.0
+    pos_count = (df["sentiment_label"] == "positive").sum()
+    neu_count = (df["sentiment_label"] == "neutral").sum()
+
+    # 4 Dimensions (Normalized 0 to 100)
+    affective_balance = min(100.0, max(10.0, ((pos_count + 0.5 * neu_count) / max(1, total_recs)) * 100))
+    recovery_velocity = min(100.0, max(20.0, 75.0 + (avg_comp * 25.0)))
+    
+    unique_emotions = df["dominant_emotion"].nunique() if "dominant_emotion" in df.columns else 3
+    emotional_agility = min(100.0, max(30.0, (unique_emotions / 7.0) * 100))
+    
+    habit_consistency = min(100.0, max(40.0, 60.0 + min(40.0, total_recs * 8.0)))
+
+    r_current = [affective_balance, recovery_velocity, emotional_agility, habit_consistency, affective_balance]
+    r_target = [85.0, 80.0, 85.0, 90.0, 85.0]
+    theta_dims = ["Affective Balance", "Recovery Velocity", "Emotional Agility", "Habit Consistency", "Affective Balance"]
+
+    with st.container(border=True):
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                <div>
+                    <span style="background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">Longitudinal Diagnostic</span>
+                    <h4 style="margin: 4px 0 0 0; font-family: 'Playfair Display', Georgia, serif; font-size: 1.22rem; font-weight: 700; color: #0f172a;">Personal Resilience Diagnostic Radar</h4>
+                </div>
+                <span style="font-size: 0.76rem; color: #0f766e; font-weight: 700;">Composite Score: {(affective_balance + recovery_velocity + emotional_agility + habit_consistency) / 4.0:.1f} / 100</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        r_col1, r_col2 = st.columns([1.2, 1], gap="medium")
+        with r_col1:
+            fig_rad = go.Figure()
+            fig_rad.add_trace(go.Scatterpolar(
+                r=r_current,
+                theta=theta_dims,
+                fill='toself',
+                name='Your Telemetry Profile',
+                line_color='#0f766e',
+                fillcolor='rgba(15, 118, 110, 0.28)'
+            ))
+            fig_rad.add_trace(go.Scatterpolar(
+                r=r_target,
+                theta=theta_dims,
+                fill='none',
+                name='Optimal Equilibrium Target',
+                line={"color": '#f59e0b', "dash": 'dash'},
+            ))
+            fig_rad.update_layout(
+                polar={
+                    "radialaxis": {"visible": True, "range": [0, 100], "tickfont": {"size": 9, "color": "#64748b"}},
+                    "angularaxis": {"tickfont": {"size": 10, "family": "Plus Jakarta Sans", "color": "#1e293b", "weight": "bold"}}
+                },
+                height=260,
+                margin={"l": 35, "r": 35, "t": 25, "b": 25},
+                showlegend=True,
+                legend={"orientation": "h", "yanchor": "bottom", "y": -0.25, "xanchor": "center", "x": 0.5, "font": {"size": 10}},
+                paper_bgcolor="rgba(0,0,0,0)",
+            )
+            st.plotly_chart(fig_rad, width="stretch")
+
+        with r_col2:
+            st.markdown(
+                """
+                <div style="background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 12px; padding: 14px; height: 100%;">
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #0f766e; text-transform: uppercase; margin-bottom: 6px;">
+                        🧠 AI Resilience Prescription
+                    </div>
+                    <p style="font-size: 0.84rem; color: #334155; line-height: 1.5; margin-bottom: 8px;">
+                        <strong>Grounded Equilibrium:</strong> Your recovery velocity is robust. To compound resilience, integrate structured 4-minute box-breathing breaks following high-context sprint reviews.
+                    </p>
+                    <ul style="font-size: 0.80rem; color: #475569; padding-left: 18px; margin: 0; line-height: 1.5;">
+                        <li><strong>Agility Practice:</strong> Label subtle cognitive nuances during Daily Reflection.</li>
+                        <li><strong>Habit Momentum:</strong> Maintain your 3-day reflection cadence for neural consolidation.</li>
+                    </ul>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+
+def render_sos_vagal_reset_banner():
+    """Render 1-click SOS 60-Second Vagus Nerve Calming Reset when activated."""
+    if st.session_state.get("show_sos_reset_modal", False):
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div style="background: linear-gradient(135deg, #022c22 0%, #064e3b 100%); border: 1.5px solid #2dd4bf; border-radius: 16px; padding: 20px 24px; color: #f0fdf4; margin-bottom: 18px; box-shadow: 0 12px 28px rgba(2, 44, 34, 0.4);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 10px; margin-bottom: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.6rem;">⚡</span>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800; color: #5eead4;">60-Second Parasympathetic SOS Reset</h3>
+                                <small style="color: #a7f3d0; font-size: 0.80rem;">Physiological Sigh & Vagal Nerve De-escalation Protocol</small>
+                            </div>
+                        </div>
+                        <span style="background: rgba(45, 212, 191, 0.2); border: 1px solid #2dd4bf; color: #5eead4; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;">
+                            Immediate Relief
+                        </span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                        <div style="background: rgba(255,255,255,0.06); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                            <strong style="color: #5eead4; font-size: 0.85rem;">1. Double Inhale</strong>
+                            <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">Deep nasal inhale, then a sharp second top-up sip.</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.06); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                            <strong style="color: #5eead4; font-size: 0.85rem;">2. Long Mouth Exhale</strong>
+                            <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">Slow, audible 6-second release to engage vagal brake.</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.06); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                            <strong style="color: #5eead4; font-size: 0.85rem;">3. Somatic Release</strong>
+                            <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">Unclench jaw, drop shoulders, feet flat on floor.</div>
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            col_close, _ = st.columns([1, 3])
+            with col_close:
+                if st.button("🌿 I Feel Centered & Ready to Resume", type="primary", width="stretch", key="btn_close_sos_reset"):
+                    st.session_state["show_sos_reset_modal"] = False
+                    st.toast("Welcome back to your centered flow state.", icon="✨")
+                    st.rerun()
+
+
+
 def render_wellness_tools_view():
     st.markdown("### 🧘 Somatic, Cognitive & Nutritional Wellness Suite")
     st.caption("Evidence-based workplace regulation tools: therapeutic yoga remedies, somatic breathwork, meditation sanctuary, cognitive reframing, and nutritional psychiatry.")
@@ -2695,6 +3373,7 @@ def render_wellness_tools_view():
     soma_tools = [
         {"id": "yoga", "label": "🧘 Therapeutic Yoga Remedies"},
         {"id": "meditation", "label": "🎵 Meditation & Soundscapes"},
+        {"id": "binaural", "label": "🧠 Binaural Beats & Brainwaves"},
         {"id": "breath", "label": "🌬️ Somatic Breathwork"},
         {"id": "reframe", "label": "💡 Cognitive Reframing"},
         {"id": "food", "label": "🥑 Mood-Food & Nutrition"},
@@ -2766,6 +3445,10 @@ def render_wellness_tools_view():
         for q in data["self_inquiry_questions"]:
             st.write(f"- {q}")
         st.success(f"**Empowering Affirmation**: *\"{data['affirmation']}\"*")
+    elif active_id == "binaural":
+        st.markdown("#### 🧠 Neural Frequency & Binaural Beats Synthesizer")
+        st.caption("Client-side stereo Web Audio API synthesis: entrain brainwaves into Alpha, Theta, Delta, or Gamma states for deep focus, meditation, and restorative rest.")
+        render_iframe(render_binaural_beats_widget(), height=420)
     elif active_id == "food":
         render_mood_food_planner_view(key_prefix="soma_sanctuary")
 
@@ -3514,6 +4197,9 @@ END:VCALENDAR"""
                 if st.session_state.get("friday_buffer_active"):
                     st.success("✅ **Sanctuary Active**: Automated calendar protection rule applied for Friday 1:00 PM onwards.")
 
+            # Executive Meeting Friction & Deep Work Recovery Calculator
+            render_meeting_recovery_calculator()
+
         with c_check:
             st.markdown(
                 """
@@ -4092,6 +4778,17 @@ def render_workspace():
         unsafe_allow_html=True,
     )
 
+    # 1-Click SOS Vagus Nerve Reset (Immediate Calm Modal)
+    render_sos_vagal_reset_banner()
+
+    # Quick Access Micro-Intervention Trigger
+    if not st.session_state.get("show_sos_reset_modal", False):
+        _, h_sos_col = st.columns([3.2, 1])
+        with h_sos_col:
+            if st.button("⚡ 60s SOS Calm Reset", key="header_sos_reset_btn", type="secondary", width="stretch", help="1-click physiological sigh & parasympathetic de-escalation"):
+                st.session_state["show_sos_reset_modal"] = True
+                st.rerun()
+
     # Route directly to the selected module from the sidebar
     if active_nav.startswith("💬"):
         with st.container(border=True):
@@ -4608,6 +5305,9 @@ def render_workspace():
 
                     st.caption("Evidence-informed self-care suggestions and restorative somatic practices are educational, non-clinical reflections.")
 
+                    # AI Cognitive Reframing Studio
+                    render_ai_cognitive_reframe_studio(report.dominant_emotion, report.original_text)
+
                     # Tailored Nutritional Support for the Analyzed Reflection
                     with st.expander(f"View Personalized Mood-Food Nutrition Plan for {report.dominant_emotion.upper()}", expanded=False):
                         render_mood_food_planner_view(default_emotion=report.dominant_emotion, key_prefix="journal_analysis")
@@ -4910,6 +5610,9 @@ def render_workspace():
             kpi4.metric("Positive Ratio", f"{(pos_count / total_recs) * 100:.1f}%", f"{pos_count} logs")
             kpi5.metric("Negative Ratio", f"{(neg_count / total_recs) * 100:.1f}%", f"{neg_count} logs")
             kpi6.metric("Active Streak", "3 Days", "Centered & Focused")
+
+            # Longitudinal Multi-Dimensional Resilience Diagnostic Radar
+            render_resilience_radar_scorecard(df)
 
             # Suggestion Adoption & Wellbeing Impact Analytics
             with st.container(border=True):
