@@ -69,11 +69,12 @@ st.set_page_config(
 
 
 def render_iframe(html_content: str, height: int = 350) -> None:
-    """Render self-contained HTML/JS/CSS in an iframe across modern and legacy Streamlit versions."""
-    if hasattr(st, "iframe"):
-        st.iframe(html_content, height=height, width="stretch")
-    else:
+    """Render self-contained HTML/JS/CSS component reliably in Streamlit."""
+    try:
         st.components.v1.html(html_content, height=height)
+    except Exception:
+        if hasattr(st, "iframe"):
+            st.iframe(html_content, height=height)
 
 # ---------------------------------------------------------------------------
 # LUCIDE MINIMALIST SVG ICON SYSTEM (Enterprise Design Architecture)
@@ -193,18 +194,17 @@ CUSTOM_CSS = """<style>
   --card-3d-hover: 0 26px 56px -10px rgba(15, 118, 110, 0.22), 0 10px 24px -4px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
-html, body, [class*="css"], [data-testid="stAppViewContainer"] {
+html, body, [data-testid="stAppViewContainer"] {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   color: var(--slate-900) !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
   text-rendering: optimizeLegibility !important;
-  perspective: 1200px;
 }
 
 /* Header & Viewport Structure */
 header[data-testid="stHeader"] {
-  display: none !important;
+  background: transparent !important;
 }
 
 /* Luxury Silk Alabaster Background with 3D Ambient Orbs */
@@ -214,7 +214,6 @@ header[data-testid="stHeader"] {
               radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
               linear-gradient(180deg, #f0fdfa 0%, #f8fafc 40%, #ffffff 100%) !important;
   color: var(--slate-900) !important;
-  perspective: 1200px;
 }
 
 .block-container {
@@ -2301,7 +2300,10 @@ def render_landing_and_auth():
 </div>
 """, unsafe_allow_html=True)
 
-        render_iframe(render_landing_hero_3d(), height=305)
+        try:
+            render_iframe(render_landing_hero_3d(), height=305)
+        except Exception:
+            pass
 
         st.markdown("""
 <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 14px; margin-bottom: 24px;">
