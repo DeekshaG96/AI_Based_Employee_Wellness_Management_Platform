@@ -2407,15 +2407,6 @@ def render_landing_and_auth():
                         except ApiError as exc:
                             st.error(str(exc))
 
-        st.markdown('<div style="text-align: center; margin: 12px 0 6px 0; font-size: 0.76rem; color: #94a3b8;">— or explore immediately —</div>', unsafe_allow_html=True)
-        if st.button("🌱 1-Click Instant Demo Access →", type="secondary", width="stretch", key="landing_instant_demo_btn"):
-            st.session_state.logged_in = True
-            st.session_state.user_id = 1
-            st.session_state.user_name = "Mindful Member"
-            st.session_state.user_email = "member@equimind.app"
-            st.session_state.api_token = "equimind_local_token_1"
-            st.rerun()
-
         st.markdown("""
 <div style="text-align: center; margin-top: 14px; font-size: 0.72rem; color: #64748b; line-height: 1.4;">
     🔒 Confidential & Secure Reflection Space · Enterprise Protected
