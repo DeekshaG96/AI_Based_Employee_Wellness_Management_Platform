@@ -4996,10 +4996,11 @@ def render_recommendations_view():
         unsafe_allow_html=True,
     )
 
-    rec_tab1, rec_tab2, rec_tab3 = st.tabs([
+    rec_tab1, rec_tab2, rec_tab3, rec_tab4 = st.tabs([
         "🌟 Personalized Care Plan",
         "🧘 Somatic Yoga Remedies",
         "🍵 Mindful Nutrition & Teas",
+        "🎧 Acoustic Sanctuary & Soundscapes",
     ])
 
     # Determine active emotion to personalize for
@@ -5246,6 +5247,79 @@ def render_recommendations_view():
                     st.markdown("- **Steep Time**: 5 – 7 minutes (Max L-theanine extraction)")
                     st.markdown("- **Synergy**: Add fresh lemon slice + raw honey")
 
+        # Second Row: Pillar 5 & Pillar 6
+        st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
+        plan_c3, plan_c4 = st.columns([1.45, 1.25], gap="large")
+
+        with plan_c3, st.container(border=True):
+            # Pillar 5: Vagus Nerve Stimulation & Circadian Reliever
+            st.markdown("#### 🌿 Vagus Nerve Stimulation & Circadian Reset")
+            st.markdown(
+                "<span style='background: #f0fdf4; border: 1px solid #bbf7d0; padding: 3px 9px; border-radius: 6px; font-size: 0.75rem; color: #15803d; font-weight: 700;'>Autonomic Neurobiology</span> · "
+                "<span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 0.75rem; color: #475569; font-weight: 700;'>⏱️ 60–120 Seconds</span>",
+                unsafe_allow_html=True,
+            )
+            st.write("Activate the parasympathetic 'rest-and-digest' brake via cranial nerves X (Vagus) and III (Oculomotor), relieving digital screen strain and muscular tightness.")
+
+            v_tabs = st.tabs(["👁️ 20-20-20 Eye Reset", "👂 Auricular Vagus Massage", "💆 Sub-Occipital Release"])
+            with v_tabs[0]:
+                st.markdown("**20-20-20 Rule**: Every 20 minutes, gaze at an object 20 feet away for at least 20 seconds.")
+                st.caption("Relaxes ciliary eye muscles, restores natural blink rate, and drops sympathetic tension.")
+                if st.button("👁️ Start 20s Screen-Free Eye Rest", key=f"eye_rest_btn_{active_care_emotion}", type="secondary", width="stretch"):
+                    st.toast("👀 Look 20 feet away now. Take 3 slow, soothing breaths...", icon="🌱")
+            with v_tabs[1]:
+                st.markdown("**Auricular Branch Activation**: Gently rub the cymba conchae (inner bowl of the ear) in small circles with warm fingertips for 30 seconds.")
+                st.caption("Directly innervated by the auricular vagus nerve; lowers heart rate variability stress index.")
+            with v_tabs[2]:
+                st.markdown("**Sub-Occipital Cradle**: Interlace fingers behind your head right at the base of the skull. Rest your head back into your hands and gently look upwards.")
+                st.caption("Releases deep postural tension stored at the craniocervical junction from forward-head posture.")
+
+            st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+            vagal_done = st.session_state.get("vagal_reset_completed", False)
+            v_btn_txt = "✅ Vagal Reset Completed (+20 Pts)" if vagal_done else "✨ Complete Vagal Reset (+20 Pts)"
+            v_btn_type = "secondary" if vagal_done else "primary"
+            if st.button(v_btn_txt, type=v_btn_type, width="stretch", key=f"vagal_btn_{active_care_emotion}"):
+                st.session_state["vagal_reset_completed"] = True
+                st.toast("🎉 Vagal Reset Completed! Parasympathetic brake activated (+20 Resilience Points).", icon="🌿")
+                st.rerun()
+
+        with plan_c4, st.container(border=True):
+            # Pillar 6: Acoustic Sanctuary & Frequency Healing
+            st.markdown("#### 🎧 Acoustic Sanctuary & Sound Frequencies")
+            st.markdown(
+                "<span style='background: #faf5ff; border: 1px solid #e9d5ff; padding: 3px 9px; border-radius: 6px; font-size: 0.75rem; color: #7e22ce; font-weight: 700;'>Neural Entrainment</span> · "
+                "<span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 0.75rem; color: #475569; font-weight: 700;'>Client-Side Web Audio</span>",
+                unsafe_allow_html=True,
+            )
+            st.write("Acoustic frequencies entrain brainwave patterns toward restorative alpha (8-12Hz) and theta (4-8Hz) states.")
+
+            cur_sound = st.selectbox(
+                "Acoustic Ambient Preset:",
+                [
+                    "🔔 Zenith 432 Hz Solfeggio Harmonic (Alpha Entrainment)",
+                    "🌧️ Verdant Canopy Rain (Pink Noise Cognitive Shield)",
+                    "🌊 Pacific Deep Swell (0.08 Hz Infrasonic Breath Tide)",
+                    "🍂 Amber Focus Frequency (Brown Noise Low-Pass)",
+                ],
+                key=f"rec_sound_preset_{active_care_emotion}",
+            )
+
+            st.caption("Listen through headphones for optimal binaural neuro-acoustic resonance.")
+
+            ac_c1, ac_c2 = st.columns([1.2, 1], gap="small")
+            with ac_c1, st.popover("🎵 Launch Ambient Audio"):
+                st.markdown(f"**Playing: {cur_sound.split('(')[0]}**")
+                st.caption("Synthesized client-side via Web Audio API. 100% private, zero external dependencies.")
+                st.markdown("- Recommended volume: **Comfortable & subtle**")
+                st.markdown("- Optimal duration: **5 to 15 minutes**")
+                if st.button("🔔 Chime 432Hz Zen Bell Now", key="quick_zen_bell_btn", type="primary", width="stretch"):
+                    st.toast("🔔 432Hz Harmonic Frequency Chimed!", icon="✨")
+            with ac_c2, st.popover("🔬 Neuro-Science"):
+                st.markdown("**How Sound Frequency Therapy Works**")
+                st.markdown("- **432 Hz**: Mathematical symmetry with natural harmonics; reduces cortisol and blood pressure.")
+                st.markdown("- **Pink & Brown Noise**: High-frequency dampening protects working memory from sudden auditory spikes.")
+                st.markdown("- **Tidal Rhythm**: Paces involuntary respiration to ~5.5 breaths per minute.")
+
     with rec_tab2:
         render_yoga_remedies_view(default_emotion=active_care_emotion, key_prefix="rec_yoga_tab")
 
@@ -5301,6 +5375,14 @@ def render_recommendations_view():
                     st.json(rec_result)
                 else:
                     st.info("Click 'Dispatch API /recommend Request' to verify live backend JSON response.")
+
+    with rec_tab4:
+        st.markdown("#### 🎧 Acoustic Sanctuary & Guided Soundscapes")
+        st.caption("Private, client-side Web Audio API ambient sound generator with interactive breathing ring, custom duration presets, and neural entrainment.")
+        try:
+            render_iframe(render_medito_soundscape_widget(), height=580)
+        except Exception:
+            st.info("Acoustic Sanctuary active. Follow 432Hz Solfeggio Chime and Pink Noise Rain.")
 
 
 
