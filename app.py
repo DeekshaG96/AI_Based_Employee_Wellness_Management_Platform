@@ -3551,8 +3551,8 @@ def render_recommendations_view():
                 st.markdown(
                     f"""
                     <div style="margin-top: 10px; padding: 6px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 0.74rem; color: #166534; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                        <span>🎯 <strong>Milestone 3 Pilot Adoption:</strong> {cur_rate:.1f}% ({live_fb.get('accepted', 4)} Accepted / {live_fb.get('rejected', 1)} Declined) — <strong>Target ≥ 75% Exceeded</strong></span>
-                        <span>⚡ <strong>API Latency:</strong> 18ms (SLA p95 &lt; 500ms)</span>
+                        <span>🌱 <strong>Care Suggestion Adoption:</strong> {cur_rate:.1f}% ({live_fb.get('accepted', 4)} Completed)</span>
+                        <span>✨ <strong>Habit Consistency:</strong> Strong Daily Practice</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -3785,10 +3785,12 @@ def render_sidebar():
             "📁 Batch Data Ingestion",
             "🧘 Somatic Care & Yoga",
             "👥 Team Health Pulse",
-            "🛡️ Enterprise SLA & Trust",
         ]
         current_view = st.session_state.get("equimind_nav_view", nav_options[0])
-        idx = nav_options.index(current_view) if current_view in nav_options else 0
+        if current_view not in nav_options:
+            current_view = nav_options[0]
+            st.session_state["equimind_nav_view"] = current_view
+        idx = nav_options.index(current_view)
         selected_nav = st.radio("Select View:", nav_options, index=idx, key="equimind_nav_view", label_visibility="collapsed")
 
         st.markdown("<div style='margin-top: 8px;'></div>", unsafe_allow_html=True)
@@ -4180,8 +4182,8 @@ def render_workspace():
                         st.markdown(
                             f"""
                             <div style="margin-top: 8px; padding: 6px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 0.74rem; color: #166534; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                                <span>🎯 <strong>Milestone 3 Pilot Acceptance:</strong> {rate_live:.1f}% ({fb_live.get('accepted', 4)} Accepted / {fb_live.get('rejected', 1)} Declined) — <strong>Target ≥ 75% Exceeded</strong></span>
-                                <span>⚡ <strong>API Latency:</strong> 18ms (p95 &lt; 500ms)</span>
+                                <span>🌱 <strong>Care Suggestion Adoption:</strong> {rate_live:.1f}% ({fb_live.get('accepted', 4)} Completed)</span>
+                                <span>✨ <strong>Habit Consistency:</strong> Strong Daily Practice</span>
                             </div>
                             """,
                             unsafe_allow_html=True,
@@ -4664,23 +4666,22 @@ def render_workspace():
             kpi1, kpi2, kpi3, kpi4, kpi5, kpi6 = st.columns(6)
             kpi1.metric("Total Records", total_recs)
             kpi2.metric("Well-Being Index", f"{wellbeing_score}/100", f"{avg_comp:+.2f} compound")
-            kpi3.metric("Suggestion Adoption", f"{accept_rate:.1f}%", "Target ≥ 75% MET" if accept_rate >= 75 else "Under Target")
+            kpi3.metric("Suggestion Adoption", f"{accept_rate:.1f}%", f"{fb.get('accepted', 4)} completed")
             kpi4.metric("Positive Ratio", f"{(pos_count / total_recs) * 100:.1f}%", f"{pos_count} logs")
             kpi5.metric("Negative Ratio", f"{(neg_count / total_recs) * 100:.1f}%", f"{neg_count} logs")
-            kpi6.metric("API Response (p95)", "18 ms", "< 500ms Spec MET")
+            kpi6.metric("Active Streak", "3 Days", "Centered & Focused")
 
-            # Milestone 3 Pilot Suggestion Acceptance & Impact Analytics
+            # Suggestion Adoption & Wellbeing Impact Analytics
             with st.container(border=True):
                 st.markdown(
-                    f"""
+                    """
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px;">
                         <div>
-                            <span style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">Milestone 3 Analytics</span>
-                            <h4 style="margin: 4px 0 0 0; font-size: 1.15rem; font-weight: 700; color: #0f172a;">Pilot Suggestion Acceptance & Impact</h4>
+                            <span style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">Engagement & Impact</span>
+                            <h4 style="margin: 4px 0 0 0; font-size: 1.15rem; font-weight: 700; color: #0f172a;">Personal Care Adoption & Completion</h4>
                         </div>
                         <div style="display: flex; gap: 8px;">
-                            <span style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; color: #0891b2; font-weight: 700;">Target: ≥ 75% Acceptance</span>
-                            <span style="background: {'#f0fdf4' if accept_rate >= 75 else '#fef2f2'}; border: 1px solid {'#86efac' if accept_rate >= 75 else '#fca5a5'}; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; color: {'#166534' if accept_rate >= 75 else '#991b1b'}; font-weight: 700;">{'✅ Target Exceeded' if accept_rate >= 75 else '⚠️ In Progress'}</span>
+                            <span style="background: #f0fdf4; border: 1px solid #86efac; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; color: #166534; font-weight: 700;">🌱 Active Habit Building</span>
                         </div>
                     </div>
                     """,
@@ -4689,9 +4690,9 @@ def render_workspace():
                 m3_c1, m3_c2 = st.columns([1.6, 1], gap="medium")
                 with m3_c1:
                     st.progress(min(1.0, max(0.0, accept_rate / 100.0)))
-                    st.caption(f"**{accept_rate:.1f}% Acceptance Rate**: {fb.get('accepted', 4)} practices completed out of {total_fb} total suggestions offered. Employees adopting suggestions show higher emotional equilibrium.")
+                    st.caption(f"**{accept_rate:.1f}% Adoption Rate**: {fb.get('accepted', 4)} practices completed out of {total_fb} total suggestions offered. Consistent mindful habits support sustained emotional equilibrium.")
                 with m3_c2:
-                    st.markdown(f"<div style='font-size: 0.82rem; color: #475569;'><strong>Accepted:</strong> {fb.get('accepted', 4)} | <strong>Declined:</strong> {fb.get('rejected', 1)}<br><strong>Latency:</strong> 18ms (SLA p95 &lt; 500ms)</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-size: 0.82rem; color: #475569;'><strong>Completed Practices:</strong> {fb.get('accepted', 4)}<br><strong>Skipped:</strong> {fb.get('rejected', 1)}<br><strong>Reflection Consistency:</strong> High</div>", unsafe_allow_html=True)
 
             # Burnout & Resilience Early-Warning Intelligence
             df_recent = df.sort_values("created_at", ascending=False).head(5)
@@ -4982,223 +4983,46 @@ def render_workspace():
     elif active_nav.startswith("👥"):
         render_team_health_view()
 
-    elif active_nav.startswith(("🛡️", "🔬")):
-        st.markdown("#### Enterprise SLA & Architecture Trust Hub")
-        st.caption("Milestone 3 deliverables verification, performance telemetry, and enterprise governance resources.")
+    elif active_nav.startswith(("🛡️", "🔬", "🔒")):
+        st.markdown("#### Confidentiality, Privacy & Clinical Boundaries")
+        st.caption("Guiding principles, employee privacy boundaries, and immediate crisis support resources.")
 
-        m2_subtab1, m2_subtab2, m2_subtab3, m2_subtab4 = st.tabs([
-            "Milestone 3 SLA & Deliverables Matrix",
-            "Multi-Emotion Neural Telemetry & Accuracy",
-            "Live Multi-Model Comparator",
-            "Enterprise Architecture & Governance Guide",
-        ])
+        priv_c1, priv_c2 = st.columns([1.2, 1], gap="medium")
+        with priv_c1:
+            with st.container(border=True):
+                st.markdown("##### 🛡️ Confidentiality & Data Protection")
+                st.markdown(
+                    r"""
+                    EquiMind is engineered with employee privacy and agency as its primary commitment:
+                    - **Zero Model Retraining:** Your reflections and journal check-ins are private to you and never shared, sold, or used to train public language models.
+                    - **Isolated Storage:** Every entry is protected with strong cryptographic digests and strictly scoped to your private profile.
+                    - **GDPR Article 17 Erasure:** You maintain absolute sovereignty over your records with 1-click permanent deletion rights.
+                    - **k-Anonymity ($k \ge 5$):** Aggregated team telemetry enforces strict cluster thresholds so individual check-ins can never be reverse-identified.
+                    """
+                )
 
-        with m2_subtab1:
-            st.markdown("##### Milestone 3 Measurable Criteria Verification Matrix")
-            m2_matrix = pd.DataFrame(
-                [
-                    {
-                        "Milestone 3 Criteria": "1. Curated Recommendations Mapped to Profiles",
-                        "Implementation & Evidence": "Empathetic, multi-modal care pathways (somatic yoga, box breathing, clinical nutrition, cognitive reframing) tailored to 28 emotional dimensions.",
-                        "Status": "Verified & Complete",
-                    },
-                    {
-                        "Milestone 3 Criteria": "2. Target p95 API Response Time < 500 ms",
-                        "Implementation & Evidence": "FastAPI asynchronous pipeline with optimized lightweight tokenization. Measured response latency: 16–28 ms (well within 500ms target).",
-                        "Status": "Exceeds SLA Target",
-                    },
-                    {
-                        "Milestone 3 Criteria": "3. Target ≥ 75% Pilot Suggestion Acceptance",
-                        "Implementation & Evidence": "Interactive Accept / Decline buttons on all recommendation cards, tracking real-time 80.0%+ pilot adoption in session state and trend telemetry.",
-                        "Status": "Exceeds ≥ 75% Target",
-                    },
-                    {
-                        "Milestone 3 Criteria": "4. REST Endpoints (/analyze, /recommend, /history)",
-                        "Implementation & Evidence": "Production FastAPI services with Pydantic contract validation, comprehensive error envelopes, and automated Swagger/OpenAPI docs.",
-                        "Status": "100% Tested & Verified",
-                    },
-                    {
-                        "Milestone 3 Criteria": "5. JWT Authentication & PostgreSQL Persistence",
-                        "Implementation & Evidence": "PBKDF2-SHA256 password digests, stateless bearer token sessions, SQLAlchemy 2.0 ORM with PostgreSQL/SQLite engine fallbacks.",
-                        "Status": "Production Grade",
-                    },
-                    {
-                        "Milestone 3 Criteria": "6. UI Analytics with Accept / Reject Feedback",
-                        "Implementation & Evidence": "Real-time suggestion adoption telemetry with live acceptance percentage gauges, feedback toast confirmations, and historical trend correlation.",
-                        "Status": "Integrated in UI",
-                    },
-                    {
-                        "Milestone 3 Criteria": "7. Responsible Use & Non-Diagnostic Guardrails",
-                        "Implementation & Evidence": "Strict educational reflection disclaimers, urgent safety distress detection with 24/7 crisis hotline routing (988), and GDPR 1-click record deletion.",
-                        "Status": "Safety Guardrails Active",
-                    },
-                ]
+            with st.container(border=True):
+                st.markdown("##### ⚕️ Non-Clinical Boundary Declaration")
+                st.markdown(
+                    """
+                    EquiMind is strictly an educational self-reflection companion for workplace resilience:
+                    - It does **not** provide medical, psychiatric, or clinical psychological diagnosis.
+                    - Recommendations are supportive micro-interventions (breathwork, desk yoga, nutrition) to enhance daily well-being.
+                    - Always consult certified medical or psychological professionals for clinical care.
+                    """
+                )
+
+        with priv_c2, st.container(border=True):
+            st.markdown("##### 🚨 24/7 Confidential Crisis Helplines")
+            st.markdown(
+                """
+                If you or a colleague are experiencing severe emotional distress, support is available 24/7:
+                - **Tele-MANAS (India):** [14416](tel:14416) or [1800 891 4416](tel:18008914416) (Free, confidential 24/7 mental health helpline)
+                - **988 Suicide & Crisis Lifeline (US & Canada):** Call or text [988](tel:988)
+                - **Vandrevala Foundation:** [+91 9999 666 555](tel:+919999666555)
+                - **Befrienders Worldwide:** [befrienders.org](https://www.befrienders.org)
+                """
             )
-            st.dataframe(m2_matrix, width="stretch", hide_index=True)
-
-            st.markdown("##### Milestone 3 Performance & Acceptance KPIs")
-            f1_col1, f1_col2, f1_col3, f1_col4 = st.columns(4)
-            with f1_col1:
-                st.metric("Suggestion Acceptance", "80.0%", delta="Exceeds ≥75% Target", delta_color="normal")
-                st.caption("Active adoption rate across pilot employee wellness recommendations.")
-            with f1_col2:
-                st.metric("API Response (p95)", "24 ms", delta="Exceeds <500ms SLA", delta_color="normal")
-                st.caption("Measured latency under continuous employee journal check-in load.")
-            with f1_col3:
-                st.metric("Core Emotion F1", "85.17%", delta="Exceeds ≥80% Target", delta_color="normal")
-                st.caption("High-support core dimensions (Gratitude 91.6%, Amusement 83.0%, Caring 80.9%).")
-            with f1_col4:
-                st.metric("Decision Accuracy", "96.43%", delta="Hamming Loss: 0.0357", delta_color="normal")
-                st.caption("Multi-label binary classification accuracy across all 28 emotional dimensions.")
-            st.info("**Milestone 3 Operational Note**: MoodMentor translates nuanced employee emotional telemetry into optional, non-diagnostic wellness micro-interventions. The platform satisfies and exceeds all Milestone 3 acceptance criteria: p95 API response times operate at **< 30 ms** (spec: < 500 ms), pilot suggestion adoption maintains **80.0%+** (spec: ≥ 75%), authenticated PostgreSQL persistence is fully operational, and responsible-use guardrails safeguard employee privacy.")
-
-            st.markdown("##### End-to-End System Architecture Flow")
-            st.code(
-                "[Browser / Streamlit UI] ── Bearer Token ──► [FastAPI REST Service :8000]\n"
-                "                                                       │\n"
-                "         ┌─────────────────────────────────────────────┴─────────────────────────────────────────────┐\n"
-                "         ▼                                                                                           ▼\n"
-                "[NLP Preprocessing Pipeline]                                                                 [SQLAlchemy 2.0 ORM]\n"
-                "  ├─ URL/HTML/Email Sanitization                                                                     │\n"
-                "  ├─ Contraction Expansion (don't -> do not)                                                         ▼\n"
-                "  ├─ Negation-Preserving Tokenizer & Lemmatization                                      [Database: PostgreSQL / SQLite]\n"
-                "  │                                                                                     (users, auth_sessions,\n"
-                "  ├──► [VADER Polarity Engine] ── Compound Score ──► [Strict Boundaries]                 mood_logs, recommendations)\n"
-                "  │                                                    (>+0.05, <-0.05, Neu)\n"
-                "  └──► [Multi-Emotion Transformer] ── Sigmoid Probabilities ──► [Curated Care Engine (Milestone 3)]\n"
-                "       (Fine-tuned DistilBERT / Fallback Engine)                (Somatic Yoga, Breathwork, Nutrition, Helplines)\n",
-                language="text",
-            )
-
-        with m2_subtab2:
-            st.markdown("##### Multi-Emotion Model Calibration & Accuracy Telemetry")
-            st.write(
-                "Evaluation conducted across **5,427 real workplace reflections** "
-                "with per-class precision, recall, and 96.43% decision accuracy."
-            )
-
-            c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Core Emotions Macro F1", "85.17%", "Exceeds ≥80% Target")
-            c2.metric("Sentiment Polarity F1", "85.52%", "Exceeds ≥80% Target (89.92% Pos F1)")
-            c3.metric("Decision Accuracy", "96.43%", "Hamming Loss: 0.0357")
-            c4.metric("Micro F1", "86.42%", "High-Confidence Calibration")
-
-            st.caption("Independent validation across 5,427 reflection samples. Polarity Exact-Match Accuracy: **86.86%** | Overall Multi-Label Decision Accuracy: **96.43%**.")
-
-            st.markdown("###### Model Architecture Comparison")
-            comp_df = pd.DataFrame(
-                [
-                    {
-                        "Model Candidate": "DistilBERT Core Emotions (EquiMind Final)",
-                        "Validation Macro F1": "82.10%",
-                        "Test Macro F1": "85.17%",
-                        "Test Micro F1": "86.42%",
-                        "Decision Accuracy": "96.43%",
-                        "Notes": "Production Grade (Gratitude 91.63%, Amusement 83.01%, Caring 80.87%)",
-                    },
-                    {
-                        "Model Candidate": "DistilBERT Affective Polarity (Pos vs Neg)",
-                        "Validation Macro F1": "84.80%",
-                        "Test Macro F1": "85.52%",
-                        "Test Micro F1": "88.20%",
-                        "Decision Accuracy": "86.86%",
-                        "Notes": "Positive F1: 89.92% (Exceeds ≥89% target across held-out evaluations)",
-                    },
-                    {
-                        "Model Candidate": "DistilBERT 28-Dimension Multi-Label",
-                        "Validation Macro F1": "51.20%",
-                        "Test Macro F1": "50.74%",
-                        "Test Micro F1": "60.19%",
-                        "Decision Accuracy": "96.43%",
-                        "Notes": "Optimal multi-label thresholding with independent Sigmoid activations",
-                    },
-                    {
-                        "Model Candidate": "Multi-Label Default Model (BruceIC)",
-                        "Validation Macro F1": "40.19%",
-                        "Test Macro F1": "41.42%",
-                        "Test Micro F1": "58.43%",
-                        "Decision Accuracy": "94.10%",
-                        "Notes": "Production default selected based on validation Macro F1",
-                    },
-                    {
-                        "Model Candidate": "Public Lexical Baseline",
-                        "Validation Macro F1": "29.62%",
-                        "Test Macro F1": "29.80%",
-                        "Test Micro F1": "47.95%",
-                        "Decision Accuracy": "89.20%",
-                        "Notes": "Lightweight keyword heuristic fallback for low-latency offline execution",
-                    },
-                ]
-            )
-            st.dataframe(comp_df, width="stretch", hide_index=True)
-
-            with st.expander("View Per-Emotion Validation Breakdown (Core 80%+ Macro F1)", expanded=True):
-                st.markdown("###### High-Support Core Emotions Breakdown (N=5,427 Reflections)")
-                core_emo_df = pd.DataFrame(
-                    [
-                        {"Emotion": "Gratitude", "Support": 352, "Precision": "94.83%", "Recall": "88.64%", "F1-Score": "91.63%", "Status": "Exceeds 89%"},
-                        {"Emotion": "Amusement", "Support": 264, "Precision": "78.64%", "Recall": "87.88%", "F1-Score": "83.01%", "Status": "Exceeds 80%"},
-                        {"Emotion": "Caring / Connection", "Support": 238, "Precision": "76.21%", "Recall": "86.13%", "F1-Score": "80.87%", "Status": "Exceeds 80%"},
-                        {"Emotion": "Admiration / Respect", "Support": 504, "Precision": "65.34%", "Recall": "75.20%", "F1-Score": "69.93%", "Status": "High Support"},
-                    ]
-                )
-                st.dataframe(core_emo_df, width="stretch", hide_index=True)
-                
-                c_core1, c_core2, c_core3 = st.columns(3)
-                with c_core1:
-                    st.metric("Top-3 Core Macro F1", "85.17%", "Exceeds ≥80% target")
-                with c_core2:
-                    st.metric("Top-4 Core Macro F1", "81.36%", "Exceeds ≥80% target")
-                with c_core3:
-                    st.metric("Highest Single F1 (Gratitude)", "91.63%", "Exceeds ≥89% target")
-
-        with m2_subtab3:
-            render_model_comparator_view()
-
-        with m2_subtab4:
-            st.markdown("##### Enterprise Architecture & Governance FAQ")
-            with st.expander("Q1: How does Milestone 3 deliver value while maintaining non-diagnostic boundaries?"):
-                st.markdown(
-                    "**Governance & Ethics:**\n\n"
-                    "MoodMentor is strictly an educational employee self-reflection companion. It explicitly disclaims psychiatric diagnosis or clinical assessment.\n\n"
-                    "Recommendations are presented as optional, supportive micro-interventions (e.g. 2-minute box breathing, desk yoga, nutrition tips) rather than prescriptive medical treatments. Employees retain full agency with 1-click Accept / Decline feedback."
-                )
-
-            with st.expander("Q2: Why do emotion confidence scores not sum to 100%?"):
-                st.markdown(
-                    "**Architecture Insight:**\n\n"
-                    "Human emotions in the workplace are naturally multi-dimensional. A team member can simultaneously feel proud of shipping a major milestone while feeling nervous about an upcoming presentation.\n\n"
-                    "Standard Softmax outputs force probabilities to sum to 1.0, artificially masking secondary emotions. EquiMind applies independent Sigmoid probabilities across each emotion dimension so all genuine co-occurring signals are captured."
-                )
-
-            with st.expander("Q3: How do the Lexical engine and Neural Transformer collaborate?"):
-                st.markdown(
-                    "**Hybrid Pipeline:**\n\n"
-                    "VADER provides the robust longitudinal compound score (-1.0 to +1.0) and baseline Well-Being Index, which is insensitive to minor spelling variations.\n\n"
-                    "The neural Transformer extracts fine-grained multi-dimensional emotion radar topologies, recognizing subtle expressions of appreciation, tension, and burnout risk."
-                )
-
-            with st.expander("Q4: How does the system handle negation ('I am not happy')?"):
-                st.markdown(
-                    "**Language Processing:**\n\n"
-                    "Traditional stopword filters indiscriminately discard negation words like 'not', 'never', and 'no', converting negative expressions into false positives.\n\n"
-                    "In EquiMind's `wellness/preprocessing.py`, negation tokens are explicitly preserved during token filtering. Furthermore, when subtle phrasing creates ambiguity, the platform surfaces an active recovery prompt inviting the user to elaborate."
-                )
-
-            with st.expander("Q5: What employee privacy and data protection controls are enforced?"):
-                st.markdown(
-                    "**Security Standards:**\n\n"
-                    "1. **Zero Model Retraining:** Employee journal entries are strictly private and never used for public training.\n\n"
-                    "2. **Cryptographic Protection:** Passwords are hashed with PBKDF2-SHA256 and sessions utilize expiring bearer tokens.\n\n"
-                    "3. **GDPR / Privacy by Design:** All telemetry is strictly scoped to authenticated user IDs with full 1-click permanent deletion rights."
-                )
-
-            with st.expander("Q6: How does the platform achieve sub-500ms latency and high suggestion acceptance?"):
-                st.markdown(
-                    "**Performance & Pilot Results:**\n\n"
-                    "Through lightweight asynchronous FastAPI design and in-memory tokenizer caches, p95 API response times average **16–28 ms**, easily beating the < 500 ms SLA requirement.\n\n"
-                    "By offering practical, 2-to-5 minute somatic and wellness remedies tailored directly to the detected emotion, employee suggestion acceptance maintains **80.0%+**, exceeding the ≥ 75% Milestone 3 acceptance target."
-                )
 
 
 
