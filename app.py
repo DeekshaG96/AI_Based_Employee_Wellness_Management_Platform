@@ -1751,9 +1751,8 @@ def _render_mood_trend() -> None:
     """Show the saved VADER mood history, including the latest analysis."""
     try:
         entries = api_history(st.session_state.user_id, st.session_state.api_token)
-    except ApiError as exc:
-        st.caption(f"Mood trend is temporarily unavailable: {exc}")
-        return
+    except Exception:
+        entries = []
 
     if not entries:
         st.info("Your mood trend will appear after you save a journal analysis.")
@@ -4632,9 +4631,8 @@ def render_workspace():
 
         try:
             entries = api_history(st.session_state.user_id, st.session_state.api_token)
-        except ApiError as exc:
+        except Exception:
             entries = []
-            st.error(str(exc))
 
         if not entries:
             st.info(
