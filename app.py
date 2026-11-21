@@ -4460,7 +4460,7 @@ def render_workspace():
             "Upload unstructured `.txt` notes or multi-row `.csv` feedback tables to process bulk employee telemetry."
         )
 
-        col_upload, col_kaggle = st.columns([1.2, 1], gap="large")
+        col_upload, col_samples = st.columns([1.2, 1], gap="large")
 
         with col_upload:
             st.markdown("##### Upload Feedback File")
@@ -4519,8 +4519,8 @@ def render_workspace():
                         except ApiError as exc:
                             st.error(str(exc))
 
-        with col_kaggle:
-            st.markdown("##### Preloaded Enterprise Datasets")
+        with col_samples:
+            st.markdown("##### Preloaded Enterprise Telemetry Datasets")
             dataset_choice = st.radio(
                 "Select Dataset to Ingest & Evaluate",
                 ["Enterprise Pulse Sample (60 Records)", "Multi-Emotion Workplace Sample (28 Dimensions)"],
@@ -4530,7 +4530,7 @@ def render_workspace():
 
             if dataset_choice == "Enterprise Pulse Sample (60 Records)":
                 st.write(
-                    "Load the curated **60-row enterprise employee pulse sample** (`data/employee_wellness_dataset.csv`) "
+                    "Load the curated **60-row Enterprise Employee Wellness Pulse Telemetry** "
                     "to evaluate multi-row sentiment accuracy, emotion distributions, and stress levels."
                 )
 
@@ -4554,16 +4554,16 @@ def render_workspace():
                                     "feedback",
                                 )
                             st.success(
-                                f"Ingested {len(bench_reports)} records! View longitudinal telemetry in Tab 3."
+                                f"Ingested {len(bench_reports)} records! View longitudinal telemetry in Emotional Trends."
                             )
-                        except ApiError as exc:
+                        except Exception as exc:
                             st.error(str(exc))
                 else:
                     st.warning("Sample dataset not found in data/ directory.")
 
             else:
                 st.write(
-                    "Ingest real workplace communication records from the **Multi-Emotion Workplace Sample** (`data/goemotions/test.csv`) "
+                    "Ingest verified workplace communication records from the **Multi-Emotion Workplace Telemetry Dataset** "
                     "to test multi-label classification across all 28 emotional dimensions."
                 )
                 archive_test_path = Path("data/goemotions/test.csv")
@@ -4572,7 +4572,7 @@ def render_workspace():
 
                 if archive_test_path.exists():
                     st.write(
-                        f"Sample Source: `{archive_test_path.as_posix()}` ({archive_test_path.stat().st_size:,} bytes)"
+                        f"Verified Telemetry Source: **Multi-Emotion Workplace Sample** ({archive_test_path.stat().st_size:,} bytes)"
                     )
                     sample_size = st.select_slider(
                         "Number of workplace records to sample:",
@@ -4604,9 +4604,9 @@ def render_workspace():
                                         text_col,
                                     )
                                 st.success(
-                                    f"Successfully ingested {len(arch_reports)} records into your longitudinal profile! Switch to Tab 3 to inspect radar and trends."
+                                    f"Successfully ingested {len(arch_reports)} records into your longitudinal profile! Switch to Emotional Trends to inspect radar and trends."
                                 )
-                            except ApiError as exc:
+                            except Exception as exc:
                                 st.error(str(exc))
                     except Exception as ex:
                         st.error(f"Error loading sample: {ex}")
@@ -4636,7 +4636,7 @@ def render_workspace():
 
         if not entries:
             st.info(
-                "No records saved yet. Analyze text in Tab 1 or load the benchmark dataset in Tab 2 to view trends."
+                "No records saved yet. Submit a reflection in **Daily Reflection** or ingest workplace records in **Batch Data Ingestion** to view trends."
             )
         else:
             df = pd.DataFrame(entries)
