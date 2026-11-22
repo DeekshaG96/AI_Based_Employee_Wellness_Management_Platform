@@ -5115,6 +5115,7 @@ def render_zen_canvas_widget() -> str:return """<!DOCTYPE html>
       overflow: hidden;
       cursor: pointer;
       box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.5);
+      touch-action: none;
     }
     canvas {
       display: block;
@@ -5222,14 +5223,25 @@ def render_zen_canvas_widget() -> str:return """<!DOCTYPE html>
     ];
 
     function resize() {
-      width = container.clientWidth || 800;
-      height = container.clientHeight || 400;
-      canvas.width = width;
-      canvas.height = height;
+      var rect = container.getBoundingClientRect();
+      var w = Math.floor(rect.width || container.clientWidth || 800);
+      var h = Math.floor(rect.height || container.clientHeight || 400);
+      if (w > 50 && h > 50) {
+        width = w;
+        height = h;
+        canvas.width = width;
+        canvas.height = height;
+      }
       if (bubbles.length === 0 && currentMode === 'bubble') initBubbles();
       if (lotusPlants.length === 0) initLotus();
+      if (particles.length === 0 && currentMode === 'orbit') initParticles();
     }
     window.addEventListener('resize', resize);
+    if (window.ResizeObserver) {
+      try {
+        new ResizeObserver(function() { resize(); }).observe(container);
+      } catch (e) {}
+    }
 
     function getAudio() {
       if (!audioCtx) {
@@ -5387,38 +5399,48 @@ def render_zen_canvas_widget() -> str:return """<!DOCTYPE html>
       }
     }
 
+    function getPos(e) {
+      var rect = canvas.getBoundingClientRect();
+      var clientX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      var clientY = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+      var scaleX = canvas.width / (rect.width || 1);
+      var scaleY = canvas.height / (rect.height || 1);
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    }
+
     // Touch & Pointer interaction
     function handlePointerDown(e) {
-      var rect = canvas.getBoundingClientRect();
-      var x = e.clientX - rect.left;
-      var y = e.clientY - rect.top;
+      var pos = getPos(e);
       isMouseDown = true;
-      mouseX = x; mouseY = y;
+      mouseX = pos.x; mouseY = pos.y;
 
       if (currentMode === 'bubble') {
-        if (!popAt(x, y)) {
-          addRipple(x, y);
+        if (!popAt(pos.x, pos.y)) {
+          addRipple(pos.x, pos.y);
         }
       } else if (currentMode === 'ripple') {
-        addRipple(x, y);
+        addRipple(pos.x, pos.y);
       } else if (currentMode === 'mandala') {
-        mandalaStrokes.push({ x: x, y: y, alpha: 1.0 });
+        mandalaStrokes.push({ x: pos.x, y: pos.y, alpha: 1.0 });
         playTone(396, 'sine', 0.25);
       } else {
-        addRipple(x, y);
+        addRipple(pos.x, pos.y);
       }
     }
 
     function handlePointerMove(e) {
-      var rect = canvas.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top;
+      var pos = getPos(e);
+      mouseX = pos.x;
+      mouseY = pos.y;
 
       if (isMouseDown) {
         if (currentMode === 'ripple') {
-          if (Math.random() < 0.25) addRipple(mouseX, mouseY);
+          if (Math.random() < 0.25) addRipple(pos.x, pos.y);
         } else if (currentMode === 'mandala') {
-          mandalaStrokes.push({ x: mouseX, y: mouseY, alpha: 1.0 });
+          mandalaStrokes.push({ x: pos.x, y: pos.y, alpha: 1.0 });
         }
       }
     }
@@ -6000,20 +6022,20 @@ def render_equiai_companion_view():
     st.markdown('<p style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 12px 0 6px 2px;">💡 Quick Coaching Starters</p>', unsafe_allow_html=True)
     q_col1, q_col2, q_col3, q_col4 = st.columns(4, gap="small")
     with q_col1:
-        if st.button("🔍 Imposter & PR Feedback", width="stretch", key="qc_prompt_1"):
-            st.session_state["queued_companion_prompt"] = "Help me process critical code review feedback without feeling imposter syndrome."
+        if st.button(get_ui_translation("qc_lbl_1", "🔍 Imposter & PR Feedback"), width="stretch", key="qc_prompt_1"):
+            st.session_state["queued_companion_prompt"] = get_ui_translation("qc_1", "Help me process critical code review feedback without feeling imposter syndrome.")
             st.rerun()
     with q_col2:
-        if st.button("🌊 2-Minute Mental Defrag", width="stretch", key="qc_prompt_2"):
-            st.session_state["queued_companion_prompt"] = "I have 20 tabs open and feel overwhelmed. Walk me through a mental defrag."
+        if st.button(get_ui_translation("qc_lbl_2", "🌊 2-Minute Mental Defrag"), width="stretch", key="qc_prompt_2"):
+            st.session_state["queued_companion_prompt"] = get_ui_translation("qc_2", "I'm juggling 5 context switches today and feeling cognitively scattered.")
             st.rerun()
     with q_col3:
-        if st.button("🛡️ Workload Boundaries", width="stretch", key="qc_prompt_3"):
-            st.session_state["queued_companion_prompt"] = "Help me communicate workload boundaries to my manager calmly without feeling guilty."
+        if st.button(get_ui_translation("qc_lbl_3", "🛡️ Workload Boundaries"), width="stretch", key="qc_prompt_3"):
+            st.session_state["queued_companion_prompt"] = get_ui_translation("qc_3", "Draft a gentle, professional boundary message for after-hours Slack.")
             st.rerun()
     with q_col4:
-        if st.button("🌿 60s Somatic Grounding", width="stretch", key="qc_prompt_4"):
-            st.session_state["queued_companion_prompt"] = "Guide me through an immediate 60-second somatic grounding exercise."
+        if st.button(get_ui_translation("qc_lbl_4", "🌿 60s Somatic Grounding"), width="stretch", key="qc_prompt_4"):
+            st.session_state["queued_companion_prompt"] = get_ui_translation("qc_4", "Guide me through an immediate 60-second somatic grounding exercise.")
             st.rerun()
 
     # Chat Memory Store
@@ -6090,6 +6112,23 @@ def render_zen_canvas_view():
     # Embed HTML5 Canvas
     st.components.v1.html(render_zen_canvas_widget(), height=525)
 
+    # Interactive De-Stress Points Claim & Quick Actions
+    st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
+    c_act1, c_act2 = st.columns([1.5, 1], gap="medium")
+    with c_act1:
+        zen_claimed = st.session_state.get("zen_decompression_claimed", False)
+        zen_btn_txt = "✅ De-Stress Practice Claimed (+25 Pts)" if zen_claimed else "✨ Complete De-Stress Session (+25 Resilience Points)"
+        zen_btn_type = "secondary" if zen_claimed else "primary"
+        if st.button(zen_btn_txt, type=zen_btn_type, width="stretch", key="zen_claim_pts_btn"):
+            st.session_state["zen_decompression_claimed"] = True
+            st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 25
+            st.toast("🎉 De-Stress Decompression Completed! +25 Resilience Points earned.", icon="🎮")
+            st.rerun()
+    with c_act2:
+        if st.button("🔄 Reset Sandbox & Respawn Stressors", type="secondary", width="stretch", key="zen_refresh_btn"):
+            st.toast("Zen Canvas reset and refreshed.", icon="🌊")
+            st.rerun()
+
     # Tactile Science Guidance Cards
     sc1, sc2 = st.columns(2, gap="medium")
     with sc1, st.container(border=True):
@@ -6100,9 +6139,10 @@ def render_zen_canvas_view():
             "and engages the motor cortex, actively grounding high-frequency rumination into tangible physical presence."
         )
     with sc2, st.container(border=True):
-        st.markdown("##### 🌿 Three Restorative Sandbox Modes")
-        st.markdown("- **🌊 Ripple Pond**: Generates concentric fluid wavefronts with 432 Hz acoustic harmonic resonance.")
-        st.markdown("- **🫧 Stress Bubble Pop**: Click floating workplace triggers (*'Imposter Syndrome'*, *'Urgent Slack'*) to pop and release them into the void.")
+        st.markdown("##### 🌿 Four Restorative Sandbox Modes")
+        st.markdown("- **🫧 Stress Bubble Pop**: Click floating workplace triggers (*'Sprint Deadline'*, *'Imposter Syndrome'*, *'Urgent Slack'*) to pop and release them into the void.")
+        st.markdown("- **🌊 Zen Lotus Pond**: Generates concentric fluid wavefronts with 432 Hz acoustic harmonic resonance and gentle water lilies.")
+        st.markdown("- **🌸 Sand Mandala Paint**: Drag to paint symmetric glowing sand mandalas with 8-fold sacred geometry that gently dissolve.")
         st.markdown("- **✨ Celestial Particles**: Swirls 90 luminous particles in harmonic golden-ratio orbits around your cursor.")
 
 
@@ -6964,6 +7004,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "Centered & Calm",
         "private": "100% Private",
         "sos_button": "⚡ 60s SOS Calm Reset",
+        "nav_reflection": "Daily Reflection",
+        "nav_companion": "EquiAI Chat Companion",
+        "nav_recommendations": "Personalized Recommendations",
+        "nav_canvas": "Zen Canvas & De-Stress",
+        "nav_habits": "Holistic Habit Matrix",
+        "nav_trends": "Emotional Trends",
+        "nav_batch": "Batch Data Ingestion",
+        "nav_somatic": "Somatic Care & Yoga",
+        "nav_team": "Team Health Pulse",
+        "qc_1": "Help me process critical code review feedback without feeling imposter syndrome.",
+        "qc_2": "I'm juggling 5 context switches today and feeling cognitively scattered.",
+        "qc_3": "Draft a gentle, professional boundary message for after-hours Slack.",
+        "qc_4": "Guide me through an immediate 60-second somatic grounding exercise.",
+        "qc_lbl_1": "🔍 Imposter & Feedback",
+        "qc_lbl_2": "🌊 2-Min Mental Defrag",
+        "qc_lbl_3": "🛡️ Workload Boundaries",
+        "qc_lbl_4": "🌿 60s Somatic Grounding",
     },
     "hi": {
         "welcome": "वापसी पर स्वागत है",
@@ -6973,6 +7030,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "शांत और केंद्रित",
         "private": "100% गोपनीय",
         "sos_button": "⚡ 60s SOS शांत रीसेट",
+        "nav_reflection": "दैनिक आत्म-चिंतन",
+        "nav_companion": "EquiAI चैट साथी",
+        "nav_recommendations": "व्यक्तिगत सुझाव",
+        "nav_canvas": "ज़ेन कैनवस और तनाव-मुक्ति",
+        "nav_habits": "समग्र आदत मैट्रिक्स",
+        "nav_trends": "भावनात्मक रुझान",
+        "nav_batch": "बल्क डेटा अंतर्ग्रहण",
+        "nav_somatic": "शारीरिक देखभाल और योग",
+        "nav_team": "टीम स्वास्थ्य पल्स",
+        "qc_1": "कोड समीक्षा या फीडबैक को बिना इम्पोस्टर सिंड्रोम के कैसे समझें?",
+        "qc_2": "आज काम का बोझ और व्यवधान बहुत अधिक हैं, दिमाग शांत कैसे रखें?",
+        "qc_3": "ऑफिस के बाद काम से अलग होने और रिलैक्स करने का तरीका बताएं।",
+        "qc_4": "तुरंत 60-सेकंड का शांत सांस और माइंडफुलनेस व्यायाम कराएं।",
+        "qc_lbl_1": "🔍 फीडबैक और इम्पोस्टर",
+        "qc_lbl_2": "🌊 2-मिनट मानसिक डीफ्रैग्",
+        "qc_lbl_3": "🛡️ कार्य-जीवन संतुलन",
+        "qc_lbl_4": "🌿 60s शांत ग्राउंडिंग",
     },
     "kn": {
         "welcome": "ಮರಳಿ ಸ್ವಾಗತ",
@@ -6982,6 +7056,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "ಶಾಂತ ಮತ್ತು ಕೇಂದ್ರಿತ",
         "private": "100% ಗೌಪ್ಯ",
         "sos_button": "⚡ 60s SOS ಶಾಂತ ಮರುಹೊಂದಿಕೆ",
+        "nav_reflection": "ದೈನಂದಿನ ಚಿಂತನೆ",
+        "nav_companion": "EquiAI ಚಾಟ್ ಒಡನಾಡಿ",
+        "nav_recommendations": "ವೈಯಕ್ತಿಕ ಶಿಫಾರಸುಗಳು",
+        "nav_canvas": "ಜೆನ್ ಕ್ಯಾನ್ವಾಸ್ & ವಿಶ್ರಾಂತಿ",
+        "nav_habits": "ಸಮಗ್ರ ಅಭ್ಯಾಸ ಮ್ಯಾಟ್ರಿಕ್ಸ್",
+        "nav_trends": "ಭಾವನಾತ್ಮಕ ಪ್ರವೃತ್ತಿಗಳು",
+        "nav_batch": "ಬ್ಯಾಚ್ ಡೇಟಾ ಸಿಂಕ್",
+        "nav_somatic": "ದೈಹಿಕ ಕಾಳಜಿ & ಯೋಗ",
+        "nav_team": "ತಂಡದ ಆರೋಗ್ಯ ಸ್ಥಿತಿ",
+        "qc_1": "ಕೆಲಸದ ವಿಮರ್ಶೆಯನ್ನು ಧನಾತ್ಮಕವಾಗಿ ಸ್ವೀಕರಿಸುವುದು ಹೇಗೆ?",
+        "qc_2": "ಇಂದು ಕೆಲಸದ ಒತ್ತಡ ಹೆಚ್ಚಾಗಿದೆ, ಶಾಂತವಾಗಿರಲು ಮಾರ್ಗದರ್ಶನ ನೀಡಿ.",
+        "qc_3": "ಕೆಲಸದ ನಂತರ ಮಾನಸಿಕ ವಿಶ್ರಾಂತಿ ಪಡೆಯಲು ಸಲಹೆ ನೀಡಿ.",
+        "qc_4": "ತಕ್ಷಣದ 60-ಸೆಕೆಂಡುಗಳ ಉಸಿರಾಟದ ವ್ಯಾಯಾಮ ತಿಳಿಸಿ.",
+        "qc_lbl_1": "🔍 ವಿಮರ್ಶೆ ಮತ್ತು ಚೇತರಿಕೆ",
+        "qc_lbl_2": "🌊 2-ನಿಮಿಷ ಮಾನಸಿಕ ಶಾಂತಿ",
+        "qc_lbl_3": "🛡️ ಕೆಲಸ-ಜೀವನ ಸಮತೋಲನ",
+        "qc_lbl_4": "🌿 60s ಶಾಂತ ವ್ಯಾಯಾಮ",
     },
     "ta": {
         "welcome": "மீண்டும் நல்வரவு",
@@ -6991,6 +7082,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "அமைதி & மையம்",
         "private": "100% தனிப்பட்டது",
         "sos_button": "⚡ 60s SOS அமைதி மீட்டமைப்பு",
+        "nav_reflection": "தினசரி சிந்தனை",
+        "nav_companion": "EquiAI அரட்டை துணை",
+        "nav_recommendations": "பரிந்துரைகள்",
+        "nav_canvas": "ஜென் கேன்வாஸ் & அமைதி",
+        "nav_habits": "முழுமையான பழக்க மேட்ரிக்ஸ்",
+        "nav_trends": "மனநிலை போக்குகள்",
+        "nav_batch": "தரவு ஒத்திசைவு",
+        "nav_somatic": "உடல் நலம் & யோகா",
+        "nav_team": "குழு நல நாடி",
+        "qc_1": "பின்னூட்டங்களை அமைதியாக கையாள்வது எப்படி?",
+        "qc_2": "இன்று பணிச்சுமை அதிகமாக உள்ளது, அமைதியடைவது எப்படி?",
+        "qc_3": "பணி முடிந்து மன அமைதி பெற உதவி தேவை.",
+        "qc_4": "60 வினாடி அமைதி மூச்சுப் பயிற்சி வழிகாட்டுங்கள்.",
+        "qc_lbl_1": "🔍 பின்னூட்டம் & மீள்திறன்",
+        "qc_lbl_2": "🌊 2-நிமிட அமைதி",
+        "qc_lbl_3": "🛡️ பணி எல்லைகள்",
+        "qc_lbl_4": "🌿 60s நிலைகொள்ளல்",
     },
     "te": {
         "welcome": "తిరిగి స్వాగతం",
@@ -7000,6 +7108,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "శాంతం & కేంద్రీకృతం",
         "private": "100% గోప్యత",
         "sos_button": "⚡ 60s SOS ప్రశాంతత రీసెట్",
+        "nav_reflection": "రోజువారీ ప్రతిబింబం",
+        "nav_companion": "EquiAI చాట్ సహచరి",
+        "nav_recommendations": "వ్యక్తిగత సూచనలు",
+        "nav_canvas": "జెన్ కాన్వాస్ & ఒత్తిడి నివారణ",
+        "nav_habits": "సమగ్ర అలవాట్ల మాత్రిక",
+        "nav_trends": "భావోద్వేగ పోకడలు",
+        "nav_batch": "బ్యాచ్ డేటా ప్రాసెసింగ్",
+        "nav_somatic": "శరీర సంరక్షణ & యోగా",
+        "nav_team": "టీమ్ హెల్త్ పల్స్",
+        "qc_1": "ఫీడ్‌బ్యాక్‌ను సానుకూలంగా ఎలా స్వీకరించాలి?",
+        "qc_2": "ఈరోజు పని ఒత్తిడి ఎక్కువగా ఉంది, ప్రశాంతంగా ఉండటానికి మార్గం చూపించండి.",
+        "qc_3": "పని తర్వాత ప్రశాంతంగా ఉండేందుకు మార్గదర్శకత్వం.",
+        "qc_4": "60 సెకన్ల శ్వాస రీసెట్ ప్రక్రియను ప్రారంభించండి.",
+        "qc_lbl_1": "🔍 అభిప్రాయం & ప్రశాంతత",
+        "qc_lbl_2": "🌊 2-నిమిషాల రీసెట్",
+        "qc_lbl_3": "🛡️ పని-జీవిత సమతుల్యత",
+        "qc_lbl_4": "🌿 60s గ్రౌండింగ్",
     },
     "mr": {
         "welcome": "पुन्हा स्वागत आहे",
@@ -7009,6 +7134,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "शांत आणि केंद्रित",
         "private": "100% खाजगी",
         "sos_button": "⚡ 60s SOS शांत रीसेट",
+        "nav_reflection": "दैनिक आत्मपरीक्षण",
+        "nav_companion": "EquiAI संवाद सोबती",
+        "nav_recommendations": "वैयक्तिक शिफारसी",
+        "nav_canvas": "झेन कॅनव्हास आणि आराम",
+        "nav_habits": "समग्र सवय मॅट्रिक्स",
+        "nav_trends": "भावनिक कल",
+        "nav_batch": "बॅच डेटा सिंक",
+        "nav_somatic": "शारीरिक काळजी आणि योग",
+        "nav_team": "संघ आरोग्य स्थिती",
+        "qc_1": "कामावरील अभिप्राय शांतपणे कसा स्वीकारावा?",
+        "qc_2": "आज खूप कामाचा ताण आहे, मनाला शांत कसे करावे?",
+        "qc_3": "कामाच्या वेळेनंतर आराम करण्याची योग्य पद्धत.",
+        "qc_4": "तातडीने ६० सेकंदांचा श्वसन व्यायाम सांगा.",
+        "qc_lbl_1": "🔍 अभिप्राय आणि आत्मविश्वास",
+        "qc_lbl_2": "🌊 २-मिनिटे मनःशांती",
+        "qc_lbl_3": "🛡️ कार्य-जीवन समतोल",
+        "qc_lbl_4": "🌿 ६० से शांतता",
     },
     "bn": {
         "welcome": "স্বাগতম",
@@ -7018,6 +7160,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "শান্ত এবং কেন্দ্রীভূত",
         "private": "১০০% ব্যক্তিগত",
         "sos_button": "⚡ ৬০ সেকেন্ড শান্ত রিসেট",
+        "nav_reflection": "দৈনিক প্রতিফলন",
+        "nav_companion": "EquiAI চ্যাট সঙ্গী",
+        "nav_recommendations": "ব্যক্তিগত সুপারিশ",
+        "nav_canvas": "জেন ক্যানভাস এবং চাপমুক্তি",
+        "nav_habits": "সামগ্রিক অভ্যাস ম্যাট্রিক্স",
+        "nav_trends": "মানসিক প্রবণতা",
+        "nav_batch": "ব্যাচ ডেটা সিঙ্ক",
+        "nav_somatic": "দৈহিক যত্ন ও যোগ",
+        "nav_team": "টিম হেলথ পালস",
+        "qc_1": "কাজের প্রতিক্রিয়া ইতিবাচকভাবে কীভাবে গ্রহণ করবেন?",
+        "qc_2": "কাজের চাপ বেশি, নিজেকে শান্ত রাখার উপায় কী?",
+        "qc_3": "কাজের পরে মানসিক স্বস্তি পাওয়ার উপায়।",
+        "qc_4": "৬০ সেকেন্ডের তাৎক্ষণিক শ্বাসের অনুশীলন করান।",
+        "qc_lbl_1": "🔍 প্রতিক্রিয়া ও আত্মবিশ্বাস",
+        "qc_lbl_2": "🌊 ২-মিনিট মানসিক বিরতি",
+        "qc_lbl_3": "🛡️ কর্ম-জীবন ভারসাম্য",
+        "qc_lbl_4": "🌿 ৬০ সে গ্রাউন্ডিং",
     },
     "gu": {
         "welcome": "પુનઃ સ્વાગત છે",
@@ -7027,6 +7186,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "શાંત અને કેન્દ્રિત",
         "private": "100% ખાનગી",
         "sos_button": "⚡ 60s SOS શાંત રીસેટ",
+        "nav_reflection": "દૈનિક પ્રતિબિંબ",
+        "nav_companion": "EquiAI ચેટ સાથી",
+        "nav_recommendations": "વ્યક્તિગત ભલામણો",
+        "nav_canvas": "ઝેન કેનવાસ & તણાવ મુક્તિ",
+        "nav_habits": "સમગ્ર ટેવ મેટ્રિક્સ",
+        "nav_trends": "લાગણીઓના વલણો",
+        "nav_batch": "બેચ ડેટા સિંક",
+        "nav_somatic": "શારીરિક સંભાળ & યોગ",
+        "nav_team": "ટીમ આરોગ્ય સ્થિતિ",
+        "qc_1": "કામના પ્રતિભાવો શાંતિથી કેવી રીતે સ્વીકારવા?",
+        "qc_2": "આજે કામનું ભારણ વધુ છે, શાંત કેવી રીતે રહેવું?",
+        "qc_3": "ઓફિસ પછી માનસિક આરામ મેળવવાની રીતો.",
+        "qc_4": "તરત જ 60-સેકન્ડનો શ્વાસોચ્છવાસનો અભ્યાસ કરાવો.",
+        "qc_lbl_1": "🔍 પ્રતિભાવ અને સ્થિરતા",
+        "qc_lbl_2": "🌊 2-મિનિટ માનસિક આરામ",
+        "qc_lbl_3": "🛡️ કાર્ય-જીવન સંતુલન",
+        "qc_lbl_4": "🌿 60s શાંત ગ્રાસ",
     },
     "ml": {
         "welcome": "തിരികെ സ്വാഗതം",
@@ -7036,6 +7212,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "calm": "ശാന്തവും ഏകാഗ്രവും",
         "private": "100% സ്വകാര്യം",
         "sos_button": "⚡ 60s SOS ശാന്തമായ റീസെറ്റ്",
+        "nav_reflection": "പ്രതിദിന പ്രതിഫലനം",
+        "nav_companion": "EquiAI ചാറ്റ് കൂട്ടുകാരൻ",
+        "nav_recommendations": "ശുപാർശകൾ",
+        "nav_canvas": "സെൻ ക്യാൻവാസ് & ശാന്തത",
+        "nav_habits": "ശീല മാട്രിക്സ്",
+        "nav_trends": "മാനസിക പ്രവണതകൾ",
+        "nav_batch": "ഡാറ്റാ സമന്വയം",
+        "nav_somatic": "ശരീര പരിചരണവും യോഗയും",
+        "nav_team": "ടീം ഹെൽത്ത് പൾസ്",
+        "qc_1": "പ്രതികരണങ്ങൾ ശാന്തമായി എങ്ങനെ കൈകാര്യം ചെയ്യാം?",
+        "qc_2": "ഇന്ന് ജോലി സമ്മർദ്ദം കൂടുതലാണ്, ശാന്തമാകാൻ സഹായിക്കുക.",
+        "qc_3": "ജോലിക്ക് ശേഷം മനസ്സിന് വിശ്രമം നൽകാനുള്ള വഴികൾ.",
+        "qc_4": "60 സെക്കൻഡ് ശ്വസന വ്യായാമം നൽകുക.",
+        "qc_lbl_1": "🔍 വിലയിരുത്തലും ആത്മവിശ്വാസവും",
+        "qc_lbl_2": "🌊 2-മിനിറ്റ് മനസ്സിന് ശാന്തി",
+        "qc_lbl_3": "🛡️ തൊഴിൽ-ജീവിത സന്തുലിതാവസ്ഥ",
+        "qc_lbl_4": "🌿 60s റീസെറ്റ്",
     },
 }
 
@@ -7140,21 +7333,46 @@ def render_sidebar():
             st.rerun()
 
         st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 2px 4px;">Navigation</p>', unsafe_allow_html=True)
-        nav_options = [
-            "💬 Daily Reflection",
-            "🤖 EquiAI Chat Companion",
-            "🎯 Personalized Recommendations",
-            "🎮 Zen Canvas & De-Stress",
-            "📊 Holistic Habit Matrix",
-            "📈 Emotional Trends",
-            "📁 Batch Data Ingestion",
-            "🧘 Somatic Care & Yoga",
-            "👥 Team Health Pulse",
+        base_nav = [
+            ("💬", "Daily Reflection", "nav_reflection"),
+            ("🤖", "EquiAI Chat Companion", "nav_companion"),
+            ("🎯", "Personalized Recommendations", "nav_recommendations"),
+            ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
+            ("📊", "Holistic Habit Matrix", "nav_habits"),
+            ("📈", "Emotional Trends", "nav_trends"),
+            ("📁", "Batch Data Ingestion", "nav_batch"),
+            ("🧘", "Somatic Care & Yoga", "nav_somatic"),
+            ("👥", "Team Health Pulse", "nav_team"),
         ]
+
+        active_lang = st.session_state.get("app_language", "en")
+        nav_options = []
+        for emoji_icon, eng_label, nav_key in base_nav:
+            if active_lang != "en":
+                loc_label = get_ui_translation(nav_key, default=eng_label)
+                nav_options.append(f"{emoji_icon} {loc_label} ({eng_label})")
+            else:
+                nav_options.append(f"{emoji_icon} {eng_label}")
+
+        # Check if a view change was queued by any button in the app
+        if st.session_state.get("nav_redirect"):
+            redirect_target = st.session_state.pop("nav_redirect")
+            for opt in nav_options:
+                if opt.startswith(redirect_target[:2]):
+                    st.session_state["equimind_nav_view"] = opt
+                    break
+
         current_view = st.session_state.get("equimind_nav_view", nav_options[0])
         if current_view not in nav_options:
-            current_view = nav_options[0]
-            st.session_state["equimind_nav_view"] = current_view
+            for opt in nav_options:
+                if opt.startswith(current_view[:2]):
+                    current_view = opt
+                    st.session_state["equimind_nav_view"] = current_view
+                    break
+            else:
+                current_view = nav_options[0]
+                st.session_state["equimind_nav_view"] = current_view
+
         idx = nav_options.index(current_view)
         selected_nav = st.radio("Select View:", nav_options, index=idx, key="equimind_nav_view", label_visibility="collapsed")
 
