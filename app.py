@@ -1947,6 +1947,8 @@ def _apply_auth(auth: dict):
     st.session_state.user_id = user["id"]
     st.session_state.user_name = user["name"]
     st.session_state.user_email = user["email"]
+    if "mindful_points" not in st.session_state:
+        st.session_state["mindful_points"] = 480
 
 
 def render_landing_hero_3d() -> str:
@@ -2473,11 +2475,13 @@ p, label,
 .material-icons,
 [data-baseweb="base-input"] button,
 [data-baseweb="base-input"] button *,
+[data-testid="stTextInputPasswordVisibilityButton"],
+[data-testid="stTextInputPasswordVisibilityButton"] *,
 button[aria-label*="password" i],
 button[aria-label*="password" i] *,
 button[aria-label*="visibility" i],
 button[aria-label*="visibility" i] * {
-  font-family: "Material Symbols Rounded", "Material Icons" !important;
+  font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important;
   font-style: normal !important;
   font-weight: 400 !important;
   font-variant: normal !important;
@@ -2488,6 +2492,56 @@ button[aria-label*="visibility" i] * {
   direction: ltr !important;
   -webkit-font-smoothing: antialiased !important;
   text-rendering: optimizeLegibility !important;
+}
+
+[data-testid="stTextInputPasswordVisibilityButton"],
+[data-baseweb="base-input"] button {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #0d9488 !important;
+}
+
+/* Classy, Refined Bullet Points & Numbered Lists */
+.stMarkdown ul, div[data-testid="stMarkdownContainer"] ul {
+  padding-left: 1.35rem !important;
+  margin: 0.5rem 0 !important;
+  list-style-type: none !important;
+}
+
+.stMarkdown ul > li, div[data-testid="stMarkdownContainer"] ul > li {
+  position: relative !important;
+  margin-bottom: 0.45rem !important;
+  line-height: 1.6 !important;
+  color: #334155 !important;
+  font-size: 0.92rem !important;
+}
+
+.stMarkdown ul > li::before, div[data-testid="stMarkdownContainer"] ul > li::before {
+  content: "•" !important;
+  color: #0d9488 !important;
+  font-weight: 800 !important;
+  font-size: 1.15rem !important;
+  position: absolute !important;
+  left: -1.05rem !important;
+  top: -0.1rem !important;
+}
+
+.stMarkdown ol, div[data-testid="stMarkdownContainer"] ol {
+  padding-left: 1.45rem !important;
+  margin: 0.5rem 0 !important;
+}
+
+.stMarkdown ol > li, div[data-testid="stMarkdownContainer"] ol > li {
+  margin-bottom: 0.45rem !important;
+  line-height: 1.6 !important;
+  color: #334155 !important;
+  font-size: 0.92rem !important;
 }
 
 /* Secondary Button Upgrade: Pill Silhouette with Luminous Specular Rim */
@@ -2958,6 +3012,22 @@ def render_yoga_remedies_view(default_emotion: str = "stress", key_prefix: str =
                     st.markdown(f"- {s}")
             with pose_tabs[2]:
                 st.markdown(f"- **Precautions:** {pose['precautions']}")
+
+            if "completed_yoga_poses" not in st.session_state:
+                st.session_state["completed_yoga_poses"] = set()
+            p_id = f"{key_prefix}_{pose['id']}"
+            is_pose_done = p_id in st.session_state["completed_yoga_poses"]
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+            p_btn_col, _ = st.columns([1.6, 2.4])
+            with p_btn_col:
+                if is_pose_done:
+                    st.button("🌟 Completed (+15 Pts)", key=f"pose_done_{p_id}", type="secondary", disabled=True, width="stretch")
+                else:
+                    if st.button("✅ Mark Practice Complete (+15 Pts)", key=f"pose_done_{p_id}", type="primary", width="stretch"):
+                        st.session_state["completed_yoga_poses"].add(p_id)
+                        st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 15
+                        st.toast(f"🧘 Completed {pose['english_name']}! +15 Resilience Points", icon="✨")
+                        st.rerun()
 
 
 def render_medito_mindfulness_view():
@@ -3672,9 +3742,10 @@ def render_sos_vagal_reset_banner():
             )
             col_close, _ = st.columns([1, 3])
             with col_close:
-                if st.button("🌿 I Feel Centered & Ready to Resume", type="primary", width="stretch", key="btn_close_sos_reset"):
+                if st.button("🌿 I Feel Centered & Ready to Resume (+20 Pts)", type="primary", width="stretch", key="btn_close_sos_reset"):
                     st.session_state["show_sos_reset_modal"] = False
-                    st.toast("Welcome back to your centered flow state.", icon="✨")
+                    st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 20
+                    st.toast("⚡ SOS Reset complete: Vagal brake engaged! +20 Resilience Points", icon="✨")
                     st.rerun()
 
 
@@ -5953,7 +6024,7 @@ def render_holistic_habits_view():
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     <span style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #166534;">🔒 Offline Sovereignty</span>
-                    <span style="background: #fffbeb; border: 1px solid #fde68a; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #92400e;">⚡ Habit Correlation</span>
+                    <span style="background: #f0fdfa; border: 1px solid #99f6e4; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #0f766e;">💎 {st.session_state.get('mindful_points', 480)} Resilience Points</span>
                     <span style="background: #e0f2fe; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #0369a1;">🔥 Active Streak: 7 Days</span>
                 </div>
             </div>
@@ -6065,6 +6136,7 @@ def render_holistic_habits_view():
                 filtered = [r for r in records if r.get("day") != "Today"]
                 filtered.append(today_entry)
                 st.session_state["habit_history_records"] = filtered
+                st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 30
                 st.toast("🎉 Daily habit log committed! +30 Resilience Points earned.", icon="🌟")
                 st.balloons()
                 st.rerun()
@@ -6294,6 +6366,9 @@ def render_recommendations_view():
                         ☀️ <strong>3-Day Streak</strong>
                     </div>
                     <div style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #99f6e4; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #0f766e; font-weight: 700; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12);">
+                        💎 <strong>{st.session_state.get('mindful_points', 480)} Resilience Points</strong>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #166534; font-weight: 700; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);">
                         ✨ <strong>{accept_rate:.0f}% Mindful Alignment</strong>
                     </div>
                 </div>
@@ -6348,7 +6423,7 @@ def render_recommendations_view():
 
         st.markdown(
             f"""
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 10px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 10px 0; padding-right: 18px; flex-wrap: wrap; gap: 8px;">
                 <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #0f172a;">Personalized Action Pathway</h4>
                 <div>{source_badge}</div>
             </div>
@@ -6446,6 +6521,7 @@ def render_recommendations_view():
                         if "suggestion_feedback" not in st.session_state:
                             st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
                         st.session_state["suggestion_feedback"]["accepted"] += 1
+                        st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 25
                         st.toast(f"🎉 Practice adopted: {path.get('title')}! +25 Resilience Points", icon="🌿")
                         st.rerun()
                 with act_b2:
@@ -6795,6 +6871,9 @@ def render_sidebar():
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(204, 251, 241, 0.6); font-size: 0.74rem;">
                     <span style="color: #0f766e; font-weight: 700;">{count_display} reflections</span>
+                    <span style="color: #0369a1; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                        <span>💎</span> {st.session_state.get('mindful_points', 480)} pts
+                    </span>
                     <span style="color: #059669; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
                         <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span> Active
                     </span>
@@ -6871,10 +6950,13 @@ def render_workspace():
                     <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #92400e; font-weight: 700; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12); display: inline-flex; align-items: center; gap: 6px;">
                         <span>☀️</span> <span>3-Day Streak</span>
                     </div>
+                    <div style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #99f6e4; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #0f766e; font-weight: 700; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12); display: inline-flex; align-items: center; gap: 6px;">
+                        <span>💎</span> <span>{st.session_state.get('mindful_points', 480)} Resilience Points</span>
+                    </div>
                     <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #166534; font-weight: 700; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12); display: inline-flex; align-items: center; gap: 6px;">
                         <span>🌿</span> <span>Centered & Calm</span>
                     </div>
-                    <div style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #99f6e4; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #0f766e; font-weight: 700; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12); display: inline-flex; align-items: center; gap: 6px;">
+                    <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1px solid #cbd5e1; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #475569; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); display: inline-flex; align-items: center; gap: 6px;">
                         <span>🔒</span> <span>100% Private</span>
                     </div>
                 </div>
@@ -7056,7 +7138,12 @@ def render_workspace():
                             st.session_state.last_analysis_report
                         )
 
-                    st.success("Mood analysis saved to your account history.")
+                    if run_btn:
+                        st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 50
+                        st.toast("🎉 Reflection recorded! +50 Resilience Points earned.", icon="🌟")
+                        st.success(f"Mood analysis saved to your account history. +50 Resilience Points earned! (Total: {st.session_state['mindful_points']} pts)")
+                    else:
+                        st.success(f"Mood analysis loaded from active reflection session. (Current Balance: {st.session_state.get('mindful_points', 480)} Resilience Points)")
 
                     # Tell Molly Contextual Metadata Card
                     meta_info = parse_entry_metadata(report.input_summary.source_name, report.original_text)
