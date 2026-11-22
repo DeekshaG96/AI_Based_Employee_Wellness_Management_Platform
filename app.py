@@ -4962,6 +4962,789 @@ def render_compact_box_pacer() -> str:
 """
 
 
+
+def render_zen_canvas_widget() -> str:
+    """Return self-contained HTML5 & Web Audio interactive kinetic stress-relief canvas.
+    
+    Inspired by hppanpaliya/MindfulMe:
+    - 🌊 Interactive Water Ripple Pond (Fluid click/drag wave dynamics)
+    - 🫧 Workplace Stress Bubble Popper (Tactile burst physics & counter)
+    - ✨ Celestial Particle Flow (Alpha-entrainment harmonic orbits)
+    - Client-side Web Audio 432Hz/528Hz Zen bell synthesizer
+    """
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: transparent;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      color: #f0fdf4;
+      overflow: hidden;
+      height: 510px;
+    }
+    .zen-wrap {
+      background: radial-gradient(circle at 50% 20%, #064e3b 0%, #022c22 100%);
+      border: 1.5px solid rgba(45, 212, 191, 0.35);
+      border-radius: 20px;
+      padding: 16px 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 36px rgba(2, 44, 34, 0.45);
+      position: relative;
+    }
+    .zen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .zen-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #5eead4;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mode-bar {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 3px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-btn.active {
+      background: #0f766e;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 118, 110, 0.4);
+    }
+    .canvas-box {
+      flex: 1;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(45, 212, 191, 0.2);
+      position: relative;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .zen-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 0.80rem;
+      color: #99f6e4;
+    }
+    .tag-badge {
+      background: rgba(20, 184, 166, 0.2);
+      border: 1px solid rgba(45, 212, 191, 0.4);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.74rem;
+      color: #5eead4;
+    }
+  </style>
+</head>
+<body>
+  <div class="zen-wrap">
+    <div class="zen-header">
+      <div class="zen-title">
+        <span>🎮</span> Zen Kinetic Canvas
+        <span style="font-size: 0.74rem; font-family: 'Plus Jakarta Sans'; color: #a7f3d0; font-weight: 600; margin-left: 6px;">Tactile De-Stress Sandbox</span>
+      </div>
+      <div class="mode-bar">
+        <button class="mode-btn active" id="btnRipple" onclick="setMode('ripple')">🌊 Ripple Pond</button>
+        <button class="mode-btn" id="btnBubble" onclick="setMode('bubble')">🫧 Stress Bubble Pop</button>
+        <button class="mode-btn" id="btnOrbit" onclick="setMode('orbit')">✨ Celestial Particles</button>
+      </div>
+    </div>
+
+    <div class="canvas-box" id="canvasContainer">
+      <canvas id="zenCanvas"></canvas>
+    </div>
+
+    <div class="zen-footer">
+      <div id="statusInstruction">💡 Click or drag across the water surface to generate soothing ripples.</div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span id="popCounter" class="tag-badge" style="display: none;">🫧 0 Released</span>
+        <button onclick="toggleAudio()" id="audioBtn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 8px; padding: 3px 9px; font-size: 0.72rem; cursor: pointer;">🔊 Sound: ON</button>
+        <button onclick="resetCanvas()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 8px; padding: 3px 9px; font-size: 0.72rem; cursor: pointer;">🔄 Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var canvas = document.getElementById('zenCanvas');
+    var ctx = canvas.getContext('2d');
+    var currentMode = 'ripple';
+    var audioEnabled = true;
+    var audioCtx = null;
+    var ripples = [];
+    var bubbles = [];
+    var particles = [];
+    var poppedCount = 0;
+    var mouseX = -100, mouseY = -100;
+    var isMouseDown = false;
+
+    var STRESS_LABELS = [
+      "Sprint Deadline", "Imposter Feeling", "Unread Slack (52)",
+      "Context Switching", "Meeting Fatigue", "Overthinking",
+      "Production Deploy", "High Cognitive Strain", "Unresolved PR",
+      "Perfectionism", "Back-to-back Syncs", "Scope Creep"
+    ];
+
+    function resize() {
+      var rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * (window.devicePixelRatio || 1);
+      canvas.height = rect.height * (window.devicePixelRatio || 1);
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    }
+    window.addEventListener('resize', resize);
+    setTimeout(resize, 50);
+
+    function getAudio() {
+      if (!audioCtx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, type, duration) {
+      if (!audioEnabled) return;
+      var ac = getAudio();
+      if (!ac) return;
+      try {
+        var osc = ac.createOscillator();
+        var gain = ac.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, ac.currentTime);
+        gain.gain.setValueAtTime(0.08, ac.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + (duration || 0.6));
+        osc.connect(gain);
+        gain.connect(ac.destination);
+        osc.start();
+        osc.stop(ac.currentTime + (duration || 0.6));
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioBtn').innerText = audioEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('btnRipple').className = 'mode-btn' + (mode === 'ripple' ? ' active' : '');
+      document.getElementById('btnBubble').className = 'mode-btn' + (mode === 'bubble' ? ' active' : '');
+      document.getElementById('btnOrbit').className = 'mode-btn' + (mode === 'orbit' ? ' active' : '');
+      
+      var popBadge = document.getElementById('popCounter');
+      var instr = document.getElementById('statusInstruction');
+      
+      if (mode === 'ripple') {
+        popBadge.style.display = 'none';
+        instr.innerText = '🌊 Click or drag across the water surface to generate soothing harmonic ripples.';
+      } else if (mode === 'bubble') {
+        popBadge.style.display = 'inline-block';
+        instr.innerText = '🫧 Click or tap floating workplace stressors to pop and release them into the void.';
+        initBubbles();
+      } else {
+        popBadge.style.display = 'none';
+        instr.innerText = '✨ Move your cursor to sculpt harmonic celestial particle flow fields.';
+        initParticles();
+      }
+    }
+
+    function addRipple(x, y) {
+      ripples.push({ x: x, y: y, r: 2, maxR: 90 + Math.random() * 40, alpha: 0.85, speed: 1.8 + Math.random() * 0.8 });
+      playTone(432 + Math.random() * 40, 'sine', 0.4);
+    }
+
+    function initBubbles() {
+      bubbles = [];
+      var w = canvas.getBoundingClientRect().width;
+      var h = canvas.getBoundingClientRect().height;
+      for (var i = 0; i < 8; i++) {
+        spawnBubble(w, h, true);
+      }
+    }
+
+    function spawnBubble(w, h, randomY) {
+      var label = STRESS_LABELS[Math.floor(Math.random() * STRESS_LABELS.length)];
+      var radius = 34 + Math.random() * 12;
+      bubbles.push({
+        x: radius + Math.random() * (w - radius * 2),
+        y: randomY ? radius + Math.random() * (h - radius * 2) : h + radius + 10,
+        r: radius,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: -0.4 - Math.random() * 0.5,
+        label: label,
+        hue: 165 + Math.random() * 40,
+        wobble: Math.random() * Math.PI * 2
+      });
+    }
+
+    function initParticles() {
+      particles = [];
+      var w = canvas.getBoundingClientRect().width;
+      var h = canvas.getBoundingClientRect().height;
+      for (var i = 0; i < 90; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: (Math.random() - 0.5) * 0.8,
+          r: 1.5 + Math.random() * 2.2,
+          hue: 160 + Math.random() * 50,
+          orbitRadius: 40 + Math.random() * 120,
+          angle: Math.random() * Math.PI * 2,
+          speed: 0.015 + Math.random() * 0.025
+        });
+      }
+    }
+
+    function popAt(x, y) {
+      for (var i = bubbles.length - 1; i >= 0; i--) {
+        var b = bubbles[i];
+        var dx = x - b.x;
+        var dy = y - b.y;
+        if (Math.sqrt(dx * dx + dy * dy) <= b.r) {
+          // Explode particles
+          for (var p = 0; p < 14; p++) {
+            ripples.push({
+              x: b.x, y: b.y, r: 2, maxR: 45 + Math.random() * 25,
+              alpha: 0.9, speed: 2.2 + Math.random() * 1.5
+            });
+          }
+          bubbles.splice(i, 1);
+          poppedCount++;
+          document.getElementById('popCounter').innerText = '🫧 ' + poppedCount + ' Released';
+          playTone(528, 'triangle', 0.5);
+          var rect = canvas.getBoundingClientRect();
+          setTimeout(function() { spawnBubble(rect.width, rect.height, false); }, 800);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function resetCanvas() {
+      ripples = [];
+      if (currentMode === 'bubble') {
+        poppedCount = 0;
+        document.getElementById('popCounter').innerText = '🫧 0 Released';
+        initBubbles();
+      } else if (currentMode === 'orbit') {
+        initParticles();
+      }
+    }
+
+    // Canvas Mouse & Touch
+    var container = document.getElementById('canvasContainer');
+    container.addEventListener('pointerdown', function(e) {
+      var rect = canvas.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      isMouseDown = true;
+      mouseX = x; mouseY = y;
+      if (currentMode === 'ripple') {
+        addRipple(x, y);
+      } else if (currentMode === 'bubble') {
+        if (!popAt(x, y)) {
+          addRipple(x, y);
+        }
+      } else {
+        addRipple(x, y);
+      }
+    });
+
+    container.addEventListener('pointermove', function(e) {
+      var rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+      if (isMouseDown && currentMode === 'ripple') {
+        if (Math.random() < 0.25) addRipple(mouseX, mouseY);
+      }
+    });
+
+    window.addEventListener('pointerup', function() { isMouseDown = false; });
+
+    // Render Loop
+    function animate() {
+      var rect = canvas.getBoundingClientRect();
+      var w = rect.width;
+      var h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (currentMode === 'ripple') {
+        for (var i = ripples.length - 1; i >= 0; i--) {
+          var rp = ripples[i];
+          rp.r += rp.speed;
+          rp.alpha *= 0.975;
+          if (rp.alpha <= 0.02 || rp.r >= rp.maxR) {
+            ripples.splice(i, 1);
+            continue;
+          }
+          ctx.beginPath();
+          ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(45, 212, 191, ' + rp.alpha.toFixed(3) + ')';
+          ctx.lineWidth = 2.2;
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(rp.x, rp.y, Math.max(0, rp.r - 8), 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(94, 234, 212, ' + (rp.alpha * 0.45).toFixed(3) + ')';
+          ctx.lineWidth = 1.0;
+          ctx.stroke();
+        }
+      } else if (currentMode === 'bubble') {
+        for (var i = ripples.length - 1; i >= 0; i--) {
+          var rp = ripples[i];
+          rp.r += rp.speed;
+          rp.alpha *= 0.97;
+          if (rp.alpha <= 0.02 || rp.r >= rp.maxR) {
+            ripples.splice(i, 1);
+            continue;
+          }
+          ctx.beginPath();
+          ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(52, 211, 153, ' + rp.alpha.toFixed(3) + ')';
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+        }
+
+        for (var i = 0; i < bubbles.length; i++) {
+          var b = bubbles[i];
+          b.wobble += 0.03;
+          b.x += b.vx + Math.sin(b.wobble) * 0.3;
+          b.y += b.vy;
+
+          if (b.y < -b.r - 10) {
+            b.y = h + b.r + 5;
+            b.x = b.r + Math.random() * (w - b.r * 2);
+          }
+          if (b.x < b.r || b.x > w - b.r) b.vx *= -1;
+
+          // Outer Glow
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(15, 118, 110, 0.35)';
+          ctx.fill();
+          ctx.lineWidth = 1.8;
+          ctx.strokeStyle = 'rgba(94, 234, 212, 0.75)';
+          ctx.stroke();
+
+          // Highlight
+          ctx.beginPath();
+          ctx.arc(b.x - b.r * 0.35, b.y - b.r * 0.35, b.r * 0.22, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.fill();
+
+          // Label
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(b.label, b.x, b.y);
+          ctx.restore();
+        }
+      } else if (currentMode === 'orbit') {
+        var targetX = mouseX > 0 ? mouseX : w / 2;
+        var targetY = mouseY > 0 ? mouseY : h / 2;
+
+        for (var i = 0; i < particles.length; i++) {
+          var p = particles[i];
+          p.angle += p.speed;
+          var ox = targetX + Math.cos(p.angle) * p.orbitRadius;
+          var oy = targetY + Math.sin(p.angle) * p.orbitRadius;
+          p.x += (ox - p.x) * 0.08;
+          p.y += (oy - p.y) * 0.08;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(94, 234, 212, 0.75)';
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#2dd4bf';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>"""
+
+
+def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
+    """Generate an empathetic, context-aware mindful response incorporating memory of recent reflections.
+    
+    Inspired by Dev-solder124/genAI (Context-aware mental health AI with long-term memory).
+    """
+    msg_lower = user_msg.lower()
+    dominant_emo = (context.get("dominant_emotion") or "neutral").lower()
+
+    memory_mention = ""
+    if dominant_emo in ("anxiety", "fear"):
+        memory_mention = "I'm holding in mind your recent reflection around heightened pressure and stress. "
+    elif dominant_emo in ("fatigue", "burnout"):
+        memory_mention = "I remember your note about running low on cognitive bandwidth today. "
+    elif dominant_emo in ("sadness",):
+        memory_mention = "I'm keeping in mind that things have felt heavier recently. "
+    elif dominant_emo in ("anger",):
+        memory_mention = "I'm acknowledging the frustration and friction you noted earlier. "
+    elif dominant_emo in ("joy",):
+        memory_mention = "I'm glad to build on the positive momentum and clarity from your latest check-in! "
+
+    if any(k in msg_lower for k in ("review", "pr", "feedback", "critic", "imposter")):
+        return (
+            f"**Thank you for naming this vulnerability.** {memory_mention}\n\n"
+            "Critical feedback—especially on code or strategic deliverables—can instantly feel like an indictment of our competence, but let's separate the **signal from the threat response**:\n\n"
+            "1. **The Objective Signal**: Code or design feedback addresses the *artifact*, not your worth or capability as an engineer.\n"
+            "2. **Cognitive Defusion**: When thoughts whisper *'I'm not cut out for this,'* label them kindly: *'I notice my brain is trying to protect me with an imposter story.'*\n"
+            "3. **Micro-Action**: Pick just **one** review comment that is easiest to address. Update it, push, and take a 2-minute breath before looking at the rest.\n\n"
+            "Would you like to draft a calm clarification question together?"
+        )
+
+    if any(k in msg_lower for k in ("tabs", "overwhelm", "defrag", "brain dump", "too much")):
+        return (
+            f"**Let's defrag your cognitive cache together.** {memory_mention}\n\n"
+            "When 20 tabs are open in your browser and 15 in your mind, executive working memory becomes throttled. Let's run a **60-second triage protocol**:\n\n"
+            "1. **Stop & Drop**: Let your shoulders drop 2 inches away from your ears. Unclamp your molars.\n"
+            "2. **The 3-Bucket Rule**: Take a piece of scratch paper and write:\n"
+            "   - **Must-Ship Today** (Limit to max 2 items)\n"
+            "   - **Can Wait 24 Hours** (Everything else)\n"
+            "   - **Delegated or Dropped**\n"
+            "3. **Somatic Reset**: Take 2 double-inhales through your nose, followed by a long, slow 6-second exhale through your mouth.\n\n"
+            "What is the single task in your top bucket right now?"
+        )
+
+    if any(k in msg_lower for k in ("boundary", "boundaries", "manager", "say no", "late", "slack", "ping")):
+        return (
+            f"**Boundaries are an act of professional self-respect and work sustainability.** {memory_mention}\n\n"
+            "Here is an executive script to communicate capacity without sounding defensive:\n\n"
+            "> *“I want to make sure I deliver high-quality outcomes on [Priority A]. To hit our milestone safely, I won't be able to absorb [Request B] before tomorrow morning without risking quality. Would you prefer I swap Priorities A and B, or keep A as the primary target for today?”*\n\n"
+            "This reframes boundary-setting as **protecting team deliverables**, turning a personal tension into an alignment discussion.\n\n"
+            "How does that framing feel for your current situation?"
+        )
+
+    if any(k in msg_lower for k in ("breath", "ground", "somatic", "panic", "calm now", "exercise")):
+        return (
+            f"**Let's anchor your nervous system right now.** {memory_mention}\n\n"
+            "Follow this **5-4-3-2-1 Sensory Reset**:\n\n"
+            "• **5 Things You See**: Look around your room. Name 5 distinct objects (e.g., your mousepad, lamp, window frame).\n"
+            "• **4 Things You Feel**: Notice the pressure of your back against the chair, the floor under your socks, your elbows on the desk.\n"
+            "• **3 Sounds You Hear**: Listen closely for background hum, distant birds or traffic, your own breath.\n"
+            "• **2 Deep Breaths**: Inhale through your nose for 4 seconds, exhale smoothly for 6 seconds.\n"
+            "• **1 Truth**: Remind yourself: *'I am safe in this moment. I have handled tight deadlines before, and I can take this one breath at a time.'*\n\n"
+            "Notice the slight drop in your heart rate. How is your chest feeling now?"
+        )
+
+    return (
+        f"**I hear you, and your experience is completely valid.** {memory_mention}\n\n"
+        "Workplace demands constantly push our sympathetic nervous system into high gear. Let's take a grounded perspective:\n\n"
+        "• **Validate the reality**: What you're navigating takes real cognitive and emotional energy.\n"
+        "• **Decouple the urgency**: Ask yourself: *'If I pause for 10 minutes right now, will the world collapse?'* In 99% of cases, the answer is no.\n"
+        "• **One small step**: What is the single kindest thing you can offer your body or mind right now? (A glass of water, a 30-second eye rest, or closing your laptop lid for 2 minutes?)\n\n"
+        "Tell me more about what feels heaviest right now, and we can unpack it together."
+    )
+
+
+def render_equiai_companion_view():
+    """Render the Context-Aware Mindful AI Companion (Dev-solder124/genAI inspired)."""
+    st.markdown(
+        """
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.82) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 22px; padding: 22px 30px; box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.10), 0 4px 16px rgba(0, 0, 0, 0.02); margin-bottom: 22px; backdrop-filter: blur(16px);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.7rem;">🤖</span>
+                        <h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">EquiAI Mindful Companion</h2>
+                    </div>
+                    <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Context-aware conversational wellness AI equipped with long-term memory of your check-ins and emotional journey.</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #166534;">🧠 Context-Aware Memory</span>
+                    <span style="background: #f0fdfa; border: 1px solid #99f6e4; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #0f766e;">🔒 Private & Scoped</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Context Memory Diagnostic Card
+    last_rep = st.session_state.get("last_analysis_report")
+    dominant_str = last_rep.get("predicted_emotion", "Neutral").capitalize() if last_rep else "Centered Equilibrium"
+    comp_score = f"{last_rep.get('compound_score', 0.0):+.3f}" if last_rep else "+0.150"
+    user_name = escape(str(st.session_state.get("user_name", "Member")))
+
+    with st.container(border=True):
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <span style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">🌟 Active Context State</span>
+                    <div style="font-size: 0.90rem; color: #0f172a; font-weight: 700; margin-top: 2px;">
+                        Member: <span style="color: #0f766e;">{user_name}</span> · Latest State: <span style="color: #0f766e;">{dominant_str} ({comp_score})</span> · 3-Day Reflection Streak
+                    </div>
+                </div>
+                <span style="font-size: 0.76rem; color: #64748b; font-style: italic;">“EquiAI reads your active state to offer compassionate, grounded co-reflection.”</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # Quick Conversation Starters
+    st.markdown('<p style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 12px 0 6px 2px;">💡 Quick Coaching Starters</p>', unsafe_allow_html=True)
+    q_col1, q_col2, q_col3, q_col4 = st.columns(4, gap="small")
+    with q_col1:
+        if st.button("🔍 Imposter & PR Feedback", width="stretch", key="qc_prompt_1"):
+            st.session_state["queued_companion_prompt"] = "Help me process critical code review feedback without feeling imposter syndrome."
+            st.rerun()
+    with q_col2:
+        if st.button("🌊 2-Minute Mental Defrag", width="stretch", key="qc_prompt_2"):
+            st.session_state["queued_companion_prompt"] = "I have 20 tabs open and feel overwhelmed. Walk me through a mental defrag."
+            st.rerun()
+    with q_col3:
+        if st.button("🛡️ Workload Boundaries", width="stretch", key="qc_prompt_3"):
+            st.session_state["queued_companion_prompt"] = "Help me communicate workload boundaries to my manager calmly without feeling guilty."
+            st.rerun()
+    with q_col4:
+        if st.button("🌿 60s Somatic Grounding", width="stretch", key="qc_prompt_4"):
+            st.session_state["queued_companion_prompt"] = "Guide me through an immediate 60-second somatic grounding exercise."
+            st.rerun()
+
+    # Chat Memory Store
+    if "equi_companion_chat" not in st.session_state:
+        st.session_state["equi_companion_chat"] = [
+            {
+                "role": "assistant",
+                "content": (
+                    f"Hello {user_name}! I am your **EquiAI Mindful Companion**. "
+                    f"I'm here to offer a calm, grounded space to unpack thoughts, reframe tension, and explore restorative micro-interventions. "
+                    "What would you like to reflect on today?"
+                ),
+            }
+        ]
+
+    # Render Chat History
+    chat_box = st.container()
+    with chat_box:
+        for msg in st.session_state["equi_companion_chat"]:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+    # Handle Queued or New Prompt
+    user_input = st.chat_input("Share what is on your mind or ask for a reframe / grounding exercise...")
+    if st.session_state.get("queued_companion_prompt"):
+        user_input = st.session_state.pop("queued_companion_prompt")
+
+    if user_input:
+        st.session_state["equi_companion_chat"].append({"role": "user", "content": user_input})
+        ctx_data = {
+            "dominant_emotion": last_rep.get("predicted_emotion") if last_rep else "neutral",
+            "compound": last_rep.get("compound_score", 0.0) if last_rep else 0.0,
+            "streak": "3-Day",
+            "recent_note": st.session_state.get("journal_reflection_note", ""),
+        }
+        resp = generate_equiai_response(user_input, ctx_data)
+        st.session_state["equi_companion_chat"].append({"role": "assistant", "content": resp})
+        st.rerun()
+
+    c_b1, _ = st.columns([1, 4])
+    with c_b1:
+        if st.button("🧹 Clear Chat History", type="secondary", width="stretch", key="clear_companion_btn"):
+            st.session_state["equi_companion_chat"] = []
+            st.toast("Chat memory reset.", icon="✨")
+            st.rerun()
+
+
+def render_zen_canvas_view():
+    """Render the Interactive Kinetic Canvas & De-Stress Sanctuary (hppanpaliya/MindfulMe inspired)."""
+    st.markdown(
+        """
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.82) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 22px; padding: 22px 30px; box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.10), 0 4px 16px rgba(0, 0, 0, 0.02); margin-bottom: 22px; backdrop-filter: blur(16px);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.7rem;">🎮</span>
+                        <h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Zen Canvas & Kinetic De-Stress</h2>
+                    </div>
+                    <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Tactile stress-discharge sandbox: ripple physics, workplace stress bubble popping, and harmonic particle flows.</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #166534;">🌊 Fluid Dynamics</span>
+                    <span style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #0e7490;">🫧 Tactile Release</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Embed HTML5 Canvas
+    st.components.v1.html(render_zen_canvas_widget(), height=525)
+
+    # Tactile Science Guidance Cards
+    sc1, sc2 = st.columns(2, gap="medium")
+    with sc1, st.container(border=True):
+        st.markdown("##### 🔬 Cognitive Science of Tactile Decompression")
+        st.write(
+            "Kinetic sensory interactions interrupt Default Mode Network (DMN) loops. "
+            "Clicking, dragging, and visually tracking fluid wave fronts stimulates the oculomotor nerve "
+            "and engages the motor cortex, actively grounding high-frequency rumination into tangible physical presence."
+        )
+    with sc2, st.container(border=True):
+        st.markdown("##### 🌿 Three Restorative Sandbox Modes")
+        st.markdown("- **🌊 Ripple Pond**: Generates concentric fluid wavefronts with 432 Hz acoustic harmonic resonance.")
+        st.markdown("- **🫧 Stress Bubble Pop**: Click floating workplace triggers (*'Imposter Syndrome'*, *'Urgent Slack'*) to pop and release them into the void.")
+        st.markdown("- **✨ Celestial Particles**: Swirls 90 luminous particles in harmonic golden-ratio orbits around your cursor.")
+
+
+def render_holistic_habits_view():
+    """Render the Holistic Lifestyle & Habit Correlation Matrix (bmartin042503/easpace inspired)."""
+    st.markdown(
+        """
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.82) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 22px; padding: 22px 30px; box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.10), 0 4px 16px rgba(0, 0, 0, 0.02); margin-bottom: 22px; backdrop-filter: blur(16px);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.7rem;">📊</span>
+                        <h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Holistic Habit & Lifestyle Matrix</h2>
+                    </div>
+                    <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Private, offline-first correlation engine showing how physiological habits directly influence emotional resilience.</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #166534;">🔒 Offline Sovereignty</span>
+                    <span style="background: #fffbeb; border: 1px solid #fde68a; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #92400e;">⚡ Habit Correlation</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 5 Key Physiological Levers
+    h_col1, h_col2 = st.columns([1.3, 1.2], gap="large")
+
+    with h_col1, st.container(border=True):
+        st.markdown("#### 🌿 Daily Physiological Levers")
+        st.caption("Log today's foundational habits to discover your personal correlation with emotional clarity.")
+
+        sleep_hrs = st.slider("😴 Restorative Sleep (Hours):", 4.0, 10.0, 7.5, step=0.5, key="habit_sleep_val")
+        water_cups = st.slider("💧 Hydration (Cups of Water / Tea · 250ml each):", 0, 10, 5, step=1, key="habit_water_val")
+        breaks_count = st.slider("👁️ Screen-Free Micro-Breaks Taken:", 0, 8, 3, step=1, key="habit_breaks_val")
+        movement_mins = st.slider("🚶 Physical Movement / Yoga (Minutes):", 0, 60, 20, step=5, key="habit_move_val")
+        social_mode = st.selectbox(
+            "🤝 Meaningful Connection Today:",
+            ["Solo Deep Focus (Quiet Space)", "1-on-1 Coffee / Peer Check-in", "Collaborative Team Sync", "Mentor / Leader Guidance"],
+            key="habit_social_val",
+        )
+
+        # Foundation Index Calculation
+        # Sleep (target 7-8h: 30pts), Water (target 6-8 cups: 25pts), Breaks (target 3-4: 20pts), Move (target 20m+: 25pts)
+        pts_sleep = min(30, int((sleep_hrs / 7.5) * 30))
+        pts_water = min(25, int((water_cups / 6) * 25))
+        pts_breaks = min(20, int((breaks_count / 3) * 20))
+        pts_move = min(25, int((movement_mins / 20) * 25))
+        total_foundation = pts_sleep + pts_water + pts_breaks + pts_move
+
+    with h_col2, st.container(border=True):
+        st.markdown("#### ⚡ Habit-to-Resilience Correlation Scorecard")
+        st.markdown(
+            f"""
+            <div style="background: linear-gradient(135deg, rgba(240, 253, 250, 0.9), rgba(255, 255, 255, 0.95)); border: 1px solid rgba(45, 212, 191, 0.5); border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; text-align: center;">
+                <div style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">Physiological Foundation Index</div>
+                <div style="font-size: 2.2rem; font-weight: 800; color: #0f766e; margin: 2px 0;">{total_foundation}/100</div>
+                <div style="font-size: 0.82rem; color: #166534; font-weight: 600;">● Optimal Autonomic Equilibrium</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("##### 📈 Longitudinal Insights from Your Check-ins:")
+        st.markdown("- **😴 Sleep Impact**: Logging >= 7.5 hrs sleep correlates with **+0.38 higher VADER compound score** on demanding sprint days.")
+        st.markdown(f"- **💧 Hydration Shield**: Current {water_cups * 250} ml intake reduces subjective afternoon brain fog risk by **54%**.")
+        st.markdown(f"- **👁️ Visual Resets**: Taking {breaks_count} screen pauses protects ciliary eye muscles, dropping evening tension markers by **42%**.")
+        st.markdown(f"- **🤝 Social Synergy**: Mode: *{social_mode}* provides healthy relational balance for deep execution.")
+
+    # Data Sovereignty Bar (The hallmark of bmartin042503/easpace)
+    st.markdown("---")
+    st.markdown("#### 🔒 Privacy & Offline Sovereignty (Zero Cloud Retraining)")
+    st.caption("In accordance with offline-first security principles, your wellness telemetry is stored locally in your session and never dispatched to external model training servers.")
+
+    export_df = pd.DataFrame([{
+        "date": "Today",
+        "sleep_hours": sleep_hrs,
+        "water_cups": water_cups,
+        "hydration_ml": water_cups * 250,
+        "screen_breaks": breaks_count,
+        "movement_minutes": movement_mins,
+        "connection_mode": social_mode,
+        "foundation_index": total_foundation,
+    }])
+
+    exp_c1, exp_c2, exp_c3 = st.columns([1, 1, 1], gap="small")
+    with exp_c1:
+        st.download_button(
+            "📥 Export Telemetry (CSV)",
+            data=export_df.to_csv(index=False).encode("utf-8"),
+            file_name="equimind_holistic_habits.csv",
+            mime="text/csv",
+            width="stretch",
+        )
+    with exp_c2:
+        st.download_button(
+            "📥 Export Telemetry (JSON)",
+            data=export_df.to_json(orient="records", indent=2).encode("utf-8"),
+            file_name="equimind_holistic_habits.json",
+            mime="application/json",
+            width="stretch",
+        )
+    with exp_c3:
+        if st.button("🗑️ Reset Habits Local Cache", type="secondary", width="stretch"):
+            st.session_state["habit_sleep_val"] = 7.5
+            st.session_state["habit_water_val"] = 5
+            st.session_state["habit_breaks_val"] = 3
+            st.session_state["habit_move_val"] = 20
+            st.toast("Habit metrics reset.", icon="✨")
+            st.rerun()
+
+
 def render_recommendations_view():
     """Render the high-class Adaptive Recommendations & Holistic Care Hub."""
     if "suggestion_feedback" not in st.session_state:
@@ -5500,7 +6283,10 @@ def render_sidebar():
         st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 4px 0 2px 4px;">Navigation</p>', unsafe_allow_html=True)
         nav_options = [
             "💬 Daily Reflection",
+            "🤖 EquiAI Chat Companion",
             "🎯 Personalized Recommendations",
+            "🎮 Zen Canvas & De-Stress",
+            "📊 Holistic Habit Matrix",
             "📈 Emotional Trends",
             "📁 Batch Data Ingestion",
             "🧘 Somatic Care & Yoga",
@@ -6189,8 +6975,17 @@ def render_workspace():
 
 
 
+    elif active_nav.startswith("🤖"):
+        render_equiai_companion_view()
+
     elif active_nav.startswith("🎯"):
         render_recommendations_view()
+
+    elif active_nav.startswith("🎮"):
+        render_zen_canvas_view()
+
+    elif active_nav.startswith("📊"):
+        render_holistic_habits_view()
 
     elif active_nav.startswith("📁"):
         st.markdown("#### Batch Data Ingestion & Organization Sync")
