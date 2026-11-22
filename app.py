@@ -4963,51 +4963,42 @@ def render_compact_box_pacer() -> str:
 
 
 
-def render_zen_canvas_widget() -> str:
-    """Return self-contained HTML5 & Web Audio interactive kinetic stress-relief canvas.
-    
-    Inspired by hppanpaliya/MindfulMe:
-    - 🌊 Interactive Water Ripple Pond (Fluid click/drag wave dynamics)
-    - 🫧 Workplace Stress Bubble Popper (Tactile burst physics & counter)
-    - ✨ Celestial Particle Flow (Alpha-entrainment harmonic orbits)
-    - Client-side Web Audio 432Hz/528Hz Zen bell synthesizer
-    """
-    return """<!DOCTYPE html>
+def render_zen_canvas_widget() -> str:return """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
     body {
-      background: transparent;
+      background: #022c22;
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       color: #f0fdf4;
       overflow: hidden;
-      height: 510px;
+      height: 520px;
     }
     .zen-wrap {
-      background: radial-gradient(circle at 50% 20%, #064e3b 0%, #022c22 100%);
-      border: 1.5px solid rgba(45, 212, 191, 0.35);
+      background: radial-gradient(circle at 50% 15%, #064e3b 0%, #022c22 100%);
+      border: 1.5px solid rgba(45, 212, 191, 0.4);
       border-radius: 20px;
-      padding: 16px 20px;
+      padding: 14px 18px;
       height: 100%;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 16px 36px rgba(2, 44, 34, 0.45);
+      box-shadow: 0 16px 36px rgba(2, 44, 34, 0.5);
       position: relative;
     }
     .zen-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       flex-wrap: wrap;
       gap: 10px;
     }
     .zen-title {
       font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #5eead4;
       display: flex;
@@ -5016,11 +5007,11 @@ def render_zen_canvas_widget() -> str:
     }
     .mode-bar {
       display: flex;
-      gap: 6px;
-      background: rgba(0, 0, 0, 0.25);
-      padding: 3px;
+      gap: 5px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px;
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
     .mode-btn {
       background: transparent;
@@ -5028,27 +5019,35 @@ def render_zen_canvas_widget() -> str:
       color: #94a3b8;
       font-size: 0.78rem;
       font-weight: 700;
-      padding: 5px 12px;
+      padding: 6px 13px;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
     }
+    .mode-btn:hover {
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.06);
+    }
     .mode-btn.active {
       background: #0f766e;
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(15, 118, 110, 0.4);
+      box-shadow: 0 2px 10px rgba(15, 118, 110, 0.5);
     }
     .canvas-box {
       flex: 1;
       border-radius: 14px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(45, 212, 191, 0.2);
+      background: #011d17;
+      border: 1.5px solid rgba(45, 212, 191, 0.3);
       position: relative;
       overflow: hidden;
-      cursor: crosshair;
+      cursor: pointer;
+      box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.5);
     }
     canvas {
       display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
     }
@@ -5059,15 +5058,35 @@ def render_zen_canvas_widget() -> str:
       margin-top: 10px;
       font-size: 0.80rem;
       color: #99f6e4;
+      flex-wrap: wrap;
+      gap: 8px;
     }
-    .tag-badge {
-      background: rgba(20, 184, 166, 0.2);
-      border: 1px solid rgba(45, 212, 191, 0.4);
-      padding: 3px 10px;
+    .score-badge {
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.25), rgba(15, 118, 110, 0.35));
+      border: 1px solid rgba(45, 212, 191, 0.5);
+      padding: 3px 12px;
       border-radius: 20px;
-      font-weight: 700;
-      font-size: 0.74rem;
+      font-weight: 800;
+      font-size: 0.78rem;
       color: #5eead4;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ctrl-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cbd5e1;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
     }
   </style>
 </head>
@@ -5076,11 +5095,12 @@ def render_zen_canvas_widget() -> str:
     <div class="zen-header">
       <div class="zen-title">
         <span>🎮</span> Zen Kinetic Canvas
-        <span style="font-size: 0.74rem; font-family: 'Plus Jakarta Sans'; color: #a7f3d0; font-weight: 600; margin-left: 6px;">Tactile De-Stress Sandbox</span>
+        <span style="font-size: 0.74rem; font-family: 'Plus Jakarta Sans'; color: #a7f3d0; font-weight: 600; margin-left: 4px;">· Tactile De-Stress Sandbox</span>
       </div>
       <div class="mode-bar">
-        <button class="mode-btn active" id="btnRipple" onclick="setMode('ripple')">🌊 Ripple Pond</button>
-        <button class="mode-btn" id="btnBubble" onclick="setMode('bubble')">🫧 Stress Bubble Pop</button>
+        <button class="mode-btn active" id="btnBubble" onclick="setMode('bubble')">🫧 Stress Bubble Pop</button>
+        <button class="mode-btn" id="btnRipple" onclick="setMode('ripple')">🌊 Zen Lotus Pond</button>
+        <button class="mode-btn" id="btnMandala" onclick="setMode('mandala')">🌸 Sand Mandala Paint</button>
         <button class="mode-btn" id="btnOrbit" onclick="setMode('orbit')">✨ Celestial Particles</button>
       </div>
     </div>
@@ -5090,11 +5110,13 @@ def render_zen_canvas_widget() -> str:
     </div>
 
     <div class="zen-footer">
-      <div id="statusInstruction">💡 Click or drag across the water surface to generate soothing ripples.</div>
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <span id="popCounter" class="tag-badge" style="display: none;">🫧 0 Released</span>
-        <button onclick="toggleAudio()" id="audioBtn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 8px; padding: 3px 9px; font-size: 0.72rem; cursor: pointer;">🔊 Sound: ON</button>
-        <button onclick="resetCanvas()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 8px; padding: 3px 9px; font-size: 0.72rem; cursor: pointer;">🔄 Reset</button>
+      <div id="statusInstruction" style="font-weight: 600; font-size: 0.82rem; color: #a7f3d0;">
+        🫧 Click or tap floating workplace stressors to pop and release them!
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <span id="popCounter" class="score-badge">🫧 0 Stressors Released</span>
+        <button onclick="toggleAudio()" id="audioBtn" class="ctrl-btn">🔊 Sound: ON</button>
+        <button onclick="resetCanvas()" class="ctrl-btn">🔄 Clear & Respawn</button>
       </div>
     </div>
   </div>
@@ -5102,31 +5124,39 @@ def render_zen_canvas_widget() -> str:
   <script>
     var canvas = document.getElementById('zenCanvas');
     var ctx = canvas.getContext('2d');
-    var currentMode = 'ripple';
+    var container = document.getElementById('canvasContainer');
+
+    var currentMode = 'bubble'; // default to bubble popping so it is immediately alive!
     var audioEnabled = true;
     var audioCtx = null;
-    var ripples = [];
+    var width = 800;
+    var height = 400;
+
     var bubbles = [];
+    var ripples = [];
     var particles = [];
+    var lotusPlants = [];
+    var mandalaStrokes = [];
     var poppedCount = 0;
-    var mouseX = -100, mouseY = -100;
     var isMouseDown = false;
+    var mouseX = 400, mouseY = 200;
 
     var STRESS_LABELS = [
-      "Sprint Deadline", "Imposter Feeling", "Unread Slack (52)",
+      "Sprint Deadline", "Imposter Syndrome", "Unread Slack (54)",
       "Context Switching", "Meeting Fatigue", "Overthinking",
       "Production Deploy", "High Cognitive Strain", "Unresolved PR",
-      "Perfectionism", "Back-to-back Syncs", "Scope Creep"
+      "Backlog Pressure", "Scope Creep", "Perfectionism"
     ];
 
     function resize() {
-      var rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * (window.devicePixelRatio || 1);
-      canvas.height = rect.height * (window.devicePixelRatio || 1);
-      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      width = container.clientWidth || 800;
+      height = container.clientHeight || 400;
+      canvas.width = width;
+      canvas.height = height;
+      if (bubbles.length === 0 && currentMode === 'bubble') initBubbles();
+      if (lotusPlants.length === 0) initLotus();
     }
     window.addEventListener('resize', resize);
-    setTimeout(resize, 50);
 
     function getAudio() {
       if (!audioCtx) {
@@ -5149,11 +5179,11 @@ def render_zen_canvas_widget() -> str:
         osc.type = type || 'sine';
         osc.frequency.setValueAtTime(freq, ac.currentTime);
         gain.gain.setValueAtTime(0.08, ac.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + (duration || 0.6));
+        gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + (duration || 0.5));
         osc.connect(gain);
         gain.connect(ac.destination);
         osc.start();
-        osc.stop(ac.currentTime + (duration || 0.6));
+        osc.stop(ac.currentTime + (duration || 0.5));
       } catch (e) {}
     }
 
@@ -5164,73 +5194,85 @@ def render_zen_canvas_widget() -> str:
 
     function setMode(mode) {
       currentMode = mode;
-      document.getElementById('btnRipple').className = 'mode-btn' + (mode === 'ripple' ? ' active' : '');
       document.getElementById('btnBubble').className = 'mode-btn' + (mode === 'bubble' ? ' active' : '');
+      document.getElementById('btnRipple').className = 'mode-btn' + (mode === 'ripple' ? ' active' : '');
+      document.getElementById('btnMandala').className = 'mode-btn' + (mode === 'mandala' ? ' active' : '');
       document.getElementById('btnOrbit').className = 'mode-btn' + (mode === 'orbit' ? ' active' : '');
-      
-      var popBadge = document.getElementById('popCounter');
+
       var instr = document.getElementById('statusInstruction');
-      
-      if (mode === 'ripple') {
-        popBadge.style.display = 'none';
-        instr.innerText = '🌊 Click or drag across the water surface to generate soothing harmonic ripples.';
-      } else if (mode === 'bubble') {
-        popBadge.style.display = 'inline-block';
-        instr.innerText = '🫧 Click or tap floating workplace stressors to pop and release them into the void.';
-        initBubbles();
+      var badge = document.getElementById('popCounter');
+
+      if (mode === 'bubble') {
+        badge.style.display = 'inline-flex';
+        instr.innerText = '🫧 Click or tap floating workplace stressors to pop and release them!';
+        if (bubbles.length === 0) initBubbles();
+      } else if (mode === 'ripple') {
+        badge.style.display = 'none';
+        instr.innerText = '🌊 Click or glide across the pond to generate soothing concentric water waves.';
+        initLotus();
+      } else if (mode === 'mandala') {
+        badge.style.display = 'none';
+        instr.innerText = '🌸 Drag to paint symmetric glowing sand mandalas that gently dissolve.';
       } else {
-        popBadge.style.display = 'none';
-        instr.innerText = '✨ Move your cursor to sculpt harmonic celestial particle flow fields.';
+        badge.style.display = 'none';
+        instr.innerText = '✨ Move your cursor to pull and sculpt celestial particle nebulae.';
         initParticles();
       }
     }
 
-    function addRipple(x, y) {
-      ripples.push({ x: x, y: y, r: 2, maxR: 90 + Math.random() * 40, alpha: 0.85, speed: 1.8 + Math.random() * 0.8 });
-      playTone(432 + Math.random() * 40, 'sine', 0.4);
-    }
-
     function initBubbles() {
       bubbles = [];
-      var w = canvas.getBoundingClientRect().width;
-      var h = canvas.getBoundingClientRect().height;
-      for (var i = 0; i < 8; i++) {
-        spawnBubble(w, h, true);
+      for (var i = 0; i < 9; i++) {
+        spawnBubble(true);
       }
     }
 
-    function spawnBubble(w, h, randomY) {
+    function spawnBubble(randomY) {
       var label = STRESS_LABELS[Math.floor(Math.random() * STRESS_LABELS.length)];
       var radius = 34 + Math.random() * 12;
       bubbles.push({
-        x: radius + Math.random() * (w - radius * 2),
-        y: randomY ? radius + Math.random() * (h - radius * 2) : h + radius + 10,
+        x: radius + 10 + Math.random() * (width - radius * 2 - 20),
+        y: randomY ? radius + 10 + Math.random() * (height - radius * 2 - 20) : height + radius + 10,
         r: radius,
-        vx: (Math.random() - 0.5) * 0.6,
+        vx: (Math.random() - 0.5) * 0.7,
         vy: -0.4 - Math.random() * 0.5,
         label: label,
-        hue: 165 + Math.random() * 40,
-        wobble: Math.random() * Math.PI * 2
+        hue: 155 + Math.random() * 45,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.02 + Math.random() * 0.02
       });
+    }
+
+    function initLotus() {
+      lotusPlants = [
+        { x: width * 0.22, y: height * 0.35, r: 24, hue: 330, petals: 8, angle: 0 },
+        { x: width * 0.75, y: height * 0.65, r: 28, hue: 170, petals: 10, angle: 0.5 },
+        { x: width * 0.50, y: height * 0.80, r: 22, hue: 45, petals: 8, angle: 1.2 }
+      ];
     }
 
     function initParticles() {
       particles = [];
-      var w = canvas.getBoundingClientRect().width;
-      var h = canvas.getBoundingClientRect().height;
       for (var i = 0; i < 90; i++) {
         particles.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.8,
-          vy: (Math.random() - 0.5) * 0.8,
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6,
           r: 1.5 + Math.random() * 2.2,
-          hue: 160 + Math.random() * 50,
-          orbitRadius: 40 + Math.random() * 120,
+          orbitRadius: 35 + Math.random() * 120,
           angle: Math.random() * Math.PI * 2,
-          speed: 0.015 + Math.random() * 0.025
+          speed: 0.012 + Math.random() * 0.02
         });
       }
+    }
+
+    function addRipple(x, y) {
+      ripples.push({
+        x: x, y: y, r: 2, maxR: 85 + Math.random() * 45,
+        alpha: 0.85, speed: 1.6 + Math.random() * 0.8
+      });
+      playTone(432 + Math.random() * 60, 'sine', 0.4);
     }
 
     function popAt(x, y) {
@@ -5238,20 +5280,20 @@ def render_zen_canvas_widget() -> str:
         var b = bubbles[i];
         var dx = x - b.x;
         var dy = y - b.y;
-        if (Math.sqrt(dx * dx + dy * dy) <= b.r) {
-          // Explode particles
-          for (var p = 0; p < 14; p++) {
+        if (Math.sqrt(dx * dx + dy * dy) <= b.r + 5) {
+          // Burst confetti
+          for (var p = 0; p < 16; p++) {
+            var ang = (Math.PI * 2 / 16) * p;
             ripples.push({
-              x: b.x, y: b.y, r: 2, maxR: 45 + Math.random() * 25,
-              alpha: 0.9, speed: 2.2 + Math.random() * 1.5
+              x: b.x, y: b.y, r: 2, maxR: 45 + Math.random() * 30,
+              alpha: 0.95, speed: 2.2 + Math.random() * 1.5
             });
           }
           bubbles.splice(i, 1);
           poppedCount++;
-          document.getElementById('popCounter').innerText = '🫧 ' + poppedCount + ' Released';
+          document.getElementById('popCounter').innerText = '🫧 ' + poppedCount + ' Stressors Released';
           playTone(528, 'triangle', 0.5);
-          var rect = canvas.getBoundingClientRect();
-          setTimeout(function() { spawnBubble(rect.width, rect.height, false); }, 800);
+          setTimeout(function() { spawnBubble(false); }, 700);
           return true;
         }
       }
@@ -5260,53 +5302,177 @@ def render_zen_canvas_widget() -> str:
 
     function resetCanvas() {
       ripples = [];
+      mandalaStrokes = [];
       if (currentMode === 'bubble') {
         poppedCount = 0;
-        document.getElementById('popCounter').innerText = '🫧 0 Released';
+        document.getElementById('popCounter').innerText = '🫧 0 Stressors Released';
         initBubbles();
       } else if (currentMode === 'orbit') {
         initParticles();
+      } else if (currentMode === 'ripple') {
+        initLotus();
       }
     }
 
-    // Canvas Mouse & Touch
-    var container = document.getElementById('canvasContainer');
-    container.addEventListener('pointerdown', function(e) {
+    // Touch & Pointer interaction
+    function handlePointerDown(e) {
       var rect = canvas.getBoundingClientRect();
       var x = e.clientX - rect.left;
       var y = e.clientY - rect.top;
       isMouseDown = true;
       mouseX = x; mouseY = y;
-      if (currentMode === 'ripple') {
-        addRipple(x, y);
-      } else if (currentMode === 'bubble') {
+
+      if (currentMode === 'bubble') {
         if (!popAt(x, y)) {
           addRipple(x, y);
         }
+      } else if (currentMode === 'ripple') {
+        addRipple(x, y);
+      } else if (currentMode === 'mandala') {
+        mandalaStrokes.push({ x: x, y: y, alpha: 1.0 });
+        playTone(396, 'sine', 0.25);
       } else {
         addRipple(x, y);
       }
-    });
+    }
 
-    container.addEventListener('pointermove', function(e) {
+    function handlePointerMove(e) {
       var rect = canvas.getBoundingClientRect();
       mouseX = e.clientX - rect.left;
       mouseY = e.clientY - rect.top;
-      if (isMouseDown && currentMode === 'ripple') {
-        if (Math.random() < 0.25) addRipple(mouseX, mouseY);
-      }
-    });
 
+      if (isMouseDown) {
+        if (currentMode === 'ripple') {
+          if (Math.random() < 0.25) addRipple(mouseX, mouseY);
+        } else if (currentMode === 'mandala') {
+          mandalaStrokes.push({ x: mouseX, y: mouseY, alpha: 1.0 });
+        }
+      }
+    }
+
+    container.addEventListener('pointerdown', handlePointerDown);
+    container.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', function() { isMouseDown = false; });
 
-    // Render Loop
-    function animate() {
-      var rect = canvas.getBoundingClientRect();
-      var w = rect.width;
-      var h = rect.height;
-      ctx.clearRect(0, 0, w, h);
+    // Periodic gentle ambient ripple in pond mode
+    setInterval(function() {
+      if (currentMode === 'ripple' && ripples.length < 5) {
+        addRipple(width * 0.2 + Math.random() * width * 0.6, height * 0.2 + Math.random() * height * 0.6);
+      }
+    }, 2800);
 
-      if (currentMode === 'ripple') {
+    // Initial setup
+    setTimeout(resize, 40);
+    setTimeout(initBubbles, 60);
+
+    // Main Animation Loop
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Mode 1: Bubble Pop
+      if (currentMode === 'bubble') {
+        // Draw ambient background water lines
+        ctx.strokeStyle = 'rgba(20, 184, 166, 0.08)';
+        ctx.lineWidth = 1;
+        for (var y = 20; y < height; y += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+
+        // Ripples
+        for (var i = ripples.length - 1; i >= 0; i--) {
+          var rp = ripples[i];
+          rp.r += rp.speed;
+          rp.alpha *= 0.965;
+          if (rp.alpha <= 0.02 || rp.r >= rp.maxR) {
+            ripples.splice(i, 1);
+            continue;
+          }
+          ctx.beginPath();
+          ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(52, 211, 153, ' + rp.alpha.toFixed(3) + ')';
+          ctx.lineWidth = 2.0;
+          ctx.stroke();
+        }
+
+        // Bubbles
+        for (var i = 0; i < bubbles.length; i++) {
+          var b = bubbles[i];
+          b.wobble += b.wobbleSpeed;
+          b.x += b.vx + Math.sin(b.wobble) * 0.35;
+          b.y += b.vy;
+
+          if (b.y < -b.r - 10) {
+            b.y = height + b.r + 10;
+            b.x = b.r + Math.random() * (width - b.r * 2);
+          }
+          if (b.x < b.r + 5 || b.x > width - b.r - 5) b.vx *= -1;
+
+          // Glowing bubble sphere
+          ctx.save();
+          var grad = ctx.createRadialGradient(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.1, b.x, b.y, b.r);
+          grad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+          grad.addColorStop(0.3, 'rgba(45, 212, 191, 0.3)');
+          grad.addColorStop(1, 'rgba(15, 118, 110, 0.45)');
+
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+          ctx.lineWidth = 1.8;
+          ctx.strokeStyle = 'rgba(94, 234, 212, 0.8)';
+          ctx.stroke();
+
+          // Highlight reflection glint
+          ctx.beginPath();
+          ctx.arc(b.x - b.r * 0.38, b.y - b.r * 0.38, b.r * 0.22, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+          ctx.fill();
+
+          // Bubble Label
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+          ctx.shadowBlur = 4;
+          ctx.fillText(b.label, b.x, b.y);
+          ctx.restore();
+        }
+      }
+
+      // Mode 2: Zen Lotus Pond
+      else if (currentMode === 'ripple') {
+        // Lotus pads
+        for (var l = 0; l < lotusPlants.length; l++) {
+          var lp = lotusPlants[l];
+          lp.angle += 0.003;
+          ctx.save();
+          ctx.translate(lp.x, lp.y);
+          ctx.rotate(lp.angle);
+          // Pad
+          ctx.beginPath();
+          ctx.arc(0, 0, lp.r * 1.5, 0.3, Math.PI * 2);
+          ctx.fillStyle = 'rgba(6, 78, 59, 0.6)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(52, 211, 153, 0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // Petals
+          for (var p = 0; p < lp.petals; p++) {
+            ctx.rotate((Math.PI * 2) / lp.petals);
+            ctx.beginPath();
+            ctx.ellipse(lp.r * 0.6, 0, lp.r * 0.4, lp.r * 0.18, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'hsla(' + lp.hue + ', 70%, 65%, 0.45)';
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // Expanding water ripples
         for (var i = ripples.length - 1; i >= 0; i--) {
           var rp = ripples[i];
           rp.r += rp.speed;
@@ -5322,78 +5488,64 @@ def render_zen_canvas_widget() -> str:
           ctx.stroke();
 
           ctx.beginPath();
-          ctx.arc(rp.x, rp.y, Math.max(0, rp.r - 8), 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(94, 234, 212, ' + (rp.alpha * 0.45).toFixed(3) + ')';
-          ctx.lineWidth = 1.0;
+          ctx.arc(rp.x, rp.y, Math.max(0, rp.r - 9), 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(94, 234, 212, ' + (rp.alpha * 0.4).toFixed(3) + ')';
+          ctx.lineWidth = 1.2;
           ctx.stroke();
         }
-      } else if (currentMode === 'bubble') {
-        for (var i = ripples.length - 1; i >= 0; i--) {
-          var rp = ripples[i];
-          rp.r += rp.speed;
-          rp.alpha *= 0.97;
-          if (rp.alpha <= 0.02 || rp.r >= rp.maxR) {
-            ripples.splice(i, 1);
+      }
+
+      // Mode 3: Sand Mandala Painter
+      else if (currentMode === 'mandala') {
+        var cx = width / 2;
+        var cy = height / 2;
+
+        for (var s = mandalaStrokes.length - 1; s >= 0; s--) {
+          var st = mandalaStrokes[s];
+          st.alpha *= 0.995;
+          if (st.alpha <= 0.02) {
+            mandalaStrokes.splice(s, 1);
             continue;
           }
-          ctx.beginPath();
-          ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(52, 211, 153, ' + rp.alpha.toFixed(3) + ')';
-          ctx.lineWidth = 1.8;
-          ctx.stroke();
-        }
 
-        for (var i = 0; i < bubbles.length; i++) {
-          var b = bubbles[i];
-          b.wobble += 0.03;
-          b.x += b.vx + Math.sin(b.wobble) * 0.3;
-          b.y += b.vy;
+          var dx = st.x - cx;
+          var dy = st.y - cy;
+          var r = Math.sqrt(dx * dx + dy * dy);
+          var baseAng = Math.atan2(dy, dx);
 
-          if (b.y < -b.r - 10) {
-            b.y = h + b.r + 5;
-            b.x = b.r + Math.random() * (w - b.r * 2);
+          // 8-fold rotational symmetry
+          for (var sym = 0; sym < 8; sym++) {
+            var ang = baseAng + (Math.PI * 2 / 8) * sym;
+            var px = cx + Math.cos(ang) * r;
+            var py = cy + Math.sin(ang) * r;
+
+            ctx.beginPath();
+            ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(94, 234, 212, ' + st.alpha.toFixed(3) + ')';
+            ctx.shadowColor = '#2dd4bf';
+            ctx.shadowBlur = 6;
+            ctx.fill();
+            ctx.shadowBlur = 0;
           }
-          if (b.x < b.r || b.x > w - b.r) b.vx *= -1;
-
-          // Outer Glow
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(15, 118, 110, 0.35)';
-          ctx.fill();
-          ctx.lineWidth = 1.8;
-          ctx.strokeStyle = 'rgba(94, 234, 212, 0.75)';
-          ctx.stroke();
-
-          // Highlight
-          ctx.beginPath();
-          ctx.arc(b.x - b.r * 0.35, b.y - b.r * 0.35, b.r * 0.22, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-          ctx.fill();
-
-          // Label
-          ctx.fillStyle = '#ffffff';
-          ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(b.label, b.x, b.y);
-          ctx.restore();
         }
-      } else if (currentMode === 'orbit') {
-        var targetX = mouseX > 0 ? mouseX : w / 2;
-        var targetY = mouseY > 0 ? mouseY : h / 2;
+      }
+
+      // Mode 4: Celestial Particles
+      else if (currentMode === 'orbit') {
+        var tx = mouseX > 0 ? mouseX : width / 2;
+        var ty = mouseY > 0 ? mouseY : height / 2;
 
         for (var i = 0; i < particles.length; i++) {
           var p = particles[i];
           p.angle += p.speed;
-          var ox = targetX + Math.cos(p.angle) * p.orbitRadius;
-          var oy = targetY + Math.sin(p.angle) * p.orbitRadius;
+          var ox = tx + Math.cos(p.angle) * p.orbitRadius;
+          var oy = ty + Math.sin(p.angle) * p.orbitRadius;
           p.x += (ox - p.x) * 0.08;
           p.y += (oy - p.y) * 0.08;
 
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(94, 234, 212, 0.75)';
+          ctx.fillStyle = 'rgba(94, 234, 212, 0.8)';
           ctx.shadowBlur = 8;
           ctx.shadowColor = '#2dd4bf';
           ctx.fill();
@@ -5504,7 +5656,30 @@ def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
             "What part of this win feels most meaningful to you?"
         )
 
-    # 7. Critical Feedback, Imposter Syndrome & Code Reviews
+    # 7. Anger, Frustration & Irritation
+    if any(k in msg_lower for k in ("angry", "anger", "mad", "furious", "pissed", "irritated", "frustrated", "rage", "hate this")):
+        return (
+            f"**Anger is valid, high-octane emotional energy, {user_name}.** {memory_mention}\n\n"
+            "Anger usually signals that an important boundary, expectation, or standard of fairness has been violated. Let's direct that energy constructively rather than letting it burn you out:\n\n"
+            "1. **The 10-Minute Buffer**: Do not reply to messages, make decisions, or write emails while your adrenaline is peaked. Step away from your desk for 5 minutes.\n"
+            "2. **Butterfly Tapping (Somatic De-escalation)**: Cross your arms over your chest and gently tap alternate shoulders in a steady 1-second cadence while exhaling slowly through your mouth.\n"
+            "3. **Separate Fact from Friction**: What is the verifiable, objective fact, and what boundary or expectation needs to be re-established?\n\n"
+            "Tell me: What triggered this anger? What felt unfair or crossed?"
+        )
+
+    # 8. Incomplete Work, Task Paralysis & Backlog Panic
+    if any(k in msg_lower for k in ("incomplete", "unfinished", "work is incomplete", "not finished", "behind on work", "backlog", "pending tasks", "cannot finish", "what to do", "procrastinat")):
+        return (
+            f"**Having incomplete work when pressure is high can trigger heavy freeze responses, {user_name}.** {memory_mention}\n\n"
+            "Let's break the paralysis right now with a **4-step tactical triage**:\n\n"
+            "1. **Drop the Guilt**: Beating yourself up burns executive prefrontal energy you need for execution. Forgive yourself for where things stand right now.\n"
+            "2. **The 5-Minute Threshold Step**: Do not look at the entire mountain of work. Pick **one micro-subtask** that takes less than 5 minutes (e.g. write one function signature, draft 3 bullet points, or open the target file).\n"
+            "3. **The 80/20 'Good Enough' Standard**: Perfectionism is the enemy of completion. What is the minimum viable version that moves this forward?\n"
+            "4. **Proactive Transparency**: If a deadline might slip, a calm, proactive heads-up eliminates 90% of dread: *'Making steady progress on Priority A; will deliver part 1 by 3 PM and part 2 tomorrow morning.'*\n\n"
+            "What is the single most urgent incomplete task on your desk right now? Tell me, and let's define its first tiny step together."
+        )
+
+    # 9. Critical Feedback, Imposter Syndrome & Code Reviews
     if any(k in msg_lower for k in ("review", "pr", "feedback", "critic", "imposter", "doubt", "not good enough", "failing", "failed")):
         return (
             f"**Thank you for naming this vulnerability, {user_name}.** {memory_mention}\n\n"
