@@ -5037,36 +5037,37 @@ def render_compact_box_pacer() -> str:
 
 
 def render_3d_human_coach_widget(user_name: str = "Member", language: str = "en") -> str:
-    """Return interactive 3D Humanoid Wellness Coach avatar powered by Three.js WebGL and Web Speech API."""
+    """Return an ultra-classy, realistic, interactive 3D Humanoid Wellness Coach avatar (Three.js WebGL & Web Speech API)."""
     safe_name = user_name.replace("'", "\\'").replace('"', '\\"')
-    return f"""<!DOCTYPE html>
+    html = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Playfair+Display:wght@700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
-    * {{ box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }}
-    body {{
-      background: radial-gradient(circle at 50% 25%, #064e3b 0%, #022c22 100%);
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+    body {
+      background: radial-gradient(circle at 50% 30%, #064e3b 0%, #022c22 100%);
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       color: #f0fdf4;
       overflow: hidden;
-      height: 520px;
-      border-radius: 20px;
-      border: 1.5px solid rgba(45, 212, 191, 0.4);
+      height: 560px;
+      border-radius: 22px;
+      border: 1.5px solid rgba(45, 212, 191, 0.45);
       position: relative;
-    }}
-    #coachCanvas {{
+      box-shadow: 0 20px 48px -10px rgba(2, 44, 34, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+    #coachCanvas {
       width: 100%;
       height: 100%;
       display: block;
       cursor: grab;
-    }}
-    #coachCanvas:active {{
+    }
+    #coachCanvas:active {
       cursor: grabbing;
-    }}
-    .coach-ui-overlay {{
+    }
+    .coach-ui-overlay {
       position: absolute;
       top: 0;
       left: 0;
@@ -5077,100 +5078,119 @@ def render_3d_human_coach_widget(user_name: str = "Member", language: str = "en"
       flex-direction: column;
       justify-content: space-between;
       padding: 16px 20px;
-    }}
-    .coach-header {{
+    }
+    .coach-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 10px;
       pointer-events: auto;
-    }}
-    .coach-title {{
-      font-family: 'Playfair Display', serif;
+    }
+    .coach-title {
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 1.25rem;
       font-weight: 700;
       color: #5eead4;
       display: flex;
       align-items: center;
       gap: 8px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }}
-    .coach-badge {{
-      background: rgba(15, 118, 110, 0.35);
-      border: 1px solid rgba(45, 212, 191, 0.4);
-      padding: 4px 12px;
-      border-radius: 9999px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: #a7f3d0;
-      backdrop-filter: blur(8px);
-      display: inline-flex;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .speech-bubble {
+      background: rgba(2, 44, 34, 0.88);
+      border: 1.5px solid rgba(45, 212, 191, 0.4);
+      border-radius: 16px;
+      padding: 12px 18px;
+      max-width: 440px;
+      pointer-events: auto;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .speech-label {
+      font-size: 0.70rem;
+      font-weight: 800;
+      color: #5eead4;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+      display: flex;
       align-items: center;
       gap: 6px;
-    }}
-    .dialogue-card {{
-      background: rgba(2, 44, 34, 0.85);
-      border: 1px solid rgba(45, 212, 191, 0.35);
-      border-radius: 14px;
-      padding: 12px 18px;
-      max-width: 480px;
-      pointer-events: auto;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      margin-bottom: 8px;
-      transition: all 0.3s ease;
-    }}
-    .dialogue-text {{
-      font-size: 0.88rem;
+    }
+    .speech-text {
+      font-size: 0.86rem;
       line-height: 1.45;
-      color: #ecfeff;
+      color: #f0fdf4;
       font-weight: 500;
-    }}
-    .coach-controls {{
+    }
+    .bottom-dock {
       display: flex;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: wrap;
       pointer-events: auto;
       align-items: center;
-    }}
-    .action-btn {{
+      background: rgba(2, 44, 34, 0.65);
+      border: 1px solid rgba(45, 212, 191, 0.25);
+      padding: 6px 10px;
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      width: fit-content;
+    }
+    .action-btn {
       background: rgba(15, 118, 110, 0.45);
-      border: 1px solid rgba(45, 212, 191, 0.45);
+      border: 1px solid rgba(45, 212, 191, 0.4);
       color: #f0fdf4;
       border-radius: 10px;
-      padding: 7px 14px;
-      font-size: 0.78rem;
+      padding: 6px 12px;
+      font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
-      backdrop-filter: blur(8px);
+      transition: all 0.18s ease;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-    }}
-    .action-btn:hover {{
+      gap: 5px;
+    }
+    .action-btn:hover {
       background: #0f766e;
       border-color: #5eead4;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.5);
-    }}
-    .action-btn.active {{
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.4);
+    }
+    .action-btn.active {
       background: linear-gradient(135deg, #0f766e, #14b8a6);
       border-color: #5eead4;
       box-shadow: 0 0 14px rgba(45, 212, 191, 0.6);
       color: #ffffff;
-    }}
-    .pacer-hud {{
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(45, 212, 191, 0.3);
+    }
+    .pacer-hud {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(45, 212, 191, 0.4);
       border-radius: 20px;
       padding: 4px 12px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       color: #5eead4;
       font-family: 'JetBrains Mono', monospace;
-    }}
+    }
+    .quick-chip {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #cbd5e1;
+      border-radius: 9999px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .quick-chip:hover {
+      background: rgba(45, 212, 191, 0.2);
+      border-color: #5eead4;
+      color: #ffffff;
+    }
   </style>
 </head>
 <body>
@@ -5180,7 +5200,7 @@ def render_3d_human_coach_widget(user_name: str = "Member", language: str = "en"
     <div class="coach-header">
       <div class="coach-title">
         <span>🧘</span> Coach Aria
-        <span style="font-size: 0.74rem; font-family: 'Plus Jakarta Sans'; color: #a7f3d0; font-weight: 600; margin-left: 4px;">· 3D Embodied Wellness Guide</span>
+        <span style="font-size: 0.74rem; font-family: 'Plus Jakarta Sans'; color: #a7f3d0; font-weight: 600; margin-left: 4px;">· 3D Human Mindful Guide</span>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
         <span id="pacerBadge" class="pacer-hud" style="display: none;">🌬️ Inhale · 4s</span>
@@ -5189,24 +5209,35 @@ def render_3d_human_coach_widget(user_name: str = "Member", language: str = "en"
     </div>
 
     <div>
-      <div class="dialogue-card" id="dialogueCard">
-        <div style="font-size: 0.70rem; font-weight: 700; color: #5eead4; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Coach Aria Speaking</div>
-        <div class="dialogue-text" id="coachSpeechText">"Hello {safe_name}. I am Aria, your 3D Mindful Coach. Take a slow breath with me. I'm here to ground your nervous system and guide your recovery."</div>
+      <div class="speech-bubble" id="dialogueCard">
+        <div class="speech-label">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 8px #10b981;"></span>
+          Coach Aria Speaking
+        </div>
+        <div class="speech-text" id="coachSpeechText">"Hello __USER_NAME__. I am Aria, your 3D Mindful Coach. Place your attention here, soften your gaze, and let us breathe together."</div>
+        
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center;">
+          <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Quick Guidance:</span>
+          <span class="quick-chip" onclick="askTopic('deadline')">⚡ Deadline Overwhelm</span>
+          <span class="quick-chip" onclick="askTopic('imposter')">🛡️ Imposter Syndrome</span>
+          <span class="quick-chip" onclick="askTopic('fatigue')">☕ Cognitive Fatigue</span>
+          <span class="quick-chip" onclick="askTopic('boundary')">🌿 Slack Boundaries</span>
+        </div>
       </div>
 
-      <div class="coach-controls">
+      <div class="bottom-dock">
         <button class="action-btn" id="btnBreath" onclick="startBoxBreathing()">🌬️ Guided Box Breathing</button>
         <button class="action-btn" id="btnHeart" onclick="startHandOnHeart()">❤️ Hand on Heart Calming</button>
-        <button class="action-btn" id="btnShoulder" onclick="startShoulderReset()">💆 Shoulder & Spine Roll</button>
+        <button class="action-btn" id="btnShoulder" onclick="startShoulderReset()">💆 Posture & Shoulder Roll</button>
         <button class="action-btn" id="btnWisdom" onclick="giveMindfulWisdom()">✨ Mindful Reflection</button>
-        <button class="action-btn" id="btnReset" onclick="resetToMeditate()">🧘 Center Pose</button>
+        <button class="action-btn active" id="btnReset" onclick="resetToMeditate()">🧘 Center Pose</button>
       </div>
     </div>
   </div>
 
   <script>
-    var userName = "{safe_name}";
-    var userLang = "{language}";
+    var userName = "__USER_NAME__";
+    var userLang = "__LANGUAGE__";
     var voiceEnabled = true;
     var breathPacerActive = false;
     var somaticHandOnHeart = false;
@@ -5219,261 +5250,403 @@ def render_3d_human_coach_widget(user_name: str = "Member", language: str = "en"
     var container = document.body;
 
     var scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x022c22, 0.08);
+    scene.fog = new THREE.FogExp2(0x022c22, 0.07);
 
     var camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.15, 3.8);
+    camera.position.set(0, 0.90, 2.85);
 
-    var renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true, alpha: true }});
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth || window.innerWidth, container.clientHeight || 520);
+    renderer.setSize(container.clientWidth || window.innerWidth, container.clientHeight || 560);
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    var ambientLight = new THREE.AmbientLight(0xdcfce7, 0.75);
+    var ambientLight = new THREE.AmbientLight(0xccfbf1, 0.82);
     scene.add(ambientLight);
 
-    var keyLight = new THREE.DirectionalLight(0xffffff, 0.85);
-    keyLight.position.set(3, 6, 5);
+    var keyLight = new THREE.DirectionalLight(0xfff7ed, 0.95);
+    keyLight.position.set(2.5, 4.5, 4.0);
     scene.add(keyLight);
 
-    var rimLight = new THREE.PointLight(0x2dd4bf, 1.4, 15);
-    rimLight.position.set(-3, 3, -1);
+    var fillLight = new THREE.PointLight(0x2dd4bf, 1.1, 14);
+    fillLight.position.set(-3.0, 2.5, 2.0);
+    scene.add(fillLight);
+
+    var rimLight = new THREE.PointLight(0xfef08a, 0.8, 10);
+    rimLight.position.set(0, 1.8, -1.5);
     scene.add(rimLight);
 
-    var warmFill = new THREE.PointLight(0xfef08a, 0.6, 12);
-    warmFill.position.set(2, -1, 3);
-    scene.add(warmFill);
+    var skinMat = new THREE.MeshStandardMaterial({
+      color: 0xf5cfb3,
+      roughness: 0.58,
+      metalness: 0.04
+    });
 
-    var skinMat = new THREE.MeshStandardMaterial({{ color: 0xdeb887, roughness: 0.65, metalness: 0.05 }});
-    var tunicMat = new THREE.MeshStandardMaterial({{ color: 0x0f766e, roughness: 0.5, metalness: 0.1 }});
-    var trimMat = new THREE.MeshStandardMaterial({{ color: 0x2dd4bf, roughness: 0.3, metalness: 0.2 }});
-    var hairMat = new THREE.MeshStandardMaterial({{ color: 0x1e293b, roughness: 0.7 }});
-    var eyeWhiteMat = new THREE.MeshBasicMaterial({{ color: 0xffffff }});
-    var irisMat = new THREE.MeshBasicMaterial({{ color: 0x0f766e }});
-    var pupilMat = new THREE.MeshBasicMaterial({{ color: 0x022c22 }});
-    var cushionMat = new THREE.MeshStandardMaterial({{ color: 0x011d17, roughness: 0.8, metalness: 0.1 }});
-    var auraMat = new THREE.MeshBasicMaterial({{ color: 0x2dd4bf, transparent: true, opacity: 0.35 }});
+    var lipMat = new THREE.MeshStandardMaterial({
+      color: 0xc46b6b,
+      roughness: 0.32,
+      metalness: 0.08
+    });
+
+    var hairMat = new THREE.MeshStandardMaterial({
+      color: 0x221815,
+      roughness: 0.42,
+      metalness: 0.12
+    });
+
+    var browMat = new THREE.MeshBasicMaterial({ color: 0x241814 });
+
+    var topMat = new THREE.MeshStandardMaterial({
+      color: 0x064e3b,
+      roughness: 0.55,
+      metalness: 0.08
+    });
+
+    var strapMat = new THREE.MeshStandardMaterial({
+      color: 0x0f766e,
+      roughness: 0.4,
+      metalness: 0.15
+    });
+
+    var goldMat = new THREE.MeshStandardMaterial({
+      color: 0xfbbf24,
+      roughness: 0.25,
+      metalness: 0.85
+    });
+
+    var eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xfcfcfc });
+    var irisMat = new THREE.MeshStandardMaterial({ color: 0x0d5c52, roughness: 0.25, metalness: 0.2 });
+    var pupilMat = new THREE.MeshBasicMaterial({ color: 0x050505 });
+    var glintMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    var cushionMat = new THREE.MeshStandardMaterial({
+      color: 0x012b22,
+      roughness: 0.8,
+      metalness: 0.05
+    });
+
+    var haloMat = new THREE.MeshBasicMaterial({
+      color: 0x2dd4bf,
+      transparent: true,
+      opacity: 0.38
+    });
 
     var coachGroup = new THREE.Group();
-    coachGroup.position.set(0, -0.4, 0);
+    coachGroup.position.set(0, -0.42, 0);
     scene.add(coachGroup);
 
-    var cushionGeo = new THREE.CylinderGeometry(0.85, 0.95, 0.22, 32);
+    var cushionGeo = new THREE.CylinderGeometry(0.85, 0.95, 0.20, 36);
     var cushion = new THREE.Mesh(cushionGeo, cushionMat);
-    cushion.position.set(0, -0.1, 0);
+    cushion.position.set(0, -0.10, 0);
     coachGroup.add(cushion);
 
-    var cushionRingGeo = new THREE.TorusGeometry(0.88, 0.025, 12, 32);
-    var cushionRing = new THREE.Mesh(cushionRingGeo, trimMat);
-    cushionRing.rotation.x = Math.PI / 2;
-    cushionRing.position.set(0, 0.01, 0);
-    coachGroup.add(cushionRing);
+    var cushionGoldTrim = new THREE.Mesh(new THREE.TorusGeometry(0.88, 0.02, 12, 36), goldMat);
+    cushionGoldTrim.rotation.x = Math.PI / 2;
+    cushionGoldTrim.position.set(0, 0.0, 0);
+    coachGroup.add(cushionGoldTrim);
 
-    var legLeftGeo = new THREE.TorusGeometry(0.55, 0.13, 16, 32, Math.PI * 0.9);
-    var legLeft = new THREE.Mesh(legLeftGeo, tunicMat);
-    legLeft.rotation.x = Math.PI / 2 + 0.1;
-    legLeft.rotation.z = -0.35;
-    legLeft.position.set(-0.15, 0.1, 0.18);
-    coachGroup.add(legLeft);
+    var legL = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.12, 16, 32, Math.PI * 0.92), topMat);
+    legL.rotation.x = Math.PI / 2 + 0.08;
+    legL.rotation.z = -0.32;
+    legL.position.set(-0.16, 0.08, 0.16);
+    coachGroup.add(legL);
 
-    var legRightGeo = new THREE.TorusGeometry(0.55, 0.13, 16, 32, Math.PI * 0.9);
-    var legRight = new THREE.Mesh(legRightGeo, tunicMat);
-    legRight.rotation.x = Math.PI / 2 + 0.1;
-    legRight.rotation.z = Math.PI + 0.35;
-    legRight.position.set(0.15, 0.15, 0.22);
-    coachGroup.add(legRight);
+    var legR = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.12, 16, 32, Math.PI * 0.92), topMat);
+    legR.rotation.x = Math.PI / 2 + 0.08;
+    legR.rotation.z = Math.PI + 0.32;
+    legR.position.set(0.16, 0.12, 0.20);
+    coachGroup.add(legR);
 
     var spineGroup = new THREE.Group();
-    spineGroup.position.set(0, 0.15, 0);
+    spineGroup.position.set(0, 0.14, 0);
     coachGroup.add(spineGroup);
 
-    var torsoGeo = new THREE.CylinderGeometry(0.34, 0.28, 0.72, 24);
-    var torso = new THREE.Mesh(torsoGeo, tunicMat);
-    torso.position.set(0, 0.36, 0);
+    var torsoGeo = new THREE.CylinderGeometry(0.31, 0.25, 0.68, 28);
+    var torso = new THREE.Mesh(torsoGeo, topMat);
+    torso.position.set(0, 0.34, 0);
     spineGroup.add(torso);
 
-    var chestCollarGeo = new THREE.TorusGeometry(0.24, 0.02, 12, 24);
-    var chestCollar = new THREE.Mesh(chestCollarGeo, trimMat);
-    chestCollar.rotation.x = Math.PI / 2;
-    chestCollar.position.set(0, 0.71, 0);
-    spineGroup.add(chestCollar);
+    var neckStrap = new THREE.Mesh(new THREE.TorusGeometry(0.20, 0.016, 12, 28), strapMat);
+    neckStrap.rotation.x = Math.PI / 2;
+    neckStrap.position.set(0, 0.67, 0);
+    spineGroup.add(neckStrap);
 
-    var neckGeo = new THREE.CylinderGeometry(0.12, 0.135, 0.22, 20);
-    var neck = new THREE.Mesh(neckGeo, skinMat);
-    neck.position.set(0, 0.81, 0);
+    var neck = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.125, 0.24, 24), skinMat);
+    neck.position.set(0, 0.77, 0);
     spineGroup.add(neck);
 
     var headGroup = new THREE.Group();
-    headGroup.position.set(0, 1.05, 0.02);
+    headGroup.position.set(0, 1.02, 0.02);
     spineGroup.add(headGroup);
 
-    var headGeo = new THREE.SphereGeometry(0.31, 28, 28);
-    headGeo.scale(1.0, 1.15, 1.0);
+    var headGeo = new THREE.SphereGeometry(0.235, 32, 32);
+    headGeo.scale(0.96, 1.15, 0.96);
     var head = new THREE.Mesh(headGeo, skinMat);
     headGroup.add(head);
 
-    var hairGeo = new THREE.SphereGeometry(0.33, 24, 24);
-    hairGeo.scale(1.02, 1.16, 1.04);
-    var hair = new THREE.Mesh(hairGeo, hairMat);
-    hair.position.set(0, 0.05, -0.04);
-    headGroup.add(hair);
+    var chinGeo = new THREE.CylinderGeometry(0.08, 0.16, 0.16, 20);
+    chinGeo.scale(0.95, 1.0, 0.85);
+    var chin = new THREE.Mesh(chinGeo, skinMat);
+    chin.position.set(0, -0.16, 0.04);
+    headGroup.add(chin);
 
-    var bunGeo = new THREE.SphereGeometry(0.13, 16, 16);
-    var bun = new THREE.Mesh(bunGeo, hairMat);
-    bun.position.set(0, 0.42, -0.16);
-    headGroup.add(bun);
+    var noseBridge = new THREE.Mesh(new THREE.ConeGeometry(0.024, 0.09, 16), skinMat);
+    noseBridge.rotation.x = -0.25;
+    noseBridge.position.set(0, 0.01, 0.23);
+    headGroup.add(noseBridge);
 
-    function createEye(x) {{
+    var noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.022, 16, 16), skinMat);
+    noseTip.position.set(0, -0.025, 0.242);
+    headGroup.add(noseTip);
+
+    var jawGroup = new THREE.Group();
+    jawGroup.position.set(0, -0.09, 0.22);
+    headGroup.add(jawGroup);
+
+    var upperLip = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.016, 0.075, 16), lipMat);
+    upperLip.rotation.z = Math.PI / 2;
+    upperLip.position.set(0, 0.012, 0);
+    jawGroup.add(upperLip);
+
+    var lowerLip = new THREE.Mesh(new THREE.SphereGeometry(0.020, 16, 16), lipMat);
+    lowerLip.scale.set(1.6, 0.7, 0.8);
+    lowerLip.position.set(0, -0.006, 0.005);
+    jawGroup.add(lowerLip);
+
+    function createAlmondEye(x) {
       var eyeGroup = new THREE.Group();
-      eyeGroup.position.set(x, 0.06, 0.28);
+      eyeGroup.position.set(x, 0.055, 0.205);
 
-      var sclera = new THREE.Mesh(new THREE.SphereGeometry(0.042, 16, 16), eyeWhiteMat);
+      var sclera = new THREE.Mesh(new THREE.SphereGeometry(0.038, 20, 20), eyeWhiteMat);
+      sclera.scale.set(1.2, 0.85, 0.9);
       eyeGroup.add(sclera);
 
-      var iris = new THREE.Mesh(new THREE.SphereGeometry(0.024, 16, 16), irisMat);
-      iris.position.set(0, 0, 0.026);
+      var iris = new THREE.Mesh(new THREE.SphereGeometry(0.022, 20, 20), irisMat);
+      iris.position.set(0, 0, 0.025);
       eyeGroup.add(iris);
 
-      var pupil = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 12), pupilMat);
-      pupil.position.set(0, 0, 0.038);
+      var pupil = new THREE.Mesh(new THREE.SphereGeometry(0.011, 16, 16), pupilMat);
+      pupil.position.set(0, 0, 0.035);
       eyeGroup.add(pupil);
 
-      var lidGeo = new THREE.SphereGeometry(0.046, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
-      var lid = new THREE.Mesh(lidGeo, skinMat);
+      var glint = new THREE.Mesh(new THREE.SphereGeometry(0.005, 8, 8), glintMat);
+      glint.position.set(0.007, 0.007, 0.042);
+      eyeGroup.add(glint);
+
+      var lashLine = new THREE.Mesh(new THREE.TorusGeometry(0.036, 0.005, 8, 16, Math.PI * 0.75), browMat);
+      lashLine.position.set(0, 0.012, 0.024);
+      lashLine.rotation.z = (x > 0 ? -0.1 : 0.1);
+      eyeGroup.add(lashLine);
+
+      var lid = new THREE.Mesh(new THREE.SphereGeometry(0.040, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5), skinMat);
       lid.position.set(0, 0.01, 0.01);
-      lid.rotation.x = -0.3;
+      lid.rotation.x = -0.32;
       eyeGroup.add(lid);
 
-      return {{ group: eyeGroup, lid: lid }};
-    }}
-    var eyeL = createEye(-0.11);
-    var eyeR = createEye(0.11);
+      var brow = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.006, 8, 16, Math.PI * 0.55), browMat);
+      brow.position.set(0, 0.055, 0.018);
+      brow.rotation.z = (x > 0 ? -0.15 : 0.15);
+      eyeGroup.add(brow);
+
+      return { group: eyeGroup, lid: lid };
+    }
+    var eyeL = createAlmondEye(-0.088);
+    var eyeR = createAlmondEye(0.088);
     headGroup.add(eyeL.group);
     headGroup.add(eyeR.group);
 
-    var armLeftGroup = new THREE.Group();
-    armLeftGroup.position.set(-0.38, 0.65, 0);
-    spineGroup.add(armLeftGroup);
+    var earL = new THREE.Mesh(new THREE.SphereGeometry(0.042, 12, 12), skinMat);
+    earL.scale.set(0.5, 1.2, 0.8);
+    earL.position.set(-0.23, 0.02, -0.02);
+    headGroup.add(earL);
 
-    var upperArmL = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.42, 16), tunicMat);
-    upperArmL.position.set(-0.06, -0.18, 0);
-    upperArmL.rotation.z = -0.35;
-    armLeftGroup.add(upperArmL);
+    var studL = new THREE.Mesh(new THREE.SphereGeometry(0.010, 8, 8), goldMat);
+    studL.position.set(-0.24, -0.01, -0.01);
+    headGroup.add(studL);
 
-    var forearmL = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.065, 0.38, 16), skinMat);
-    forearmL.position.set(-0.10, -0.44, 0.18);
-    forearmL.rotation.x = 0.85;
-    forearmL.rotation.z = -0.2;
-    armLeftGroup.add(forearmL);
+    var earR = new THREE.Mesh(new THREE.SphereGeometry(0.042, 12, 12), skinMat);
+    earR.scale.set(0.5, 1.2, 0.8);
+    earR.position.set(0.23, 0.02, -0.02);
+    headGroup.add(earR);
 
-    var handL = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), skinMat);
-    handL.position.set(-0.12, -0.56, 0.36);
-    armLeftGroup.add(handL);
+    var studR = new THREE.Mesh(new THREE.SphereGeometry(0.010, 8, 8), goldMat);
+    studR.position.set(0.24, -0.01, -0.01);
+    headGroup.add(studR);
 
-    var rightArmPivot = new THREE.Group();
-    rightArmPivot.position.set(0.38, 0.65, 0);
-    spineGroup.add(rightArmPivot);
+    var hairBase = new THREE.Mesh(new THREE.SphereGeometry(0.245, 24, 24), hairMat);
+    hairBase.scale.set(1.02, 1.12, 1.05);
+    hairBase.position.set(0, 0.04, -0.04);
+    headGroup.add(hairBase);
 
-    var upperArmR = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.42, 16), tunicMat);
-    upperArmR.position.set(0.06, -0.18, 0);
-    upperArmR.rotation.z = 0.35;
-    rightArmPivot.add(upperArmR);
+    var bangL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.02, 0.22, 12), hairMat);
+    bangL.rotation.z = 0.65;
+    bangL.rotation.x = -0.2;
+    bangL.position.set(-0.11, 0.16, 0.14);
+    headGroup.add(bangL);
 
-    var rightForearmGroup = new THREE.Group();
-    rightForearmGroup.position.set(0.10, -0.36, 0);
-    rightArmPivot.add(rightForearmGroup);
+    var bangR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.02, 0.22, 12), hairMat);
+    bangR.rotation.z = -0.65;
+    bangR.rotation.x = -0.2;
+    bangR.position.set(0.11, 0.16, 0.14);
+    headGroup.add(bangR);
 
-    var forearmR = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.065, 0.38, 16), skinMat);
-    forearmR.position.set(0, -0.16, 0.14);
-    forearmR.rotation.x = 0.85;
-    rightForearmGroup.add(forearmR);
+    var bunGroup = new THREE.Group();
+    bunGroup.position.set(0, 0.32, -0.15);
+    headGroup.add(bunGroup);
 
-    var handR = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), skinMat);
-    handR.position.set(0, -0.32, 0.28);
-    rightForearmGroup.add(handR);
+    var bun = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), hairMat);
+    bunGroup.add(bun);
 
-    var auraGeo = new THREE.TorusGeometry(1.25, 0.022, 16, 64);
-    var auraMesh = new THREE.Mesh(auraGeo, auraMat);
-    auraMesh.position.set(0, 0.65, -0.25);
-    coachGroup.add(auraMesh);
+    var bunBraid = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.025, 12, 24), hairMat);
+    bunBraid.rotation.x = Math.PI / 2;
+    bunGroup.add(bunBraid);
 
-    var starGeo = new THREE.BufferGeometry();
-    var starCount = 75;
+    var hairPin = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.32, 12), goldMat);
+    hairPin.rotation.z = Math.PI / 4;
+    hairPin.position.set(0, 0.02, 0.02);
+    bunGroup.add(hairPin);
+
+    var armL = new THREE.Group();
+    armL.position.set(-0.32, 0.58, 0);
+    spineGroup.add(armL);
+
+    var upperArmL = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.065, 0.38, 16), skinMat);
+    upperArmL.position.set(-0.06, -0.16, 0);
+    upperArmL.rotation.z = -0.32;
+    armL.add(upperArmL);
+
+    var forearmL = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.052, 0.36, 16), skinMat);
+    forearmL.position.set(-0.10, -0.40, 0.16);
+    forearmL.rotation.x = 0.88;
+    forearmL.rotation.z = -0.18;
+    armL.add(forearmL);
+
+    var handLGroup = new THREE.Group();
+    handLGroup.position.set(-0.12, -0.52, 0.32);
+    armL.add(handLGroup);
+
+    var palmL = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 12), skinMat);
+    palmL.scale.set(1.0, 0.45, 1.2);
+    handLGroup.add(palmL);
+
+    var mudraRingL = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.008, 8, 16), skinMat);
+    mudraRingL.position.set(-0.01, 0.02, 0.05);
+    mudraRingL.rotation.x = 0.4;
+    handLGroup.add(mudraRingL);
+
+    var armRPivot = new THREE.Group();
+    armRPivot.position.set(0.32, 0.58, 0);
+    spineGroup.add(armRPivot);
+
+    var upperArmR = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.065, 0.38, 16), skinMat);
+    upperArmR.position.set(0.06, -0.16, 0);
+    upperArmR.rotation.z = 0.32;
+    armRPivot.add(upperArmR);
+
+    var forearmRPivot = new THREE.Group();
+    forearmRPivot.position.set(0.09, -0.32, 0);
+    armRPivot.add(forearmRPivot);
+
+    var forearmR = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.052, 0.36, 16), skinMat);
+    forearmR.position.set(0, -0.14, 0.14);
+    forearmR.rotation.x = 0.88;
+    forearmRPivot.add(forearmR);
+
+    var handRGroup = new THREE.Group();
+    handRGroup.position.set(0, -0.28, 0.28);
+    forearmRPivot.add(handRGroup);
+
+    var palmR = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 12), skinMat);
+    palmR.scale.set(1.0, 0.45, 1.2);
+    handRGroup.add(palmR);
+
+    var mudraRingR = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.008, 8, 16), skinMat);
+    mudraRingR.position.set(0.01, 0.02, 0.05);
+    mudraRingR.rotation.x = 0.4;
+    handRGroup.add(mudraRingR);
+
+    var haloGeo = new THREE.TorusGeometry(1.15, 0.018, 16, 64);
+    var haloMesh = new THREE.Mesh(haloGeo, haloMat);
+    haloMesh.position.set(0, 0.62, -0.25);
+    coachGroup.add(haloMesh);
+
+    var starCount = 80;
     var starPos = new Float32Array(starCount * 3);
-    for (var i = 0; i < starCount * 3; i += 3) {{
-      starPos[i] = (Math.random() - 0.5) * 5;
-      starPos[i + 1] = Math.random() * 3 - 0.5;
-      starPos[i + 2] = (Math.random() - 0.5) * 3;
-    }}
+    for (var i = 0; i < starCount * 3; i += 3) {
+      starPos[i] = (Math.random() - 0.5) * 4.5;
+      starPos[i + 1] = Math.random() * 3.0 - 0.5;
+      starPos[i + 2] = (Math.random() - 0.5) * 2.8;
+    }
+    var starGeo = new THREE.BufferGeometry();
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    var starMat = new THREE.PointsMaterial({{ size: 0.045, color: 0x5eead4, transparent: true, opacity: 0.7 }});
+    var starMat = new THREE.PointsMaterial({ size: 0.040, color: 0x5eead4, transparent: true, opacity: 0.75 });
     var starField = new THREE.Points(starGeo, starMat);
     scene.add(starField);
 
     var mouseX = 0, mouseY = 0;
     var targetHeadY = 0, targetHeadX = 0;
-    window.addEventListener('pointermove', function(e) {{
+    window.addEventListener('pointermove', function(e) {
       var rect = canvas.getBoundingClientRect();
       mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouseY = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
-      targetHeadY = mouseX * 0.45;
-      targetHeadX = -mouseY * 0.25;
-    }});
+      targetHeadY = mouseX * 0.40;
+      targetHeadX = -mouseY * 0.22;
+    });
 
     var audioCtx = null;
-    function getAudio() {{
-      if (!audioCtx) {{
+    function getAudio() {
+      if (!audioCtx) {
         var AC = window.AudioContext || window.webkitAudioContext;
         if (AC) audioCtx = new AC();
-      }}
+      }
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       return audioCtx;
-    }}
+    }
 
-    function playTone(freq, type, duration) {{
+    function playChime(freq, type, duration) {
       var ac = getAudio();
       if (!ac) return;
-      try {{
+      try {
         var osc = ac.createOscillator();
         var gain = ac.createGain();
         osc.type = type || 'sine';
         osc.frequency.setValueAtTime(freq, ac.currentTime);
         gain.gain.setValueAtTime(0.08, ac.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + (duration || 0.8));
+        gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + (duration || 1.0));
         osc.connect(gain);
         gain.connect(ac.destination);
         osc.start();
-        osc.stop(ac.currentTime + (duration || 0.8));
-      }} catch(e) {{}}
-    }}
+        osc.stop(ac.currentTime + (duration || 1.0));
+      } catch(e) {}
+    }
 
-    function speakAloud(text) {{
+    function speakAloud(text) {
       document.getElementById('coachSpeechText').innerText = '"' + text + '"';
       if (!voiceEnabled || !window.speechSynthesis) return;
-      try {{
+      try {
         window.speechSynthesis.cancel();
         var utter = new SpeechSynthesisUtterance(text);
         utter.rate = 0.90;
-        utter.pitch = 1.05;
+        utter.pitch = 1.06;
         var voices = window.speechSynthesis.getVoices();
-        for (var i = 0; i < voices.length; i++) {{
+        for (var i = 0; i < voices.length; i++) {
           var v = voices[i];
-          if (v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Karen') || v.name.includes('Zira') || v.name.includes('India'))) {{
+          if (v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('India'))) {
             utter.voice = v;
             break;
-          }}
-        }}
+          }
+        }
         window.speechSynthesis.speak(utter);
-      }} catch (e) {{}}
-    }}
+      } catch (e) {}
+    }
 
-    function toggleVoice() {{
+    function toggleVoice() {
       voiceEnabled = !voiceEnabled;
       document.getElementById('voiceBtn').innerText = voiceEnabled ? '🗣️ Voice: ON' : '🔇 Voice: OFF';
       if (!voiceEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
-    }}
+    }
 
-    function startBoxBreathing() {{
+    function startBoxBreathing() {
       breathPacerActive = true;
       somaticHandOnHeart = false;
       shoulderRollActive = false;
@@ -5481,174 +5654,189 @@ def render_3d_human_coach_widget(user_name: str = "Member", language: str = "en"
       pacerSeconds = 4;
       document.getElementById('pacerBadge').style.display = 'inline-flex';
       setActiveBtn('btnBreath');
-      playTone(432, 'sine', 1.0);
+      playChime(432, 'sine', 1.2);
       speakAloud("Let us practice 4-4-4 Pranayama Box Breathing together. Inhale deeply through your nose as my chest expands.");
-    }}
+    }
 
-    function startHandOnHeart() {{
+    function startHandOnHeart() {
       breathPacerActive = false;
       somaticHandOnHeart = true;
       shoulderRollActive = false;
       document.getElementById('pacerBadge').style.display = 'none';
       setActiveBtn('btnHeart');
-      playTone(528, 'triangle', 1.2);
-      speakAloud("Place your right hand over your chest. Feel the warm, steady rhythm of your heartbeat. This somatic contact triggers natural vagal calming. You are safe and centered.");
-    }}
+      playChime(528, 'triangle', 1.4);
+      speakAloud("Place your right hand flat over your chest. Feel the warmth and steady rhythm of your heartbeat. This triggers natural somatic oxytocin release. You are grounded, safe, and seen.");
+    }
 
-    function startShoulderReset() {{
+    function startShoulderReset() {
       breathPacerActive = false;
       somaticHandOnHeart = false;
       shoulderRollActive = true;
       document.getElementById('pacerBadge').style.display = 'none';
       setActiveBtn('btnShoulder');
-      playTone(396, 'sine', 0.8);
-      speakAloud("Gently inhale and draw both shoulders up toward your ears. Now roll them back and exhale completely, letting all postural strain dissolve.");
-    }}
+      playChime(396, 'sine', 1.0);
+      speakAloud("Inhale and lift both shoulders gently up toward your ears. Now roll them backward and exhale completely, letting all tension melt away.");
+    }
 
-    function giveMindfulWisdom() {{
+    function giveMindfulWisdom() {
       breathPacerActive = false;
       somaticHandOnHeart = false;
       shoulderRollActive = false;
       document.getElementById('pacerBadge').style.display = 'none';
       setActiveBtn('btnWisdom');
       var pearls = [
-        "Thoughts and code reviews are like passing clouds in the sky. You are the sky—enduring, grounded, and clear.",
-        "When cognitive overwhelm whispers urgency, ask yourself: 'Can I offer my nervous system one kind minute of stillness right now?'",
-        "Imposter syndrome is simply your brain trying to protect you. Thank it kindly, and remind yourself of how much you have solved.",
-        "Sustainable breakthroughs are never built on relentless strain. They compound through mindful, steady pacing."
+        "Thoughts and code reviews are like passing weather across an open sky. You are the enduring sky—still, grounded, and clear.",
+        "When cognitive overwhelm whispers urgency, pause and ask: 'If I take one slow breath right now, will anything collapse?' In 99% of cases, the answer is no.",
+        "Imposter syndrome is simply your brain trying to protect you. Thank it gently, and remind yourself of all the complex problems you have already solved.",
+        "Sustainable breakthroughs are never born of constant strain. They compound through mindful, steady pacing."
       ];
       var pick = pearls[Math.floor(Math.random() * pearls.length)];
-      playTone(432, 'sine', 1.0);
+      playChime(432, 'sine', 1.2);
       speakAloud(pick);
-    }}
+    }
 
-    function resetToMeditate() {{
+    function resetToMeditate() {
       breathPacerActive = false;
       somaticHandOnHeart = false;
       shoulderRollActive = false;
       document.getElementById('pacerBadge').style.display = 'none';
       setActiveBtn('btnReset');
-      speakAloud("Returning to centered meditation stillness. Take another peaceful breath at your own natural pace.");
-    }}
+      speakAloud("Returning to centered stillness. Feel the quiet stability in your seat and take a smooth, effortless breath.");
+    }
 
-    function setActiveBtn(id) {{
+    function askTopic(topic) {
+      var responses = {
+        "deadline": "When deadlines loom large, the nervous system enters tunnel vision. Let's separate the timeline from the panic. What is the single smallest action you can take in the next 15 minutes?",
+        "imposter": "Code reviews evaluate the artifact, never your worth as an engineer. When self-doubt whispers, label it kindly: 'I notice my brain telling an imposter story.' Then take one conscious breath.",
+        "fatigue": "Cognitive fatigue means your prefrontal cortex has spent its fuel. Give yourself permission for a 2-minute visual rest away from all screens right now.",
+        "boundary": "Professional boundaries preserve quality of thought. An after-hours Slack can wait until morning. Protect your evening recovery like a core production deliverable."
+      };
+      var msg = responses[topic] || "Take a gentle breath and let us explore this together.";
+      playChime(432, 'sine', 1.0);
+      speakAloud(msg);
+    }
+
+    function setActiveBtn(id) {
       var ids = ['btnBreath', 'btnHeart', 'btnShoulder', 'btnWisdom', 'btnReset'];
-      for (var i = 0; i < ids.length; i++) {{
+      for (var i = 0; i < ids.length; i++) {
         var el = document.getElementById(ids[i]);
         if (el) el.className = 'action-btn' + (ids[i] === id ? ' active' : '');
-      }}
-    }}
+      }
+    }
 
-    setInterval(function() {{
+    setInterval(function() {
       if (!breathPacerActive) return;
       pacerSeconds--;
-      if (pacerSeconds <= 0) {{
+      if (pacerSeconds <= 0) {
         pacerPhase = (pacerPhase + 1) % 4;
         pacerSeconds = 4;
-        if (pacerPhase === 0) {{
-          playTone(432, 'sine', 0.5);
-          if (voiceEnabled) speakAloud("Inhale slowly...");
-        }} else if (pacerPhase === 1) {{
-          playTone(528, 'sine', 0.5);
-          if (voiceEnabled) speakAloud("Hold gently...");
-        }} else if (pacerPhase === 2) {{
-          playTone(396, 'sine', 0.5);
-          if (voiceEnabled) speakAloud("Exhale completely...");
-        }} else {{
-          playTone(432, 'sine', 0.5);
-          if (voiceEnabled) speakAloud("Rest and reset.");
-        }}
-      }}
+        if (pacerPhase === 0) {
+          playChime(432, 'sine', 0.6);
+          if (voiceEnabled) speakAloud("Inhale slowly through your nose...");
+        } else if (pacerPhase === 1) {
+          playChime(528, 'sine', 0.6);
+          if (voiceEnabled) speakAloud("Hold gently and stay relaxed...");
+        } else if (pacerPhase === 2) {
+          playChime(396, 'sine', 0.6);
+          if (voiceEnabled) speakAloud("Exhale completely through your mouth...");
+        } else {
+          playChime(432, 'sine', 0.6);
+          if (voiceEnabled) speakAloud("Rest and feel the stillness.");
+        }
+      }
       var phaseNames = ['🌬️ Inhale', '⏸️ Hold', '💨 Exhale', '🌿 Rest'];
       document.getElementById('pacerBadge').innerText = phaseNames[pacerPhase] + ' · ' + pacerSeconds + 's';
-    }}, 1000);
+    }, 1000);
 
     var clock = new THREE.Clock();
     var blinkTimer = 0;
     var isBlinking = false;
 
-    function animate() {{
+    function animate() {
       requestAnimationFrame(animate);
       var t = clock.getElapsedTime();
 
-      starField.rotation.y = t * 0.02;
+      starField.rotation.y = t * 0.018;
 
       var breathFreq = breathPacerActive ? 0.392 : 0.85;
       var breathVal = Math.sin(t * breathFreq);
-      var chestScale = 1.0 + 0.06 * breathVal;
+      var chestScale = 1.0 + 0.05 * breathVal;
       torso.scale.set(chestScale, 1.0 + 0.02 * breathVal, chestScale);
-      spineGroup.position.y = 0.15 + 0.02 * breathVal;
+      spineGroup.position.y = 0.14 + 0.018 * breathVal;
 
-      auraMesh.scale.set(1.0 + 0.05 * breathVal, 1.0 + 0.05 * breathVal, 1.0);
-      auraMesh.rotation.z = t * 0.1;
+      haloMesh.scale.set(1.0 + 0.04 * breathVal, 1.0 + 0.04 * breathVal, 1.0);
+      haloMesh.rotation.z = t * 0.08;
 
-      headGroup.rotation.y += (targetHeadY - headGroup.rotation.y) * 0.06;
-      headGroup.rotation.x += (targetHeadX - headGroup.rotation.x) * 0.06;
+      headGroup.rotation.y += (targetHeadY - headGroup.rotation.y) * 0.05;
+      headGroup.rotation.x += (targetHeadX - headGroup.rotation.x) * 0.05;
 
       blinkTimer += 0.016;
-      if (!isBlinking && blinkTimer > 3.6 + Math.sin(t) * 1.0) {{
+      if (!isBlinking && blinkTimer > 3.8 + Math.sin(t) * 1.2) {
         isBlinking = true;
         blinkTimer = 0;
-      }}
-      if (isBlinking) {{
-        eyeL.lid.scale.y = 1.8;
-        eyeR.lid.scale.y = 1.8;
-        if (blinkTimer > 0.14) {{
+      }
+      if (isBlinking) {
+        eyeL.lid.scale.y = 1.9;
+        eyeR.lid.scale.y = 1.9;
+        if (blinkTimer > 0.13) {
           eyeL.lid.scale.y = 1.0;
           eyeR.lid.scale.y = 1.0;
           isBlinking = false;
           blinkTimer = 0;
-        }}
-      }}
+        }
+      }
 
-      if (somaticHandOnHeart) {{
-        rightArmPivot.rotation.z += (-1.15 - rightArmPivot.rotation.z) * 0.08;
-        rightArmPivot.rotation.x += (0.75 - rightArmPivot.rotation.x) * 0.08;
-        rightForearmGroup.rotation.y += (1.4 - rightForearmGroup.rotation.y) * 0.08;
-        rightForearmGroup.rotation.z += (0.4 - rightForearmGroup.rotation.z) * 0.08;
-      }} else {{
-        rightArmPivot.rotation.z += (0.0 - rightArmPivot.rotation.z) * 0.08;
-        rightArmPivot.rotation.x += (0.0 - rightArmPivot.rotation.x) * 0.08;
-        rightForearmGroup.rotation.y += (0.0 - rightForearmGroup.rotation.y) * 0.08;
-        rightForearmGroup.rotation.z += (0.0 - rightForearmGroup.rotation.z) * 0.08;
-      }}
+      if (somaticHandOnHeart) {
+        armRPivot.rotation.z += (-1.10 - armRPivot.rotation.z) * 0.08;
+        armRPivot.rotation.x += (0.72 - armRPivot.rotation.x) * 0.08;
+        forearmRPivot.rotation.y += (1.45 - forearmRPivot.rotation.y) * 0.08;
+        forearmRPivot.rotation.z += (0.35 - forearmRPivot.rotation.z) * 0.08;
+      } else {
+        armRPivot.rotation.z += (0.0 - armRPivot.rotation.z) * 0.08;
+        armRPivot.rotation.x += (0.0 - armRPivot.rotation.x) * 0.08;
+        forearmRPivot.rotation.y += (0.0 - forearmRPivot.rotation.y) * 0.08;
+        forearmRPivot.rotation.z += (0.0 - forearmRPivot.rotation.z) * 0.08;
+      }
 
-      if (shoulderRollActive) {{
+      if (shoulderRollActive) {
         var rollVal = Math.sin(t * 2.5);
-        armLeftGroup.position.y = 0.65 + 0.08 * rollVal;
-        rightArmPivot.position.y = 0.65 + 0.08 * rollVal;
-      }} else {{
-        armLeftGroup.position.y = 0.65;
-        if (!somaticHandOnHeart) rightArmPivot.position.y = 0.65;
-      }}
+        armL.position.y = 0.58 + 0.07 * rollVal;
+        armRPivot.position.y = 0.58 + 0.07 * rollVal;
+      } else {
+        armL.position.y = 0.58;
+        if (!somaticHandOnHeart) armRPivot.position.y = 0.58;
+      }
 
-      if (window.speechSynthesis && window.speechSynthesis.speaking) {{
-        headGroup.position.y = 1.05 + Math.sin(t * 12) * 0.012;
-      }} else {{
-        headGroup.position.y = 1.05;
-      }}
+      if (window.speechSynthesis && window.speechSynthesis.speaking) {
+        headGroup.position.y = 1.02 + Math.sin(t * 14) * 0.010;
+        jawGroup.position.y = -0.09 - Math.abs(Math.sin(t * 12)) * 0.018;
+      } else {
+        headGroup.position.y = 1.02;
+        jawGroup.position.y = -0.09;
+      }
 
       renderer.render(scene, camera);
-    }}
+    }
     animate();
 
-    function resize() {{
+    function resize() {
       var w = container.clientWidth || window.innerWidth;
-      var h = container.clientHeight || 520;
+      var h = container.clientHeight || 560;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-    }}
+    }
     window.addEventListener('resize', resize);
-    if (window.ResizeObserver) {{
-      try {{
+    if (window.ResizeObserver) {
+      try {
         new ResizeObserver(resize).observe(container);
-      }} catch(e) {{}}
-    }}
+      } catch(e) {}
+    }
     setTimeout(resize, 40);
   </script>
 </body>
 </html>"""
+    return html.replace("__USER_NAME__", safe_name).replace("__LANGUAGE__", language)
 
 
 
@@ -6643,7 +6831,7 @@ def render_equiai_companion_view():
         # Embed Interactive 3D Humanoid Wellness Coach
         st.components.v1.html(
             render_3d_human_coach_widget(user_name=user_name, language=st.session_state.get("app_language", "en")),
-            height=535,
+            height=568,
         )
 
         # Interactive Somatic & Voice Coaching Control Center
@@ -6666,6 +6854,42 @@ def render_equiai_companion_view():
         with ch_c3:
             if st.button("🔔 432Hz Gong Chime", type="secondary", width="stretch", key="coach_gong_btn"):
                 st.toast("🔔 432Hz Harmonic Frequency Chimed! Take one slow breath.", icon="✨")
+
+        # Interactive Live Dialogue Query for Aria
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("##### 💬 Live Coaching Inquiries for Coach Aria")
+            st.caption("Ask Coach Aria for personalized micro-coaching, somatic grounding, or guidance on navigating high-pressure workplace moments.")
+            c_in1, c_in2 = st.columns([3.5, 1], gap="small")
+            with c_in1:
+                aria_query = st.text_input(
+                    "Ask Coach Aria:",
+                    placeholder="e.g. How do I maintain equanimity through back-to-back sprint reviews?",
+                    key="aria_direct_query_input",
+                    label_visibility="collapsed",
+                )
+            with c_in2:
+                aria_submit = st.button("✨ Ask Aria", type="primary", width="stretch", key="aria_direct_submit_btn")
+
+            if aria_submit and aria_query:
+                with st.spinner("Coach Aria is synthesizing grounded guidance..."):
+                    aria_ctx = {
+                        "dominant_emotion": last_rep.get("predicted_emotion") if last_rep else "neutral",
+                        "compound": last_rep.get("compound_score", 0.0) if last_rep else 0.0,
+                        "streak": "3-Day Streak",
+                        "user_name": user_name,
+                        "app_language": st.session_state.get("app_language", "en"),
+                    }
+                    aria_reply = generate_equiai_response(aria_query, aria_ctx)
+                    st.markdown(
+                        f"""
+                        <div style="background: linear-gradient(135deg, rgba(240, 253, 250, 0.95), rgba(204, 251, 241, 0.7)); border: 1.5px solid #5eead4; border-radius: 14px; padding: 16px 20px; margin-top: 10px;">
+                            <div style="font-size: 0.72rem; font-weight: 800; color: #0f766e; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">🧘 Coach Aria Responds</div>
+                            <div style="font-size: 0.88rem; color: #0f172a; line-height: 1.55;">{aria_reply}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
         # Neuroscience of Embodied Coaching Cards
         card_col1, card_col2 = st.columns(2, gap="medium")
