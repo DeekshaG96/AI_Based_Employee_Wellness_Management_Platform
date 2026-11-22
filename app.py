@@ -5917,6 +5917,29 @@ def render_zen_canvas_view():
 
 def render_holistic_habits_view():
     """Render the Holistic Lifestyle & Habit Correlation Matrix (bmartin042503/easpace inspired)."""
+    # Initialize habit state defaults if not already present
+    if "habit_sleep_val" not in st.session_state:
+        st.session_state["habit_sleep_val"] = 7.5
+    if "habit_water_val" not in st.session_state:
+        st.session_state["habit_water_val"] = 5
+    if "habit_breaks_val" not in st.session_state:
+        st.session_state["habit_breaks_val"] = 3
+    if "habit_move_val" not in st.session_state:
+        st.session_state["habit_move_val"] = 20
+    if "habit_social_val" not in st.session_state:
+        st.session_state["habit_social_val"] = "Solo Deep Focus (Quiet Space)"
+    if "habit_history_records" not in st.session_state:
+        st.session_state["habit_history_records"] = [
+            {"day": "Mon", "sleep": 7.0, "water": 6, "breaks": 3, "move": 25, "score": 88, "completed": True},
+            {"day": "Tue", "sleep": 7.5, "water": 7, "breaks": 4, "move": 30, "score": 94, "completed": True},
+            {"day": "Wed", "sleep": 6.5, "water": 5, "breaks": 2, "move": 15, "score": 78, "completed": True},
+            {"day": "Thu", "sleep": 8.0, "water": 8, "breaks": 4, "move": 20, "score": 96, "completed": True},
+            {"day": "Fri", "sleep": 7.0, "water": 6, "breaks": 3, "move": 20, "score": 86, "completed": True},
+            {"day": "Sat", "sleep": 8.5, "water": 7, "breaks": 5, "move": 40, "score": 98, "completed": True},
+        ]
+    if "habit_committed_today" not in st.session_state:
+        st.session_state["habit_committed_today"] = False
+
     st.markdown(
         """
         <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.82) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 22px; padding: 22px 30px; box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.10), 0 4px 16px rgba(0, 0, 0, 0.02); margin-bottom: 22px; backdrop-filter: blur(16px);">
@@ -5931,6 +5954,7 @@ def render_holistic_habits_view():
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     <span style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #166534;">🔒 Offline Sovereignty</span>
                     <span style="background: #fffbeb; border: 1px solid #fde68a; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #92400e;">⚡ Habit Correlation</span>
+                    <span style="background: #e0f2fe; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #0369a1;">🔥 Active Streak: 7 Days</span>
                 </div>
             </div>
         </div>
@@ -5939,16 +5963,73 @@ def render_holistic_habits_view():
     )
 
     # 5 Key Physiological Levers
-    h_col1, h_col2 = st.columns([1.3, 1.2], gap="large")
+    h_col1, h_col2 = st.columns([1.25, 1.25], gap="large")
 
     with h_col1, st.container(border=True):
         st.markdown("#### 🌿 Daily Physiological Levers")
         st.caption("Log today's foundational habits to discover your personal correlation with emotional clarity.")
 
-        sleep_hrs = st.slider("😴 Restorative Sleep (Hours):", 4.0, 10.0, 7.5, step=0.5, key="habit_sleep_val")
-        water_cups = st.slider("💧 Hydration (Cups of Water / Tea · 250ml each):", 0, 10, 5, step=1, key="habit_water_val")
-        breaks_count = st.slider("👁️ Screen-Free Micro-Breaks Taken:", 0, 8, 3, step=1, key="habit_breaks_val")
-        movement_mins = st.slider("🚶 Physical Movement / Yoga (Minutes):", 0, 60, 20, step=5, key="habit_move_val")
+        # Quick-Action 1-Click Micro Loggers
+        st.markdown(
+            """
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #0f766e; letter-spacing: 0.05em; margin-bottom: 8px;">
+                ⚡ 1-Click Quick Loggers:
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        qc1, qc2, qc3, qc4 = st.columns(4, gap="small")
+        with qc1:
+            if st.button("💧 +1 Water", help="Add 1 glass (250ml) hydration", width="stretch", key="btn_quick_water"):
+                st.session_state["habit_water_val"] = min(10, st.session_state.get("habit_water_val", 5) + 1)
+                st.toast("💧 Logged 1 glass of water (+250ml)!", icon="✨")
+                st.rerun()
+        with qc2:
+            if st.button("🍵 +1 Tea", help="Add 1 cup herbal tea", width="stretch", key="btn_quick_tea"):
+                st.session_state["habit_water_val"] = min(10, st.session_state.get("habit_water_val", 5) + 1)
+                st.toast("🍵 Logged 1 cup of soothing herbal tea!", icon="🌿")
+                st.rerun()
+        with qc3:
+            if st.button("👁️ +1 Break", help="Log a 2-min screen-free pause", width="stretch", key="btn_quick_break"):
+                st.session_state["habit_breaks_val"] = min(8, st.session_state.get("habit_breaks_val", 3) + 1)
+                st.toast("👁️ Screen pause logged! Eye strain reduced.", icon="👁️")
+                st.rerun()
+        with qc4:
+            if st.button("🚶 +10m Move", help="Log 10 minutes movement or stretch", width="stretch", key="btn_quick_move"):
+                st.session_state["habit_move_val"] = min(60, st.session_state.get("habit_move_val", 20) + 10)
+                st.toast("🚶 10 minutes somatic movement logged!", icon="🧘")
+                st.rerun()
+
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+        sleep_hrs = st.slider(
+            "😴 Restorative Sleep (Hours):",
+            4.0, 10.0,
+            value=float(st.session_state.get("habit_sleep_val", 7.5)),
+            step=0.5,
+            key="habit_sleep_val"
+        )
+        water_cups = st.slider(
+            f"💧 Hydration ({st.session_state.get('habit_water_val', 5) * 250} ml · Cups of Water / Tea):",
+            0, 10,
+            value=int(st.session_state.get("habit_water_val", 5)),
+            step=1,
+            key="habit_water_val"
+        )
+        breaks_count = st.slider(
+            "👁️ Screen-Free Micro-Breaks Taken:",
+            0, 8,
+            value=int(st.session_state.get("habit_breaks_val", 3)),
+            step=1,
+            key="habit_breaks_val"
+        )
+        movement_mins = st.slider(
+            "🚶 Physical Movement / Yoga (Minutes):",
+            0, 60,
+            value=int(st.session_state.get("habit_move_val", 20)),
+            step=5,
+            key="habit_move_val"
+        )
         social_mode = st.selectbox(
             "🤝 Meaningful Connection Today:",
             ["Solo Deep Focus (Quiet Space)", "1-on-1 Coffee / Peer Check-in", "Collaborative Team Sync", "Mentor / Leader Guidance"],
@@ -5956,30 +6037,192 @@ def render_holistic_habits_view():
         )
 
         # Foundation Index Calculation
-        # Sleep (target 7-8h: 30pts), Water (target 6-8 cups: 25pts), Breaks (target 3-4: 20pts), Move (target 20m+: 25pts)
+        # Sleep (target 7.5-8h: 30pts), Water (target 6-8 cups: 25pts), Breaks (target 3-4: 20pts), Move (target 20m+: 25pts)
         pts_sleep = min(30, int((sleep_hrs / 7.5) * 30))
         pts_water = min(25, int((water_cups / 6) * 25))
         pts_breaks = min(20, int((breaks_count / 3) * 20))
         pts_move = min(25, int((movement_mins / 20) * 25))
         total_foundation = pts_sleep + pts_water + pts_breaks + pts_move
 
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+        # Commit Today's Habits Button
+        commit_col1, commit_col2 = st.columns([1.8, 1.2], gap="small")
+        with commit_col1:
+            if st.button("💾 Commit Today's Habit Log (+30 Pts)", type="primary", width="stretch", key="btn_commit_habits"):
+                st.session_state["habit_committed_today"] = True
+                today_entry = {
+                    "day": "Today",
+                    "sleep": sleep_hrs,
+                    "water": water_cups,
+                    "breaks": breaks_count,
+                    "move": movement_mins,
+                    "score": total_foundation,
+                    "completed": True,
+                }
+                # Check if Today is already in history, update or append
+                records = st.session_state.get("habit_history_records", [])
+                filtered = [r for r in records if r.get("day") != "Today"]
+                filtered.append(today_entry)
+                st.session_state["habit_history_records"] = filtered
+                st.toast("🎉 Daily habit log committed! +30 Resilience Points earned.", icon="🌟")
+                st.balloons()
+                st.rerun()
+
+        with commit_col2:
+            if st.session_state.get("habit_committed_today", False):
+                st.markdown(
+                    """
+                    <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 8px 12px; text-align: center; color: #166534; font-size: 0.8rem; font-weight: 700;">
+                        ✅ Logged for Today
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.caption("Pending today's commit")
+
     with h_col2, st.container(border=True):
         st.markdown("#### ⚡ Habit-to-Resilience Correlation Scorecard")
+        
+        # Status headline based on foundation score
+        if total_foundation >= 85:
+            eq_label = "Optimal Autonomic Equilibrium"
+            eq_color = "#166534"
+            eq_badge_bg = "rgba(240, 253, 250, 0.9)"
+            eq_border = "rgba(45, 212, 191, 0.6)"
+        elif total_foundation >= 70:
+            eq_label = "Balanced Physiological Baseline"
+            eq_color = "#0369a1"
+            eq_badge_bg = "rgba(240, 249, 255, 0.9)"
+            eq_border = "rgba(56, 189, 248, 0.6)"
+        else:
+            eq_label = "Recovery Rebuilding Required"
+            eq_color = "#b45309"
+            eq_badge_bg = "rgba(255, 251, 235, 0.9)"
+            eq_border = "rgba(251, 191, 36, 0.6)"
+
         st.markdown(
             f"""
-            <div style="background: linear-gradient(135deg, rgba(240, 253, 250, 0.9), rgba(255, 255, 255, 0.95)); border: 1px solid rgba(45, 212, 191, 0.5); border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; text-align: center;">
+            <div style="background: {eq_badge_bg}; border: 1.5px solid {eq_border}; border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; text-align: center; box-shadow: 0 4px 14px -3px rgba(15, 118, 110, 0.08);">
                 <div style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">Physiological Foundation Index</div>
-                <div style="font-size: 2.2rem; font-weight: 800; color: #0f766e; margin: 2px 0;">{total_foundation}/100</div>
-                <div style="font-size: 0.82rem; color: #166534; font-weight: 600;">● Optimal Autonomic Equilibrium</div>
+                <div style="font-size: 2.3rem; font-weight: 800; color: #0f766e; margin: 2px 0;">{total_foundation}/100</div>
+                <div style="font-size: 0.82rem; color: {eq_color}; font-weight: 600;">● {eq_label}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        st.markdown("##### 📈 Longitudinal Insights from Your Check-ins:")
+        # 5-Pillar Polar / Radar Visualization (Plotly)
+        radar_categories = ["Sleep Rest", "Hydration", "Micro-Breaks", "Movement", "Social Balance"]
+        score_sleep = min(100.0, (sleep_hrs / 8.0) * 100.0)
+        score_water = min(100.0, (water_cups / 8.0) * 100.0)
+        score_breaks = min(100.0, (breaks_count / 5.0) * 100.0)
+        score_move = min(100.0, (movement_mins / 30.0) * 100.0)
+        social_scores = {
+            "Solo Deep Focus (Quiet Space)": 85.0,
+            "1-on-1 Coffee / Peer Check-in": 95.0,
+            "Collaborative Team Sync": 80.0,
+            "Mentor / Leader Guidance": 90.0,
+        }
+        score_social = social_scores.get(social_mode, 80.0)
+        current_vals = [score_sleep, score_water, score_breaks, score_move, score_social]
+        target_vals = [100.0, 100.0, 100.0, 100.0, 100.0]
+
+        # Close polygon
+        cats_closed = radar_categories + [radar_categories[0]]
+        cur_closed = current_vals + [current_vals[0]]
+        tgt_closed = target_vals + [target_vals[0]]
+
+        fig_radar = go.Figure()
+        fig_radar.add_trace(go.Scatterpolar(
+            r=tgt_closed,
+            theta=cats_closed,
+            fill="toself",
+            name="Optimal Target",
+            line={"color": "rgba(148, 163, 184, 0.6)", "dash": "dash", "width": 1.5},
+            fillcolor="rgba(241, 245, 249, 0.45)",
+            hoverinfo="theta+r",
+        ))
+        fig_radar.add_trace(go.Scatterpolar(
+            r=cur_closed,
+            theta=cats_closed,
+            fill="toself",
+            name="Your Level",
+            line={"color": "#0d9488", "width": 2.5},
+            fillcolor="rgba(13, 148, 136, 0.28)",
+            hoverinfo="theta+r",
+        ))
+        fig_radar.update_layout(
+            polar={
+                "radialaxis": {
+                    "visible": True,
+                    "range": [0, 100],
+                    "showticklabels": False,
+                    "linecolor": "rgba(203, 213, 225, 0.6)",
+                    "gridcolor": "rgba(203, 213, 225, 0.4)",
+                },
+                "angularaxis": {
+                    "linecolor": "rgba(203, 213, 225, 0.6)",
+                    "gridcolor": "rgba(203, 213, 225, 0.4)",
+                    "tickfont": {"size": 11, "color": "#334155", "family": "system-ui"},
+                },
+                "bgcolor": "rgba(255, 255, 255, 0.6)",
+            },
+            margin={"l": 30, "r": 30, "t": 15, "b": 15},
+            height=250,
+            showlegend=True,
+            legend={
+                "orientation": "h",
+                "yanchor": "bottom",
+                "y": -0.22,
+                "xanchor": "center",
+                "x": 0.5,
+                "font": {"size": 10, "color": "#64748b"},
+            },
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+        st.plotly_chart(fig_radar, width="stretch", config={"displayModeBar": False})
+
+        # 7-Day Consistency Weekly Tracker Grid
+        st.markdown(
+            """
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #0f766e; letter-spacing: 0.05em; margin: 10px 0 6px 0;">
+                📅 7-Day Habit Consistency Track:
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        
+        records = st.session_state.get("habit_history_records", [])
+        day_cols = st.columns(len(records), gap="small")
+        for idx, rec in enumerate(records):
+            with day_cols[idx]:
+                day_name = rec.get("day", f"D{idx+1}")
+                day_score = rec.get("score", 85)
+                is_today = day_name == "Today"
+                border_style = "2px solid #0d9488" if is_today else "1px solid #e2e8f0"
+                bg_style = "#f0fdf4" if day_score >= 80 else "#fffbeb"
+                text_col = "#166534" if day_score >= 80 else "#92400e"
+                st.markdown(
+                    f"""
+                    <div style="background: {bg_style}; border: {border_style}; border-radius: 8px; padding: 6px 2px; text-align: center;">
+                        <div style="font-size: 0.68rem; font-weight: 700; color: #64748b;">{day_name}</div>
+                        <div style="font-size: 0.85rem; font-weight: 800; color: {text_col};">{day_score}</div>
+                        <div style="font-size: 0.65rem; color: #0d9488;">✓</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        st.markdown("##### 📈 Dynamic Habit-to-Mood Insights:")
         st.markdown("- **😴 Sleep Impact**: Logging >= 7.5 hrs sleep correlates with **+0.38 higher VADER compound score** on demanding sprint days.")
-        st.markdown(f"- **💧 Hydration Shield**: Current {water_cups * 250} ml intake reduces subjective afternoon brain fog risk by **54%**.")
-        st.markdown(f"- **👁️ Visual Resets**: Taking {breaks_count} screen pauses protects ciliary eye muscles, dropping evening tension markers by **42%**.")
+        fog_risk = max(18, 100 - int(water_cups * 10 + breaks_count * 5))
+        st.markdown(f"- **💧 Hydration Shield**: Current {water_cups * 250} ml intake reduces subjective afternoon brain fog risk by **{100 - fog_risk}%**.")
+        tension_drop = min(68, breaks_count * 14)
+        st.markdown(f"- **👁️ Visual Resets**: Taking {breaks_count} screen pauses protects ciliary eye muscles, dropping evening tension markers by **{tension_drop}%**.")
         st.markdown(f"- **🤝 Social Synergy**: Mode: *{social_mode}* provides healthy relational balance for deep execution.")
 
     # Data Sovereignty Bar (The hallmark of bmartin042503/easpace)
@@ -6021,6 +6264,7 @@ def render_holistic_habits_view():
             st.session_state["habit_water_val"] = 5
             st.session_state["habit_breaks_val"] = 3
             st.session_state["habit_move_val"] = 20
+            st.session_state["habit_committed_today"] = False
             st.toast("Habit metrics reset.", icon="✨")
             st.rerun()
 
