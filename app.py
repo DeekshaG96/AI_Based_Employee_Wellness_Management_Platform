@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 from html import escape
 from io import BytesIO
@@ -11,6 +12,7 @@ from typing import Any
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import requests
 import streamlit as st
 
 from wellness.api_client import (
@@ -5632,14 +5634,97 @@ def render_zen_canvas_widget() -> str:return """<!DOCTYPE html>
 </html>"""
 
 
-def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
+def get_gemini_api_key() -> str | None:
+    """Safely discover Gemini API Key from Streamlit Secrets, environment variables, or session state."""
+    try:
+        if hasattr(st, "secrets"):
+            for k in ("GEMINI_API_KEY", "gemini_api_key", "GOOGLE_API_KEY", "google_api_key"):
+                secret_val = st.secrets.get(k)
+                if secret_val:
+                    return str(secret_val).strip()
+    except Exception:
+        pass
+
+    for k in ("GEMINI_API_KEY", "gemini_api_key", "GOOGLE_API_KEY", "google_api_key"):
+        val = os.getenv(k)
+        if val:
+            return val.strip()
+
+    return st.session_state.get("custom_gemini_api_key")
+
+
+def call_gemini_chat(prompt: str, context: dict[str, Any], history: list[dict[str, str]], api_key: str) -> str | None:
+    """Send user reflection and context-aware psychological history to Google's Gemini API."""
+    user_name = context.get("user_name") or "Team Member"
+    streak = context.get("streak", "3-Day Streak")
+    entry_count = context.get("entry_count", "5")
+    dominant_emo = (context.get("dominant_emotion") or "neutral").capitalize()
+    comp_score = context.get("compound", 0.0)
+    recent_note = context.get("recent_note", "")
+
+    system_instruction = (
+        f"You are EquiAI, a warm, compassionate, evidence-based workplace mental wellness and emotional resilience companion on the EquiMind platform.\n"
+        f"The user's name is {user_name}.\n"
+        f"User Reflection Context:\n"
+        f"- Check-in streak: {streak}\n"
+        f"- Total reflections logged: {entry_count}\n"
+        f"- Recent emotional landscape: {dominant_emo} (sentiment polarity: {comp_score:+.3f})\n"
+        f"- Recent user reflection note: {recent_note}\n\n"
+        "Guidelines:\n"
+        "- Respond with genuine empathy, warmth, psychological safety, and somatic clarity.\n"
+        "- Ground your insights in cognitive defusion (ACT), cognitive reframing (CBT), and somatic nervous system regulation (polyvagal theory).\n"
+        f"- When the user asks 'who am i', recognize them as {user_name}, highlight their mindful journey, and remind them of the conscious observer perspective.\n"
+        "- When the user mentions incomplete work or overwhelm, offer gentle triage (5-minute micro-chunking, dropping guilt, 80/20 standard).\n"
+        "- When the user feels lonely, validate loneliness as a natural biological signal for connection rather than a personal defect.\n"
+        "- Keep responses clear, concise (2-4 brief paragraphs or structured bullet points), well-formatted, and avoid robotic clinical disclaimers.\n"
+        "- Format using GitHub-flavored markdown with clean spacing."
+    )
+
+    contents: list[dict[str, Any]] = []
+    recent_history = history[-6:] if history else []
+    for msg in recent_history:
+        role = "user" if msg.get("role") == "user" else "model"
+        text = msg.get("content", "").strip()
+        if text:
+            contents.append({"role": role, "parts": [{"text": text}]})
+
+    if not contents or contents[-1].get("role") != "user" or contents[-1]["parts"][0]["text"] != prompt:
+        contents.append({"role": "user", "parts": [{"text": prompt}]})
+
+    models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.5-flash"]
+    for model_name in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        payload = {
+            "system_instruction": {
+                "parts": [{"text": system_instruction}]
+            },
+            "contents": contents,
+            "generationConfig": {
+                "temperature": 0.7,
+                "maxOutputTokens": 800,
+            },
+        }
+        try:
+            res = requests.post(url, json=payload, timeout=12)
+            if res.status_code == 200:
+                data = res.json()
+                cand = data.get("candidates", [])
+                if cand:
+                    parts = cand[0].get("content", {}).get("parts", [])
+                    if parts and "text" in parts[0]:
+                        return parts[0]["text"]
+        except Exception as _err:
+            _ = _err
+
+    return None
+
+
+def generate_equiai_response(user_msg: str, context: dict[str, Any], history: list[dict[str, str]] | None = None) -> str:
     """Generate an empathetic, context-aware mindful response incorporating memory of recent reflections.
     
     Inspired by Dev-solder124/genAI (Context-aware mental health AI with long-term memory):
-    - Reads user profile, reflection count, streak, and recent emotional journey.
-    - Accurately addresses identity questions ('who am i', 'who are you', 'tell me about myself').
-    - Empathizes with complex/mixed emotional states (e.g. 'happy but alone', 'anxious about failing').
-    - Prevents repetitive templates by generating context-specific CBT/ACT responses.
+    - When GEMINI_API_KEY is present in Streamlit Secrets, calls Google Gemini API.
+    - Seamlessly falls back to the private, offline-first rule engine when offline or unconfigured.
     """
     clean_msg = user_msg.strip()
     msg_lower = clean_msg.lower()
@@ -5649,6 +5734,16 @@ def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
     entry_count = context.get("entry_count", "5")
     dominant_emo = (context.get("dominant_emotion") or "neutral").lower()
     comp_score = context.get("compound", 0.0)
+
+    # 0. Active Gemini API Engine (If API Key is provided in Streamlit Secrets or Environment)
+    api_key = get_gemini_api_key()
+    if api_key:
+        try:
+            gemini_reply = call_gemini_chat(clean_msg, context, history or [], api_key)
+            if gemini_reply and len(gemini_reply.strip()) > 10:
+                return gemini_reply.strip()
+        except Exception:
+            pass  # Fall through to offline sovereign engine seamlessly
 
     # Context memory hook to naturally weave past state into dialogue
     memory_mention = ""
@@ -5823,8 +5918,15 @@ def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
 
 def render_equiai_companion_view():
     """Render the Context-Aware Mindful AI Companion (Dev-solder124/genAI inspired)."""
+    has_gemini = bool(get_gemini_api_key())
+    engine_badge = (
+        '<span style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #bfdbfe; padding: 5px 14px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #1d4ed8; box-shadow: 0 2px 8px rgba(29, 78, 216, 0.12);">✨ Powered by Gemini AI</span>'
+        if has_gemini
+        else '<span style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #166534;">🧠 Offline Sovereign Engine</span>'
+    )
+
     st.markdown(
-        """
+        f"""
         <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.82) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 22px; padding: 22px 30px; box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.10), 0 4px 16px rgba(0, 0, 0, 0.02); margin-bottom: 22px; backdrop-filter: blur(16px);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <div>
@@ -5835,6 +5937,7 @@ def render_equiai_companion_view():
                     <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Context-aware conversational wellness AI equipped with long-term memory of your check-ins and emotional journey.</p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    {engine_badge}
                     <span style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #166534;">🧠 Context-Aware Memory</span>
                     <span style="background: #f0fdfa; border: 1px solid #99f6e4; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #0f766e;">🔒 Private & Scoped</span>
                 </div>
@@ -5932,7 +6035,7 @@ def render_equiai_companion_view():
             "user_name": user_name,
             "entry_count": str(entry_count),
         }
-        resp = generate_equiai_response(user_input, ctx_data)
+        resp = generate_equiai_response(user_input, ctx_data, history=st.session_state.get("equi_companion_chat", []))
         st.session_state["equi_companion_chat"].append({"role": "assistant", "content": resp})
         st.rerun()
 
