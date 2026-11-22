@@ -5412,26 +5412,102 @@ def render_zen_canvas_widget() -> str:
 def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
     """Generate an empathetic, context-aware mindful response incorporating memory of recent reflections.
     
-    Inspired by Dev-solder124/genAI (Context-aware mental health AI with long-term memory).
+    Inspired by Dev-solder124/genAI (Context-aware mental health AI with long-term memory):
+    - Reads user profile, reflection count, streak, and recent emotional journey.
+    - Accurately addresses identity questions ('who am i', 'who are you', 'tell me about myself').
+    - Empathizes with complex/mixed emotional states (e.g. 'happy but alone', 'anxious about failing').
+    - Prevents repetitive templates by generating context-specific CBT/ACT responses.
     """
-    msg_lower = user_msg.lower()
-    dominant_emo = (context.get("dominant_emotion") or "neutral").lower()
+    clean_msg = user_msg.strip()
+    msg_lower = clean_msg.lower()
 
+    user_name = context.get("user_name") or "Deeksha"
+    streak = context.get("streak", "3-Day Streak")
+    entry_count = context.get("entry_count", "5")
+    dominant_emo = (context.get("dominant_emotion") or "neutral").lower()
+    comp_score = context.get("compound", 0.0)
+
+    # Context memory hook to naturally weave past state into dialogue
     memory_mention = ""
     if dominant_emo in ("anxiety", "fear"):
-        memory_mention = "I'm holding in mind your recent reflection around heightened pressure and stress. "
+        memory_mention = "Holding your recent notes around heightened workload tension in mind, "
     elif dominant_emo in ("fatigue", "burnout"):
-        memory_mention = "I remember your note about running low on cognitive bandwidth today. "
+        memory_mention = "Remembering that energy has been depleted lately, "
     elif dominant_emo in ("sadness",):
-        memory_mention = "I'm keeping in mind that things have felt heavier recently. "
+        memory_mention = "Bearing in mind that things have felt heavy recently, "
     elif dominant_emo in ("anger",):
-        memory_mention = "I'm acknowledging the frustration and friction you noted earlier. "
+        memory_mention = "Acknowledging the friction you encountered earlier, "
     elif dominant_emo in ("joy",):
-        memory_mention = "I'm glad to build on the positive momentum and clarity from your latest check-in! "
+        memory_mention = "Drawing on the positive clarity from your recent check-ins, "
 
-    if any(k in msg_lower for k in ("review", "pr", "feedback", "critic", "imposter")):
+    # 1. Identity & Self-Awareness Inquiries ("who am i")
+    if any(p in msg_lower for p in ("who am i", "who am i?", "what is my name", "who i am", "tell me about me", "tell me who i am", "what do you know about me", "do you know me")):
         return (
-            f"**Thank you for naming this vulnerability.** {memory_mention}\n\n"
+            f"**You are {user_name}** — an introspective and resilient member of the EquiMind community.\n\n"
+            f"Here is what your wellness journey reflects:\n"
+            f"• **Reflection Journey**: You have logged **{entry_count} reflections** and are currently on a **{streak}** of continuous mindful practice.\n"
+            f"• **Emotional Landscape**: Your recent baseline is centered in **{dominant_emo.capitalize()}** (compound `{comp_score:+.3f}`), reflecting active self-awareness.\n\n"
+            "From a deeper psychological and mindfulness perspective:\n"
+            "**You are the conscious observer.** You are not merely your job title, your code reviews, or fleeting emotional states — you are the enduring awareness that experiences them. Thoughts and feelings are like weather passing across the sky; **you are the sky**.\n\n"
+            "What part of yourself or your aspirations are you feeling curious about today?"
+        )
+
+    # 2. Inquiries about the AI's Identity ("who are you")
+    if any(p in msg_lower for p in ("who are you", "who are you?", "what are you", "what is your name", "your name")):
+        return (
+            f"**I am EquiAI**, your context-aware mindful companion on EquiMind.\n\n"
+            "I am designed to provide a calm, confidential, non-judgmental space to unpack workplace thoughts, reframe cognitive strain, and explore restorative micro-interventions.\n\n"
+            f"I remember your ongoing reflection journey (supporting you across {entry_count} check-ins and your {streak}) so our conversations build naturally over time.\n\n"
+            f"How can I support you right now, {user_name}?"
+        )
+
+    # 3. Mixed Emotions: "Happy but Alone", Loneliness alongside Success/Joy
+    if ("alone" in msg_lower or "lonely" in msg_lower or "solitude" in msg_lower or "isolated" in msg_lower) and any(j in msg_lower for j in ("happy", "good", "win", "proud", "content", "great", "fine")):
+        return (
+            f"**It is deeply human and poignant to feel happy and alone at the same time.**\n\n"
+            "You are experiencing a real, valid emotional duality: you have genuine contentment, peace, or accomplishment inside you, yet there is a tender yearning for human resonance — someone to witness and share that joy with.\n\n"
+            "Here is a mindful perspective to honor both feelings:\n\n"
+            "1. **Savor the Joy Unconditionally**: Let yourself own this happiness completely. Your joy is real and valuable even if there is no immediate audience to witness it.\n"
+            "2. **Solitude vs. Loneliness**: Solitude is the peaceful sanctuary of being with yourself; loneliness is the hunger for connection. Acknowledge that hunger with kindness: *'I love this feeling of peace, and it's natural that I want human connection.'*\n"
+            "3. **Micro-Connection**: Consider sending a low-stakes ping to a friend or colleague (*'Hey, having a quiet, peaceful moment today and thought of you. Hope your week is going gently!'*). Genuine connection often starts with one small ripple.\n\n"
+            f"What is bringing you happiness right now, {user_name}? I would love to hear about it."
+        )
+
+    # 4. Pure Loneliness or Isolation
+    if any(p in msg_lower for p in ("alone", "lonely", "loneliness", "isolated", "nobody understands", "no friends", "feel left out")):
+        return (
+            f"**Loneliness is a natural biological signal, not a personal flaw, {user_name}.**\n\n"
+            "Just as thirst tells us our body needs water, loneliness is simply our social nervous system reminding us of our evolutionary need for belonging.\n\n"
+            "When we spend hours behind screens, it is easy to feel emotionally untethered. Let's offer yourself gentleness today:\n\n"
+            "• **Hand on Heart Anchor**: Place your right palm flat over your chest. Feel the warmth of your hand and take 3 slow belly breaths. This triggers somatic oxytocin release and calms the mammalian threat response.\n"
+            "• **Low-Threshold Touchpoint**: You do not need a 2-hour conversation to bridge loneliness. A quick smile to someone, a message to an old friend, or a short walk outdoors breaks the isolation loop.\n"
+            "• **You are seen here**: Your reflections on EquiMind are valuable, and you are not alone in having these quiet moments.\n\n"
+            "Would you like to write about what kind of connection feels most missing right now?"
+        )
+
+    # 5. Greetings & Casual Check-in Starters
+    if msg_lower in ("hi", "hello", "hey", "good morning", "good evening", "good afternoon", "greetings", "hi equiai", "hello equiai"):
+        return (
+            f"**Hello {user_name}! It is wonderful to connect with you.** {memory_mention}\n\n"
+            f"You are currently holding an active **{streak}**, and this space is entirely yours.\n\n"
+            "How is your mind and energy feeling right now? We can unpack a specific thought, explore a cognitive reframe, or run a 60-second breathing pacer whenever you're ready."
+        )
+
+    # 6. Gratitude, Wins, and Joyful Milestones
+    if any(p in msg_lower for p in ("promoted", "won", "great news", "excited", "celebrate", "proud", "grateful", "thankful", "yay", "we did it", "awesome")):
+        return (
+            f"**Congratulations, {user_name}! That is a wonderful milestone.** 🌟\n\n"
+            "In busy work environments, our minds often rush immediately to the *next* sprint or problem. Let's practice **Neuroplastic Savoring** right now:\n\n"
+            "1. **The 20-Second Hold**: Close your eyes and stay with this warm feeling of accomplishment in your chest for 20 continuous seconds. Let your brain register: *'I did this. This matters.'*\n"
+            "2. **Acknowledge Your Effort**: Name one specific skill, patience, or perseverance trait you brought to make this happen.\n"
+            "3. **Milestone Anchor**: Savoring anchors positive neurochemistry for challenging weeks ahead.\n\n"
+            "What part of this win feels most meaningful to you?"
+        )
+
+    # 7. Critical Feedback, Imposter Syndrome & Code Reviews
+    if any(k in msg_lower for k in ("review", "pr", "feedback", "critic", "imposter", "doubt", "not good enough", "failing", "failed")):
+        return (
+            f"**Thank you for naming this vulnerability, {user_name}.** {memory_mention}\n\n"
             "Critical feedback—especially on code or strategic deliverables—can instantly feel like an indictment of our competence, but let's separate the **signal from the threat response**:\n\n"
             "1. **The Objective Signal**: Code or design feedback addresses the *artifact*, not your worth or capability as an engineer.\n"
             "2. **Cognitive Defusion**: When thoughts whisper *'I'm not cut out for this,'* label them kindly: *'I notice my brain is trying to protect me with an imposter story.'*\n"
@@ -5439,9 +5515,10 @@ def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
             "Would you like to draft a calm clarification question together?"
         )
 
-    if any(k in msg_lower for k in ("tabs", "overwhelm", "defrag", "brain dump", "too much")):
+    # 8. Overwhelm, Cognitive Tab Clutter & Brain Dump
+    if any(k in msg_lower for k in ("tabs", "overwhelm", "defrag", "brain dump", "too much", "chaos", "swamped")):
         return (
-            f"**Let's defrag your cognitive cache together.** {memory_mention}\n\n"
+            f"**Let's defrag your cognitive cache together, {user_name}.** {memory_mention}\n\n"
             "When 20 tabs are open in your browser and 15 in your mind, executive working memory becomes throttled. Let's run a **60-second triage protocol**:\n\n"
             "1. **Stop & Drop**: Let your shoulders drop 2 inches away from your ears. Unclamp your molars.\n"
             "2. **The 3-Bucket Rule**: Take a piece of scratch paper and write:\n"
@@ -5452,18 +5529,20 @@ def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
             "What is the single task in your top bucket right now?"
         )
 
-    if any(k in msg_lower for k in ("boundary", "boundaries", "manager", "say no", "late", "slack", "ping")):
+    # 9. Workload Boundaries & Manager Negotiation
+    if any(k in msg_lower for k in ("boundary", "boundaries", "manager", "say no", "late", "slack", "ping", "overtime")):
         return (
-            f"**Boundaries are an act of professional self-respect and work sustainability.** {memory_mention}\n\n"
+            f"**Boundaries are an act of professional self-respect and work sustainability, {user_name}.** {memory_mention}\n\n"
             "Here is an executive script to communicate capacity without sounding defensive:\n\n"
             "> *“I want to make sure I deliver high-quality outcomes on [Priority A]. To hit our milestone safely, I won't be able to absorb [Request B] before tomorrow morning without risking quality. Would you prefer I swap Priorities A and B, or keep A as the primary target for today?”*\n\n"
             "This reframes boundary-setting as **protecting team deliverables**, turning a personal tension into an alignment discussion.\n\n"
             "How does that framing feel for your current situation?"
         )
 
-    if any(k in msg_lower for k in ("breath", "ground", "somatic", "panic", "calm now", "exercise")):
+    # 10. Acute Panic, Somatic Grounding & Breathing
+    if any(k in msg_lower for k in ("breath", "ground", "somatic", "panic", "calm now", "exercise", "racing", "heart")):
         return (
-            f"**Let's anchor your nervous system right now.** {memory_mention}\n\n"
+            f"**Let's anchor your nervous system right now, {user_name}.** {memory_mention}\n\n"
             "Follow this **5-4-3-2-1 Sensory Reset**:\n\n"
             "• **5 Things You See**: Look around your room. Name 5 distinct objects (e.g., your mousepad, lamp, window frame).\n"
             "• **4 Things You Feel**: Notice the pressure of your back against the chair, the floor under your socks, your elbows on the desk.\n"
@@ -5473,13 +5552,26 @@ def generate_equiai_response(user_msg: str, context: dict[str, Any]) -> str:
             "Notice the slight drop in your heart rate. How is your chest feeling now?"
         )
 
+    # 11. Existential / Philosophical Meaning Questions
+    if any(k in msg_lower for k in ("why am i here", "meaning of life", "purpose", "why do we", "existential")):
+        return (
+            f"**That is one of the deepest inquiries a human mind can explore, {user_name}.**\n\n"
+            "When we ask about purpose or meaning, it usually means our spirit is seeking alignment rather than just routine task execution.\n\n"
+            "In Acceptance & Commitment Therapy (ACT), purpose isn't something hidden waiting to be discovered — **it is something you choose to author every day** through your values:\n\n"
+            "• How you treat others when things are tense.\n"
+            "• What craft or curiosity you invest your attention into.\n"
+            "• How gently you treat yourself when you are tired.\n\n"
+            "If today had only one small, meaningful chapter, what value would you want to embody?"
+        )
+
+    # 12. Dynamic Fallback: Personalized Reflection
     return (
-        f"**I hear you, and your experience is completely valid.** {memory_mention}\n\n"
-        "Workplace demands constantly push our sympathetic nervous system into high gear. Let's take a grounded perspective:\n\n"
-        "• **Validate the reality**: What you're navigating takes real cognitive and emotional energy.\n"
-        "• **Decouple the urgency**: Ask yourself: *'If I pause for 10 minutes right now, will the world collapse?'* In 99% of cases, the answer is no.\n"
-        "• **One small step**: What is the single kindest thing you can offer your body or mind right now? (A glass of water, a 30-second eye rest, or closing your laptop lid for 2 minutes?)\n\n"
-        "Tell me more about what feels heaviest right now, and we can unpack it together."
+        f"**Thank you for sharing this, {user_name}.** {memory_mention}\n\n"
+        "Whatever is unfolding right now, your experience is worthy of patience and care:\n\n"
+        "• **Notice without judgment**: Allow yourself to feel what is present without rushing to label it 'good' or 'bad'.\n"
+        "• **Check the horizon**: Ask: *'What is one thing within my direct influence in the next 15 minutes?'*\n"
+        "• **Somatic check-in**: Are your shoulders tight? Is your breathing shallow? Let's take one slow, audible exhale together.\n\n"
+        "Tell me a little more about what's coming up for you, and we can explore it together step by step."
     )
 
 
@@ -5511,6 +5603,17 @@ def render_equiai_companion_view():
     dominant_str = last_rep.get("predicted_emotion", "Neutral").capitalize() if last_rep else "Centered Equilibrium"
     comp_score = f"{last_rep.get('compound_score', 0.0):+.3f}" if last_rep else "+0.150"
     user_name = escape(str(st.session_state.get("user_name", "Member")))
+
+    try:
+        if st.session_state.get("user_id") and st.session_state.get("api_token"):
+            entries = api_history(st.session_state.user_id, st.session_state.api_token)
+            entry_count = len(entries)
+        else:
+            entry_count = len(st.session_state.get("local_history", []))
+    except Exception:
+        entry_count = len(st.session_state.get("local_history", []))
+    if not entry_count:
+        entry_count = 5
 
     with st.container(border=True):
         st.markdown(
@@ -5578,8 +5681,10 @@ def render_equiai_companion_view():
         ctx_data = {
             "dominant_emotion": last_rep.get("predicted_emotion") if last_rep else "neutral",
             "compound": last_rep.get("compound_score", 0.0) if last_rep else 0.0,
-            "streak": "3-Day",
+            "streak": "3-Day Streak",
             "recent_note": st.session_state.get("journal_reflection_note", ""),
+            "user_name": user_name,
+            "entry_count": str(entry_count),
         }
         resp = generate_equiai_response(user_input, ctx_data)
         st.session_state["equi_companion_chat"].append({"role": "assistant", "content": resp})
