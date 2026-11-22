@@ -7040,11 +7040,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 }
 
 
-def t(key: str, default: str | None = None) -> str:
+def get_ui_translation(key: str, default: str | None = None) -> str:
     """Retrieve localized UI label for the active user language."""
     lang = st.session_state.get("app_language", "en") if hasattr(st, "session_state") else "en"
     lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS["en"])
     return lang_dict.get(key, TRANSLATIONS["en"].get(key, default or key))
+
+
+t = get_ui_translation
 
 
 def set_active_view(target_view: str, soma_tool: str | None = None):
@@ -7183,13 +7186,13 @@ def render_workspace():
     active_user_name = escape(str(st.session_state.get("user_name", "Team Member")))
     initial = active_user_name[0].upper() if active_user_name else "E"
 
-    welcome_title = t("welcome")
-    tagline_desc = t("tagline")
-    streak_label = t("streak")
-    pts_label = t("resilience_points")
-    calm_label = t("calm")
-    priv_label = t("private")
-    sos_label = t("sos_button")
+    welcome_title = get_ui_translation("welcome")
+    tagline_desc = get_ui_translation("tagline")
+    streak_label = get_ui_translation("streak")
+    pts_label = get_ui_translation("resilience_points")
+    calm_label = get_ui_translation("calm")
+    priv_label = get_ui_translation("private")
+    sos_label = get_ui_translation("sos_button")
 
     # High-Class Luxury Header Banner (Clutter-Free, Standard, Aesthetic)
     st.markdown(
@@ -8669,9 +8672,9 @@ def render_guest_workspace():
                     sel_col = col_opts[0] if col_opts else df_guest.columns[0]
                     if st.button("Analyze First 5 CSV Rows", type="primary", key="guest_csv_btn"):
                         for idx, r in df_guest.head(5).iterrows():
-                            t = str(r[sel_col]).strip()
-                            if t:
-                                rep = analyze_text(t, source_name=f"{g_file.name} (row {idx+1})")
+                            row_txt = str(r[sel_col]).strip()
+                            if row_txt:
+                                rep = analyze_text(row_txt, source_name=f"{g_file.name} (row {idx+1})")
                                 st.write(f"Row {idx+1}: **{rep.sentiment_label.value}** ({rep.sentiment_scores.compound:.2f}) · {rep.dominant_emotion}")
                 except Exception as ex:
                     st.error(f"Could not read CSV: {ex}")
