@@ -5036,6 +5036,622 @@ def render_compact_box_pacer() -> str:
 
 
 
+def render_3d_human_coach_widget(user_name: str = "Member", language: str = "en") -> str:
+    """Return interactive 3D Humanoid Wellness Coach avatar powered by Three.js WebGL and Web Speech API."""
+    safe_name = user_name.replace("'", "\\'").replace('"', '\\"')
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Playfair+Display:wght@700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * {{ box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }}
+    body {{
+      background: radial-gradient(circle at 50% 25%, #064e3b 0%, #022c22 100%);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      color: #f0fdf4;
+      overflow: hidden;
+      height: 520px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(45, 212, 191, 0.4);
+      position: relative;
+    }}
+    #coachCanvas {{
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }}
+    #coachCanvas:active {{
+      cursor: grabbing;
+    }}
+    .coach-ui-overlay {{
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px 20px;
+    }}
+    .coach-header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      pointer-events: auto;
+    }}
+    .coach-title {{
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #5eead4;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }}
+    .coach-badge {{
+      background: rgba(15, 118, 110, 0.35);
+      border: 1px solid rgba(45, 212, 191, 0.4);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #a7f3d0;
+      backdrop-filter: blur(8px);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .dialogue-card {{
+      background: rgba(2, 44, 34, 0.85);
+      border: 1px solid rgba(45, 212, 191, 0.35);
+      border-radius: 14px;
+      padding: 12px 18px;
+      max-width: 480px;
+      pointer-events: auto;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }}
+    .dialogue-text {{
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: #ecfeff;
+      font-weight: 500;
+    }}
+    .coach-controls {{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      pointer-events: auto;
+      align-items: center;
+    }}
+    .action-btn {{
+      background: rgba(15, 118, 110, 0.45);
+      border: 1px solid rgba(45, 212, 191, 0.45);
+      color: #f0fdf4;
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(8px);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .action-btn:hover {{
+      background: #0f766e;
+      border-color: #5eead4;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.5);
+    }}
+    .action-btn.active {{
+      background: linear-gradient(135deg, #0f766e, #14b8a6);
+      border-color: #5eead4;
+      box-shadow: 0 0 14px rgba(45, 212, 191, 0.6);
+      color: #ffffff;
+    }}
+    .pacer-hud {{
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #5eead4;
+      font-family: 'JetBrains Mono', monospace;
+    }}
+  </style>
+</head>
+<body>
+  <canvas id="coachCanvas"></canvas>
+
+  <div class="coach-ui-overlay">
+    <div class="coach-header">
+      <div class="coach-title">
+        <span>🧘</span> Coach Aria
+        <span style="font-size: 0.74rem; font-family: 'Plus Jakarta Sans'; color: #a7f3d0; font-weight: 600; margin-left: 4px;">· 3D Embodied Wellness Guide</span>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <span id="pacerBadge" class="pacer-hud" style="display: none;">🌬️ Inhale · 4s</span>
+        <button id="voiceBtn" class="action-btn" onclick="toggleVoice()">🗣️ Voice: ON</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="dialogue-card" id="dialogueCard">
+        <div style="font-size: 0.70rem; font-weight: 700; color: #5eead4; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Coach Aria Speaking</div>
+        <div class="dialogue-text" id="coachSpeechText">"Hello {safe_name}. I am Aria, your 3D Mindful Coach. Take a slow breath with me. I'm here to ground your nervous system and guide your recovery."</div>
+      </div>
+
+      <div class="coach-controls">
+        <button class="action-btn" id="btnBreath" onclick="startBoxBreathing()">🌬️ Guided Box Breathing</button>
+        <button class="action-btn" id="btnHeart" onclick="startHandOnHeart()">❤️ Hand on Heart Calming</button>
+        <button class="action-btn" id="btnShoulder" onclick="startShoulderReset()">💆 Shoulder & Spine Roll</button>
+        <button class="action-btn" id="btnWisdom" onclick="giveMindfulWisdom()">✨ Mindful Reflection</button>
+        <button class="action-btn" id="btnReset" onclick="resetToMeditate()">🧘 Center Pose</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var userName = "{safe_name}";
+    var userLang = "{language}";
+    var voiceEnabled = true;
+    var breathPacerActive = false;
+    var somaticHandOnHeart = false;
+    var shoulderRollActive = false;
+    var pacerTimer = 0;
+    var pacerPhase = 0;
+    var pacerSeconds = 4;
+
+    var canvas = document.getElementById('coachCanvas');
+    var container = document.body;
+
+    var scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x022c22, 0.08);
+
+    var camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 1.15, 3.8);
+
+    var renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true, alpha: true }});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth || window.innerWidth, container.clientHeight || 520);
+    renderer.shadowMap.enabled = true;
+
+    var ambientLight = new THREE.AmbientLight(0xdcfce7, 0.75);
+    scene.add(ambientLight);
+
+    var keyLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    keyLight.position.set(3, 6, 5);
+    scene.add(keyLight);
+
+    var rimLight = new THREE.PointLight(0x2dd4bf, 1.4, 15);
+    rimLight.position.set(-3, 3, -1);
+    scene.add(rimLight);
+
+    var warmFill = new THREE.PointLight(0xfef08a, 0.6, 12);
+    warmFill.position.set(2, -1, 3);
+    scene.add(warmFill);
+
+    var skinMat = new THREE.MeshStandardMaterial({{ color: 0xdeb887, roughness: 0.65, metalness: 0.05 }});
+    var tunicMat = new THREE.MeshStandardMaterial({{ color: 0x0f766e, roughness: 0.5, metalness: 0.1 }});
+    var trimMat = new THREE.MeshStandardMaterial({{ color: 0x2dd4bf, roughness: 0.3, metalness: 0.2 }});
+    var hairMat = new THREE.MeshStandardMaterial({{ color: 0x1e293b, roughness: 0.7 }});
+    var eyeWhiteMat = new THREE.MeshBasicMaterial({{ color: 0xffffff }});
+    var irisMat = new THREE.MeshBasicMaterial({{ color: 0x0f766e }});
+    var pupilMat = new THREE.MeshBasicMaterial({{ color: 0x022c22 }});
+    var cushionMat = new THREE.MeshStandardMaterial({{ color: 0x011d17, roughness: 0.8, metalness: 0.1 }});
+    var auraMat = new THREE.MeshBasicMaterial({{ color: 0x2dd4bf, transparent: true, opacity: 0.35 }});
+
+    var coachGroup = new THREE.Group();
+    coachGroup.position.set(0, -0.4, 0);
+    scene.add(coachGroup);
+
+    var cushionGeo = new THREE.CylinderGeometry(0.85, 0.95, 0.22, 32);
+    var cushion = new THREE.Mesh(cushionGeo, cushionMat);
+    cushion.position.set(0, -0.1, 0);
+    coachGroup.add(cushion);
+
+    var cushionRingGeo = new THREE.TorusGeometry(0.88, 0.025, 12, 32);
+    var cushionRing = new THREE.Mesh(cushionRingGeo, trimMat);
+    cushionRing.rotation.x = Math.PI / 2;
+    cushionRing.position.set(0, 0.01, 0);
+    coachGroup.add(cushionRing);
+
+    var legLeftGeo = new THREE.TorusGeometry(0.55, 0.13, 16, 32, Math.PI * 0.9);
+    var legLeft = new THREE.Mesh(legLeftGeo, tunicMat);
+    legLeft.rotation.x = Math.PI / 2 + 0.1;
+    legLeft.rotation.z = -0.35;
+    legLeft.position.set(-0.15, 0.1, 0.18);
+    coachGroup.add(legLeft);
+
+    var legRightGeo = new THREE.TorusGeometry(0.55, 0.13, 16, 32, Math.PI * 0.9);
+    var legRight = new THREE.Mesh(legRightGeo, tunicMat);
+    legRight.rotation.x = Math.PI / 2 + 0.1;
+    legRight.rotation.z = Math.PI + 0.35;
+    legRight.position.set(0.15, 0.15, 0.22);
+    coachGroup.add(legRight);
+
+    var spineGroup = new THREE.Group();
+    spineGroup.position.set(0, 0.15, 0);
+    coachGroup.add(spineGroup);
+
+    var torsoGeo = new THREE.CylinderGeometry(0.34, 0.28, 0.72, 24);
+    var torso = new THREE.Mesh(torsoGeo, tunicMat);
+    torso.position.set(0, 0.36, 0);
+    spineGroup.add(torso);
+
+    var chestCollarGeo = new THREE.TorusGeometry(0.24, 0.02, 12, 24);
+    var chestCollar = new THREE.Mesh(chestCollarGeo, trimMat);
+    chestCollar.rotation.x = Math.PI / 2;
+    chestCollar.position.set(0, 0.71, 0);
+    spineGroup.add(chestCollar);
+
+    var neckGeo = new THREE.CylinderGeometry(0.12, 0.135, 0.22, 20);
+    var neck = new THREE.Mesh(neckGeo, skinMat);
+    neck.position.set(0, 0.81, 0);
+    spineGroup.add(neck);
+
+    var headGroup = new THREE.Group();
+    headGroup.position.set(0, 1.05, 0.02);
+    spineGroup.add(headGroup);
+
+    var headGeo = new THREE.SphereGeometry(0.31, 28, 28);
+    headGeo.scale(1.0, 1.15, 1.0);
+    var head = new THREE.Mesh(headGeo, skinMat);
+    headGroup.add(head);
+
+    var hairGeo = new THREE.SphereGeometry(0.33, 24, 24);
+    hairGeo.scale(1.02, 1.16, 1.04);
+    var hair = new THREE.Mesh(hairGeo, hairMat);
+    hair.position.set(0, 0.05, -0.04);
+    headGroup.add(hair);
+
+    var bunGeo = new THREE.SphereGeometry(0.13, 16, 16);
+    var bun = new THREE.Mesh(bunGeo, hairMat);
+    bun.position.set(0, 0.42, -0.16);
+    headGroup.add(bun);
+
+    function createEye(x) {{
+      var eyeGroup = new THREE.Group();
+      eyeGroup.position.set(x, 0.06, 0.28);
+
+      var sclera = new THREE.Mesh(new THREE.SphereGeometry(0.042, 16, 16), eyeWhiteMat);
+      eyeGroup.add(sclera);
+
+      var iris = new THREE.Mesh(new THREE.SphereGeometry(0.024, 16, 16), irisMat);
+      iris.position.set(0, 0, 0.026);
+      eyeGroup.add(iris);
+
+      var pupil = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 12), pupilMat);
+      pupil.position.set(0, 0, 0.038);
+      eyeGroup.add(pupil);
+
+      var lidGeo = new THREE.SphereGeometry(0.046, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
+      var lid = new THREE.Mesh(lidGeo, skinMat);
+      lid.position.set(0, 0.01, 0.01);
+      lid.rotation.x = -0.3;
+      eyeGroup.add(lid);
+
+      return {{ group: eyeGroup, lid: lid }};
+    }}
+    var eyeL = createEye(-0.11);
+    var eyeR = createEye(0.11);
+    headGroup.add(eyeL.group);
+    headGroup.add(eyeR.group);
+
+    var armLeftGroup = new THREE.Group();
+    armLeftGroup.position.set(-0.38, 0.65, 0);
+    spineGroup.add(armLeftGroup);
+
+    var upperArmL = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.42, 16), tunicMat);
+    upperArmL.position.set(-0.06, -0.18, 0);
+    upperArmL.rotation.z = -0.35;
+    armLeftGroup.add(upperArmL);
+
+    var forearmL = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.065, 0.38, 16), skinMat);
+    forearmL.position.set(-0.10, -0.44, 0.18);
+    forearmL.rotation.x = 0.85;
+    forearmL.rotation.z = -0.2;
+    armLeftGroup.add(forearmL);
+
+    var handL = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), skinMat);
+    handL.position.set(-0.12, -0.56, 0.36);
+    armLeftGroup.add(handL);
+
+    var rightArmPivot = new THREE.Group();
+    rightArmPivot.position.set(0.38, 0.65, 0);
+    spineGroup.add(rightArmPivot);
+
+    var upperArmR = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.42, 16), tunicMat);
+    upperArmR.position.set(0.06, -0.18, 0);
+    upperArmR.rotation.z = 0.35;
+    rightArmPivot.add(upperArmR);
+
+    var rightForearmGroup = new THREE.Group();
+    rightForearmGroup.position.set(0.10, -0.36, 0);
+    rightArmPivot.add(rightForearmGroup);
+
+    var forearmR = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.065, 0.38, 16), skinMat);
+    forearmR.position.set(0, -0.16, 0.14);
+    forearmR.rotation.x = 0.85;
+    rightForearmGroup.add(forearmR);
+
+    var handR = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), skinMat);
+    handR.position.set(0, -0.32, 0.28);
+    rightForearmGroup.add(handR);
+
+    var auraGeo = new THREE.TorusGeometry(1.25, 0.022, 16, 64);
+    var auraMesh = new THREE.Mesh(auraGeo, auraMat);
+    auraMesh.position.set(0, 0.65, -0.25);
+    coachGroup.add(auraMesh);
+
+    var starGeo = new THREE.BufferGeometry();
+    var starCount = 75;
+    var starPos = new Float32Array(starCount * 3);
+    for (var i = 0; i < starCount * 3; i += 3) {{
+      starPos[i] = (Math.random() - 0.5) * 5;
+      starPos[i + 1] = Math.random() * 3 - 0.5;
+      starPos[i + 2] = (Math.random() - 0.5) * 3;
+    }}
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    var starMat = new THREE.PointsMaterial({{ size: 0.045, color: 0x5eead4, transparent: true, opacity: 0.7 }});
+    var starField = new THREE.Points(starGeo, starMat);
+    scene.add(starField);
+
+    var mouseX = 0, mouseY = 0;
+    var targetHeadY = 0, targetHeadX = 0;
+    window.addEventListener('pointermove', function(e) {{
+      var rect = canvas.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseY = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      targetHeadY = mouseX * 0.45;
+      targetHeadX = -mouseY * 0.25;
+    }});
+
+    var audioCtx = null;
+    function getAudio() {{
+      if (!audioCtx) {{
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }}
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }}
+
+    function playTone(freq, type, duration) {{
+      var ac = getAudio();
+      if (!ac) return;
+      try {{
+        var osc = ac.createOscillator();
+        var gain = ac.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, ac.currentTime);
+        gain.gain.setValueAtTime(0.08, ac.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + (duration || 0.8));
+        osc.connect(gain);
+        gain.connect(ac.destination);
+        osc.start();
+        osc.stop(ac.currentTime + (duration || 0.8));
+      }} catch(e) {{}}
+    }}
+
+    function speakAloud(text) {{
+      document.getElementById('coachSpeechText').innerText = '"' + text + '"';
+      if (!voiceEnabled || !window.speechSynthesis) return;
+      try {{
+        window.speechSynthesis.cancel();
+        var utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 0.90;
+        utter.pitch = 1.05;
+        var voices = window.speechSynthesis.getVoices();
+        for (var i = 0; i < voices.length; i++) {{
+          var v = voices[i];
+          if (v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Karen') || v.name.includes('Zira') || v.name.includes('India'))) {{
+            utter.voice = v;
+            break;
+          }}
+        }}
+        window.speechSynthesis.speak(utter);
+      }} catch (e) {{}}
+    }}
+
+    function toggleVoice() {{
+      voiceEnabled = !voiceEnabled;
+      document.getElementById('voiceBtn').innerText = voiceEnabled ? '🗣️ Voice: ON' : '🔇 Voice: OFF';
+      if (!voiceEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+    }}
+
+    function startBoxBreathing() {{
+      breathPacerActive = true;
+      somaticHandOnHeart = false;
+      shoulderRollActive = false;
+      pacerPhase = 0;
+      pacerSeconds = 4;
+      document.getElementById('pacerBadge').style.display = 'inline-flex';
+      setActiveBtn('btnBreath');
+      playTone(432, 'sine', 1.0);
+      speakAloud("Let us practice 4-4-4 Pranayama Box Breathing together. Inhale deeply through your nose as my chest expands.");
+    }}
+
+    function startHandOnHeart() {{
+      breathPacerActive = false;
+      somaticHandOnHeart = true;
+      shoulderRollActive = false;
+      document.getElementById('pacerBadge').style.display = 'none';
+      setActiveBtn('btnHeart');
+      playTone(528, 'triangle', 1.2);
+      speakAloud("Place your right hand over your chest. Feel the warm, steady rhythm of your heartbeat. This somatic contact triggers natural vagal calming. You are safe and centered.");
+    }}
+
+    function startShoulderReset() {{
+      breathPacerActive = false;
+      somaticHandOnHeart = false;
+      shoulderRollActive = true;
+      document.getElementById('pacerBadge').style.display = 'none';
+      setActiveBtn('btnShoulder');
+      playTone(396, 'sine', 0.8);
+      speakAloud("Gently inhale and draw both shoulders up toward your ears. Now roll them back and exhale completely, letting all postural strain dissolve.");
+    }}
+
+    function giveMindfulWisdom() {{
+      breathPacerActive = false;
+      somaticHandOnHeart = false;
+      shoulderRollActive = false;
+      document.getElementById('pacerBadge').style.display = 'none';
+      setActiveBtn('btnWisdom');
+      var pearls = [
+        "Thoughts and code reviews are like passing clouds in the sky. You are the sky—enduring, grounded, and clear.",
+        "When cognitive overwhelm whispers urgency, ask yourself: 'Can I offer my nervous system one kind minute of stillness right now?'",
+        "Imposter syndrome is simply your brain trying to protect you. Thank it kindly, and remind yourself of how much you have solved.",
+        "Sustainable breakthroughs are never built on relentless strain. They compound through mindful, steady pacing."
+      ];
+      var pick = pearls[Math.floor(Math.random() * pearls.length)];
+      playTone(432, 'sine', 1.0);
+      speakAloud(pick);
+    }}
+
+    function resetToMeditate() {{
+      breathPacerActive = false;
+      somaticHandOnHeart = false;
+      shoulderRollActive = false;
+      document.getElementById('pacerBadge').style.display = 'none';
+      setActiveBtn('btnReset');
+      speakAloud("Returning to centered meditation stillness. Take another peaceful breath at your own natural pace.");
+    }}
+
+    function setActiveBtn(id) {{
+      var ids = ['btnBreath', 'btnHeart', 'btnShoulder', 'btnWisdom', 'btnReset'];
+      for (var i = 0; i < ids.length; i++) {{
+        var el = document.getElementById(ids[i]);
+        if (el) el.className = 'action-btn' + (ids[i] === id ? ' active' : '');
+      }}
+    }}
+
+    setInterval(function() {{
+      if (!breathPacerActive) return;
+      pacerSeconds--;
+      if (pacerSeconds <= 0) {{
+        pacerPhase = (pacerPhase + 1) % 4;
+        pacerSeconds = 4;
+        if (pacerPhase === 0) {{
+          playTone(432, 'sine', 0.5);
+          if (voiceEnabled) speakAloud("Inhale slowly...");
+        }} else if (pacerPhase === 1) {{
+          playTone(528, 'sine', 0.5);
+          if (voiceEnabled) speakAloud("Hold gently...");
+        }} else if (pacerPhase === 2) {{
+          playTone(396, 'sine', 0.5);
+          if (voiceEnabled) speakAloud("Exhale completely...");
+        }} else {{
+          playTone(432, 'sine', 0.5);
+          if (voiceEnabled) speakAloud("Rest and reset.");
+        }}
+      }}
+      var phaseNames = ['🌬️ Inhale', '⏸️ Hold', '💨 Exhale', '🌿 Rest'];
+      document.getElementById('pacerBadge').innerText = phaseNames[pacerPhase] + ' · ' + pacerSeconds + 's';
+    }}, 1000);
+
+    var clock = new THREE.Clock();
+    var blinkTimer = 0;
+    var isBlinking = false;
+
+    function animate() {{
+      requestAnimationFrame(animate);
+      var t = clock.getElapsedTime();
+
+      starField.rotation.y = t * 0.02;
+
+      var breathFreq = breathPacerActive ? 0.392 : 0.85;
+      var breathVal = Math.sin(t * breathFreq);
+      var chestScale = 1.0 + 0.06 * breathVal;
+      torso.scale.set(chestScale, 1.0 + 0.02 * breathVal, chestScale);
+      spineGroup.position.y = 0.15 + 0.02 * breathVal;
+
+      auraMesh.scale.set(1.0 + 0.05 * breathVal, 1.0 + 0.05 * breathVal, 1.0);
+      auraMesh.rotation.z = t * 0.1;
+
+      headGroup.rotation.y += (targetHeadY - headGroup.rotation.y) * 0.06;
+      headGroup.rotation.x += (targetHeadX - headGroup.rotation.x) * 0.06;
+
+      blinkTimer += 0.016;
+      if (!isBlinking && blinkTimer > 3.6 + Math.sin(t) * 1.0) {{
+        isBlinking = true;
+        blinkTimer = 0;
+      }}
+      if (isBlinking) {{
+        eyeL.lid.scale.y = 1.8;
+        eyeR.lid.scale.y = 1.8;
+        if (blinkTimer > 0.14) {{
+          eyeL.lid.scale.y = 1.0;
+          eyeR.lid.scale.y = 1.0;
+          isBlinking = false;
+          blinkTimer = 0;
+        }}
+      }}
+
+      if (somaticHandOnHeart) {{
+        rightArmPivot.rotation.z += (-1.15 - rightArmPivot.rotation.z) * 0.08;
+        rightArmPivot.rotation.x += (0.75 - rightArmPivot.rotation.x) * 0.08;
+        rightForearmGroup.rotation.y += (1.4 - rightForearmGroup.rotation.y) * 0.08;
+        rightForearmGroup.rotation.z += (0.4 - rightForearmGroup.rotation.z) * 0.08;
+      }} else {{
+        rightArmPivot.rotation.z += (0.0 - rightArmPivot.rotation.z) * 0.08;
+        rightArmPivot.rotation.x += (0.0 - rightArmPivot.rotation.x) * 0.08;
+        rightForearmGroup.rotation.y += (0.0 - rightForearmGroup.rotation.y) * 0.08;
+        rightForearmGroup.rotation.z += (0.0 - rightForearmGroup.rotation.z) * 0.08;
+      }}
+
+      if (shoulderRollActive) {{
+        var rollVal = Math.sin(t * 2.5);
+        armLeftGroup.position.y = 0.65 + 0.08 * rollVal;
+        rightArmPivot.position.y = 0.65 + 0.08 * rollVal;
+      }} else {{
+        armLeftGroup.position.y = 0.65;
+        if (!somaticHandOnHeart) rightArmPivot.position.y = 0.65;
+      }}
+
+      if (window.speechSynthesis && window.speechSynthesis.speaking) {{
+        headGroup.position.y = 1.05 + Math.sin(t * 12) * 0.012;
+      }} else {{
+        headGroup.position.y = 1.05;
+      }}
+
+      renderer.render(scene, camera);
+    }}
+    animate();
+
+    function resize() {{
+      var w = container.clientWidth || window.innerWidth;
+      var h = container.clientHeight || 520;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }}
+    window.addEventListener('resize', resize);
+    if (window.ResizeObserver) {{
+      try {{
+        new ResizeObserver(resize).observe(container);
+      }} catch(e) {{}}
+    }}
+    setTimeout(resize, 40);
+  </script>
+</body>
+</html>"""
+
+
+
 def render_zen_canvas_widget() -> str:return """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6018,72 +6634,121 @@ def render_equiai_companion_view():
             unsafe_allow_html=True,
         )
 
-    # Quick Conversation Starters
-    st.markdown('<p style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 12px 0 6px 2px;">💡 Quick Coaching Starters</p>', unsafe_allow_html=True)
-    q_col1, q_col2, q_col3, q_col4 = st.columns(4, gap="small")
-    with q_col1:
-        if st.button(get_ui_translation("qc_lbl_1", "🔍 Imposter & PR Feedback"), width="stretch", key="qc_prompt_1"):
-            st.session_state["queued_companion_prompt"] = get_ui_translation("qc_1", "Help me process critical code review feedback without feeling imposter syndrome.")
-            st.rerun()
-    with q_col2:
-        if st.button(get_ui_translation("qc_lbl_2", "🌊 2-Minute Mental Defrag"), width="stretch", key="qc_prompt_2"):
-            st.session_state["queued_companion_prompt"] = get_ui_translation("qc_2", "I'm juggling 5 context switches today and feeling cognitively scattered.")
-            st.rerun()
-    with q_col3:
-        if st.button(get_ui_translation("qc_lbl_3", "🛡️ Workload Boundaries"), width="stretch", key="qc_prompt_3"):
-            st.session_state["queued_companion_prompt"] = get_ui_translation("qc_3", "Draft a gentle, professional boundary message for after-hours Slack.")
-            st.rerun()
-    with q_col4:
-        if st.button(get_ui_translation("qc_lbl_4", "🌿 60s Somatic Grounding"), width="stretch", key="qc_prompt_4"):
-            st.session_state["queued_companion_prompt"] = get_ui_translation("qc_4", "Guide me through an immediate 60-second somatic grounding exercise.")
-            st.rerun()
+    coach_view_tab1, coach_view_tab2 = st.tabs([
+        "🧘 3D Human Coach (Aria)",
+        "💬 Conversational AI Co-Reflection (Gemini)",
+    ])
 
-    # Chat Memory Store
-    if "equi_companion_chat" not in st.session_state:
-        st.session_state["equi_companion_chat"] = [
-            {
-                "role": "assistant",
-                "content": (
-                    f"Hello {user_name}! I am your **EquiAI Mindful Companion**. "
-                    f"I'm here to offer a calm, grounded space to unpack thoughts, reframe tension, and explore restorative micro-interventions. "
-                    "What would you like to reflect on today?"
-                ),
+    with coach_view_tab1:
+        # Embed Interactive 3D Humanoid Wellness Coach
+        st.components.v1.html(
+            render_3d_human_coach_widget(user_name=user_name, language=st.session_state.get("app_language", "en")),
+            height=535,
+        )
+
+        # Interactive Somatic & Voice Coaching Control Center
+        st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
+        ch_c1, ch_c2, ch_c3 = st.columns([1.5, 1, 1], gap="medium")
+        with ch_c1:
+            coach_done = st.session_state.get("coach_session_completed", False)
+            c_btn_txt = "✅ 3D Coaching Practice Logged (+25 Pts)" if coach_done else "✨ Complete 3D Coaching Session (+25 Resilience Points)"
+            c_btn_type = "secondary" if coach_done else "primary"
+            if st.button(c_btn_txt, type=c_btn_type, width="stretch", key="claim_coach_session_btn"):
+                st.session_state["coach_session_completed"] = True
+                st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 25
+                st.toast("🎉 3D Humanoid Coaching Session Logged! +25 Resilience Points.", icon="🧘")
+                st.rerun()
+        with ch_c2:
+            if st.button("💬 Unpack Thoughts in Chat →", type="secondary", width="stretch", key="coach_to_chat_btn"):
+                st.session_state["queued_companion_prompt"] = "Help me unpack and reflect on what I just felt during my 3D coaching session."
+                st.toast("Switched prompt to chat companion.", icon="💬")
+                st.rerun()
+        with ch_c3:
+            if st.button("🔔 432Hz Gong Chime", type="secondary", width="stretch", key="coach_gong_btn"):
+                st.toast("🔔 432Hz Harmonic Frequency Chimed! Take one slow breath.", icon="✨")
+
+        # Neuroscience of Embodied Coaching Cards
+        card_col1, card_col2 = st.columns(2, gap="medium")
+        with card_col1, st.container(border=True):
+            st.markdown("##### 🧠 Mirror Neurons & Embodied Resonance")
+            st.write(
+                "When observing a 3D coach breathing at 4-4-4 diaphragmatic intervals, mirror neurons in the premotor cortex "
+                "activate somatic synchrony. This down-regulates sympathetic overdrive and naturally resets resting respiratory rate."
+            )
+        with card_col2, st.container(border=True):
+            st.markdown("##### 🎙️ Spoken Bio-Feedback & Somatic Presence")
+            st.write(
+                "Aria's spoken auditory prompts and Hand-on-Heart posture trigger parasympathetic vagal stimulation, "
+                "reducing acute cognitive fatigue and restoring calm executive control before demanding deliverables."
+            )
+
+    with coach_view_tab2:
+        # Quick Conversation Starters
+        st.markdown('<p style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 12px 0 6px 2px;">💡 Quick Coaching Starters</p>', unsafe_allow_html=True)
+        q_col1, q_col2, q_col3, q_col4 = st.columns(4, gap="small")
+        with q_col1:
+            if st.button(get_ui_translation("qc_lbl_1", "🔍 Imposter & PR Feedback"), width="stretch", key="qc_prompt_1"):
+                st.session_state["queued_companion_prompt"] = get_ui_translation("qc_1", "Help me process critical code review feedback without feeling imposter syndrome.")
+                st.rerun()
+        with q_col2:
+            if st.button(get_ui_translation("qc_lbl_2", "🌊 2-Minute Mental Defrag"), width="stretch", key="qc_prompt_2"):
+                st.session_state["queued_companion_prompt"] = get_ui_translation("qc_2", "I'm juggling 5 context switches today and feeling cognitively scattered.")
+                st.rerun()
+        with q_col3:
+            if st.button(get_ui_translation("qc_lbl_3", "🛡️ Workload Boundaries"), width="stretch", key="qc_prompt_3"):
+                st.session_state["queued_companion_prompt"] = get_ui_translation("qc_3", "Draft a gentle, professional boundary message for after-hours Slack.")
+                st.rerun()
+        with q_col4:
+            if st.button(get_ui_translation("qc_lbl_4", "🌿 60s Somatic Grounding"), width="stretch", key="qc_prompt_4"):
+                st.session_state["queued_companion_prompt"] = get_ui_translation("qc_4", "Guide me through an immediate 60-second somatic grounding exercise.")
+                st.rerun()
+
+        # Chat Memory Store
+        if "equi_companion_chat" not in st.session_state:
+            st.session_state["equi_companion_chat"] = [
+                {
+                    "role": "assistant",
+                    "content": (
+                        f"Hello {user_name}! I am your **EquiAI Mindful Companion**. "
+                        f"I'm here to offer a calm, grounded space to unpack thoughts, reframe tension, and explore restorative micro-interventions. "
+                        "What would you like to reflect on today?"
+                    ),
+                }
+            ]
+
+        # Render Chat History
+        chat_box = st.container()
+        with chat_box:
+            for msg in st.session_state["equi_companion_chat"]:
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
+
+        # Handle Queued or New Prompt
+        user_input = st.chat_input("Share what is on your mind or ask for a reframe / grounding exercise...")
+        if st.session_state.get("queued_companion_prompt"):
+            user_input = st.session_state.pop("queued_companion_prompt")
+
+        if user_input:
+            st.session_state["equi_companion_chat"].append({"role": "user", "content": user_input})
+            ctx_data = {
+                "dominant_emotion": last_rep.get("predicted_emotion") if last_rep else "neutral",
+                "compound": last_rep.get("compound_score", 0.0) if last_rep else 0.0,
+                "streak": "3-Day Streak",
+                "recent_note": st.session_state.get("journal_reflection_note", ""),
+                "user_name": user_name,
+                "entry_count": str(entry_count),
+                "app_language": st.session_state.get("app_language", "en"),
             }
-        ]
-
-    # Render Chat History
-    chat_box = st.container()
-    with chat_box:
-        for msg in st.session_state["equi_companion_chat"]:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
-
-    # Handle Queued or New Prompt
-    user_input = st.chat_input("Share what is on your mind or ask for a reframe / grounding exercise...")
-    if st.session_state.get("queued_companion_prompt"):
-        user_input = st.session_state.pop("queued_companion_prompt")
-
-    if user_input:
-        st.session_state["equi_companion_chat"].append({"role": "user", "content": user_input})
-        ctx_data = {
-            "dominant_emotion": last_rep.get("predicted_emotion") if last_rep else "neutral",
-            "compound": last_rep.get("compound_score", 0.0) if last_rep else 0.0,
-            "streak": "3-Day Streak",
-            "recent_note": st.session_state.get("journal_reflection_note", ""),
-            "user_name": user_name,
-            "entry_count": str(entry_count),
-            "app_language": st.session_state.get("app_language", "en"),
-        }
-        resp = generate_equiai_response(user_input, ctx_data, history=st.session_state.get("equi_companion_chat", []))
-        st.session_state["equi_companion_chat"].append({"role": "assistant", "content": resp})
-        st.rerun()
-
-    c_b1, _ = st.columns([1, 4])
-    with c_b1:
-        if st.button("🧹 Clear Chat History", type="secondary", width="stretch", key="clear_companion_btn"):
-            st.session_state["equi_companion_chat"] = []
-            st.toast("Chat memory reset.", icon="✨")
+            resp = generate_equiai_response(user_input, ctx_data, history=st.session_state.get("equi_companion_chat", []))
+            st.session_state["equi_companion_chat"].append({"role": "assistant", "content": resp})
             st.rerun()
+
+        c_b1, _ = st.columns([1, 4])
+        with c_b1:
+            if st.button("🧹 Clear Chat History", type="secondary", width="stretch", key="clear_companion_btn"):
+                st.session_state["equi_companion_chat"] = []
+                st.toast("Chat memory reset.", icon="✨")
+                st.rerun()
 
 
 def render_zen_canvas_view():
