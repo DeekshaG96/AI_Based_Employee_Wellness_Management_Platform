@@ -5662,9 +5662,25 @@ def call_gemini_chat(prompt: str, context: dict[str, Any], history: list[dict[st
     comp_score = context.get("compound", 0.0)
     recent_note = context.get("recent_note", "")
 
+    active_lang_code = context.get("app_language") or (st.session_state.get("app_language", "en") if hasattr(st, "session_state") else "en")
+    lang_names = {
+        "en": "English",
+        "hi": "Hindi (हिन्दी)",
+        "kn": "Kannada (ಕನ್ನಡ)",
+        "ta": "Tamil (தமிழ்)",
+        "te": "Telugu (తెలుగు)",
+        "mr": "Marathi (मराठी)",
+        "bn": "Bengali (বাংলা)",
+        "gu": "Gujarati (ગુજરાતી)",
+        "ml": "Malayalam (മലയാളം)",
+    }
+    lang_name = lang_names.get(active_lang_code, "English")
+
     system_instruction = (
         f"You are EquiAI, a warm, compassionate, evidence-based workplace mental wellness and emotional resilience companion on the EquiMind platform.\n"
         f"The user's name is {user_name}.\n"
+        f"Preferred Communication Language: {lang_name}.\n"
+        f"- LANGUAGE REQUIREMENT: If the preferred language is not English, you MUST converse primarily in {lang_name} using natural, respectful, culturally comforting expressions. If the user writes in hybrid scripts like Hinglish or Kanglish, respond warmly in natural conversational phrasing they easily understand.\n"
         f"User Reflection Context:\n"
         f"- Check-in streak: {streak}\n"
         f"- Total reflections logged: {entry_count}\n"
@@ -5938,8 +5954,8 @@ def render_equiai_companion_view():
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     {engine_badge}
+                    <span style="background: #fdf4ff; border: 1px solid #f0abfc; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #a21caf;">🌐 {INDIAN_LANGUAGES.get(st.session_state.get('app_language', 'en'), '🇬🇧 English')}</span>
                     <span style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #166534;">🧠 Context-Aware Memory</span>
-                    <span style="background: #f0fdfa; border: 1px solid #99f6e4; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #0f766e;">🔒 Private & Scoped</span>
                 </div>
             </div>
         </div>
@@ -6034,6 +6050,7 @@ def render_equiai_companion_view():
             "recent_note": st.session_state.get("journal_reflection_note", ""),
             "user_name": user_name,
             "entry_count": str(entry_count),
+            "app_language": st.session_state.get("app_language", "en"),
         }
         resp = generate_equiai_response(user_input, ctx_data, history=st.session_state.get("equi_companion_chat", []))
         st.session_state["equi_companion_chat"].append({"role": "assistant", "content": resp})
@@ -6926,6 +6943,110 @@ def render_model_comparator_view():
 
 
 
+INDIAN_LANGUAGES: dict[str, str] = {
+    "en": "🇬🇧 English",
+    "hi": "🇮🇳 हिन्दी (Hindi)",
+    "kn": "🇮🇳 ಕನ್ನಡ (Kannada)",
+    "ta": "🇮🇳 தமிழ் (Tamil)",
+    "te": "🇮🇳 తెలుగు (Telugu)",
+    "mr": "🇮🇳 मराठी (Marathi)",
+    "bn": "🇮🇳 বাংলা (Bengali)",
+    "gu": "🇮🇳 ગુજરાતી (Gujarati)",
+    "ml": "🇮🇳 മലയാളം (Malayalam)",
+}
+
+TRANSLATIONS: dict[str, dict[str, str]] = {
+    "en": {
+        "welcome": "Welcome back",
+        "tagline": "Your quiet space for mindful reflection, emotional clarity, and wellness.",
+        "streak": "3-Day Streak",
+        "resilience_points": "Resilience Points",
+        "calm": "Centered & Calm",
+        "private": "100% Private",
+        "sos_button": "⚡ 60s SOS Calm Reset",
+    },
+    "hi": {
+        "welcome": "वापसी पर स्वागत है",
+        "tagline": "माइंडफुलनेस, भावनात्मक स्पष्टता और कल्याण के लिए आपका शांत स्थान।",
+        "streak": "3-दिवसीय स्ट्रीक",
+        "resilience_points": "लचीलापन अंक",
+        "calm": "शांत और केंद्रित",
+        "private": "100% गोपनीय",
+        "sos_button": "⚡ 60s SOS शांत रीसेट",
+    },
+    "kn": {
+        "welcome": "ಮರಳಿ ಸ್ವಾಗತ",
+        "tagline": "ಭಾವನಾತ್ಮಕ ಸ್ಪಷ್ಟತೆ, ಮನಃಶಾಂತಿ ಮತ್ತು ಕ್ಷೇಮಕ್ಕಾಗಿ ನಿಮ್ಮ ಖಾಸಗಿ ತಾಣ.",
+        "streak": "3-ದಿನಗಳ ಪಯಣ",
+        "resilience_points": "ಚೇತರಿಕೆ ಅಂಕಗಳು",
+        "calm": "ಶಾಂತ ಮತ್ತು ಕೇಂದ್ರಿತ",
+        "private": "100% ಗೌಪ್ಯ",
+        "sos_button": "⚡ 60s SOS ಶಾಂತ ಮರುಹೊಂದಿಕೆ",
+    },
+    "ta": {
+        "welcome": "மீண்டும் நல்வரவு",
+        "tagline": "மன அமைதி, தெளிவு மற்றும் ஆரோக்கியத்திற்கான உங்களின் பிரத்யேக இடம்.",
+        "streak": "3-நாள் தொடர்",
+        "resilience_points": "மீள்திறன் புள்ளிகள்",
+        "calm": "அமைதி & மையம்",
+        "private": "100% தனிப்பட்டது",
+        "sos_button": "⚡ 60s SOS அமைதி மீட்டமைப்பு",
+    },
+    "te": {
+        "welcome": "తిరిగి స్వాగతం",
+        "tagline": "మానసిక ప్రశాంతత, భావోద్వేగ స్పష్టత కోసం మీ వ్యక్తిగత స్థలం.",
+        "streak": "3-రోజుల స్ట్రీక్",
+        "resilience_points": "స్థితిస్థాపకత పాయింట్లు",
+        "calm": "శాంతం & కేంద్రీకృతం",
+        "private": "100% గోప్యత",
+        "sos_button": "⚡ 60s SOS ప్రశాంతత రీసెట్",
+    },
+    "mr": {
+        "welcome": "पुन्हा स्वागत आहे",
+        "tagline": "भावनिक स्पष्टता आणि मानसिक शांततेसाठी आपली वैयक्तिक जागा.",
+        "streak": "3-दिवसीय सातत्य",
+        "resilience_points": "लवचिकता गुण",
+        "calm": "शांत आणि केंद्रित",
+        "private": "100% खाजगी",
+        "sos_button": "⚡ 60s SOS शांत रीसेट",
+    },
+    "bn": {
+        "welcome": "স্বাগতম",
+        "tagline": "মানসিক সুস্থতা এবং মানসিক স্বচ্ছতার জন্য আপনার শান্ত স্থান।",
+        "streak": "৩-দিনের ধারাবাহিকতা",
+        "resilience_points": "স্থিতিস্থাপকতা পয়েন্ট",
+        "calm": "শান্ত এবং কেন্দ্রীভূত",
+        "private": "১০০% ব্যক্তিগত",
+        "sos_button": "⚡ ৬০ সেকেন্ড শান্ত রিসেট",
+    },
+    "gu": {
+        "welcome": "પુનઃ સ્વાગત છે",
+        "tagline": "માનસિક શાંતિ અને સુખાકારી માટે તમારું અંગત સ્થાન.",
+        "streak": "3-દિવસીય સાતત્ય",
+        "resilience_points": "સ્થિતિસ્થાપકતા પોઈન્ટ્સ",
+        "calm": "શાંત અને કેન્દ્રિત",
+        "private": "100% ખાનગી",
+        "sos_button": "⚡ 60s SOS શાંત રીસેટ",
+    },
+    "ml": {
+        "welcome": "തിരികെ സ്വാഗതം",
+        "tagline": "മാനസിക വ്യക്തതയ്ക്കും സമാധാനത്തിനുമുള്ള നിങ്ങളുടെ സ്വകാര്യ ഇടം.",
+        "streak": "3-ദിവസത്തെ സ്ട്രീക്ക്",
+        "resilience_points": "പോയിന്റുകൾ",
+        "calm": "ശാന്തവും ഏകാഗ്രവും",
+        "private": "100% സ്വകാര്യം",
+        "sos_button": "⚡ 60s SOS ശാന്തമായ റീസെറ്റ്",
+    },
+}
+
+
+def t(key: str, default: str | None = None) -> str:
+    """Retrieve localized UI label for the active user language."""
+    lang = st.session_state.get("app_language", "en") if hasattr(st, "session_state") else "en"
+    lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS["en"])
+    return lang_dict.get(key, TRANSLATIONS["en"].get(key, default or key))
+
+
 def set_active_view(target_view: str, soma_tool: str | None = None):
     """Safely queue a navigation switch before sidebar instantiation."""
     st.session_state["nav_redirect"] = target_view
@@ -6986,7 +7107,36 @@ def render_sidebar():
             unsafe_allow_html=True,
         )
 
-        st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 4px 0 2px 4px;">Navigation</p>', unsafe_allow_html=True)
+        # Regional Indian Language Selector
+        if "app_language" not in st.session_state:
+            st.session_state["app_language"] = "en"
+
+        st.markdown(
+            """
+            <div style="font-size: 0.68rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 4px 0 3px 2px; display: flex; align-items: center; gap: 6px;">
+                <span>🌐</span> <span>Language / ಭಾಷೆ / भाषा</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        lang_keys = list(INDIAN_LANGUAGES.keys())
+        curr_lang = st.session_state.get("app_language", "en")
+        curr_lang_idx = lang_keys.index(curr_lang) if curr_lang in lang_keys else 0
+
+        chosen_lang_label = st.selectbox(
+            "Language",
+            options=[INDIAN_LANGUAGES[k] for k in lang_keys],
+            index=curr_lang_idx,
+            key="ui_language_dropdown",
+            label_visibility="collapsed",
+        )
+        selected_code = next(k for k, v in INDIAN_LANGUAGES.items() if v == chosen_lang_label)
+        if selected_code != st.session_state.get("app_language"):
+            st.session_state["app_language"] = selected_code
+            st.toast(f"Language set to {chosen_lang_label}", icon="🌐")
+            st.rerun()
+
+        st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 2px 4px;">Navigation</p>', unsafe_allow_html=True)
         nav_options = [
             "💬 Daily Reflection",
             "🤖 EquiAI Chat Companion",
@@ -7033,6 +7183,14 @@ def render_workspace():
     active_user_name = escape(str(st.session_state.get("user_name", "Team Member")))
     initial = active_user_name[0].upper() if active_user_name else "E"
 
+    welcome_title = t("welcome")
+    tagline_desc = t("tagline")
+    streak_label = t("streak")
+    pts_label = t("resilience_points")
+    calm_label = t("calm")
+    priv_label = t("private")
+    sos_label = t("sos_button")
+
     # High-Class Luxury Header Banner (Clutter-Free, Standard, Aesthetic)
     st.markdown(
         f"""
@@ -7044,23 +7202,23 @@ def render_workspace():
                     </div>
                     <div>
                         <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 700; color: #0f172a; letter-spacing: -0.025em; line-height: 1.2;">
-                            Welcome back, <span style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{active_user_name}</span>
+                            {welcome_title}, <span style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{active_user_name}</span>
                         </div>
-                        <div style="font-size: 0.86rem; color: #64748b; margin-top: 3px; font-weight: 400;">Your quiet space for mindful reflection, emotional clarity, and wellness.</div>
+                        <div style="font-size: 0.86rem; color: #64748b; margin-top: 3px; font-weight: 400;">{tagline_desc}</div>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #92400e; font-weight: 700; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12); display: inline-flex; align-items: center; gap: 6px;">
-                        <span>☀️</span> <span>3-Day Streak</span>
+                        <span>☀️</span> <span>{streak_label}</span>
                     </div>
                     <div style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #99f6e4; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #0f766e; font-weight: 700; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12); display: inline-flex; align-items: center; gap: 6px;">
-                        <span>💎</span> <span>{st.session_state.get('mindful_points', 480)} Resilience Points</span>
+                        <span>💎</span> <span>{st.session_state.get('mindful_points', 480)} {pts_label}</span>
                     </div>
                     <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #166534; font-weight: 700; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12); display: inline-flex; align-items: center; gap: 6px;">
-                        <span>🌿</span> <span>Centered & Calm</span>
+                        <span>🌿</span> <span>{calm_label}</span>
                     </div>
                     <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1px solid #cbd5e1; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #475569; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); display: inline-flex; align-items: center; gap: 6px;">
-                        <span>🔒</span> <span>100% Private</span>
+                        <span>🔒</span> <span>{priv_label}</span>
                     </div>
                 </div>
             </div>
@@ -7076,7 +7234,7 @@ def render_workspace():
     if not st.session_state.get("show_sos_reset_modal", False):
         _sos_spacer, sos_btn_col = st.columns([3.8, 1.2], gap="small")
         with sos_btn_col:
-            if st.button("⚡ 60s SOS Calm Reset", key="header_sos_reset_btn", type="secondary", width="stretch", help="1-click physiological sigh & parasympathetic de-escalation"):
+            if st.button(sos_label, key="header_sos_reset_btn", type="secondary", width="stretch", help="1-click physiological sigh & parasympathetic de-escalation"):
                 st.session_state["show_sos_reset_modal"] = True
                 st.rerun()
 
