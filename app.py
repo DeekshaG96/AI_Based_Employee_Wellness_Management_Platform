@@ -3544,8 +3544,8 @@ def render_ai_cognitive_reframe_studio(dominant_emotion: str, original_text: str
                     Pattern: {distortion_title}
                 </span>
             </div>
-            <p style="font-size: 0.86rem; color: #334155; line-height: 1.5; margin-bottom: 12px;">
-                Automatic thoughts can amplify workplace tension. Transforming cognitive distortions into grounded, objective reframes restores emotional clarity and self-efficacy.
+            <p style="font-size: 0.86rem; color: #334155; line-height: 1.5; margin-bottom: 0;">
+                Automatic cognitive distortions amplify workplace tension. Grounded cognitive reframing decouples emotion from threat, restoring autonomy and executive clarity.
             </p>
         </div>
         """,
@@ -3555,23 +3555,63 @@ def render_ai_cognitive_reframe_studio(dominant_emotion: str, original_text: str
     c_card1, c_card2 = st.columns(2, gap="medium")
     with c_card1, st.container(border=True):
         st.markdown("##### 🔍 1. Objective Perspective Shift")
-        st.markdown(f"*{perspective}*")
-        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size: 0.92rem; font-weight: 600; color: #0f766e; margin-bottom: 8px;'>“{perspective}”</div>", unsafe_allow_html=True)
         st.caption("Self-Inquiry Probes:")
-        for q in questions[:2]:
+        for q in questions[:3]:
             st.markdown(f"- <span style='font-size: 0.82rem; color: #475569;'>{q}</span>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        adopt_shift_key = f"adopt_shift_{dominant_emotion}_{len(original_text)}"
+        if st.button("📝 Adopt Perspective into Note", key=adopt_shift_key, type="secondary", width="stretch"):
+            curr_note = st.session_state.get("journal_reflection_note", "").strip()
+            new_note = f"{curr_note} [Shift: {perspective}]".strip() if curr_note else f"[Shift: {perspective}]"
+            st.session_state["journal_reflection_note"] = new_note
+            if st.session_state.get("last_analysis_metadata"):
+                st.session_state["last_analysis_metadata"]["note"] = new_note
+            st.toast("Adopted objective shift into reflection note!", icon="💡")
+            st.rerun()
 
     with c_card2, st.container(border=True):
         st.markdown("##### 🌟 2. Grounded Self-Affirmation")
-        st.markdown(f"*{affirmation}*")
-        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-        adopt_key = f"adopt_reframe_{dominant_emotion}_{len(original_text)}"
-        if st.button("📝 Adopt Reframe into Reflection Note", key=adopt_key, type="primary", width="stretch"):
+        st.markdown(f"<div style='font-size: 0.92rem; font-weight: 600; color: #0284c7; margin-bottom: 8px;'>“{affirmation}”</div>", unsafe_allow_html=True)
+        st.caption("Resilience Anchor:")
+        st.markdown("<p style='font-size: 0.82rem; color: #64748b; margin: 4px 0 12px 0;'>Repeating grounded self-affirmations de-escalates amygdala hyperactivity and anchors cognitive flexibility during challenging tasks.</p>", unsafe_allow_html=True)
+        adopt_aff_key = f"adopt_aff_{dominant_emotion}_{len(original_text)}"
+        if st.button("✨ Adopt Affirmation into Note (+15 pts)", key=adopt_aff_key, type="primary", width="stretch"):
             curr_note = st.session_state.get("journal_reflection_note", "").strip()
-            new_note = f"{curr_note} [Reframe: {perspective}]".strip() if curr_note else f"[Reframe: {perspective}]"
+            new_note = f"{curr_note} [Affirmation: {affirmation}]".strip() if curr_note else f"[Affirmation: {affirmation}]"
             st.session_state["journal_reflection_note"] = new_note
-            st.toast("Adopted cognitive reframe into your reflection notes!", icon="💡")
+            if st.session_state.get("last_analysis_metadata"):
+                st.session_state["last_analysis_metadata"]["note"] = new_note
+            st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 15
+            st.toast("Affirmation adopted (+15 pts)! Recorded in personal reflection journal.", icon="🌟")
             st.rerun()
+
+    with st.expander("✍️ Practice Personal Cognitive Reframe Exercise (+25 Resilience Points)", expanded=False):
+        st.markdown(f"**Guided Reflection Probe:** *{questions[0] if questions else 'How can you view this challenge with grounded kindness?'}*")
+        custom_reframe = st.text_area(
+            "Write your own personalized cognitive reframe below:",
+            placeholder="E.g., While this deadline is tight, I have delivered difficult projects before and can ask my team for support on blockages.",
+            key=f"custom_reframe_input_{dominant_emotion}",
+            height=70,
+        )
+        sub_c1, sub_c2 = st.columns([1.5, 1], gap="small")
+        with sub_c1:
+            if st.button("💾 Save Resilient Reframe (+25 pts)", key=f"save_custom_reframe_btn_{dominant_emotion}", type="primary", width="stretch"):
+                if custom_reframe.strip():
+                    curr_note = st.session_state.get("journal_reflection_note", "").strip()
+                    new_note = f"{curr_note} [My Reframe: {custom_reframe.strip()}]".strip() if curr_note else f"[My Reframe: {custom_reframe.strip()}]"
+                    st.session_state["journal_reflection_note"] = new_note
+                    if st.session_state.get("last_analysis_metadata"):
+                        st.session_state["last_analysis_metadata"]["note"] = new_note
+                    st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 25
+                    st.success("🎉 Personal cognitive reframe logged (+25 pts)! Added to your reflection history.")
+                    st.rerun()
+                else:
+                    st.warning("Please type your reframe before saving.")
+        with sub_c2:
+            if st.button("🤖 Co-Reflect with EquiAI Coach →", key=f"reframe_coach_discuss_btn_{dominant_emotion}", type="secondary", width="stretch"):
+                set_active_view("🤖 EquiAI Chat Companion")
+                st.rerun()
 
 
 def render_meeting_recovery_calculator():
