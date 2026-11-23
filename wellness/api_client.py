@@ -617,3 +617,20 @@ def get_database_entities(token: str | None = None) -> dict[str, list[dict[str, 
         conn = connect_database()
         return get_all_database_entities(conn)
 
+
+def get_admin_analytics(token: str | None = None) -> dict[str, Any]:
+    """Retrieve official Admin Dashboard Analytics metrics."""
+    try:
+        return _request("GET", "/admin/analytics", token=token)
+    except Exception:
+        from .storage import (
+            connect_database,
+        )
+        from .storage import (
+            get_admin_analytics as get_storage_admin_analytics,
+        )
+
+        conn = connect_database()
+        return get_storage_admin_analytics(conn)
+
+
