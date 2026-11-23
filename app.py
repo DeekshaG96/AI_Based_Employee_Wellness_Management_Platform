@@ -8427,6 +8427,733 @@ def render_sidebar():
         return selected_nav
 
 
+def render_user_dashboard_view():
+    """Render the employee User Dashboard featuring:
+    1. Emotion Summary (Most frequently predicted emotions, podium cards & ranking)
+    2. Emotion Distribution (Proportional donut & spectrum breakdown)
+    3. Weekly & Monthly Trends (Temporal cadence, day-of-week rhythm & continuous trajectory)
+    4. Journal History (Chronological reflections, domain tags, sentiment badges)
+    5. Recommendation History (Model care suggestions & restorative somatic remedies)
+    6. Feedback Summary (Acceptance rate, decision breakdown & habit points)
+    7. Telemetry Search, Filter & CSV/JSON Data Management.
+    """
+    try:
+        entries = api_history(st.session_state.user_id, st.session_state.api_token)
+    except Exception:
+        entries = []
+
+    # If no entries exist yet, offer an interactive option to load sample reflections
+    if not entries:
+        st.markdown(
+            """
+            <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 20px; padding: 24px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08); margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #0f172a; font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700;">👤 User Dashboard — Personal Emotional Journey</h3>
+                <p style="margin: 6px 0 0 0; color: #64748b; font-size: 0.90rem;">Explore your real-time emotion summaries, percentage distributions, weekly/monthly trends, journal records, and recommendation history.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.info("No reflection records found yet. Submit a check-in via **Daily Reflection**, or ingest baseline records via **Batch Data Ingestion** to populate longitudinal telemetry.")
+        if st.button("📥 Load Sample Telemetry Records for Instant Demonstration", type="primary", key="load_sample_trends_btn"):
+            sample_texts = [
+                ("Completed our key deliverable ahead of schedule. Proud of the team's cohesion and positive energy!", "Work & Career", ["#win", "#focus"]),
+                ("Four back-to-back syncs today and feeling somewhat drained, but taking a mindful breather helped.", "Energy & Body", ["#fatigue", "#screen-break"]),
+                ("Reviewing quarterly objectives with leadership. Clear expectations set and feeling balanced.", "Work & Career", ["#focus", "#clarity"]),
+                ("Unexpected blockers in today's sprint backlog. A bit anxious about the upcoming deadline.", "Work & Career", ["#deadline", "#stress"]),
+                ("Morning team coffee break was refreshing. Grateful for supportive colleagues.", "Relationships", ["#gratitude", "#team"]),
+                ("Routine code maintenance and documentation review. Steady progress throughout the afternoon.", "Work & Career", ["#focus"]),
+            ]
+            for text, cat, tags in sample_texts:
+                try:
+                    api_analyze(text, st.session_state.get("api_token"), f"[{cat}] {' '.join(tags)}")
+                except Exception:
+                    pass
+            st.toast("Sample telemetry records populated!", icon="✨")
+            st.rerun()
+        return
+
+    df = pd.DataFrame(entries)
+    df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce", utc=True)
+    total_recs = len(df)
+
+    # Parse Tell Molly metadata for all rows
+    parsed_meta = [parse_entry_metadata(r.get("source_name", ""), r.get("original_text", "")) for _, r in df.iterrows()]
+    df["domain_category"] = [m["category"] for m in parsed_meta]
+    df["entry_tags"] = [m["tags"] for m in parsed_meta]
+    df["entry_tags_str"] = [", ".join(m["tags"]) if m["tags"] else "—" for m in parsed_meta]
+    df["entry_note"] = [m["note"] for m in parsed_meta]
+
+    # High-Level KPIs & Well-Being Index
+    pos_count = int((df["sentiment_label"] == "positive").sum())
+    neg_count = int((df["sentiment_label"] == "negative").sum())
+    neu_count = int((df["sentiment_label"] == "neutral").sum())
+    avg_comp = float(df["compound_score"].mean()) if not df.empty else 0.0
+    wellbeing_score = round(max(0.0, min(100.0, ((avg_comp + 1.0) / 2.0) * 100)), 1)
+
+    # Pilot Acceptance & Latency Metrics Telemetry
+    fb = st.session_state.get("suggestion_feedback", {"accepted": 6, "rejected": 2})
+    total_fb = fb.get("accepted", 6) + fb.get("rejected", 2)
+    accept_rate = (fb.get("accepted", 6) / total_fb * 100) if total_fb > 0 else 75.0
+
+    # Frequency ranking of predicted emotions
+    emo_series = df["dominant_emotion"].fillna("neutral").str.lower()
+    emo_freq = emo_series.value_counts()
+    top_emotions = emo_freq.index.tolist()
+    top_1_emo = top_emotions[0] if len(top_emotions) > 0 else "neutral"
+    top_1_cnt = int(emo_freq.iloc[0]) if len(emo_freq) > 0 else 0
+    top_1_pct = (top_1_cnt / total_recs * 100) if total_recs > 0 else 0.0
+
+    # Executive Header Banner for User Dashboard
+    st.markdown(
+        f"""
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 20px; padding: 22px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08); margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Employee Analytics Portal</span>
+                        <span style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">100% Private to You</span>
+                    </div>
+                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">👤 User Dashboard — Personal Emotional Journey</h2>
+                    <p style="margin: 3px 0 0 0; font-size: 0.86rem; color: #64748b;">Comprehensive personal emotion summaries, percentage distributions, temporal trends, journal history, and care recommendations.</p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                        <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Dominant Affect</div>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f766e;">{top_1_emo.capitalize()} ({top_1_pct:.0f}%)</div>
+                    </div>
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                        <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Well-Being Index</div>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">{wellbeing_score}/100</div>
+                    </div>
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                        <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Reflections</div>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">{total_recs} logs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Fast Portal Switcher
+    u_bar_c1, u_bar_c2 = st.columns([3, 1.2], gap="small")
+    with u_bar_c1:
+        st.caption("🔒 **Employee View Active:** Displaying individual longitudinal trends. Switch to Admin Dashboard for organization telemetry.")
+    with u_bar_c2:
+        if st.button("🛡️ Open Admin Dashboard →", width="stretch", key="user_dash_jump_admin_btn", help="Switch to Executive Admin Dashboard"):
+            set_active_view("🛡️")
+            st.rerun()
+
+    # High-Level Metric Tiles
+    k1, k2, k3, k4, k5, k6 = st.columns(6)
+    k1.metric("Total Records", total_recs)
+    k2.metric("Well-Being Index", f"{wellbeing_score}/100", f"{avg_comp:+.2f} compound")
+    k3.metric("Care Adoption", f"{accept_rate:.1f}%", f"{fb.get('accepted', 6)} completed")
+    k4.metric("Positive Valence", f"{(pos_count / total_recs) * 100:.1f}%", f"{pos_count} logs")
+    k5.metric("Equilibrium", f"{(neu_count / total_recs) * 100:.1f}%", f"{neu_count} logs")
+    k6.metric("Strain Markers", f"{(neg_count / total_recs) * 100:.1f}%", f"{neg_count} logs")
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+
+    # -------------------------------------------------------------------------
+    # 6 CORE TABS MATCHING MEETING SPECIFICATION
+    # -------------------------------------------------------------------------
+    dash_tab1, dash_tab2, dash_tab3, dash_tab4, dash_tab5, dash_tab6 = st.tabs([
+        "🌟 Emotion Summary",
+        "📊 Emotion Distribution",
+        "📈 Weekly & Monthly Trends",
+        "📝 Journal History",
+        "💡 Recommendation History",
+        "⭐ Feedback Summary",
+    ])
+
+    # =========================================================================
+    # TAB 1: EMOTION SUMMARY --- Most frequently predicted emotions
+    # =========================================================================
+    with dash_tab1:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Emotion Summary — Most Frequently Predicted Emotions</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Surfacing the dominant affective states and recurring psychological patterns identified across your check-ins.</p>
+                </div>
+                <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Frequency Ranking Analyzed</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Top-3 Dominant Emotion Podium Cards
+        pod_cols = st.columns(3, gap="medium")
+        medals = [("🥇 #1 Dominant Emotion", "#0f766e", "#f0fdfa", "#99f6e4"),
+                  ("🥈 #2 Secondary Emotion", "#2563eb", "#eff6ff", "#bfdbfe"),
+                  ("🥉 #3 Tertiary Emotion", "#d97706", "#fffbeb", "#fde68a")]
+
+        for rank_idx, (medal_title, title_col, card_bg, border_col) in enumerate(medals):
+            with pod_cols[rank_idx]:
+                if rank_idx < len(top_emotions):
+                    emo_name = top_emotions[rank_idx].capitalize()
+                    emo_c = int(emo_freq.iloc[rank_idx])
+                    emo_p = (emo_c / total_recs) * 100
+                    emo_badge = "Constructive State" if emo_name.lower() in ("joy", "gratitude", "love") else ("Equilibrium" if emo_name.lower() in ("neutral", "calm") else "Strain Marker")
+                    st.markdown(
+                        f"""
+                        <div style="background: {card_bg}; border: 1.5px solid {border_col}; border-radius: 14px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.76rem; font-weight: 700; color: {title_col}; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">{medal_title}</div>
+                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; font-family: 'Playfair Display', serif;">{emo_name}</div>
+                                <div style="font-size: 1.25rem; font-weight: 800; color: {title_col};">{emo_p:.1f}%</div>
+                            </div>
+                            <div style="margin-top: 6px; font-size: 0.82rem; color: #475569;">
+                                <strong>{emo_c}</strong> out of {total_recs} check-ins · <span style="font-weight: 600;">{emo_badge}</span>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(
+                        f"""
+                        <div style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 14px; padding: 16px; text-align: center; color: #94a3b8;">
+                            <div style="font-size: 0.76rem; font-weight: 700; margin-bottom: 4px;">{medal_title}</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">Awaiting More Logs</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+
+        # Frequency Ranking Horizontal Bar Chart & Summary Matrix
+        c_sum1, c_sum2 = st.columns([1.5, 1], gap="medium")
+        with c_sum1:
+            st.markdown("##### 📊 Predicted Emotion Frequency Ranking")
+            freq_df = pd.DataFrame({
+                "Emotion": [e.capitalize() for e in emo_freq.index],
+                "Count": emo_freq.values,
+                "Percentage": [(c / total_recs * 100) for c in emo_freq.values],
+            }).sort_values("Count", ascending=True)
+
+            fig_freq = px.bar(
+                freq_df,
+                x="Count",
+                y="Emotion",
+                orientation="h",
+                text="Percentage",
+                color="Count",
+                color_continuous_scale=["#ccfbf1", "#14b8a6", "#0f766e"],
+            )
+            fig_freq.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+            fig_freq.update_layout(
+                height=260,
+                margin={"l": 10, "r": 30, "t": 10, "b": 10},
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                showlegend=False,
+            )
+            st.plotly_chart(fig_freq, width="stretch")
+
+        with c_sum2:
+            st.markdown("##### 💡 Affective Pattern Diagnostics")
+            st.markdown(
+                f"""
+                <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
+                    <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Dominant Valence Archetype:</div>
+                    Your most frequent state is <strong style="color: #0f766e;">{top_1_emo.capitalize()}</strong>, appearing in <strong>{top_1_pct:.1f}%</strong> of your reflections.
+                    <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9; font-size: 0.78rem; color: #64748b;">
+                        Evaluated by MoodMentor's calibrated DistilBERT model + VADER rule-based sentiment engine.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        render_resilience_radar_scorecard(df)
+
+    # =========================================================================
+    # TAB 2: EMOTION DISTRIBUTION --- Percentage of different predicted emotions
+    # =========================================================================
+    with dash_tab2:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Emotion Distribution — Percentage of Different Predicted Emotions</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Full breakdown of the proportional distribution across every predicted affective state.</p>
+                </div>
+                <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">100% Normalized Spectrum</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        dist_c1, dist_c2 = st.columns([1.2, 1.4], gap="large")
+
+        with dist_c1:
+            st.markdown("##### 🍩 Interactive Affective Donut Visualization")
+            emo_pie_data = pd.DataFrame({
+                "Emotion": [e.capitalize() for e in emo_freq.index],
+                "Count": emo_freq.values,
+                "Percentage": [(c / total_recs * 100) for c in emo_freq.values],
+            })
+            fig_pie = px.pie(
+                emo_pie_data,
+                values="Count",
+                names="Emotion",
+                hole=0.55,
+                color="Emotion",
+                color_discrete_map={
+                    e.capitalize(): EMOTION_PALETTE.get(e.lower(), "#94a3b8") for e in emo_freq.index
+                },
+            )
+            fig_pie.update_traces(textinfo="percent+label", textposition="outside")
+            fig_pie.update_layout(
+                height=290,
+                showlegend=False,
+                margin={"l": 10, "r": 10, "t": 10, "b": 10},
+                paper_bgcolor="rgba(0,0,0,0)",
+            )
+            st.plotly_chart(fig_pie, width="stretch")
+
+        with dist_c2:
+            st.markdown("##### 📋 Normalized Proportional Breakdown Table")
+            breakdown_df = pd.DataFrame([
+                {
+                    "Emotion": e.capitalize(),
+                    "Share (%)": f"{(c / total_recs * 100):.1f}%",
+                    "Total Logs": c,
+                    "Affective Class": "Constructive" if e.lower() in ("joy", "gratitude", "love") else ("Equilibrium" if e.lower() in ("neutral", "calm") else "Strain Marker"),
+                }
+                for e, c in emo_freq.items()
+            ])
+            st.dataframe(
+                breakdown_df,
+                width="stretch",
+                hide_index=True,
+                column_config={
+                    "Emotion": st.column_config.TextColumn("Emotion", width="medium"),
+                    "Share (%)": st.column_config.TextColumn("Percentage Share", width="medium"),
+                    "Total Logs": st.column_config.NumberColumn("Occurrences", width="small"),
+                    "Affective Class": st.column_config.TextColumn("Classification", width="medium"),
+                },
+            )
+
+    # =========================================================================
+    # TAB 3: WEEKLY / MONTHLY TRENDS --- How predicted emotions vary by time
+    # =========================================================================
+    with dash_tab3:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Weekly & Monthly Trends — How Predicted Emotions Vary by Time</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Temporal trajectory analyzing weekly cadence, day-of-week rhythm, and month-over-month emotional drift.</p>
+                </div>
+                <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Longitudinal Temporal View</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        trend_horizon = st.radio(
+            "Select Temporal Dimension:",
+            ["📆 Weekly Trends (Day-of-Week Cadence)", "🗓️ Monthly Trends (Month-over-Month Drift)", "📈 Continuous Longitudinal Compound Trajectory"],
+            horizontal=True,
+            label_visibility="collapsed",
+            key="user_trends_temporal_dimension_radio",
+        )
+
+        if "Weekly" in trend_horizon:
+            st.markdown("##### 📆 Weekly Emotion Cadence & Day-of-Week Rhythm")
+            df_day = df.copy()
+            df_day["day_name"] = df_day["created_at"].dt.day_name()
+            day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            day_stats = df_day.groupby("day_name")["compound_score"].agg(["mean", "count"]).reindex(day_order).dropna()
+
+            w_c1, w_c2 = st.columns([1.5, 1], gap="medium")
+            with w_c1:
+                if not day_stats.empty:
+                    day_df = day_stats.reset_index()
+                    day_df.columns = ["Day", "Avg Sentiment", "Count"]
+                    fig_day = px.bar(
+                        day_df,
+                        x="Day",
+                        y="Avg Sentiment",
+                        color="Avg Sentiment",
+                        color_continuous_scale=["#f87171", "#fcd34d", "#34d399"],
+                        text="Avg Sentiment",
+                        range_y=[-1.0, 1.0],
+                    )
+                    fig_day.update_traces(texttemplate="%{text:.2f}", textposition="outside")
+                    fig_day.update_layout(
+                        height=280,
+                        margin={"l": 20, "r": 20, "t": 20, "b": 20},
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                    )
+                    st.plotly_chart(fig_day, width="stretch")
+                else:
+                    st.info("Additional weekly logs required to calculate day-of-week cadence.")
+
+            with w_c2:
+                st.markdown(
+                    """
+                    <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
+                        <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Weekly Morale Dynamics:</div>
+                        Day-of-week analysis reveals how workplace demands, deliverables, and team schedules affect autonomic recovery.
+                        <ul style="margin: 8px 0 8px 18px; padding: 0;">
+                            <li><strong>Mid-Week Slump:</strong> Often correlates with sprint deadlines and context switching.</li>
+                            <li><strong>End-of-Week Elevation:</strong> Reflects deliverable completion and restorative anticipation.</li>
+                        </ul>
+                        <em>Tip: Schedule high-focus deep work on your peak valence days.</em>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        elif "Monthly" in trend_horizon:
+            st.markdown("##### 🗓️ Monthly Emotion Drift & Longitudinal Progression")
+            df_month = df.copy()
+            df_month["month_year"] = df_month["created_at"].dt.strftime("%Y-%m (%b)")
+            month_stats = df_month.groupby("month_year")["compound_score"].agg(["mean", "count"]).reset_index()
+            month_stats.columns = ["Month", "Avg Compound Score", "Total Check-ins"]
+
+            m_c1, m_c2 = st.columns([1.5, 1], gap="medium")
+            with m_c1:
+                if not month_stats.empty:
+                    fig_month = px.bar(
+                        month_stats,
+                        x="Month",
+                        y="Avg Compound Score",
+                        color="Avg Compound Score",
+                        text="Avg Compound Score",
+                        color_continuous_scale=["#f87171", "#fcd34d", "#34d399"],
+                        range_y=[-1.0, 1.0],
+                    )
+                    fig_month.update_traces(texttemplate="%{text:.2f}", textposition="outside")
+                    fig_month.update_layout(
+                        height=280,
+                        margin={"l": 20, "r": 20, "t": 20, "b": 20},
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                    )
+                    st.plotly_chart(fig_month, width="stretch")
+                else:
+                    st.info("Additional monthly data required to render longitudinal drift.")
+
+            with m_c2:
+                st.markdown(
+                    """
+                    <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
+                        <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Monthly Longitudinal Resilience:</div>
+                        Month-over-month telemetry captures macro-shifts in personal morale, coping capacity, and stress recovery.
+                        <ul style="margin: 8px 0 8px 18px; padding: 0;">
+                            <li><strong>Longitudinal Baseline:</strong> Tracks stable affective equilibrium across quarters.</li>
+                            <li><strong>Seasonal & Project Peaks:</strong> Identifies sprint cycles that benefit from proactive somatic recovery.</li>
+                        </ul>
+                        <em>Tip: Celebrate months with elevated positive valence and consistency!</em>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        else:
+            st.markdown("##### 📈 Continuous Longitudinal Trajectory")
+            fig_timeline = px.line(
+                df.sort_values("created_at"),
+                x="created_at",
+                y="compound_score",
+                markers=True,
+                title="Sentiment Moving Trajectory Across Reflections",
+                range_y=[-1.0, 1.0],
+                color_discrete_sequence=["#0f766e"],
+            )
+            fig_timeline.update_layout(height=280, margin={"l": 20, "r": 20, "t": 40, "b": 20}, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+            st.plotly_chart(fig_timeline, width="stretch")
+
+    # =========================================================================
+    # TAB 4: JOURNAL HISTORY --- Recent journal entries
+    # =========================================================================
+    with dash_tab4:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Journal History — Recent Journal Entries</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Chronological archive of all your self-reflections, domain focus areas, and affective markers.</p>
+                </div>
+                <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Chronological Logs</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        jh_c1, jh_c2 = st.columns([1, 2], gap="small")
+        with jh_c1:
+            jh_sentiment = st.selectbox("Filter by Sentiment:", ["All", "positive", "neutral", "negative"], key="jh_filter_sent_sel")
+        with jh_c2:
+            jh_search = st.text_input("Search Journal Excerpt:", placeholder="Search your reflections by keyword or tag...", key="jh_search_input_txt")
+
+        jh_df = df.copy()
+        if jh_sentiment != "All":
+            jh_df = jh_df[jh_df["sentiment_label"] == jh_sentiment]
+        if jh_search.strip():
+            jh_df = jh_df[jh_df["original_text"].str.contains(jh_search.strip(), case=False, na=False)]
+
+        st.markdown(f"**Showing {len(jh_df)} of {total_recs} reflections:**")
+        for _, r in jh_df.head(12).iterrows():
+            dom_e = str(r.get("dominant_emotion", "neutral")).capitalize()
+            sent_badge = "#059669" if r.get("sentiment_label") == "positive" else ("#d97706" if r.get("sentiment_label") == "neutral" else "#dc2626")
+            sent_bg = "#f0fdf4" if r.get("sentiment_label") == "positive" else ("#fffbeb" if r.get("sentiment_label") == "neutral" else "#fef2f2")
+            entry_time_str = str(r.get("created_at", ""))[:16]
+            cat_str = str(r.get("domain_category", "General"))
+            tags_str = str(r.get("entry_tags_str", "—"))
+
+            st.markdown(
+                f"""
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">Reflection #{r.get('id')}</span>
+                            <span style="background: {sent_bg}; color: {sent_badge}; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px;">{dom_e} · Compound {r.get('compound_score', 0):+.2f}</span>
+                            <span style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">{cat_str}</span>
+                        </div>
+                        <span style="font-size: 0.78rem; color: #94a3b8;">📅 {entry_time_str}</span>
+                    </div>
+                    <div style="font-size: 0.88rem; color: #334155; line-height: 1.5; font-style: italic; margin: 4px 0;">
+                        "{r.get('original_text', '')}"
+                    </div>
+                    <div style="font-size: 0.74rem; color: #64748b; margin-top: 4px;">
+                        Tags: <code style="color: #0f766e;">{tags_str}</code>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    # =========================================================================
+    # TAB 5: RECOMMENDATION HISTORY --- Previously generated suggestions
+    # =========================================================================
+    with dash_tab5:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Recommendation History — Previously Generated Suggestions by Model</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Review AI-generated wellness micro-interventions, somatic care pathways, and personalized yoga remedies.</p>
+                </div>
+                <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Adaptive Pathways</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        for idx, r in df.head(8).iterrows():
+            dom_emo = str(r.get("dominant_emotion", "neutral")).capitalize()
+            remedy = get_yoga_remedy_for_emotion(dom_emo.lower())
+            st.markdown(
+                f"""
+                <div style="background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%); border: 1.5px solid #ccfbf1; border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.04);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <span style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase;">Generated for Reflection #{r.get('id')} ({dom_emo})</span>
+                            <h4 style="margin: 2px 0 0 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">💡 Restorative Pathway: Grounding & Emotional Regulation</h4>
+                        </div>
+                        <span style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 3px 10px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #0891b2;">⏱️ 3-5 Min Practice</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: #475569; margin-bottom: 8px;">
+                        <strong>Recommended Somatic Remedy:</strong> {remedy.get('icon', '🧘')} <em>{remedy.get('english_name', 'Restorative Asana')}</em> ({remedy.get('sanskrit_name', 'Asana')})
+                    </div>
+                    <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; color: #334155;">
+                        {remedy.get('somatic_mechanism', 'Somatic regulation through diaphragmatic pacing and vagal nerve stimulation.')}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    # =========================================================================
+    # TAB 6: FEEDBACK SUMMARY --- Accepted / Rejected Recommendations
+    # =========================================================================
+    with dash_tab6:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Feedback Summary — Accepted / Rejected Recommendations</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Track your personal engagement with model recommendations, acceptance ratios, and habit stickiness.</p>
+                </div>
+                <span style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Feedback Loop Closed</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        fb_live = st.session_state.get("suggestion_feedback", {"accepted": 6, "rejected": 2})
+        acc_count = fb_live.get("accepted", 6)
+        rej_count = fb_live.get("rejected", 2)
+        tot_feedback = acc_count + rej_count
+        live_acc_pct = (acc_count / tot_feedback * 100) if tot_feedback > 0 else 75.0
+
+        fb_m1, fb_m2, fb_m3, fb_m4 = st.columns(4)
+        fb_m1.metric("Total Decisions Logged", tot_feedback)
+        fb_m2.metric("Accepted Recommendations", acc_count, delta="Adopted & Practiced")
+        fb_m3.metric("Declined / Skipped", rej_count, delta="Skipped for Now")
+        fb_m4.metric("Personal Acceptance Rate", f"{live_acc_pct:.1f}%", "acc / total x 100")
+
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+        fb_chart_c1, fb_chart_c2 = st.columns([1.2, 1.2], gap="medium")
+        with fb_chart_c1:
+            st.markdown("##### 📊 Acceptance vs Decline Ratio")
+            pie_data = pd.DataFrame({
+                "Decision": ["Accepted Practice", "Declined / Skipped"],
+                "Count": [acc_count, rej_count],
+            })
+            fig_fb = px.pie(
+                pie_data,
+                values="Count",
+                names="Decision",
+                hole=0.55,
+                color="Decision",
+                color_discrete_map={"Accepted Practice": "#059669", "Declined / Skipped": "#94a3b8"},
+            )
+            fig_fb.update_traces(textinfo="percent+label", textposition="outside")
+            fig_fb.update_layout(height=240, margin={"l": 10, "r": 10, "t": 10, "b": 10}, paper_bgcolor="rgba(0,0,0,0)")
+            st.plotly_chart(fig_fb, width="stretch")
+
+        with fb_chart_c2:
+            st.markdown("##### 🌿 Habit Stickiness Insight")
+            st.markdown(
+                f"""
+                <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
+                    <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Adaptive Recommendation Model:</div>
+                    When you click <strong>✅ Accept Practice</strong> in your daily reflection, the model records positive reinforcement in the <code>user_feedback</code> database table.
+                    <ul style="margin: 8px 0 8px 18px; padding: 0;">
+                        <li><strong>Acceptance Rate Formula:</strong> <code>(Accepted / Total) × 100 = {live_acc_pct:.1f}%</code></li>
+                        <li><strong>Current Habit Consistency:</strong> Highly Responsive · Strong Daily Integration</li>
+                        <li><strong>Resilience Reward:</strong> +15 Mindful Points granted per completed practice</li>
+                    </ul>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    # -------------------------------------------------------------------------
+    # RECORD DETAIL INSPECTOR, FILTER & EXPORT
+    # -------------------------------------------------------------------------
+    st.markdown("---")
+    st.markdown("##### 🔍 Telemetry Search & Record Management")
+    f1, f2, f3 = st.columns([1, 1, 2])
+    with f1:
+        filter_sentiment = st.selectbox(
+            "Filter by Sentiment:", ["All", "positive", "neutral", "negative"], key="trends_filter_sentiment"
+        )
+    with f2:
+        available_cats = ["All"] + sorted([str(c) for c in df["domain_category"].unique() if c])
+        filter_category = st.selectbox("Filter by Life Domain:", available_cats, key="trends_filter_cat")
+    with f3:
+        search_query = st.text_input(
+            "Search Text, Tags (#), or Notes:", placeholder="Search original text, #tag, or notes...", key="trends_search_text"
+        )
+
+    filtered_df = df.copy()
+    if filter_sentiment != "All":
+        filtered_df = filtered_df[filtered_df["sentiment_label"] == filter_sentiment]
+    if filter_category != "All":
+        filtered_df = filtered_df[filtered_df["domain_category"] == filter_category]
+    if search_query.strip():
+        q = search_query.casefold()
+        original_matches = (
+            filtered_df["original_text"]
+            .fillna("")
+            .astype(str)
+            .str.casefold()
+            .str.contains(q, na=False, regex=False)
+        )
+        source_matches = (
+            filtered_df["source_name"]
+            .fillna("")
+            .astype(str)
+            .str.casefold()
+            .str.contains(q, na=False, regex=False)
+        )
+        filtered_df = filtered_df[original_matches | source_matches]
+
+    st.markdown(f"**Showing {len(filtered_df)} of {total_recs} records:**")
+    display_cols = [
+        "id",
+        "created_at",
+        "domain_category",
+        "entry_tags_str",
+        "sentiment_label",
+        "compound_score",
+        "dominant_emotion",
+        "original_text",
+    ]
+    st.dataframe(
+        filtered_df[display_cols],
+        column_config={
+            "id": st.column_config.NumberColumn("ID", width="small"),
+            "created_at": st.column_config.DatetimeColumn("Timestamp", format="YYYY-MM-DD HH:mm"),
+            "domain_category": st.column_config.TextColumn("Domain"),
+            "entry_tags_str": st.column_config.TextColumn("Tags"),
+            "sentiment_label": st.column_config.TextColumn("Sentiment"),
+            "compound_score": st.column_config.NumberColumn("Compound", format="%.3f"),
+            "dominant_emotion": st.column_config.TextColumn("Dominant Emotion"),
+            "original_text": st.column_config.TextColumn("Original Text Excerpt", width="large"),
+        },
+        width="stretch",
+        hide_index=True,
+    )
+
+    # Record Detail & Delete
+    selected_id = st.selectbox(
+        "Inspect & Manage Record by ID:",
+        options=filtered_df["id"].tolist(),
+        format_func=lambda x: f"Record #{x}",
+        key="trends_inspect_select",
+    )
+    if selected_id:
+        rec_row = df[df["id"] == selected_id].iloc[0]
+        rc1, rc2 = st.columns([3, 1])
+        with rc1:
+            st.write(f"**Original Text:** {rec_row['original_text']}")
+            st.write(f"**Domain:** `{rec_row.get('domain_category', 'General')}` | **Tags:** `{rec_row.get('entry_tags_str', 'None')}`")
+            st.write(f"**Dominant Emotion:** `{rec_row.get('dominant_emotion', 'neutral').capitalize()}` | **Compound Score:** `{rec_row['compound_score']:.3f}`")
+        with rc2:
+            if st.button("Delete Record", key=f"del_rec_{selected_id}", type="secondary", width="stretch"):
+                try:
+                    api_delete_entry(selected_id, st.session_state.api_token)
+                    st.success(f"Record #{selected_id} deleted.")
+                    st.rerun()
+                except ApiError as exc:
+                    st.error(str(exc))
+
+    # Export Buttons
+    st.markdown("---")
+    exp1, exp2 = st.columns([1, 1])
+    with exp1:
+        st.download_button(
+            "📥 Export Filtered Records (CSV)",
+            data=filtered_df.to_csv(index=False).encode("utf-8"),
+            file_name="moodmentor_sentiment_report.csv",
+            mime="text/csv",
+            width="stretch",
+        )
+    with exp2:
+        st.download_button(
+            "📥 Export Filtered Records (JSON)",
+            data=filtered_df.to_json(orient="records", indent=2, date_format="iso").encode("utf-8"),
+            file_name="moodmentor_sentiment_report.json",
+            mime="application/json",
+            width="stretch",
+        )
+
+
 def render_admin_dashboard_view():
     """Render the executive Admin Dashboard Analytics view featuring:
     1. Interactive 1-click multi-department check-in simulator (20 records)
@@ -9689,757 +10416,14 @@ def render_workspace():
                     st.warning("Sample dataset not found.")
 
     # ---------------------------------------------------------------------------
-    # CHRONOS: LONGITUDINAL TRENDS & STORED ANALYTICS
+    # 👤 USER DASHBOARD — PERSONAL EMOTIONAL JOURNEY & TELEMETRY
     # ---------------------------------------------------------------------------
     elif active_nav.startswith("📈"):
-        try:
-            entries = api_history(st.session_state.user_id, st.session_state.api_token)
-        except Exception:
-            entries = []
+        render_user_dashboard_view()
 
-        # If no entries exist yet, offer an interactive option to load sample reflections
-        if not entries:
-            st.markdown(
-                """
-                <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 20px; padding: 24px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08); margin-bottom: 20px;">
-                    <h3 style="margin: 0; color: #0f172a; font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700;">Longitudinal Emotional Analytics & Database Records</h3>
-                    <p style="margin: 6px 0 0 0; color: #64748b; font-size: 0.90rem;">Explore real-time emotion summaries, percentage distributions, weekly/monthly trends, and the 6 underlying database entities.</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            st.info("No reflection records found yet. Submit a check-in via **Daily Reflection**, or ingest baseline records via **Batch Data Ingestion** to populate longitudinal telemetry.")
-            if st.button("📥 Load Sample Telemetry Records for Instant Demonstration", type="primary", key="load_sample_trends_btn"):
-                sample_texts = [
-                    ("Completed our key deliverable ahead of schedule. Proud of the team's cohesion and positive energy!", "Work & Career", ["#win", "#focus"]),
-                    ("Four back-to-back syncs today and feeling somewhat drained, but taking a mindful breather helped.", "Energy & Body", ["#fatigue", "#screen-break"]),
-                    ("Reviewing quarterly objectives with leadership. Clear expectations set and feeling balanced.", "Work & Career", ["#focus", "#clarity"]),
-                    ("Unexpected blockers in today's sprint backlog. A bit anxious about the upcoming deadline.", "Work & Career", ["#deadline", "#stress"]),
-                    ("Morning team coffee break was refreshing. Grateful for supportive colleagues.", "Relationships", ["#gratitude", "#team"]),
-                    ("Routine code maintenance and documentation review. Steady progress throughout the afternoon.", "Work & Career", ["#focus"]),
-                ]
-                for text, cat, tags in sample_texts:
-                    try:
-                        api_analyze(text, st.session_state.get("api_token"), f"[{cat}] {' '.join(tags)}")
-                    except Exception:
-                        pass
-                st.toast("Sample telemetry records populated!", icon="✨")
-                st.rerun()
-        else:
-            df = pd.DataFrame(entries)
-            df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce", utc=True)
-            total_recs = len(df)
-
-            # Parse Tell Molly metadata for all rows
-            parsed_meta = [parse_entry_metadata(r.get("source_name", ""), r.get("original_text", "")) for _, r in df.iterrows()]
-            df["domain_category"] = [m["category"] for m in parsed_meta]
-            df["entry_tags"] = [m["tags"] for m in parsed_meta]
-            df["entry_tags_str"] = [", ".join(m["tags"]) if m["tags"] else "—" for m in parsed_meta]
-            df["entry_note"] = [m["note"] for m in parsed_meta]
-
-            # High-Level KPIs & Well-Being Index
-            pos_count = (df["sentiment_label"] == "positive").sum()
-            neg_count = (df["sentiment_label"] == "negative").sum()
-            neu_count = (df["sentiment_label"] == "neutral").sum()
-            avg_comp = float(df["compound_score"].mean()) if not df.empty else 0.0
-            wellbeing_score = round(max(0.0, min(100.0, ((avg_comp + 1.0) / 2.0) * 100)), 1)
-
-            # Pilot Acceptance & Latency Metrics Telemetry
-            fb = st.session_state.get("suggestion_feedback", {"accepted": 4, "rejected": 1})
-            total_fb = fb.get("accepted", 0) + fb.get("rejected", 0)
-            accept_rate = (fb.get("accepted", 0) / total_fb * 100) if total_fb > 0 else 80.0
-
-            # Frequency ranking of predicted emotions
-            emo_series = df["dominant_emotion"].fillna("neutral").str.lower()
-            emo_freq = emo_series.value_counts()
-            top_emotions = emo_freq.index.tolist()
-            top_1_emo = top_emotions[0] if len(top_emotions) > 0 else "neutral"
-            top_1_cnt = int(emo_freq.iloc[0]) if len(emo_freq) > 0 else 0
-            top_1_pct = (top_1_cnt / total_recs * 100) if total_recs > 0 else 0.0
-
-            # Executive Header Banner for User Dashboard
-            st.markdown(
-                f"""
-                <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 20px; padding: 22px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08); margin-bottom: 14px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                <span style="background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Employee Analytics Portal</span>
-                                <span style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">100% Private to You</span>
-                            </div>
-                            <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">👤 User Dashboard — Personal Emotional Journey</h2>
-                            <p style="margin: 3px 0 0 0; font-size: 0.86rem; color: #64748b;">Comprehensive personal emotion summaries, percentage distributions, temporal trends, journal history, and care recommendations.</p>
-                        </div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Dominant Affect</div>
-                                <div style="font-size: 1.15rem; font-weight: 800; color: #0f766e;">{top_1_emo.capitalize()} ({top_1_pct:.0f}%)</div>
-                            </div>
-                            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Well-Being Index</div>
-                                <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">{wellbeing_score}/100</div>
-                            </div>
-                            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Reflections</div>
-                                <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">{total_recs} logs</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            # Fast Portal Switcher
-            u_bar_c1, u_bar_c2 = st.columns([3, 1.2], gap="small")
-            with u_bar_c1:
-                st.caption("🔒 **Employee View Active:** Displaying individual longitudinal trends. Switch to Admin Dashboard for organization telemetry.")
-            with u_bar_c2:
-                if st.button("🛡️ Open Admin Dashboard →", width="stretch", key="user_dash_jump_admin_btn", help="Switch to Executive Admin Dashboard"):
-                    set_active_view("🛡️")
-                    st.rerun()
-
-            # High-Level Metric Tiles
-            k1, k2, k3, k4, k5, k6 = st.columns(6)
-            k1.metric("Total Records", total_recs)
-            k2.metric("Well-Being Index", f"{wellbeing_score}/100", f"{avg_comp:+.2f} compound")
-            k3.metric("Care Adoption", f"{accept_rate:.1f}%", f"{fb.get('accepted', 4)} completed")
-            k4.metric("Positive Valence", f"{(pos_count / total_recs) * 100:.1f}%", f"{pos_count} logs")
-            k5.metric("Equilibrium", f"{(neu_count / total_recs) * 100:.1f}%", f"{neu_count} logs")
-            k6.metric("Strain Markers", f"{(neg_count / total_recs) * 100:.1f}%", f"{neg_count} logs")
-
-            st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-            # -------------------------------------------------------------------------
-            # 4 CORE SECTIONS AS HIGH-PROFILE TABS MATCHING MEETING SPECIFICATION
-            # -------------------------------------------------------------------------
-            dash_tab1, dash_tab2, dash_tab3, dash_tab4, dash_tab5, dash_tab6 = st.tabs([
-                "🌟 Emotion Summary",
-                "📊 Emotion Distribution",
-                "📈 Weekly & Monthly Trends",
-                "📝 Journal History",
-                "💡 Recommendation History",
-                "⭐ Feedback Summary",
-            ])
-
-            # =========================================================================
-            # TAB 1: EMOTION SUMMARY --- Most frequently predicted emotions
-            # =========================================================================
-            with dash_tab1:
-                st.markdown(
-                    """
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Emotion Summary — Most Frequently Predicted Emotions</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Surfacing the dominant affective states and recurring psychological patterns identified across your check-ins.</p>
-                        </div>
-                        <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Frequency Ranking Analyzed</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                # Top-3 Dominant Emotion Podium Cards
-                pod_cols = st.columns(3, gap="medium")
-                medals = [("🥇 #1 Dominant Emotion", "#0f766e", "#f0fdfa", "#99f6e4"),
-                          ("🥈 #2 Secondary Emotion", "#2563eb", "#eff6ff", "#bfdbfe"),
-                          ("🥉 #3 Tertiary Emotion", "#d97706", "#fffbeb", "#fde68a")]
-
-                for rank_idx, (medal_title, title_col, card_bg, border_col) in enumerate(medals):
-                    with pod_cols[rank_idx]:
-                        if rank_idx < len(top_emotions):
-                            emo_name = top_emotions[rank_idx].capitalize()
-                            emo_c = int(emo_freq.iloc[rank_idx])
-                            emo_p = (emo_c / total_recs) * 100
-                            emo_badge = "Constructive State" if emo_name.lower() in ("joy", "gratitude", "love") else ("Equilibrium" if emo_name.lower() in ("neutral", "calm") else "Strain Marker")
-                            st.markdown(
-                                f"""
-                                <div style="background: {card_bg}; border: 1.5px solid {border_col}; border-radius: 14px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-                                    <div style="font-size: 0.76rem; font-weight: 700; color: {title_col}; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">{medal_title}</div>
-                                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                        <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; font-family: 'Playfair Display', serif;">{emo_name}</div>
-                                        <div style="font-size: 1.25rem; font-weight: 800; color: {title_col};">{emo_p:.1f}%</div>
-                                    </div>
-                                    <div style="margin-top: 6px; font-size: 0.82rem; color: #475569;">
-                                        <strong>{emo_c}</strong> out of {total_recs} check-ins · <span style="font-weight: 600;">{emo_badge}</span>
-                                    </div>
-                                </div>
-                                """,
-                                unsafe_allow_html=True,
-                            )
-                        else:
-                            st.markdown(
-                                f"""
-                                <div style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 14px; padding: 16px; text-align: center; color: #94a3b8;">
-                                    <div style="font-size: 0.76rem; font-weight: 700; margin-bottom: 4px;">{medal_title}</div>
-                                    <div style="font-size: 1.1rem; font-weight: 600;">Awaiting More Logs</div>
-                                </div>
-                                """,
-                                unsafe_allow_html=True,
-                            )
-
-                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-
-                # Frequency Ranking Horizontal Bar Chart & Summary Matrix
-                c_sum1, c_sum2 = st.columns([1.5, 1], gap="medium")
-                with c_sum1:
-                    st.markdown("##### 📊 Predicted Emotion Frequency Ranking")
-                    freq_df = pd.DataFrame({
-                        "Emotion": [e.capitalize() for e in emo_freq.index],
-                        "Count": emo_freq.values,
-                        "Percentage": [(c / total_recs * 100) for c in emo_freq.values],
-                    }).sort_values("Count", ascending=True)
-
-                    fig_freq = px.bar(
-                        freq_df,
-                        x="Count",
-                        y="Emotion",
-                        orientation="h",
-                        text="Count",
-                        color="Emotion",
-                        color_discrete_map={k.capitalize(): v for k, v in EMOTION_PALETTE.items()},
-                    )
-                    fig_freq.update_traces(texttemplate="%{text} logs (%{customdata[0]:.1f}%)", textposition="outside",
-                                           customdata=freq_df[["Percentage"]])
-                    fig_freq.update_layout(
-                        height=290,
-                        margin={"l": 10, "r": 30, "t": 10, "b": 10},
-                        showlegend=False,
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        plot_bgcolor="rgba(0,0,0,0)",
-                        xaxis={"showgrid": True, "gridcolor": "#f1f5f9"},
-                    )
-                    st.plotly_chart(fig_freq, width="stretch")
-
-                with c_sum2:
-                    st.markdown("##### 🧠 Behavioral & Telemetry Insight")
-                    primary_name = top_1_emo.capitalize()
-                    if top_1_emo in ("joy", "love", "gratitude"):
-                        narrative = (
-                            f"**{primary_name}** represents **{top_1_pct:.1f}%** of your telemetry. This demonstrates strong constructive momentum, high psychological safety, and clear executive clarity. "
-                            "Recommended focus: Harness this energy to tackle complex creative endeavors and mentor peers."
-                        )
-                    elif top_1_emo in ("neutral", "calm"):
-                        narrative = (
-                            f"**{primary_name}** represents **{top_1_pct:.1f}%** of your telemetry. Your reflections reflect steady, objective emotional equilibrium and balanced workload handling. "
-                            "Recommended focus: Maintain foundational sleep, hydration, and periodic micro-resets."
-                        )
-                    else:
-                        narrative = (
-                            f"**{primary_name}** is the most frequent emotion (**{top_1_pct:.1f}%**). Telemetry flags recurring cognitive load or fatigue indicators. "
-                            "Recommended focus: Engage in physiological sighs, somatic desk yoga, or utilize the 1-click SOS vagal calming tool."
-                        )
-
-                    st.markdown(
-                        f"""
-                        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.86rem; color: #334155; line-height: 1.55;">
-                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Dominant Affective Synthesis:</div>
-                            {narrative}
-                            <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b;">
-                                <span>Unique Emotions Detected: <strong>{df['dominant_emotion'].nunique()}</strong></span>
-                                <span>Stability Metric: <strong>{100 - min(80, int(neg_count/total_recs*100))}%</strong></span>
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                # Longitudinal Multi-Dimensional Resilience Diagnostic Radar
-                st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-                render_resilience_radar_scorecard(df)
-
-            # =========================================================================
-            # TAB 2: EMOTION DISTRIBUTION --- Percentage of different predicted emotions
-            # =========================================================================
-            with dash_tab2:
-                st.markdown(
-                    """
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Emotion Distribution — Percentage of Different Predicted Emotions</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Full breakdown of the proportional distribution across every predicted affective state.</p>
-                        </div>
-                        <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">100% Normalized Spectrum</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                dist_c1, dist_c2 = st.columns([1.2, 1.4], gap="large")
-
-                with dist_c1:
-                    st.markdown("##### 🍩 Interactive Affective Donut Visualization")
-                    emo_pie_data = pd.DataFrame({
-                        "Emotion": [e.capitalize() for e in emo_freq.index],
-                        "Count": emo_freq.values,
-                        "Percentage": [(c / total_recs * 100) for c in emo_freq.values],
-                    })
-                    fig_donut = px.pie(
-                        emo_pie_data,
-                        names="Emotion",
-                        values="Count",
-                        hole=0.48,
-                        color="Emotion",
-                        color_discrete_map={k.capitalize(): v for k, v in EMOTION_PALETTE.items()},
-                    )
-                    fig_donut.update_traces(
-                        textposition="inside",
-                        textinfo="percent+label",
-                        hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}<extra></extra>",
-                    )
-                    fig_donut.update_layout(
-                        height=310,
-                        margin={"l": 10, "r": 10, "t": 10, "b": 10},
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        showlegend=True,
-                        legend={"orientation": "h", "yanchor": "bottom", "y": -0.2, "xanchor": "center", "x": 0.5},
-                    )
-                    st.plotly_chart(fig_donut, width="stretch")
-
-                with dist_c2:
-                    st.markdown("##### 📈 Exact Percentage Breakdown & Proportional Share")
-                    for emo_raw, count_val in emo_freq.items():
-                        emo_name = emo_raw.capitalize()
-                        pct_val = (count_val / total_recs) * 100
-                        col_hex = EMOTION_PALETTE.get(emo_raw.lower(), "#0f766e")
-                        st.markdown(
-                            f"""
-                            <div style="margin-bottom: 10px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                                    <span style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">{emo_name}</span>
-                                    <span style="font-weight: 800; color: {col_hex}; font-size: 0.92rem;">{pct_val:.1f}% <span style="font-size: 0.74rem; color: #64748b; font-weight: 400;">({count_val} logs)</span></span>
-                                </div>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                        st.progress(min(1.0, max(0.0, pct_val / 100.0)))
-
-                    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-                    st.markdown(
-                        f"""
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; font-size: 0.80rem; color: #475569;">
-                            <span>✨ Positive Affect: <strong>{(pos_count/total_recs)*100:.1f}%</strong></span>
-                            <span>⚖️ Neutral Baseline: <strong>{(neu_count/total_recs)*100:.1f}%</strong></span>
-                            <span>🛡️ Strain / Fatigue: <strong>{(neg_count/total_recs)*100:.1f}%</strong></span>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-            # =========================================================================
-            # TAB 3: WEEKLY / MONTHLY TRENDS --- How predicted emotions vary by time
-            # =========================================================================
-            with dash_tab3:
-                st.markdown(
-                    """
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Weekly & Monthly Trends — How Predicted Emotions Vary by Time</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Temporal trajectory analyzing weekly cadence, day-of-week rhythm, and month-over-month emotional drift.</p>
-                        </div>
-                        <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Longitudinal Temporal View</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                trend_horizon = st.radio(
-                    "Select Temporal Dimension:",
-                    ["📆 Weekly Trends (Day-of-Week Cadence)", "🗓️ Monthly Trends (Month-over-Month Drift)", "📈 Continuous Longitudinal Compound Trajectory"],
-                    horizontal=True,
-                    label_visibility="collapsed",
-                    key="trends_temporal_dimension_radio",
-                )
-
-                if "Weekly" in trend_horizon:
-                    st.markdown("##### 📆 Weekly Emotion Cadence & Day-of-Week Rhythm")
-                    df_day = df.copy()
-                    df_day["day_name"] = df_day["created_at"].dt.day_name()
-                    day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-                    day_stats = df_day.groupby("day_name")["compound_score"].agg(["mean", "count"]).reindex(day_order).dropna()
-
-                    w_c1, w_c2 = st.columns([1.5, 1], gap="medium")
-                    with w_c1:
-                        if not day_stats.empty:
-                            day_df = day_stats.reset_index()
-                            day_df.columns = ["Day", "Avg Sentiment", "Count"]
-                            fig_day = px.bar(
-                                day_df,
-                                x="Day",
-                                y="Avg Sentiment",
-                                color="Avg Sentiment",
-                                color_continuous_scale=["#f87171", "#fcd34d", "#34d399"],
-                                text="Avg Sentiment",
-                                range_y=[-1.0, 1.0],
-                            )
-                            fig_day.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-                            fig_day.update_layout(
-                                height=280,
-                                margin={"l": 20, "r": 20, "t": 20, "b": 20},
-                                paper_bgcolor="rgba(0,0,0,0)",
-                                plot_bgcolor="rgba(0,0,0,0)",
-                            )
-                            st.plotly_chart(fig_day, width="stretch")
-                        else:
-                            st.info("Additional weekly logs required to calculate day-of-week cadence.")
-
-                    with w_c2:
-                        st.markdown(
-                            """
-                            <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
-                                <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Weekly Morale Dynamics:</div>
-                                Day-of-week analysis reveals how workplace demands, deliverables, and team schedules affect autonomic recovery.
-                                <ul style="margin: 8px 0 8px 18px; padding: 0;">
-                                    <li><strong>Mid-Week Slump:</strong> Often correlates with sprint deadlines and context switching.</li>
-                                    <li><strong>End-of-Week Elevation:</strong> Reflects deliverable completion and restorative anticipation.</li>
-                                </ul>
-                                <em>Tip: Schedule high-focus deep work on your peak valence days.</em>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-
-                elif "Monthly" in trend_horizon:
-                    st.markdown("##### 🗓️ Monthly Emotion Drift & Longitudinal Progression")
-                    df_month = df.copy()
-                    df_month["month_year"] = df_month["created_at"].dt.strftime("%Y-%m (%b)")
-                    month_stats = df_month.groupby("month_year")["compound_score"].agg(["mean", "count"]).reset_index()
-                    month_stats.columns = ["Month", "Avg Compound Score", "Total Check-ins"]
-
-                    m_c1, m_c2 = st.columns([1.5, 1], gap="medium")
-                    with m_c1:
-                        if not month_stats.empty:
-                            fig_month = px.bar(
-                                month_stats,
-                                x="Month",
-                                y="Avg Compound Score",
-                                color="Avg Compound Score",
-                                text="Avg Compound Score",
-                                color_continuous_scale=["#f87171", "#fcd34d", "#34d399"],
-                                range_y=[-1.0, 1.0],
-                            )
-                            fig_month.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-                            fig_month.update_layout(
-                                height=280,
-                                margin={"l": 20, "r": 20, "t": 20, "b": 20},
-                                paper_bgcolor="rgba(0,0,0,0)",
-                                plot_bgcolor="rgba(0,0,0,0)",
-                            )
-                            st.plotly_chart(fig_month, width="stretch")
-                        else:
-                            st.info("Additional monthly data required to render longitudinal drift.")
-
-                    with m_c2:
-                        st.markdown(
-                            """
-                            <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
-                                <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Monthly Longitudinal Resilience:</div>
-                                Month-over-month telemetry captures macro-shifts in personal morale, coping capacity, and stress recovery.
-                                <ul style="margin: 8px 0 8px 18px; padding: 0;">
-                                    <li><strong>Longitudinal Baseline:</strong> Tracks stable affective equilibrium across quarters.</li>
-                                    <li><strong>Seasonal & Project Peaks:</strong> Identifies sprint cycles that benefit from proactive somatic recovery.</li>
-                                </ul>
-                                <em>Tip: Celebrate months with elevated positive valence and consistency!</em>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-
-                else:
-                    st.markdown("##### 📈 Continuous Longitudinal Trajectory")
-                    fig_timeline = px.line(
-                        df.sort_values("created_at"),
-                        x="created_at",
-                        y="compound_score",
-                        markers=True,
-                        title="Sentiment Moving Trajectory Across Reflections",
-                        range_y=[-1.0, 1.0],
-                        color_discrete_sequence=["#0f766e"],
-                    )
-                    fig_timeline.update_layout(height=280, margin={"l": 20, "r": 20, "t": 40, "b": 20}, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-                    st.plotly_chart(fig_timeline, width="stretch")
-
-            # =========================================================================
-            # TAB 4: JOURNAL HISTORY --- Recent journal entries
-            # =========================================================================
-            with dash_tab4:
-                st.markdown(
-                    """
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Journal History — Recent Journal Entries</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Chronological archive of all your self-reflections, domain focus areas, and affective markers.</p>
-                        </div>
-                        <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Chronological Logs</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                jh_c1, jh_c2 = st.columns([1, 2], gap="small")
-                with jh_c1:
-                    jh_sentiment = st.selectbox("Filter by Sentiment:", ["All", "positive", "neutral", "negative"], key="jh_filter_sent_sel")
-                with jh_c2:
-                    jh_search = st.text_input("Search Journal Excerpt:", placeholder="Search your reflections by keyword or tag...", key="jh_search_input_txt")
-
-                jh_df = df.copy()
-                if jh_sentiment != "All":
-                    jh_df = jh_df[jh_df["sentiment_label"] == jh_sentiment]
-                if jh_search.strip():
-                    jh_df = jh_df[jh_df["original_text"].str.contains(jh_search.strip(), case=False, na=False)]
-
-                st.markdown(f"**Showing {len(jh_df)} of {total_recs} reflections:**")
-                for _, r in jh_df.head(12).iterrows():
-                    dom_e = str(r.get("dominant_emotion", "neutral")).capitalize()
-                    sent_badge = "#059669" if r.get("sentiment_label") == "positive" else ("#d97706" if r.get("sentiment_label") == "neutral" else "#dc2626")
-                    sent_bg = "#f0fdf4" if r.get("sentiment_label") == "positive" else ("#fffbeb" if r.get("sentiment_label") == "neutral" else "#fef2f2")
-                    entry_time_str = str(r.get("created_at", ""))[:16]
-                    cat_str = str(r.get("domain_category", "General"))
-                    tags_str = str(r.get("entry_tags_str", "—"))
-
-                    st.markdown(
-                        f"""
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">Reflection #{r.get('id')}</span>
-                                    <span style="background: {sent_bg}; color: {sent_badge}; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px;">{dom_e} · Compound {r.get('compound_score', 0):+.2f}</span>
-                                    <span style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">{cat_str}</span>
-                                </div>
-                                <span style="font-size: 0.78rem; color: #94a3b8;">📅 {entry_time_str}</span>
-                            </div>
-                            <div style="font-size: 0.88rem; color: #334155; line-height: 1.5; font-style: italic; margin: 4px 0;">
-                                "{r.get('original_text', '')}"
-                            </div>
-                            <div style="font-size: 0.74rem; color: #64748b; margin-top: 4px;">
-                                Tags: <code style="color: #0f766e;">{tags_str}</code>
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-            # =========================================================================
-            # TAB 5: RECOMMENDATION HISTORY --- Previously generated suggestions
-            # =========================================================================
-            with dash_tab5:
-                st.markdown(
-                    """
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Recommendation History — Previously Generated Suggestions by Model</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Review AI-generated wellness micro-interventions, somatic care pathways, and personalized yoga remedies.</p>
-                        </div>
-                        <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Adaptive Pathways</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                for idx, r in df.head(8).iterrows():
-                    dom_emo = str(r.get("dominant_emotion", "neutral")).capitalize()
-                    remedy = get_yoga_remedy_for_emotion(dom_emo.lower())
-                    st.markdown(
-                        f"""
-                        <div style="background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%); border: 1.5px solid #ccfbf1; border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.04);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-                                <div>
-                                    <span style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase;">Generated for Reflection #{r.get('id')} ({dom_emo})</span>
-                                    <h4 style="margin: 2px 0 0 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">💡 Restorative Pathway: Grounding & Emotional Regulation</h4>
-                                </div>
-                                <span style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 3px 10px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #0891b2;">⏱️ 3-5 Min Practice</span>
-                            </div>
-                            <div style="font-size: 0.85rem; color: #475569; margin-bottom: 8px;">
-                                <strong>Recommended Somatic Remedy:</strong> {remedy.get('icon', '🧘')} <em>{remedy.get('english_name', 'Restorative Asana')}</em> ({remedy.get('sanskrit_name', 'Asana')})
-                            </div>
-                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; color: #334155;">
-                                {remedy.get('somatic_mechanism', 'Somatic regulation through diaphragmatic pacing and vagal nerve stimulation.')}
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-            # =========================================================================
-            # TAB 6: FEEDBACK SUMMARY --- Accepted / Rejected Recommendations
-            # =========================================================================
-            with dash_tab6:
-                st.markdown(
-                    """
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Feedback Summary — Accepted / Rejected Recommendations</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Track your personal engagement with model recommendations, acceptance ratios, and habit stickiness.</p>
-                        </div>
-                        <span style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Feedback Loop Closed</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                fb_live = st.session_state.get("suggestion_feedback", {"accepted": 6, "rejected": 2})
-                acc_count = fb_live.get("accepted", 6)
-                rej_count = fb_live.get("rejected", 2)
-                tot_feedback = acc_count + rej_count
-                live_acc_pct = (acc_count / tot_feedback * 100) if tot_feedback > 0 else 75.0
-
-                fb_m1, fb_m2, fb_m3, fb_m4 = st.columns(4)
-                fb_m1.metric("Total Decisions Logged", tot_feedback)
-                fb_m2.metric("Accepted Recommendations", acc_count, delta="Adopted & Practiced")
-                fb_m3.metric("Declined / Skipped", rej_count, delta="Skipped for Now")
-                fb_m4.metric("Personal Acceptance Rate", f"{live_acc_pct:.1f}%", "acc / total x 100")
-
-                st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-
-                fb_chart_c1, fb_chart_c2 = st.columns([1.2, 1.2], gap="medium")
-                with fb_chart_c1:
-                    st.markdown("##### 📊 Acceptance vs Decline Ratio")
-                    pie_data = pd.DataFrame({
-                        "Decision": ["Accepted Practice", "Declined / Skipped"],
-                        "Count": [acc_count, rej_count],
-                    })
-                    fig_fb = px.pie(
-                        pie_data,
-                        values="Count",
-                        names="Decision",
-                        hole=0.55,
-                        color="Decision",
-                        color_discrete_map={"Accepted Practice": "#059669", "Declined / Skipped": "#94a3b8"},
-                    )
-                    fig_fb.update_traces(textinfo="percent+label", textposition="outside")
-                    fig_fb.update_layout(height=240, margin={"l": 10, "r": 10, "t": 10, "b": 10}, paper_bgcolor="rgba(0,0,0,0)")
-                    st.plotly_chart(fig_fb, width="stretch")
-
-                with fb_chart_c2:
-                    st.markdown("##### 🌿 Habit Stickiness Insight")
-                    st.markdown(
-                        f"""
-                        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
-                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Adaptive Recommendation Model:</div>
-                            When you click <strong>✅ Accept Practice</strong> in your daily reflection, the model records positive reinforcement in the <code>user_feedback</code> database table.
-                            <ul style="margin: 8px 0 8px 18px; padding: 0;">
-                                <li><strong>Acceptance Rate Formula:</strong> <code>(Accepted / Total) × 100 = {live_acc_pct:.1f}%</code></li>
-                                <li><strong>Current Habit Consistency:</strong> Highly Responsive · Strong Daily Integration</li>
-                                <li><strong>Resilience Reward:</strong> +15 Mindful Points granted per completed practice</li>
-                            </ul>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-
-            # -------------------------------------------------------------------------
-            # RECORD DETAIL INSPECTOR, FILTER & EXPORT
-            # -------------------------------------------------------------------------
-            st.markdown("---")
-            st.markdown("##### 🔍 Telemetry Search & Record Management")
-            f1, f2, f3 = st.columns([1, 1, 2])
-            with f1:
-                filter_sentiment = st.selectbox(
-                    "Filter by Sentiment:", ["All", "positive", "neutral", "negative"], key="trends_filter_sentiment"
-                )
-            with f2:
-                available_cats = ["All"] + sorted([str(c) for c in df["domain_category"].unique() if c])
-                filter_category = st.selectbox("Filter by Life Domain:", available_cats, key="trends_filter_cat")
-            with f3:
-                search_query = st.text_input(
-                    "Search Text, Tags (#), or Notes:", placeholder="Search original text, #tag, or notes...", key="trends_search_text"
-                )
-
-            filtered_df = df.copy()
-            if filter_sentiment != "All":
-                filtered_df = filtered_df[filtered_df["sentiment_label"] == filter_sentiment]
-            if filter_category != "All":
-                filtered_df = filtered_df[filtered_df["domain_category"] == filter_category]
-            if search_query.strip():
-                q = search_query.casefold()
-                original_matches = (
-                    filtered_df["original_text"]
-                    .fillna("")
-                    .astype(str)
-                    .str.casefold()
-                    .str.contains(q, na=False, regex=False)
-                )
-                source_matches = (
-                    filtered_df["source_name"]
-                    .fillna("")
-                    .astype(str)
-                    .str.casefold()
-                    .str.contains(q, na=False, regex=False)
-                )
-                filtered_df = filtered_df[original_matches | source_matches]
-
-            st.markdown(f"**Showing {len(filtered_df)} of {total_recs} records:**")
-            display_cols = [
-                "id",
-                "created_at",
-                "domain_category",
-                "entry_tags_str",
-                "sentiment_label",
-                "compound_score",
-                "dominant_emotion",
-                "original_text",
-            ]
-            st.dataframe(
-                filtered_df[display_cols],
-                column_config={
-                    "id": st.column_config.NumberColumn("ID", width="small"),
-                    "created_at": st.column_config.DatetimeColumn("Timestamp", format="YYYY-MM-DD HH:mm"),
-                    "domain_category": st.column_config.TextColumn("Domain"),
-                    "entry_tags_str": st.column_config.TextColumn("Tags"),
-                    "sentiment_label": st.column_config.TextColumn("Sentiment"),
-                    "compound_score": st.column_config.NumberColumn("Compound", format="%.3f"),
-                    "dominant_emotion": st.column_config.TextColumn("Dominant Emotion"),
-                    "original_text": st.column_config.TextColumn("Original Text Excerpt", width="large"),
-                },
-                width="stretch",
-                hide_index=True,
-            )
-
-            # Record Detail & Delete
-            selected_id = st.selectbox(
-                "Inspect & Manage Record by ID:",
-                options=filtered_df["id"].tolist(),
-                format_func=lambda x: f"Record #{x}",
-                key="trends_inspect_select",
-            )
-            if selected_id:
-                rec_row = df[df["id"] == selected_id].iloc[0]
-                rc1, rc2 = st.columns([3, 1])
-                with rc1:
-                    st.write(f"**Original Text:** {rec_row['original_text']}")
-                    st.write(f"**Domain:** `{rec_row.get('domain_category', 'General')}` | **Tags:** `{rec_row.get('entry_tags_str', 'None')}`")
-                    st.write(f"**Dominant Emotion:** `{rec_row.get('dominant_emotion', 'neutral').capitalize()}` | **Compound Score:** `{rec_row['compound_score']:.3f}`")
-                with rc2:
-                    if st.button("Delete Record", key=f"del_rec_{selected_id}", type="secondary", width="stretch"):
-                        try:
-                            api_delete_entry(selected_id, st.session_state.api_token)
-                            st.success(f"Record #{selected_id} deleted.")
-                            st.rerun()
-                        except ApiError as exc:
-                            st.error(str(exc))
-
-            # Export Buttons
-            st.markdown("---")
-            exp1, exp2 = st.columns([1, 1])
-            with exp1:
-                st.download_button(
-                    "📥 Export Filtered Records (CSV)",
-                    data=filtered_df.to_csv(index=False).encode("utf-8"),
-                    file_name="moodmentor_sentiment_report.csv",
-                    mime="text/csv",
-                    width="stretch",
-                )
-            with exp2:
-                st.download_button(
-                    "📥 Export Filtered Records (JSON)",
-                    data=filtered_df.to_json(orient="records", indent=2, date_format="iso").encode("utf-8"),
-                    file_name="moodmentor_sentiment_report.json",
-                    mime="application/json",
-                    width="stretch",
-                )
-
+    # ---------------------------------------------------------------------------
+    # 🛡️ ADMIN DASHBOARD — ENTERPRISE TELEMETRY & DATABASE OPERATIONS
+    # ---------------------------------------------------------------------------
     elif active_nav.startswith("🛡️"):
         render_admin_dashboard_view()
 
