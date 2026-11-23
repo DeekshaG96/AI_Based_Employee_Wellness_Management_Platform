@@ -580,13 +580,16 @@ def submit_feedback(
     report_data: dict[str, Any] | str,
     accepted_or_rejected: str = "accepted",
     token: str | None = None,
+    api_token: str | None = None,
+    **kwargs: Any,
 ) -> dict[str, Any]:
     """Store 5. User feedback (recommendation id, report data, accepted/rejected)."""
+    effective_token = token or api_token or kwargs.get("auth_token")
     try:
         return _request(
             "POST",
             "/feedback",
-            token=token,
+            token=effective_token,
             json={
                 "recommendation_id": recommendation_id,
                 "report_data": report_data if isinstance(report_data, dict) else {},
