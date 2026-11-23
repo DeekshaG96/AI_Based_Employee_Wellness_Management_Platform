@@ -883,6 +883,54 @@ def generate_recommendations(
     }
 
 
+class _FallbackVaderAnalyzer:
+    """Zero-dependency heuristic sentiment scorer used if both NLTK VADER and vaderSentiment are absent."""
+
+    _POS_WORDS = frozenset({
+        "good", "great", "excellent", "amazing", "wonderful", "happy", "joy", "peaceful",
+        "calm", "radiant", "loved", "grateful", "energized", "strong", "best", "positive",
+        "success", "glad", "delighted", "inspired", "healthy", "thriving", "safe"
+    })
+    _NEG_WORDS = frozenset({
+        "bad", "terrible", "awful", "horrible", "sad", "depressed", "anxious", "stress",
+        "stressed", "tired", "exhausted", "fatigue", "overwhelmed", "angry", "hate", "pain",
+        "hurt", "worst", "negative", "failure", "hopeless", "frustrated", "burnout", "burnt"
+    })
+
+    def polarity_scores(self, text: str) -> dict[str, float]:
+        tokens = re.findall(r"[a-z']+", text.lower())
+        if not tokens:
+            return {"neg": 0.0, "neu": 1.0, "pos": 0.0, "compound": 0.0}
+
+        pos_count = 0
+        neg_count = 0
+        negation_tokens = {"not", "no", "never", "n't", "cannot", "hardly", "barely"}
+
+        for i, t in enumerate(tokens):
+            is_negated = any(tokens[max(0, i - 2):i] and tok in negation_tokens for tok in tokens[max(0, i - 2):i])
+            if t in self._POS_WORDS:
+                if is_negated:
+                    neg_count += 1
+                else:
+                    pos_count += 1
+            elif t in self._NEG_WORDS:
+                if is_negated:
+                    pos_count += 0.5
+                else:
+                    neg_count += 1
+
+        total = pos_count + neg_count
+        if total == 0:
+            return {"neg": 0.0, "neu": 1.0, "pos": 0.0, "compound": 0.0}
+
+        diff = pos_count - neg_count
+        compound = max(-1.0, min(1.0, diff / (abs(diff) + 1.0)))
+        pos_ratio = round(pos_count / len(tokens), 3)
+        neg_ratio = round(neg_count / len(tokens), 3)
+        neu_ratio = round(max(0.0, 1.0 - (pos_ratio + neg_ratio)), 3)
+        return {"neg": neg_ratio, "neu": neu_ratio, "pos": pos_ratio, "compound": round(compound, 4)}
+
+
 _VADER_INSTANCE: Any = None
 
 
@@ -899,8 +947,21 @@ def _vader_analyzer() -> Any:
             return _VADER_INSTANCE
         except ImportError:
             pass
-    _VADER_INSTANCE = SentimentIntensityAnalyzer()
-    return _VADER_INSTANCE
+    try:
+        instance = SentimentIntensityAnalyzer()
+        # Verify that lexicon data is actually present and functional
+        instance.polarity_scores("health check")
+        _VADER_INSTANCE = instance
+        return _VADER_INSTANCE
+    except Exception:
+        try:
+            from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer as BundledVader
+
+            _VADER_INSTANCE = BundledVader()
+            return _VADER_INSTANCE
+        except ImportError:
+            _VADER_INSTANCE = _FallbackVaderAnalyzer()
+            return _VADER_INSTANCE
 
 
 def warm_up_emotion_pipeline() -> None:

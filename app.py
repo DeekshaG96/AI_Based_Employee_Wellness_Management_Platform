@@ -80,6 +80,34 @@ st.set_page_config(
 )
 
 
+# Initialize and ensure NLP linguistic resources for hosted platforms (Streamlit Cloud, Docker)
+@st.cache_resource
+def _bootstrap_nlp_resources() -> None:
+    try:
+        import nltk
+
+        repo_root = os.path.dirname(os.path.abspath(__file__))
+        for d in [os.path.join(repo_root, "nltk_data"), os.path.expanduser("~/nltk_data")]:
+            if os.path.exists(d) and d not in nltk.data.path:
+                nltk.data.path.insert(0, d)
+        for pkg in ("vader_lexicon", "stopwords", "wordnet", "punkt", "punkt_tab"):
+            try:
+                nltk.download(pkg, quiet=True)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    try:
+        import vaderSentiment  # noqa: F401
+
+        os.environ.setdefault("WELLNESS_BUNDLED_VADER", "1")
+    except Exception:
+        pass
+
+
+_bootstrap_nlp_resources()
+
+
 def render_iframe(html_content: str, height: int = 350) -> None:
     """Render self-contained HTML/JS/CSS component reliably in Streamlit."""
     try:

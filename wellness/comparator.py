@@ -13,6 +13,7 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 
 from .pipeline import (
     _EMOTION_KEYWORDS,
+    _vader_analyzer,
     classify_emotions_with_method,
     sanitize_text_for_vader,
 )
@@ -21,7 +22,7 @@ from .pipeline import (
 def run_lexical_baseline(text: str) -> dict[str, Any]:
     """Run pure lexical rule-based sentiment and emotion classification."""
     vader_input = sanitize_text_for_vader(text)
-    sia = SentimentIntensityAnalyzer()
+    sia = _vader_analyzer()
     vader_scores = sia.polarity_scores(vader_input)
     compound = float(vader_scores["compound"])
 
