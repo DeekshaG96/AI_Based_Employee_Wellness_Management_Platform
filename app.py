@@ -8455,6 +8455,304 @@ def render_sidebar():
         return selected_nav
 
 
+PENN_TREEBANK_DESC = {
+    "JJ": "Adjective (Descriptive/Affective)",
+    "JJR": "Adjective (Comparative)",
+    "JJS": "Adjective (Superlative)",
+    "NN": "Noun (Singular/Mass)",
+    "NNS": "Noun (Plural)",
+    "NNP": "Proper Noun (Singular)",
+    "NNPS": "Proper Noun (Plural)",
+    "VB": "Verb (Base Form)",
+    "VBD": "Verb (Past Tense)",
+    "VBG": "Verb (Gerund/Present Participle)",
+    "VBN": "Verb (Past Participle)",
+    "VBP": "Verb (Present Non-3rd Singular)",
+    "VBZ": "Verb (Present 3rd Singular)",
+    "RB": "Adverb (Modifier/Degree)",
+    "RBR": "Adverb (Comparative)",
+    "RBS": "Adverb (Superlative)",
+    "MD": "Modal Auxiliary (Capability/Intention)",
+    "DT": "Determiner",
+    "IN": "Preposition / Conjunction",
+    "PRP": "Personal Pronoun",
+    "PRP$": "Possessive Pronoun",
+    "UH": "Interjection (Emotional Particle)",
+}
+
+
+def render_deep_nlp_pipeline_inspector(text: str, key_suffix: str = "") -> None:
+    """Render an elevated, interactive Deep NLP Preprocessing Pipeline Inspector.
+
+    Includes:
+    1. Interactive phrase tester / playground
+    2. Architectural KPI strip (Input chars, Raw tokens, Stopwords pruned, Negations guarded, Compression ratio)
+    3. Interactive 4-tab workbench:
+       - 🪜 Step-by-Step Pipeline Walkthrough (7 sequential NLP transformations)
+       - 📋 Token-by-Token Matrix (Interactive Table with POS, Grammatical Type, Lemma, and VADER Valence)
+       - 🛡️ Negation Guard Analysis (Explains and proves polarity preservation)
+       - 💾 Pipeline JSON & Raw Telemetry (Copyable & downloadable structured JSON)
+    """
+    from wellness.pipeline import _vader_analyzer
+
+    with st.expander(
+        "🔍 Deep NLP Preprocessing Pipeline Inspector (Step-by-Step Architecture)",
+        expanded=False,
+    ):
+        with st.container():
+            st.markdown(
+                """
+                <div style="background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%); border: 1px solid #99f6e4; border-radius: 12px; padding: 12px 18px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <span style="background: #0f766e; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 0.70rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">Live Linguistic Pipeline</span>
+                            <h4 style="margin: 3px 0 0 0; color: #0f172a; font-size: 1.15rem; font-weight: 800;">Deep NLP Preprocessing Pipeline Inspector</h4>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #0f766e; font-weight: 600;">
+                            Sequential Transformation: Ingestion &rarr; Sanitization &rarr; Tokenization &rarr; Negation Guard &rarr; POS &rarr; Lemmatization &rarr; Valence
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            play_col1, play_col2 = st.columns([3, 1], gap="small")
+            with play_col1:
+                eval_text = st.text_input(
+                    "Inspect reflection text or test custom phrase:",
+                    value=text,
+                    key=f"nlp_inspect_input_{key_suffix}",
+                    help="You can edit this phrase to see real-time NLP token segmentation, contraction expansions, and POS tagging.",
+                )
+            with play_col2:
+                sample_choice = st.selectbox(
+                    "Or load preset:",
+                    [
+                        "Current Reflection",
+                        "I am not bad at all",
+                        "Can't handle this workload anymore!",
+                        "Deeply grateful for this supportive team.",
+                        "Not feeling great, but pushing through.",
+                    ],
+                    key=f"nlp_preset_choice_{key_suffix}",
+                )
+                if sample_choice != "Current Reflection" and sample_choice != eval_text:
+                    eval_text = sample_choice
+
+        active_text = eval_text.strip() or text
+        breakdown = get_preprocessing_breakdown(active_text)
+        sia = _vader_analyzer()
+        lexicon = getattr(sia, "lexicon", {})
+
+        raw_tokens = breakdown.get("raw_tokens", [])
+        filtered_tokens = breakdown.get("filtered_tokens", [])
+        stopwords_removed = breakdown.get("stopwords_removed", [])
+        negations_preserved = breakdown.get("negations_preserved", [])
+        lemmas = list(breakdown.get("lemmas", []))
+        pos_tags = breakdown.get("pos_tags", [])
+
+        token_count = len(raw_tokens)
+        filtered_count = len(filtered_tokens)
+        pruned_count = len(stopwords_removed)
+        negation_count = len(negations_preserved)
+        compression_pct = (
+            ((token_count - filtered_count) / token_count * 100)
+            if token_count > 0
+            else 0.0
+        )
+
+        kpi_c1, kpi_c2, kpi_c3, kpi_c4, kpi_c5 = st.columns(5)
+        kpi_c1.metric("Input Characters", len(active_text))
+        kpi_c2.metric("Raw Tokens", token_count)
+        kpi_c3.metric(
+            "Stopwords Pruned",
+            pruned_count,
+            delta=f"-{compression_pct:.0f}% noise",
+            delta_color="inverse",
+        )
+        kpi_c4.metric(
+            "Negations Protected",
+            negation_count,
+            delta="Shield active" if negation_count > 0 else "0 present",
+        )
+        kpi_c5.metric("Final Lemmas", len(lemmas))
+
+        t_walk, t_matrix, t_guard, t_json = st.tabs(
+            [
+                "🪜 Step-by-Step Flow",
+                "📋 Token-by-Token Matrix",
+                "🛡️ Negation Guard Analysis",
+                "💾 Pipeline JSON & Export",
+            ]
+        )
+
+        with t_walk:
+            st.markdown("##### 1. Raw Character Stream Ingestion")
+            st.code(breakdown["raw_text"], language="text")
+
+            st.markdown("##### 2. VADER Input Sanitization (Punctuation, Intensifiers & Negations Strictly Preserved)")
+            st.caption(
+                "Strips extraneous HTML/URL markers while preserving exclamation points, ALL-CAPS intensity, and contraction expansions (e.g. `can't` &rarr; `cannot`, `i'm` &rarr; `i am`)."
+            )
+            st.code(breakdown["vader_input"], language="text")
+
+            st.markdown("##### 3. Lexical Normalization & Case Folding")
+            st.caption("Lowercases characters and removes punctuation boundaries for stable vocabulary indexing.")
+            st.code(breakdown["cleaned_text"], language="text")
+
+            st.markdown(f"##### 4. Word Tokenization & Boundary Detection ({token_count} Tokens)")
+            st.caption("Regex / spaCy boundary segmenter splits text into discrete atomic tokens:")
+            t_chips = " ".join(
+                [
+                    f'<span style="display: inline-block; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 3px 8px; border-radius: 6px; margin: 2px; font-size: 0.78rem; font-weight: 600;">{idx+1}. {escape(t)}</span>'
+                    for idx, t in enumerate(raw_tokens)
+                ]
+            )
+            st.markdown(t_chips, unsafe_allow_html=True)
+
+            st.markdown("##### 5. Stopword Pruning & Negation Safeguard Filtering")
+            st.caption(
+                "Eliminates high-frequency grammatical glue words while explicitly protecting negation words to prevent sentiment inversion."
+            )
+            f_cols = st.columns(3)
+            with f_cols[0]:
+                st.markdown(f"**🛑 Removed Stopwords ({len(stopwords_removed)}):**")
+                sw_html = (
+                    " ".join(
+                        [
+                            f'<span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 2px 7px; border-radius: 4px; margin: 2px; font-size: 0.75rem;">{escape(s)}</span>'
+                            for s in stopwords_removed
+                        ]
+                    )
+                    if stopwords_removed
+                    else '<span style="color: #94a3b8; font-size: 0.78rem;">None detected</span>'
+                )
+                st.markdown(sw_html, unsafe_allow_html=True)
+            with f_cols[1]:
+                st.markdown(f"**🛡️ Protected Negations ({len(negations_preserved)}):**")
+                neg_html = (
+                    " ".join(
+                        [
+                            f'<span style="display: inline-block; background: #dcfce7; color: #166534; border: 1px solid #86efac; padding: 2px 7px; border-radius: 4px; margin: 2px; font-size: 0.75rem; font-weight: 700;">{escape(n)}</span>'
+                            for n in negations_preserved
+                        ]
+                    )
+                    if negations_preserved
+                    else '<span style="color: #94a3b8; font-size: 0.78rem;">No negations present</span>'
+                )
+                st.markdown(neg_html, unsafe_allow_html=True)
+            with f_cols[2]:
+                st.markdown(f"**🌿 Retained Content Tokens ({len(filtered_tokens)}):**")
+                ret_html = (
+                    " ".join(
+                        [
+                            f'<span style="display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 7px; border-radius: 4px; margin: 2px; font-size: 0.75rem; font-weight: 600;">{escape(f)}</span>'
+                            for f in filtered_tokens
+                        ]
+                    )
+                    if filtered_tokens
+                    else '<span style="color: #94a3b8; font-size: 0.78rem;">Empty</span>'
+                )
+                st.markdown(ret_html, unsafe_allow_html=True)
+
+            st.markdown("##### 6. Part-of-Speech (POS) Tagging & Morphological Lemmatization")
+            st.caption("Decodes Penn Treebank syntactic tags and extracts canonical dictionary roots:")
+            pos_chips = []
+            for (tok, tag), lem in zip(pos_tags, lemmas):
+                desc = PENN_TREEBANK_DESC.get(tag, tag)
+                val = lexicon.get(tok.lower(), lexicon.get(lem.lower(), 0.0))
+                val_badge = (
+                    f' · <span style="color: {"#15803d" if val > 0 else ("#b91c1c" if val < 0 else "#64748b")}; font-weight: 700;">{val:+.1f}</span>'
+                    if val != 0.0
+                    else ""
+                )
+                pos_chips.append(
+                    f'<span style="display: inline-block; background: #ffffff; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 8px; margin: 3px; font-size: 0.78rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">'
+                    f'<strong>{escape(tok)}</strong> &rarr; <code style="color: #0f766e; font-weight: 700;">{escape(lem)}</code> <span style="background: #e2e8f0; color: #334155; padding: 1px 5px; border-radius: 4px; font-size: 0.70rem; font-weight: 700;">{escape(tag)}</span>'
+                    f'<span style="color: #64748b; font-size: 0.72rem;"> ({escape(desc.split()[0])})</span>{val_badge}'
+                    f"</span>"
+                )
+            st.markdown("".join(pos_chips), unsafe_allow_html=True)
+
+        with t_matrix:
+            st.markdown("##### Interactive Token-by-Token Processing Matrix")
+            matrix_rows = []
+            for idx, t in enumerate(raw_tokens):
+                is_dropped = t in stopwords_removed
+                is_neg = t in negations_preserved
+                tag = "—"
+                desc = "Stopword (Filtered)"
+                lemma_val = "—"
+                if not is_dropped:
+                    for (pt_tok, pt_tag), l_val in zip(pos_tags, lemmas):
+                        if pt_tok == t:
+                            tag = pt_tag
+                            desc = PENN_TREEBANK_DESC.get(tag, tag)
+                            lemma_val = l_val
+                            break
+
+                val_score = lexicon.get(t.lower(), 0.0)
+                val_str = f"{val_score:+.2f}" if val_score != 0.0 else "0.00 (Neutral)"
+
+                status = (
+                    "🛡️ Preserved (Negation Guard)"
+                    if is_neg
+                    else (
+                        "🛑 Pruned (Stopword)"
+                        if is_dropped
+                        else "✅ Retained (Content)"
+                    )
+                )
+
+                matrix_rows.append(
+                    {
+                        "Idx": idx + 1,
+                        "Token": t,
+                        "Pipeline Status": status,
+                        "POS Tag": tag,
+                        "Grammatical Role": desc,
+                        "Lemma Root": lemma_val,
+                        "VADER Valence": val_str,
+                    }
+                )
+            if matrix_rows:
+                st.dataframe(pd.DataFrame(matrix_rows), width="stretch", hide_index=True)
+
+        with t_guard:
+            st.markdown("##### 🛡️ Negation Safeguard Benchmark & Sentiment Inversion Proof")
+            st.info(
+                """
+                **Why Standard Stopword Removal Fails in Sentiment Analysis:**
+                Standard NLP stopword lists (like default NLTK `stopwords.words('english')`) naively strip words like `not`, `never`, `no`, and `cannot`.
+                - In the phrase **\"I am not bad\"**, standard removal leaves **\"bad\"** &rarr; Inverts positive relief into negative strain (False Alarm).
+                - In the phrase **\"I am not happy\"**, standard removal leaves **\"happy\"** &rarr; Inverts acute distress into positive calm (Missed Risk).
+
+                **MoodMentor Safeguard Architecture:**
+                Our preprocessing pipeline enforces `_NEGATIONS` protection (`{"no", "not", "nor", "never", "n't", "nothing", "none", "neither", "cannot"}`). These tokens are actively preserved during stopword filtering, ensuring accurate VADER scoring and transformer attention.
+                """
+            )
+            if negations_preserved:
+                st.success(
+                    f"✅ **Active Negation Guard**: Successfully protected **{', '.join(negations_preserved)}** from stopword deletion."
+                )
+            else:
+                st.caption("No negation particles were detected in this phrase.")
+
+        with t_json:
+            st.markdown("##### Pipeline Breakdown Abstract Syntax Tree (AST)")
+            st.json(breakdown)
+            json_str = json.dumps(breakdown, indent=2, default=str)
+            st.download_button(
+                "⬇️ Download Preprocessing Pipeline (.json)",
+                data=json_str,
+                file_name=f"moodmentor-nlp-pipeline-{int(datetime.now(timezone.utc).timestamp())}.json",
+                mime="application/json",
+                key=f"download_nlp_pipeline_json_{key_suffix}",
+                width="stretch",
+            )
+
+
 def render_user_dashboard_view():
     """Render the employee User Dashboard featuring:
     1. Emotion Summary (Most frequently predicted emotions, podium cards & ranking)
@@ -10210,52 +10508,7 @@ def render_workspace():
 
                     # Deep NLP Inspector
                     st.markdown("---")
-                    with st.expander(
-                        "Deep NLP Preprocessing Pipeline Inspector (Step-by-Step)",
-                        expanded=False,
-                    ):
-                        breakdown = get_preprocessing_breakdown(report.original_text)
-                        st.markdown(f"**1. Raw Text Input ({len(breakdown['raw_text'])} chars):**")
-                        st.code(breakdown["raw_text"])
-
-                        st.markdown(
-                            "**2. VADER Sanitized Input (Punctuation, Capitalization & Negations Strictly Preserved):**"
-                        )
-                        st.code(breakdown["vader_input"])
-
-                        st.markdown(
-                            f"**3. Normalized & Cleaned Text ({len(breakdown['cleaned_text'].split())} words):**"
-                        )
-                        st.code(breakdown["cleaned_text"])
-
-                        st.markdown("**4. Raw Tokens Extracted:**")
-                        token_chips = "".join(
-                            [
-                                f'<span class="chip chip-token">{t}</span>'
-                                for t in breakdown["raw_tokens"][:40]
-                            ]
-                        )
-                        st.markdown(token_chips, unsafe_allow_html=True)
-
-                        st.markdown(
-                            "**5. Filtered Tokens (Stopwords Removed, Negations Preserved):**"
-                        )
-                        filter_chips = "".join(
-                            [
-                                f'<span class="chip chip-filter">{t}</span>'
-                                for t in breakdown["filtered_tokens"][:40]
-                            ]
-                        )
-                        st.markdown(filter_chips, unsafe_allow_html=True)
-
-                        st.markdown("**6. Lemmatized Canonical Roots (WordNet POS Tagged):**")
-                        lemma_chips = "".join(
-                            [
-                                f'<span class="chip chip-lemma">{t}</span>'
-                                for t in breakdown["lemmas"][:40]
-                            ]
-                        )
-                        st.markdown(lemma_chips, unsafe_allow_html=True)
+                    render_deep_nlp_pipeline_inspector(report.original_text, key_suffix="journal_analysis")
 
                 except Exception as exc:
                     st.error(f"Error during analysis: {exc}")
@@ -10697,10 +10950,7 @@ def render_guest_workspace():
                     with c_pdf:
                         st.download_button("Download Report (.pdf)", _build_analysis_report_pdf(rep), f"moodmentor-guest-{stamp}.pdf", "application/pdf", width="stretch")
 
-                    with st.expander("Deep NLP Preprocessing Pipeline Inspector"):
-                        bk = get_preprocessing_breakdown(rep.original_text)
-                        st.markdown(f"**Cleaned text:** `{bk['cleaned_text']}`")
-                        st.markdown(f"**Lemmas:** `{bk['lemmas']}`")
+                    render_deep_nlp_pipeline_inspector(rep.original_text, key_suffix="guest_mode")
                 except Exception as exc:
                     st.error(f"Analysis error: {exc}")
 

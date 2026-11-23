@@ -897,6 +897,18 @@ class _FallbackVaderAnalyzer:
         "hurt", "worst", "negative", "failure", "hopeless", "frustrated", "burnout", "burnt"
     })
 
+    @property
+    def lexicon(self) -> dict[str, float]:
+        lex = {w: 2.0 for w in self._POS_WORDS}
+        lex.update({w: -2.0 for w in self._NEG_WORDS})
+        lex["bad"] = -2.5
+        lex["terrible"] = -3.0
+        lex["good"] = 1.9
+        lex["great"] = 3.1
+        lex["sad"] = -2.1
+        lex["happy"] = 2.7
+        return lex
+
     def polarity_scores(self, text: str) -> dict[str, float]:
         tokens = re.findall(r"[a-z']+", text.lower())
         if not tokens:

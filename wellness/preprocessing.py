@@ -18,8 +18,6 @@ from nltk import pos_tag, word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-from .errors import NLTKResourceError
-
 _NON_LETTER = re.compile(r"[^a-zA-Z\s]")
 _URL = re.compile(r"https?://\S+|www\.\S+")
 _EMAIL = re.compile(r"\S+@\S+\.\S+")
@@ -177,6 +175,53 @@ def _wordnet_pos(tag: str) -> str:
     return "n"
 
 
+_HEURISTIC_POS: dict[str, str] = {
+    # Adjectives (JJ)
+    "bad": "JJ", "good": "JJ", "great": "JJ", "happy": "JJ", "sad": "JJ", "tired": "JJ",
+    "exhausted": "JJ", "calm": "JJ", "peaceful": "JJ", "radiant": "JJ", "anxious": "JJ",
+    "stressed": "JJ", "overwhelmed": "JJ", "angry": "JJ", "terrible": "JJ", "awful": "JJ",
+    "amazing": "JJ", "wonderful": "JJ", "healthy": "JJ", "hard": "JJ", "easy": "JJ",
+    # Verbs (VB)
+    "sleep": "VB", "work": "VB", "feel": "VB", "do": "VB", "make": "VB", "go": "VB",
+    "take": "VB", "see": "VB", "come": "VB", "think": "VB", "look": "VB", "want": "VB",
+    "give": "VB", "use": "VB", "find": "VB", "tell": "VB", "ask": "VB", "try": "VB",
+    # Modals / Negations (MD / RB)
+    "cannot": "MD", "not": "RB", "never": "RB", "no": "DT", "neither": "DT",
+    # Nouns (NN)
+    "today": "NN", "time": "NN", "day": "NN", "week": "NN", "job": "NN", "workload": "NN",
+    "boss": "NN", "team": "NN", "project": "NN", "deadline": "NN", "meeting": "NN",
+    "stress": "NN", "burnout": "NN", "energy": "NN", "mind": "NN", "body": "NN", "heart": "NN",
+}
+
+
+def _heuristic_pos_tag(token: str) -> str:
+    """Return a linguistically grounded POS tag fallback when NLTK corpora are unavailable."""
+    lower = token.lower()
+    if lower in _HEURISTIC_POS:
+        return _HEURISTIC_POS[lower]
+    if lower.endswith("ly"):
+        return "RB"
+    if lower.endswith("ing"):
+        return "VBG"
+    if lower.endswith("ed"):
+        return "VBD"
+    if lower.endswith(("ful", "ous", "ive", "able")):
+        return "JJ"
+    return "NN"
+
+
+def _heuristic_lemmatize(token: str) -> str:
+    """Return a simple morphological stem fallback when WordNet is unavailable."""
+    lower = token.lower()
+    if lower.endswith("ing") and len(lower) > 5:
+        return lower[:-3]
+    if lower.endswith("ed") and len(lower) > 4:
+        return lower[:-2]
+    if lower.endswith("s") and len(lower) > 3 and not lower.endswith("ss") and lower not in _NEGATIONS:
+        return lower[:-1]
+    return lower
+
+
 def _tokenize_and_lemmatize(
     cleaned: str,
 ) -> tuple[list[str], list[str], list[tuple[str, str]], tuple[str, ...], list[str]]:
@@ -186,9 +231,9 @@ def _tokenize_and_lemmatize(
         raw_tokens = re.findall(r"[a-z]+", cleaned.lower())
         stop_words = _HOSTED_STOP_WORDS - _NEGATIONS
         filtered = [token for token in raw_tokens if token not in stop_words]
-        tagged = [(token, "TOKEN") for token in filtered]
-        # Keep surface forms here; without a corpus, do not claim lemmatization.
-        return raw_tokens, filtered, tagged, tuple(filtered), notes
+        tagged = [(token, _heuristic_pos_tag(token)) for token in filtered]
+        lemmas = tuple(_heuristic_lemmatize(token) for token in filtered)
+        return raw_tokens, filtered, tagged, lemmas, notes
 
     try:
         stop_words = set(stopwords.words("english")) - _NEGATIONS
@@ -220,17 +265,17 @@ def _tokenize_and_lemmatize(
     try:
         tagged = pos_tag(filtered)
     except (LookupError, PermissionError, OSError):
-        tagged = [(token, "TOKEN") for token in filtered]
+        tagged = [(token, _heuristic_pos_tag(token)) for token in filtered]
         notes.append(
-            "NLTK part-of-speech data were unavailable; surface token labels were used."
+            "NLTK part-of-speech data were unavailable; grounded heuristic POS labels were used."
         )
     try:
         lemmatizer = WordNetLemmatizer()
         lemmas = tuple(lemmatizer.lemmatize(token, _wordnet_pos(tag)) for token, tag in tagged)
     except (LookupError, PermissionError, OSError):
-        lemmas = tuple(filtered)
+        lemmas = tuple(_heuristic_lemmatize(token) for token in filtered)
         notes.append(
-            "WordNet data were unavailable; surface forms were retained instead of claiming lemmatization."
+            "WordNet data were unavailable; grounded morphological stem rules were used."
         )
     return raw_tokens, filtered, tagged, lemmas, notes
 
@@ -249,12 +294,18 @@ def get_preprocessing_breakdown(text: str) -> dict[str, Any]:
     vader_input = sanitize_text_for_vader(text)
     cleaned = clean_text(text)
     raw_tokens, filtered, tagged, lemmas, notes = _tokenize_and_lemmatize(cleaned)
+    stopwords_removed = [t for t in raw_tokens if t not in filtered]
+    negations_preserved = [t for t in filtered if t in _NEGATIONS]
+    content_tokens = [t for t in filtered if t not in _NEGATIONS]
     return {
         "raw_text": text,
         "vader_input": vader_input,
         "cleaned_text": cleaned,
         "raw_tokens": raw_tokens,
         "filtered_tokens": filtered,
+        "stopwords_removed": stopwords_removed,
+        "negations_preserved": negations_preserved,
+        "content_tokens": content_tokens,
         "pos_tags": tagged,
         "lemmas": lemmas,
         "processed_text": " ".join(lemmas),

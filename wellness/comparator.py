@@ -9,8 +9,6 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from nltk.sentiment import SentimentIntensityAnalyzer
-
 from .pipeline import (
     _EMOTION_KEYWORDS,
     _vader_analyzer,
