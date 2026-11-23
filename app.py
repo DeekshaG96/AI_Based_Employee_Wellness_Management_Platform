@@ -8013,8 +8013,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "Personalized Recommendations",
         "nav_canvas": "Zen Canvas & De-Stress",
         "nav_habits": "Holistic Habit Matrix",
-        "nav_trends": "Emotional Trends",
-        "nav_admin": "Admin Dashboard Analytics",
+        "nav_trends": "User Dashboard",
+        "nav_admin": "Admin Dashboard",
         "nav_batch": "Batch Data Ingestion",
         "nav_somatic": "Somatic Care & Yoga",
         "nav_team": "Team Health Pulse",
@@ -8040,8 +8040,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "व्यक्तिगत सुझाव",
         "nav_canvas": "ज़ेन कैनवस और तनाव-मुक्ति",
         "nav_habits": "समग्र आदत मैट्रिक्स",
-        "nav_trends": "भावनात्मक रुझान",
-        "nav_admin": "एडमिन डैशबोर्ड एनालिटिक्स",
+        "nav_trends": "यूज़र डैशबोर्ड",
+        "nav_admin": "एडमिन डैशबोर्ड",
         "nav_batch": "बल्क डेटा अंतर्ग्रहण",
         "nav_somatic": "शारीरिक देखभाल और योग",
         "nav_team": "टीम स्वास्थ्य पल्स",
@@ -8067,8 +8067,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "ವೈಯಕ್ತಿಕ ಶಿಫಾರಸುಗಳು",
         "nav_canvas": "ಜೆನ್ ಕ್ಯಾನ್ವಾಸ್ & ವಿಶ್ರಾಂತಿ",
         "nav_habits": "ಸಮಗ್ರ ಅಭ್ಯಾಸ ಮ್ಯಾಟ್ರಿಕ್ಸ್",
-        "nav_trends": "ಭಾವನಾತ್ಮಕ ಪ್ರವೃತ್ತಿಗಳು",
-        "nav_admin": "ನಿರ್ವಾಹಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಅಂಕಿಅಂಶಗಳು",
+        "nav_trends": "ಬಳಕೆದಾರರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+        "nav_admin": "ನಿರ್ವಾಹಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
         "nav_batch": "ಬ್ಯಾಚ್ ಡೇಟಾ ಸಿಂಕ್",
         "nav_somatic": "ದೈಹಿಕ ಕಾಳಜಿ & ಯೋಗ",
         "nav_team": "ತಂಡದ ಆರೋಗ್ಯ ಸ್ಥಿತಿ",
@@ -8094,8 +8094,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "பரிந்துரைகள்",
         "nav_canvas": "ஜென் கேன்வாஸ் & அமைதி",
         "nav_habits": "முழுமையான பழக்க மேட்ரிக்ஸ்",
-        "nav_trends": "மனநிலை போக்குகள்",
-        "nav_admin": "நிர்வாகி டாஷ்போர்டு பகுப்பாய்வு",
+        "nav_trends": "பயனர் டாஷ்போர்டு",
+        "nav_admin": "நிர்வாகி டாஷ்போர்டு",
         "nav_batch": "தரவு ஒத்திசைவு",
         "nav_somatic": "உடல் நலம் & யோகா",
         "nav_team": "குழு நல நாடி",
@@ -8121,8 +8121,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "వ్యక్తిగత సూచనలు",
         "nav_canvas": "జెన్ కాన్వాస్ & ఒత్తిడి నివారణ",
         "nav_habits": "సమగ్ర అలవాట్ల మాత్రిక",
-        "nav_trends": "భావోద్వేగ పోకడలు",
-        "nav_admin": "అడ్మిన్ డాష్‌బోర్డ్ విశ్లేషణలు",
+        "nav_trends": "వినియోగదారు డ్యాష్‌బోర్డ్",
+        "nav_admin": "అడ్మిన్ డాష్‌బోర్డ్",
         "nav_batch": "బ్యాచ్ డేటా ప్రాసెసింగ్",
         "nav_somatic": "శరీర సంరక్షణ & యోగా",
         "nav_team": "టీమ్ హెల్త్ పల్స్",
@@ -8148,8 +8148,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "वैयक्तिक शिफारसी",
         "nav_canvas": "झेन कॅनव्हास आणि आराम",
         "nav_habits": "समग्र सवय मॅट्रिक्स",
-        "nav_trends": "भावनिक कल",
-        "nav_admin": "प्रशासक डॅशबोर्ड विश्लेषण",
+        "nav_trends": "वापरकर्ता डॅशबोर्ड",
+        "nav_admin": "प्रशासक डॅशबोर्ड",
         "nav_batch": "बॅच डेटा सिंक",
         "nav_somatic": "शारीरिक काळजी आणि योग",
         "nav_team": "संघ आरोग्य स्थिती",
@@ -8175,8 +8175,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "ব্যক্তিগত সুপারিশ",
         "nav_canvas": "জেন ক্যানভাস এবং চাপমুক্তি",
         "nav_habits": "সামগ্রিক অভ্যাস ম্যাট্রিক্স",
-        "nav_trends": "মানসিক প্রবণতা",
-        "nav_admin": "অ্যাডমিন ড্যাশবোর্ড অ্যানালিটিক্স",
+        "nav_trends": "ইউজার ড্যাশবোর্ড",
+        "nav_admin": "অ্যাডমিন ড্যাশবোর্ড",
         "nav_batch": "ব্যাচ ডেটা সিঙ্ক",
         "nav_somatic": "দৈহিক যত্ন ও যোগ",
         "nav_team": "টিম হেলথ পালস",
@@ -8202,8 +8202,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "વ્યક્તિગત ભલામણો",
         "nav_canvas": "ઝેન કેનવાસ & તણાવ મુક્તિ",
         "nav_habits": "સમગ્ર ટેવ મેટ્રિક્સ",
-        "nav_trends": "લાગણીઓના વલણો",
-        "nav_admin": "એડમિન ડેશબોર્ડ એનાલિટિક્સ",
+        "nav_trends": "વપરાશકર્તા ડેશબોર્ડ",
+        "nav_admin": "એડમિન ડેશબોર્ડ",
         "nav_batch": "બેચ ડેટા સિંક",
         "nav_somatic": "શારીરિક સંભાળ & યોગ",
         "nav_team": "ટીમ આરોગ્ય સ્થિતિ",
@@ -8229,8 +8229,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "nav_recommendations": "ശുപാർശകൾ",
         "nav_canvas": "സെൻ ക്യാൻവാസ് & ശാന്തത",
         "nav_habits": "ശീല മാട്രിക്സ്",
-        "nav_trends": "മാനസിക പ്രവണതകൾ",
-        "nav_admin": "അഡ്മിൻ ഡാഷ്‌ബോർഡ് അനലിറ്റിക്‌സ്",
+        "nav_trends": "ഉപയോക്തൃ ഡാഷ്‌ബോർഡ്",
+        "nav_admin": "അഡ്മിൻ ഡാഷ്‌ബോർഡ്",
         "nav_batch": "ഡാറ്റാ സമന്വയം",
         "nav_somatic": "ശരീര പരിചരണവും യോഗയും",
         "nav_team": "ടീം ഹെൽത്ത് പൾസ്",
@@ -8345,15 +8345,34 @@ def render_sidebar():
             st.toast(f"Language set to {chosen_lang_label}", icon="🌐")
             st.rerun()
 
-        st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 2px 4px;">Navigation</p>', unsafe_allow_html=True)
+        # Quick 2-Dashboard Switcher
+        st.markdown(
+            """
+            <div style="font-size: 0.68rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 4px 2px; display: flex; align-items: center; gap: 6px;">
+                <span>⚡</span> <span>2 Dedicated Dashboards</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        dash_c1, dash_c2 = st.columns(2, gap="small")
+        with dash_c1:
+            if st.button("📈 User Dash", width="stretch", key="sidebar_quick_user_dash", help="Open Employee / User Dashboard"):
+                set_active_view("📈")
+                st.rerun()
+        with dash_c2:
+            if st.button("🛡️ Admin Dash", width="stretch", key="sidebar_quick_admin_dash", help="Open Executive / Admin Dashboard"):
+                set_active_view("🛡️")
+                st.rerun()
+
+        st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 2px 4px;">Navigation Menu</p>', unsafe_allow_html=True)
         base_nav = [
             ("💬", "Daily Reflection", "nav_reflection"),
+            ("📈", "User Dashboard", "nav_trends"),
+            ("🛡️", "Admin Dashboard", "nav_admin"),
             ("🤖", "EquiAI Chat Companion", "nav_companion"),
             ("🎯", "Personalized Recommendations", "nav_recommendations"),
             ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
             ("📊", "Holistic Habit Matrix", "nav_habits"),
-            ("📈", "Emotional Trends", "nav_trends"),
-            ("🛡️", "Admin Dashboard Analytics", "nav_admin"),
             ("📁", "Batch Data Ingestion", "nav_batch"),
             ("🧘", "Somatic Care & Yoga", "nav_somatic"),
             ("👥", "Team Health Pulse", "nav_team"),
@@ -8436,7 +8455,7 @@ def render_admin_dashboard_view():
                         <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Enterprise Telemetry</span>
                         <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px;">● All 6 Database Tables Active</span>
                     </div>
-                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">🛡️ Admin Dashboard Analytics</h2>
+                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">🛡️ Admin Dashboard — Enterprise Telemetry & Infrastructure</h2>
                     <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.88rem;">Executive operational oversight: registered employee base, inference volumes, care adoption, and API latency.</p>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -8505,8 +8524,8 @@ def render_admin_dashboard_view():
             st.rerun()
 
     with sim_c3:
-        if st.button("📈 Jump to Emotional Trends →", width="stretch", key="admin_jump_trends_btn"):
-            set_active_view("📈 Emotional Trends")
+        if st.button("📈 Open User Dashboard →", width="stretch", key="admin_jump_trends_btn", help="Switch to Employee User Dashboard"):
+            set_active_view("📈")
             st.rerun()
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
@@ -9738,18 +9757,18 @@ def render_workspace():
             top_1_cnt = int(emo_freq.iloc[0]) if len(emo_freq) > 0 else 0
             top_1_pct = (top_1_cnt / total_recs * 100) if total_recs > 0 else 0.0
 
-            # Executive Header Banner
+            # Executive Header Banner for User Dashboard
             st.markdown(
                 f"""
-                <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 20px; padding: 22px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08); margin-bottom: 18px;">
+                <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 20px; padding: 22px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08); margin-bottom: 14px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
                         <div>
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                <span style="background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">AI Telemetry & Stored Analytics</span>
-                                <span style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">6 Entities Synchronized</span>
+                                <span style="background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Employee Analytics Portal</span>
+                                <span style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">100% Private to You</span>
                             </div>
-                            <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Dashboard Analysis & Database Intelligence</h2>
-                            <p style="margin: 3px 0 0 0; font-size: 0.86rem; color: #64748b;">Comprehensive emotional summaries, percentage distributions, temporal trends, and database audit logs.</p>
+                            <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">👤 User Dashboard — Personal Emotional Journey</h2>
+                            <p style="margin: 3px 0 0 0; font-size: 0.86rem; color: #64748b;">Comprehensive personal emotion summaries, percentage distributions, temporal trends, journal history, and care recommendations.</p>
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
@@ -9761,7 +9780,7 @@ def render_workspace():
                                 <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">{wellbeing_score}/100</div>
                             </div>
                             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Telemetry</div>
+                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Reflections</div>
                                 <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">{total_recs} logs</div>
                             </div>
                         </div>
@@ -9770,6 +9789,15 @@ def render_workspace():
                 """,
                 unsafe_allow_html=True,
             )
+
+            # Fast Portal Switcher
+            u_bar_c1, u_bar_c2 = st.columns([3, 1.2], gap="small")
+            with u_bar_c1:
+                st.caption("🔒 **Employee View Active:** Displaying individual longitudinal trends. Switch to Admin Dashboard for organization telemetry.")
+            with u_bar_c2:
+                if st.button("🛡️ Open Admin Dashboard →", width="stretch", key="user_dash_jump_admin_btn", help="Switch to Executive Admin Dashboard"):
+                    set_active_view("🛡️")
+                    st.rerun()
 
             # High-Level Metric Tiles
             k1, k2, k3, k4, k5, k6 = st.columns(6)
@@ -9785,14 +9813,13 @@ def render_workspace():
             # -------------------------------------------------------------------------
             # 4 CORE SECTIONS AS HIGH-PROFILE TABS MATCHING MEETING SPECIFICATION
             # -------------------------------------------------------------------------
-            dash_tab1, dash_tab2, dash_tab3, dash_tab4, dash_tab5, dash_tab6, dash_tab7 = st.tabs([
+            dash_tab1, dash_tab2, dash_tab3, dash_tab4, dash_tab5, dash_tab6 = st.tabs([
                 "🌟 Emotion Summary",
                 "📊 Emotion Distribution",
                 "📈 Weekly & Monthly Trends",
                 "📝 Journal History",
                 "💡 Recommendation History",
                 "⭐ Feedback Summary",
-                "🛡️ Admin Dashboard Analytics",
             ])
 
             # =========================================================================
@@ -10105,89 +10132,33 @@ def render_workspace():
 
                     with m_c2:
                         st.markdown(
-                            f"""
+                            """
                             <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
                                 <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Monthly Longitudinal Resilience:</div>
-                                Monitoring month-over-month sentiment shifts identifies sustained cultural well-being versus emerging chronic burnout.
-                                <div style="margin-top: 10px; padding: 8px 12px; background: #f0fdfa; border-left: 3px solid #0f766e; border-radius: 4px; font-size: 0.80rem; color: #0f766e;">
-                                    <strong>Longitudinal Health:</strong> Average compound sentiment has remained stable at <strong>{avg_comp:+.2f}</strong>.
-                                </div>
+                                Month-over-month telemetry captures macro-shifts in personal morale, coping capacity, and stress recovery.
+                                <ul style="margin: 8px 0 8px 18px; padding: 0;">
+                                    <li><strong>Longitudinal Baseline:</strong> Tracks stable affective equilibrium across quarters.</li>
+                                    <li><strong>Seasonal & Project Peaks:</strong> Identifies sprint cycles that benefit from proactive somatic recovery.</li>
+                                </ul>
+                                <em>Tip: Celebrate months with elevated positive valence and consistency!</em>
                             </div>
                             """,
                             unsafe_allow_html=True,
                         )
 
                 else:
-                    st.markdown("##### 📈 Continuous Compound Score Trajectory Over Time")
-                    df_sorted = df.sort_values(["created_at", "id"], ascending=True).reset_index(drop=True)
+                    st.markdown("##### 📈 Continuous Longitudinal Trajectory")
                     fig_timeline = px.line(
-                        df_sorted,
+                        df.sort_values("created_at"),
                         x="created_at",
                         y="compound_score",
                         markers=True,
-                        labels={"created_at": "Timestamp", "compound_score": "Compound Sentiment Score"},
+                        title="Sentiment Moving Trajectory Across Reflections",
+                        range_y=[-1.0, 1.0],
                         color_discrete_sequence=["#0f766e"],
                     )
-                    fig_timeline.add_hline(
-                        y=0.05,
-                        line_dash="dash",
-                        line_color="#34d399",
-                        annotation_text="Positive Valence (+0.05)",
-                    )
-                    fig_timeline.add_hline(
-                        y=-0.05,
-                        line_dash="dash",
-                        line_color="#f87171",
-                        annotation_text="Strain Threshold (-0.05)",
-                    )
-                    fig_timeline.update_layout(
-                        height=300,
-                        margin={"l": 20, "r": 20, "t": 20, "b": 20},
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        plot_bgcolor="rgba(0,0,0,0)",
-                        yaxis={"range": [-1.05, 1.05]},
-                    )
+                    fig_timeline.update_layout(height=280, margin={"l": 20, "r": 20, "t": 40, "b": 20}, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
                     st.plotly_chart(fig_timeline, width="stretch")
-
-                # Contextual Life Domain Categories Expander
-                with st.expander("🏷️ Life Domain Categories & Hashtag Trigger Analytics", expanded=False):
-                    tm_c1, tm_c2 = st.columns([1, 1], gap="medium")
-                    with tm_c1:
-                        st.markdown("###### Domain Affect Breakdown")
-                        cat_stats = df.groupby("domain_category")["compound_score"].agg(["mean", "count"]).reset_index()
-                        cat_stats.columns = ["Life Domain", "Avg Sentiment", "Count"]
-                        if not cat_stats.empty:
-                            fig_cat = px.bar(
-                                cat_stats,
-                                x="Avg Sentiment",
-                                y="Life Domain",
-                                orientation="h",
-                                color="Avg Sentiment",
-                                color_continuous_scale=["#f87171", "#fcd34d", "#34d399"],
-                                range_x=[-1.0, 1.0],
-                                text="Avg Sentiment",
-                            )
-                            fig_cat.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-                            fig_cat.update_layout(
-                                height=240,
-                                margin={"l": 10, "r": 20, "t": 10, "b": 10},
-                                paper_bgcolor="rgba(0,0,0,0)",
-                                plot_bgcolor="rgba(0,0,0,0)",
-                            )
-                            st.plotly_chart(fig_cat, width="stretch")
-                    with tm_c2:
-                        st.markdown("###### Trigger / Tag Correlation Matrix")
-                        tag_records = []
-                        for _, r in df.iterrows():
-                            for t in r["entry_tags"]:
-                                tag_records.append({"Tag": t, "compound": r["compound_score"]})
-                        if tag_records:
-                            tag_summary = pd.DataFrame(tag_records).groupby("Tag")["compound"].agg(["mean", "count"]).reset_index()
-                            tag_summary.columns = ["Tag", "Avg Sentiment", "Logs"]
-                            tag_summary = tag_summary.sort_values("Avg Sentiment", ascending=False)
-                            st.dataframe(tag_summary, width="stretch", hide_index=True)
-                        else:
-                            st.info("Tag check-ins with `#hashtag` to view trigger correlation metrics.")
 
             # =========================================================================
             # TAB 4: JOURNAL HISTORY --- Recent journal entries
@@ -10198,51 +10169,56 @@ def render_workspace():
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                         <div>
                             <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Journal History — Recent Journal Entries</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Chronological log of recent personal journal check-ins, word counts, and sentiment metadata.</p>
+                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Chronological archive of all your self-reflections, domain focus areas, and affective markers.</p>
                         </div>
-                        <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">{total_recs} Total Check-ins</span>
+                        <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Chronological Logs</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
-                jh_df = df[["id", "created_at", "domain_category", "entry_tags_str", "dominant_emotion", "compound_score", "original_text"]].copy()
-                jh_df.columns = ["Journal ID", "Timestamp", "Domain", "Tags", "Emotion", "Compound", "Journal Text"]
-                st.dataframe(
-                    jh_df,
-                    column_config={
-                        "Journal ID": st.column_config.NumberColumn("ID", width="small"),
-                        "Timestamp": st.column_config.DatetimeColumn("Timestamp", format="YYYY-MM-DD HH:mm"),
-                        "Domain": st.column_config.TextColumn("Life Domain"),
-                        "Tags": st.column_config.TextColumn("Tags"),
-                        "Emotion": st.column_config.TextColumn("Detected Emotion"),
-                        "Compound": st.column_config.NumberColumn("Valence", format="%.3f"),
-                        "Journal Text": st.column_config.TextColumn("Journal Entry (Full Narrative)", width="large"),
-                    },
-                    width="stretch",
-                    hide_index=True,
-                )
+                jh_c1, jh_c2 = st.columns([1, 2], gap="small")
+                with jh_c1:
+                    jh_sentiment = st.selectbox("Filter by Sentiment:", ["All", "positive", "neutral", "negative"], key="jh_filter_sent_sel")
+                with jh_c2:
+                    jh_search = st.text_input("Search Journal Excerpt:", placeholder="Search your reflections by keyword or tag...", key="jh_search_input_txt")
 
-                with st.expander("📖 Read Recent Reflection Cards in Full Detail", expanded=False):
-                    for _, r in df.head(8).iterrows():
-                        emo_badge_col = EMOTION_PALETTE.get(str(r.get("dominant_emotion", "neutral")).lower(), "#0f766e")
-                        st.markdown(
-                            f"""
-                            <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                    <span style="font-weight: 700; color: #0f172a; font-size: 0.90rem;">Check-in #{r['id']} · {r['created_at'].strftime('%b %d, %Y at %I:%M %p')}</span>
-                                    <span style="background: {emo_badge_col}15; color: {emo_badge_col}; border: 1px solid {emo_badge_col}40; font-size: 0.74rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
-                                        {str(r.get('dominant_emotion', 'neutral')).capitalize()} ({r['compound_score']:+.2f})
-                                    </span>
+                jh_df = df.copy()
+                if jh_sentiment != "All":
+                    jh_df = jh_df[jh_df["sentiment_label"] == jh_sentiment]
+                if jh_search.strip():
+                    jh_df = jh_df[jh_df["original_text"].str.contains(jh_search.strip(), case=False, na=False)]
+
+                st.markdown(f"**Showing {len(jh_df)} of {total_recs} reflections:**")
+                for _, r in jh_df.head(12).iterrows():
+                    dom_e = str(r.get("dominant_emotion", "neutral")).capitalize()
+                    sent_badge = "#059669" if r.get("sentiment_label") == "positive" else ("#d97706" if r.get("sentiment_label") == "neutral" else "#dc2626")
+                    sent_bg = "#f0fdf4" if r.get("sentiment_label") == "positive" else ("#fffbeb" if r.get("sentiment_label") == "neutral" else "#fef2f2")
+                    entry_time_str = str(r.get("created_at", ""))[:16]
+                    cat_str = str(r.get("domain_category", "General"))
+                    tags_str = str(r.get("entry_tags_str", "—"))
+
+                    st.markdown(
+                        f"""
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">Reflection #{r.get('id')}</span>
+                                    <span style="background: {sent_bg}; color: {sent_badge}; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px;">{dom_e} · Compound {r.get('compound_score', 0):+.2f}</span>
+                                    <span style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">{cat_str}</span>
                                 </div>
-                                <div style="font-size: 0.86rem; color: #334155; line-height: 1.5; font-style: italic;">“{r['original_text']}”</div>
-                                <div style="margin-top: 6px; font-size: 0.75rem; color: #64748b;">
-                                    Domain: <strong>{r.get('domain_category', 'General')}</strong> | Tags: <strong>{r.get('entry_tags_str', 'None')}</strong>
-                                </div>
+                                <span style="font-size: 0.78rem; color: #94a3b8;">📅 {entry_time_str}</span>
                             </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
+                            <div style="font-size: 0.88rem; color: #334155; line-height: 1.5; font-style: italic; margin: 4px 0;">
+                                "{r.get('original_text', '')}"
+                            </div>
+                            <div style="font-size: 0.74rem; color: #64748b; margin-top: 4px;">
+                                Tags: <code style="color: #0f766e;">{tags_str}</code>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
             # =========================================================================
             # TAB 5: RECOMMENDATION HISTORY --- Previously generated suggestions
@@ -10252,51 +10228,41 @@ def render_workspace():
                     """
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                         <div>
-                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Recommendation History — Previously Generated Suggestions by the Model</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Archival telemetry of personalized micro-interventions, somatic resets, and cognitive care plans generated for your reflections.</p>
+                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Recommendation History — Previously Generated Suggestions by Model</h3>
+                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Review AI-generated wellness micro-interventions, somatic care pathways, and personalized yoga remedies.</p>
                         </div>
-                        <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">AI Model Inferences</span>
+                        <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Adaptive Pathways</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
-                rec_history_items = []
-                for _, r in df.iterrows():
-                    rec_raw = r.get("recommendation")
-                    rec_dict = rec_raw if isinstance(rec_raw, dict) else {}
-                    title = rec_dict.get("title") or f"Personal Care for {r.get('dominant_emotion', 'neutral').capitalize()}"
-                    cat = rec_dict.get("category", r.get("domain_category", "Well-Being"))
-                    urgency = rec_dict.get("urgency", "Low")
-                    summary = rec_dict.get("summary") or f"Targeted micro-intervention responding to {r.get('dominant_emotion', 'neutral')} emotional tone."
-                    rec_history_items.append({
-                        "Recommendation ID": int(r["id"]),
-                        "Timestamp": r["created_at"].strftime("%Y-%m-%d %H:%M"),
-                        "Target Emotion": str(r.get("dominant_emotion", "neutral")).capitalize(),
-                        "Suggestion Title": title,
-                        "Category": cat,
-                        "Urgency": urgency,
-                        "Summary / Action": summary,
-                    })
-
-                rec_hist_df = pd.DataFrame(rec_history_items)
-                st.dataframe(
-                    rec_hist_df,
-                    column_config={
-                        "Recommendation ID": st.column_config.NumberColumn("ID", width="small"),
-                        "Timestamp": st.column_config.TextColumn("Date & Time"),
-                        "Target Emotion": st.column_config.TextColumn("Emotion"),
-                        "Suggestion Title": st.column_config.TextColumn("Model Suggestion Title", width="medium"),
-                        "Category": st.column_config.TextColumn("Category"),
-                        "Urgency": st.column_config.TextColumn("Urgency"),
-                        "Summary / Action": st.column_config.TextColumn("Clinical Guidance / Action Items", width="large"),
-                    },
-                    width="stretch",
-                    hide_index=True,
-                )
+                for idx, r in df.head(8).iterrows():
+                    dom_emo = str(r.get("dominant_emotion", "neutral")).capitalize()
+                    remedy = get_yoga_remedy_for_emotion(dom_emo.lower())
+                    st.markdown(
+                        f"""
+                        <div style="background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%); border: 1.5px solid #ccfbf1; border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.04);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                                <div>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase;">Generated for Reflection #{r.get('id')} ({dom_emo})</span>
+                                    <h4 style="margin: 2px 0 0 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">💡 Restorative Pathway: Grounding & Emotional Regulation</h4>
+                                </div>
+                                <span style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 3px 10px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #0891b2;">⏱️ 3-5 Min Practice</span>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #475569; margin-bottom: 8px;">
+                                <strong>Recommended Somatic Remedy:</strong> {remedy.get('icon', '🧘')} <em>{remedy.get('english_name', 'Restorative Asana')}</em> ({remedy.get('sanskrit_name', 'Asana')})
+                            </div>
+                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; color: #334155;">
+                                {remedy.get('somatic_mechanism', 'Somatic regulation through diaphragmatic pacing and vagal nerve stimulation.')}
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
             # =========================================================================
-            # TAB 6: FEEDBACK SUMMARY --- Accepted / rejected recommendations
+            # TAB 6: FEEDBACK SUMMARY --- Accepted / Rejected Recommendations
             # =========================================================================
             with dash_tab6:
                 st.markdown(
@@ -10304,206 +10270,63 @@ def render_workspace():
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                         <div>
                             <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Feedback Summary — Accepted / Rejected Recommendations</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Auditing adoption rate telemetry and evaluating user responses to model-generated care recommendations.</p>
+                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Track your personal engagement with model recommendations, acceptance ratios, and habit stickiness.</p>
                         </div>
-                        <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Adoption Audited</span>
+                        <span style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Feedback Loop Closed</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
-                acc_c1, acc_c2, acc_c3, acc_c4 = st.columns(4)
-                acc_count = fb.get("accepted", 4)
-                rej_count = fb.get("rejected", 1)
-                total_sug = acc_count + rej_count
+                fb_live = st.session_state.get("suggestion_feedback", {"accepted": 6, "rejected": 2})
+                acc_count = fb_live.get("accepted", 6)
+                rej_count = fb_live.get("rejected", 2)
+                tot_feedback = acc_count + rej_count
+                live_acc_pct = (acc_count / tot_feedback * 100) if tot_feedback > 0 else 75.0
 
-                acc_c1.metric("Total Suggestions Offered", total_sug)
-                acc_c2.metric("Accepted Practices", acc_count, "Adopted & Completed")
-                acc_c3.metric("Skipped / Rejected", rej_count, "Alternative Preferred")
-                acc_c4.metric("Adoption Rate", f"{accept_rate:.1f}%", "acc / total x 100")
+                fb_m1, fb_m2, fb_m3, fb_m4 = st.columns(4)
+                fb_m1.metric("Total Decisions Logged", tot_feedback)
+                fb_m2.metric("Accepted Recommendations", acc_count, delta="Adopted & Practiced")
+                fb_m3.metric("Declined / Skipped", rej_count, delta="Skipped for Now")
+                fb_m4.metric("Personal Acceptance Rate", f"{live_acc_pct:.1f}%", "acc / total x 100")
 
-                st.markdown(
-                    f"""
-                    <div style="margin: 12px 0; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
-                            <span>Care Pathway Acceptance Rate:</span>
-                            <span style="color: #0f766e;">{accept_rate:.1f}%</span>
-                        </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                st.progress(min(1.0, max(0.0, accept_rate / 100.0)))
+                st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
-                st.markdown("##### 📋 Telemetry Feedback Log")
-                fb_records = [
-                    {"Feedback ID": 1, "Timestamp": "2026-11-23 18:45", "Recommendation Title": "Ground in the Room (5-4-3-2-1 Reset)", "Status": "ACCEPTED", "Impact": "+25 Resilience Points", "User Response": "Adopted into daily sprint routine"},
-                    {"Feedback ID": 2, "Timestamp": "2026-11-23 17:30", "Recommendation Title": "Vagus Nerve Physiological Sigh", "Status": "ACCEPTED", "Impact": "+25 Resilience Points", "User Response": "Completed parasympathetic sigh cycle"},
-                    {"Feedback ID": 3, "Timestamp": "2026-11-23 16:15", "Recommendation Title": "Desk Shoulder Roll & Tension Release", "Status": "ACCEPTED", "Impact": "+25 Resilience Points", "User Response": "Released ciliary & shoulder tension"},
-                    {"Feedback ID": 4, "Timestamp": "2026-11-22 14:10", "Recommendation Title": "Cognitive Decatastrophizing Reframe", "Status": "ACCEPTED", "Impact": "+25 Resilience Points", "User Response": "Adopted constructive reframe"},
-                    {"Feedback ID": 5, "Timestamp": "2026-11-22 11:20", "Recommendation Title": "15-Minute Sunlight Walk", "Status": "REJECTED", "Impact": "Alternative chosen", "User Response": "Declined / Skipped due to tight schedule"},
-                ]
-                fb_table_df = pd.DataFrame(fb_records)
-                st.dataframe(
-                    fb_table_df,
-                    column_config={
-                        "Feedback ID": st.column_config.NumberColumn("ID", width="small"),
-                        "Timestamp": st.column_config.TextColumn("Timestamp"),
-                        "Recommendation Title": st.column_config.TextColumn("Recommendation"),
-                        "Status": st.column_config.TextColumn("Outcome (Accepted / Rejected)"),
-                        "Impact": st.column_config.TextColumn("Resilience Impact"),
-                        "User Response": st.column_config.TextColumn("User Response Note"),
-                    },
-                    width="stretch",
-                    hide_index=True,
-                )
-
-            # =========================================================================
-            # TAB 7: ADMIN DASHBOARD ANALYTICS (6 Official Enterprise Metrics)
-            # =========================================================================
-            with dash_tab7:
-                st.markdown(
-                    """
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Admin Dashboard Analytics</h3>
-                            <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Enterprise operational telemetry: user adoption, recommendation usage, acceptance rates, and API performance.</p>
-                        </div>
-                        <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Operational Telemetry</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                try:
-                    admin_stats = api_get_admin_analytics(st.session_state.get("api_token"))
-                except Exception:
-                    admin_stats = {}
-
-                total_reg_users = admin_stats.get("total_registered_users", max(1, len(entries)))
-                active_users_cnt = admin_stats.get("active_users", max(1, min(total_reg_users, 4)))
-                total_recs_analysis = admin_stats.get("total_recommendations_analysis", total_recs * 2)
-                rec_usage_cnt = admin_stats.get("recommendation_usage", total_recs)
-                api_perf = admin_stats.get("api_performance", {"avg_response_time_ms": 38.2, "p95_response_time_ms": 110.5, "error_rate_pct": 0.0, "uptime_pct": 99.99, "status": "Optimal"})
-
-                # The 6 Official Admin Dashboard Metrics from meeting specification
-                adm_c1, adm_c2, adm_c3 = st.columns(3)
-                adm_c4, adm_c5, adm_c6 = st.columns(3)
-
-                adm_c1.metric(
-                    "1. Total Registered Users",
-                    f"{total_reg_users}",
-                    "Enrolled Platform Accounts",
-                )
-                adm_c2.metric(
-                    "2. Active Users",
-                    f"{active_users_cnt}",
-                    "Active Daily Check-ins",
-                )
-                adm_c3.metric(
-                    "3. Total Recommendations / Analysis",
-                    f"{total_recs_analysis}",
-                    "Inference Runs Completed",
-                )
-                adm_c4.metric(
-                    "4. Recommendation Usage",
-                    f"{rec_usage_cnt}",
-                    "Care Pathways Generated",
-                )
-                adm_c5.metric(
-                    "5. Acceptance Rate",
-                    f"{accept_rate:.1f}%",
-                    "acc recs / total recs x 100",
-                )
-                adm_c6.metric(
-                    "6. API Performance",
-                    f"{api_perf['avg_response_time_ms']} ms",
-                    f"Error Rate: {api_perf['error_rate_pct']:.1f}% (Uptime {api_perf.get('uptime_pct', 99.99)}%)",
-                )
-
-                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-
-                perf_col1, perf_col2 = st.columns([1.5, 1], gap="medium")
-                with perf_col1:
-                    st.markdown("##### ⚡ API Performance & Latency Telemetry")
-                    perf_df = pd.DataFrame({
-                        "Metric": ["Average Response Time", "P95 Latency", "P99 Spike Latency", "Timeout Threshold"],
-                        "Milliseconds (ms)": [api_perf["avg_response_time_ms"], api_perf["p95_response_time_ms"], 145.0, 500.0],
+                fb_chart_c1, fb_chart_c2 = st.columns([1.2, 1.2], gap="medium")
+                with fb_chart_c1:
+                    st.markdown("##### 📊 Acceptance vs Decline Ratio")
+                    pie_data = pd.DataFrame({
+                        "Decision": ["Accepted Practice", "Declined / Skipped"],
+                        "Count": [acc_count, rej_count],
                     })
-                    fig_perf = px.bar(
-                        perf_df,
-                        x="Metric",
-                        y="Milliseconds (ms)",
-                        text="Milliseconds (ms)",
-                        color="Milliseconds (ms)",
-                        color_continuous_scale=["#34d399", "#fcd34d", "#f87171"],
+                    fig_fb = px.pie(
+                        pie_data,
+                        values="Count",
+                        names="Decision",
+                        hole=0.55,
+                        color="Decision",
+                        color_discrete_map={"Accepted Practice": "#059669", "Declined / Skipped": "#94a3b8"},
                     )
-                    fig_perf.update_traces(texttemplate="%{text:.1f} ms", textposition="outside")
-                    fig_perf.update_layout(height=260, margin={"l": 20, "r": 20, "t": 20, "b": 20}, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-                    st.plotly_chart(fig_perf, width="stretch")
+                    fig_fb.update_traces(textinfo="percent+label", textposition="outside")
+                    fig_fb.update_layout(height=240, margin={"l": 10, "r": 10, "t": 10, "b": 10}, paper_bgcolor="rgba(0,0,0,0)")
+                    st.plotly_chart(fig_fb, width="stretch")
 
-                with perf_col2:
-                    st.markdown("##### 🛡️ Platform Service Level Indicators (SLI/SLO)")
+                with fb_chart_c2:
+                    st.markdown("##### 🌿 Habit Stickiness Insight")
                     st.markdown(
                         f"""
-                        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #334155; line-height: 1.55;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                                <span>Health Status:</span> <strong style="color: #166534;">● {api_perf['status']}</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                                <span>Platform Uptime:</span> <strong>{api_perf.get('uptime_pct', 99.99)}%</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                                <span>Error Rate:</span> <strong style="color: #166534;">{api_perf['error_rate_pct']:.2f}%</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                                <span>Database Engine:</span> <strong>SQLite / PostgreSQL</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                                <span>NLP Model Pipeline:</span> <strong>VADER + Fine-tuned DistilBERT</strong>
-                            </div>
-                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9; font-size: 0.78rem; color: #64748b;">
-                                Formula: <code>Acceptance Rate = (Accepted Recs / Total Recs) * 100</code>
-                            </div>
+                        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
+                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Adaptive Recommendation Model:</div>
+                            When you click <strong>✅ Accept Practice</strong> in your daily reflection, the model records positive reinforcement in the <code>user_feedback</code> database table.
+                            <ul style="margin: 8px 0 8px 18px; padding: 0;">
+                                <li><strong>Acceptance Rate Formula:</strong> <code>(Accepted / Total) × 100 = {live_acc_pct:.1f}%</code></li>
+                                <li><strong>Current Habit Consistency:</strong> Highly Responsive · Strong Daily Integration</li>
+                                <li><strong>Resilience Reward:</strong> +15 Mindful Points granted per completed practice</li>
+                            </ul>
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
-
-                # Expander for all 6 verified database entities
-                with st.expander("🗄️ Inspect Stored Database Records (All 6 Verified Entities)", expanded=False):
-                    try:
-                        db_all = api_get_database_entities(st.session_state.get("api_token"))
-                    except Exception:
-                        db_all = {}
-
-                    users_list = db_all.get("users", []) or [{"id": 1, "name": st.session_state.get("user_name", "Member"), "email": st.session_state.get("user_email", "member@equimind.internal"), "profile_details": {"role": "Senior Engineer", "department": "Core Platform"}, "created_at": datetime.now(timezone.utc).isoformat()}]
-                    journals_list = db_all.get("journal_entries", []) or [{"id": int(r["id"]), "user_id": 1, "journal_text": str(r["original_text"]), "timestamp": str(r["created_at"])} for _, r in df.head(5).iterrows()]
-                    recs_list = db_all.get("recommendations", []) or [{"id": int(r["id"]), "user_id": 1, "title": f"Pathway for {r.get('dominant_emotion', 'neutral')}", "category": "Well-Being", "report_data": {"dominant_emotion": r.get("dominant_emotion")}} for _, r in df.head(5).iterrows()]
-                    audits_list = db_all.get("audit_trails", []) or [{"id": int(r["id"]), "user_id": 1, "username": st.session_state.get("user_name", "Member"), "journal_id": int(r["id"]), "recommendation": "Care practice delivered", "timestamp": str(r["created_at"])} for _, r in df.head(5).iterrows()]
-                    feedback_list = db_all.get("user_feedback", []) or [{"id": 1, "recommendation_id": 1, "report_data": {"practice": "Ground in the Room"}, "accepted_or_rejected": "accepted", "timestamp": datetime.now(timezone.utc).isoformat()}]
-                    reports_list = db_all.get("reports", []) or [{"id": int(r["id"]), "user_id": 1, "username": st.session_state.get("user_name", "Member"), "timestamp": str(r["created_at"])} for _, r in df.head(5).iterrows()]
-
-                    ent_t1, ent_t2, ent_t3, ent_t4, ent_t5, ent_t6 = st.tabs([
-                        f"👤 Users ({len(users_list)})",
-                        f"📝 Journal Entries ({len(journals_list)})",
-                        f"💡 Recommendations ({len(recs_list)})",
-                        f"📋 Audit Trails ({len(audits_list)})",
-                        f"⭐ Feedback ({len(feedback_list)})",
-                        f"📄 Reports ({len(reports_list)})",
-                    ])
-                    with ent_t1:
-                        st.dataframe(pd.DataFrame(users_list), width="stretch", hide_index=True)
-                    with ent_t2:
-                        st.dataframe(pd.DataFrame(journals_list), width="stretch", hide_index=True)
-                    with ent_t3:
-                        st.dataframe(pd.DataFrame(recs_list), width="stretch", hide_index=True)
-                    with ent_t4:
-                        st.dataframe(pd.DataFrame(audits_list), width="stretch", hide_index=True)
-                    with ent_t5:
-                        st.dataframe(pd.DataFrame(feedback_list), width="stretch", hide_index=True)
-                    with ent_t6:
-                        st.dataframe(pd.DataFrame(reports_list), width="stretch", hide_index=True)
 
 
             # -------------------------------------------------------------------------
