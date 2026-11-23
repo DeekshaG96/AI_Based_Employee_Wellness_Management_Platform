@@ -8567,9 +8567,6 @@ def set_active_view(target_view: str, soma_tool: str | None = None):
 def render_sidebar():
     """Render the EquiMind executive account panel and interactive navigation menu."""
     with st.sidebar:
-        # Check if a view change was queued by any button in the app
-        if st.session_state.get("nav_redirect"):
-            st.session_state["equimind_nav_view"] = st.session_state.pop("nav_redirect")
         user_name = escape(str(st.session_state.get("user_name", "EquiMind Member")))
         user_email = escape(str(st.session_state.get("user_email", "member@enterprise.internal")))
         initial = user_name[0].upper() if user_name else "E"
@@ -8670,12 +8667,12 @@ def render_sidebar():
             ("💬", "Daily Reflection", "nav_reflection"),
             ("📈", "User Dashboard", "nav_trends"),
             ("🛡️", "Admin Dashboard", "nav_admin"),
-            ("🤖", "EquiAI Chat Companion", "nav_companion"),
             ("🎯", "Personalized Recommendations", "nav_recommendations"),
-            ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
-            ("📊", "Holistic Habit Matrix", "nav_habits"),
-            ("📁", "Batch Data Ingestion", "nav_batch"),
+            ("🤖", "EquiAI Chat Companion", "nav_companion"),
             ("🧘", "Somatic Care & Yoga", "nav_somatic"),
+            ("📊", "Holistic Habit Matrix", "nav_habits"),
+            ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
+            ("📁", "Batch Data Ingestion", "nav_batch"),
             ("👥", "Team Health Pulse", "nav_team"),
         ]
 
@@ -9474,63 +9471,159 @@ def render_user_dashboard_view():
             st.plotly_chart(fig_timeline, width="stretch")
 
     # =========================================================================
-    # TAB 4: JOURNAL HISTORY --- Recent journal entries
+    # TAB 4: JOURNAL HISTORY & RECORD VAULT
     # =========================================================================
     with dash_tab4:
         st.markdown(
             """
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                 <div>
-                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Journal History — Recent Journal Entries</h3>
+                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Journal History & Record Vault</h3>
                     <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Chronological archive of all your self-reflections, domain focus areas, and affective markers.</p>
                 </div>
-                <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Chronological Logs</span>
+                <span style="background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Encrypted Personal Vault</span>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        jh_c1, jh_c2 = st.columns([1, 2], gap="small")
-        with jh_c1:
-            jh_sentiment = st.selectbox("Filter by Sentiment:", ["All", "positive", "neutral", "negative"], key="jh_filter_sent_sel")
-        with jh_c2:
-            jh_search = st.text_input("Search Journal Excerpt:", placeholder="Search your reflections by keyword or tag...", key="jh_search_input_txt")
+        # Unified Search & Filter Toolbar
+        f1, f2, f3 = st.columns([1, 1, 2], gap="small")
+        with f1:
+            filter_sentiment = st.selectbox(
+                "Filter by Sentiment:", ["All", "positive", "neutral", "negative"], key="user_dash_filter_sentiment"
+            )
+        with f2:
+            available_cats = ["All"] + sorted([str(c) for c in df["domain_category"].unique() if c])
+            filter_category = st.selectbox("Filter by Life Domain:", available_cats, key="user_dash_filter_category")
+        with f3:
+            search_query = st.text_input(
+                "Search Text, Tags (#), or Notes:", placeholder="Search original text, #tag, or notes...", key="user_dash_search_text"
+            )
 
-        jh_df = df.copy()
-        if jh_sentiment != "All":
-            jh_df = jh_df[jh_df["sentiment_label"] == jh_sentiment]
-        if jh_search.strip():
-            jh_df = jh_df[jh_df["original_text"].str.contains(jh_search.strip(), case=False, na=False)]
+        filtered_df = df.copy()
+        if filter_sentiment != "All":
+            filtered_df = filtered_df[filtered_df["sentiment_label"] == filter_sentiment]
+        if filter_category != "All":
+            filtered_df = filtered_df[filtered_df["domain_category"] == filter_category]
+        if search_query.strip():
+            q = search_query.casefold()
+            orig_match = filtered_df["original_text"].fillna("").astype(str).str.casefold().str.contains(q, na=False, regex=False)
+            src_match = filtered_df["source_name"].fillna("").astype(str).str.casefold().str.contains(q, na=False, regex=False)
+            filtered_df = filtered_df[orig_match | src_match]
 
-        st.markdown(f"**Showing {len(jh_df)} of {total_recs} reflections:**")
-        for _, r in jh_df.head(12).iterrows():
-            dom_e = str(r.get("dominant_emotion", "neutral")).capitalize()
-            sent_badge = "#059669" if r.get("sentiment_label") == "positive" else ("#d97706" if r.get("sentiment_label") == "neutral" else "#dc2626")
-            sent_bg = "#f0fdf4" if r.get("sentiment_label") == "positive" else ("#fffbeb" if r.get("sentiment_label") == "neutral" else "#fef2f2")
-            entry_time_str = str(r.get("created_at", ""))[:16]
-            cat_str = str(r.get("domain_category", "General"))
-            tags_str = str(r.get("entry_tags_str", "—"))
+        st.caption(f"Showing **{len(filtered_df)}** of **{total_recs}** reflections:")
 
-            st.markdown(
-                f"""
-                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">Reflection #{r.get('id')}</span>
-                            <span style="background: {sent_bg}; color: {sent_badge}; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px;">{dom_e} · Compound {r.get('compound_score', 0):+.2f}</span>
-                            <span style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">{cat_str}</span>
+        # Sub-view switcher: Interactive Table vs Card Stream
+        jh_view_tab1, jh_view_tab2 = st.tabs(["📋 Structured Data Table", "🗂️ Card Stream View"])
+
+        with jh_view_tab1:
+            display_cols = [
+                "id",
+                "created_at",
+                "domain_category",
+                "entry_tags_str",
+                "sentiment_label",
+                "compound_score",
+                "dominant_emotion",
+                "original_text",
+            ]
+            st.dataframe(
+                filtered_df[display_cols],
+                column_config={
+                    "id": st.column_config.NumberColumn("ID", width="small"),
+                    "created_at": st.column_config.DatetimeColumn("Timestamp", format="YYYY-MM-DD HH:mm"),
+                    "domain_category": st.column_config.TextColumn("Domain"),
+                    "entry_tags_str": st.column_config.TextColumn("Tags"),
+                    "sentiment_label": st.column_config.TextColumn("Sentiment"),
+                    "compound_score": st.column_config.NumberColumn("Compound", format="%.3f"),
+                    "dominant_emotion": st.column_config.TextColumn("Dominant Emotion"),
+                    "original_text": st.column_config.TextColumn("Original Text Excerpt", width="large"),
+                },
+                width="stretch",
+                hide_index=True,
+            )
+
+        with jh_view_tab2:
+            if filtered_df.empty:
+                st.info("No reflections match the active filters.")
+            else:
+                for _, r in filtered_df.head(15).iterrows():
+                    dom_e = str(r.get("dominant_emotion", "neutral")).capitalize()
+                    sent_badge = "#059669" if r.get("sentiment_label") == "positive" else ("#d97706" if r.get("sentiment_label") == "neutral" else "#dc2626")
+                    sent_bg = "#f0fdf4" if r.get("sentiment_label") == "positive" else ("#fffbeb" if r.get("sentiment_label") == "neutral" else "#fef2f2")
+                    entry_time_str = str(r.get("created_at", ""))[:16]
+                    cat_str = str(r.get("domain_category", "General"))
+                    tags_str = str(r.get("entry_tags_str", "—"))
+
+                    st.markdown(
+                        f"""
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">Reflection #{r.get('id')}</span>
+                                    <span style="background: {sent_bg}; color: {sent_badge}; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px;">{dom_e} · Compound {r.get('compound_score', 0):+.2f}</span>
+                                    <span style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">{cat_str}</span>
+                                </div>
+                                <span style="font-size: 0.78rem; color: #94a3b8;">📅 {entry_time_str}</span>
+                            </div>
+                            <div style="font-size: 0.88rem; color: #334155; line-height: 1.5; font-style: italic; margin: 4px 0;">
+                                "{r.get('original_text', '')}"
+                            </div>
+                            <div style="font-size: 0.74rem; color: #64748b; margin-top: 4px;">
+                                Tags: <code style="color: #0f766e;">{tags_str}</code>
+                            </div>
                         </div>
-                        <span style="font-size: 0.78rem; color: #94a3b8;">📅 {entry_time_str}</span>
-                    </div>
-                    <div style="font-size: 0.88rem; color: #334155; line-height: 1.5; font-style: italic; margin: 4px 0;">
-                        "{r.get('original_text', '')}"
-                    </div>
-                    <div style="font-size: 0.74rem; color: #64748b; margin-top: 4px;">
-                        Tags: <code style="color: #0f766e;">{tags_str}</code>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+        # Record Detail Inspection & Privacy-Compliant Deletion
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        if not filtered_df.empty:
+            with st.expander("🔍 Inspect Specific Reflection or Exercise Deletion", expanded=False):
+                selected_id = st.selectbox(
+                    "Select Reflection by ID:",
+                    options=filtered_df["id"].tolist(),
+                    format_func=lambda x: f"Reflection Record #{x}",
+                    key="user_dash_inspect_select",
+                )
+                if selected_id:
+                    rec_row = df[df["id"] == selected_id].iloc[0]
+                    rc1, rc2 = st.columns([3, 1], gap="small")
+                    with rc1:
+                        st.write(f"**Original Text:** {rec_row['original_text']}")
+                        st.write(f"**Domain:** `{rec_row.get('domain_category', 'General')}` | **Tags:** `{rec_row.get('entry_tags_str', 'None')}`")
+                        st.write(f"**Dominant Emotion:** `{rec_row.get('dominant_emotion', 'neutral').capitalize()}` | **Compound Score:** `{rec_row['compound_score']:.3f}`")
+                    with rc2:
+                        if st.button("🗑️ Delete Record", key=f"del_rec_{selected_id}", type="secondary", width="stretch", help="Permanently delete this check-in"):
+                            try:
+                                api_delete_entry(selected_id, st.session_state.api_token)
+                                st.success(f"Record #{selected_id} deleted.")
+                                st.rerun()
+                            except ApiError as exc:
+                                st.error(str(exc))
+
+        # Export Vault Buttons
+        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+        exp1, exp2 = st.columns(2, gap="small")
+        with exp1:
+            st.download_button(
+                "📥 Export Filtered Reflections (CSV)",
+                data=filtered_df.to_csv(index=False).encode("utf-8"),
+                file_name="moodmentor_reflections_report.csv",
+                mime="text/csv",
+                width="stretch",
+                key="user_dash_export_csv_btn",
+            )
+        with exp2:
+            st.download_button(
+                "📥 Export Filtered Reflections (JSON)",
+                data=filtered_df.to_json(orient="records", indent=2, date_format="iso").encode("utf-8"),
+                file_name="moodmentor_reflections_report.json",
+                mime="application/json",
+                width="stretch",
+                key="user_dash_export_json_btn",
             )
 
     # =========================================================================
@@ -9549,6 +9642,14 @@ def render_user_dashboard_view():
             """,
             unsafe_allow_html=True,
         )
+
+        rec_jump_c1, rec_jump_c2 = st.columns([3, 1], gap="small")
+        with rec_jump_c1:
+            st.caption("Each reflection automatically generates a restorative micro-intervention tailored to emotional valence.")
+        with rec_jump_c2:
+            if st.button("🎯 Open Full Care Hub →", width="stretch", key="user_dash_jump_care_hub_btn"):
+                set_active_view("🎯")
+                st.rerun()
 
         for idx, r in df.head(8).iterrows():
             dom_emo = str(r.get("dominant_emotion", "neutral")).capitalize()
@@ -9640,117 +9741,6 @@ def render_user_dashboard_view():
                 """,
                 unsafe_allow_html=True,
             )
-
-    # -------------------------------------------------------------------------
-    # RECORD DETAIL INSPECTOR, FILTER & EXPORT
-    # -------------------------------------------------------------------------
-    st.markdown("---")
-    st.markdown("##### 🔍 Telemetry Search & Record Management")
-    f1, f2, f3 = st.columns([1, 1, 2])
-    with f1:
-        filter_sentiment = st.selectbox(
-            "Filter by Sentiment:", ["All", "positive", "neutral", "negative"], key="trends_filter_sentiment"
-        )
-    with f2:
-        available_cats = ["All"] + sorted([str(c) for c in df["domain_category"].unique() if c])
-        filter_category = st.selectbox("Filter by Life Domain:", available_cats, key="trends_filter_cat")
-    with f3:
-        search_query = st.text_input(
-            "Search Text, Tags (#), or Notes:", placeholder="Search original text, #tag, or notes...", key="trends_search_text"
-        )
-
-    filtered_df = df.copy()
-    if filter_sentiment != "All":
-        filtered_df = filtered_df[filtered_df["sentiment_label"] == filter_sentiment]
-    if filter_category != "All":
-        filtered_df = filtered_df[filtered_df["domain_category"] == filter_category]
-    if search_query.strip():
-        q = search_query.casefold()
-        original_matches = (
-            filtered_df["original_text"]
-            .fillna("")
-            .astype(str)
-            .str.casefold()
-            .str.contains(q, na=False, regex=False)
-        )
-        source_matches = (
-            filtered_df["source_name"]
-            .fillna("")
-            .astype(str)
-            .str.casefold()
-            .str.contains(q, na=False, regex=False)
-        )
-        filtered_df = filtered_df[original_matches | source_matches]
-
-    st.markdown(f"**Showing {len(filtered_df)} of {total_recs} records:**")
-    display_cols = [
-        "id",
-        "created_at",
-        "domain_category",
-        "entry_tags_str",
-        "sentiment_label",
-        "compound_score",
-        "dominant_emotion",
-        "original_text",
-    ]
-    st.dataframe(
-        filtered_df[display_cols],
-        column_config={
-            "id": st.column_config.NumberColumn("ID", width="small"),
-            "created_at": st.column_config.DatetimeColumn("Timestamp", format="YYYY-MM-DD HH:mm"),
-            "domain_category": st.column_config.TextColumn("Domain"),
-            "entry_tags_str": st.column_config.TextColumn("Tags"),
-            "sentiment_label": st.column_config.TextColumn("Sentiment"),
-            "compound_score": st.column_config.NumberColumn("Compound", format="%.3f"),
-            "dominant_emotion": st.column_config.TextColumn("Dominant Emotion"),
-            "original_text": st.column_config.TextColumn("Original Text Excerpt", width="large"),
-        },
-        width="stretch",
-        hide_index=True,
-    )
-
-    # Record Detail & Delete
-    selected_id = st.selectbox(
-        "Inspect & Manage Record by ID:",
-        options=filtered_df["id"].tolist(),
-        format_func=lambda x: f"Record #{x}",
-        key="trends_inspect_select",
-    )
-    if selected_id:
-        rec_row = df[df["id"] == selected_id].iloc[0]
-        rc1, rc2 = st.columns([3, 1])
-        with rc1:
-            st.write(f"**Original Text:** {rec_row['original_text']}")
-            st.write(f"**Domain:** `{rec_row.get('domain_category', 'General')}` | **Tags:** `{rec_row.get('entry_tags_str', 'None')}`")
-            st.write(f"**Dominant Emotion:** `{rec_row.get('dominant_emotion', 'neutral').capitalize()}` | **Compound Score:** `{rec_row['compound_score']:.3f}`")
-        with rc2:
-            if st.button("Delete Record", key=f"del_rec_{selected_id}", type="secondary", width="stretch"):
-                try:
-                    api_delete_entry(selected_id, st.session_state.api_token)
-                    st.success(f"Record #{selected_id} deleted.")
-                    st.rerun()
-                except ApiError as exc:
-                    st.error(str(exc))
-
-    # Export Buttons
-    st.markdown("---")
-    exp1, exp2 = st.columns([1, 1])
-    with exp1:
-        st.download_button(
-            "📥 Export Filtered Records (CSV)",
-            data=filtered_df.to_csv(index=False).encode("utf-8"),
-            file_name="moodmentor_sentiment_report.csv",
-            mime="text/csv",
-            width="stretch",
-        )
-    with exp2:
-        st.download_button(
-            "📥 Export Filtered Records (JSON)",
-            data=filtered_df.to_json(orient="records", indent=2, date_format="iso").encode("utf-8"),
-            file_name="moodmentor_sentiment_report.json",
-            mime="application/json",
-            width="stretch",
-        )
 
 
 def render_admin_dashboard_view():
@@ -10049,7 +10039,11 @@ def render_admin_dashboard_view():
 
     with ent_t1:
         st.caption("Schema: `id (int), name (str), email (str), profile_details (json), created_at (timestamp)`")
-        u_df = pd.DataFrame(users_list)
+        clean_users = [
+            {**u, "profile_details": json.dumps(u["profile_details"]) if isinstance(u.get("profile_details"), (dict, list)) else str(u.get("profile_details", ""))}
+            for u in users_list
+        ]
+        u_df = pd.DataFrame(clean_users)
         st.dataframe(u_df, width="stretch", hide_index=True)
         st.download_button(
             "📥 Download Users Table (CSV)",
@@ -10073,7 +10067,11 @@ def render_admin_dashboard_view():
 
     with ent_t3:
         st.caption("Schema: `id (int), user_id (int), report_data (json), title (str), category (str), urgency (str)`")
-        r_df = pd.DataFrame(recs_list)
+        clean_recs = [
+            {**r, "report_data": json.dumps(r["report_data"]) if isinstance(r.get("report_data"), (dict, list)) else str(r.get("report_data", ""))}
+            for r in recs_list
+        ]
+        r_df = pd.DataFrame(clean_recs)
         st.dataframe(r_df, width="stretch", hide_index=True)
         st.download_button(
             "📥 Download Recommendations Table (CSV)",
@@ -10097,7 +10095,11 @@ def render_admin_dashboard_view():
 
     with ent_t5:
         st.caption("Schema: `id (int), recommendation_id (int), report_data (json), accepted_or_rejected (str), timestamp (iso)`")
-        f_df = pd.DataFrame(feedback_list)
+        clean_feedback = [
+            {**f, "report_data": json.dumps(f["report_data"]) if isinstance(f.get("report_data"), (dict, list)) else str(f.get("report_data", ""))}
+            for f in feedback_list
+        ]
+        f_df = pd.DataFrame(clean_feedback)
         st.dataframe(f_df, width="stretch", hide_index=True)
         st.download_button(
             "📥 Download Feedback Table (CSV)",
@@ -10108,8 +10110,12 @@ def render_admin_dashboard_view():
         )
 
     with ent_t6:
-        st.caption("Schema: `id (int), user_id (int), username (str), timestamp (iso)`")
-        rep_df = pd.DataFrame(reports_list)
+        st.caption("Schema: `id (int), user_id (int), username (str), report_data (json), timestamp (iso)`")
+        clean_reports = [
+            {**rp, "report_data": json.dumps(rp["report_data"]) if isinstance(rp.get("report_data"), (dict, list)) else str(rp.get("report_data", ""))}
+            for rp in reports_list
+        ]
+        rep_df = pd.DataFrame(clean_reports)
         st.dataframe(rep_df, width="stretch", hide_index=True)
         st.download_button(
             "📥 Download Reports Table (CSV)",
