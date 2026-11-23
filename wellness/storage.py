@@ -24,6 +24,63 @@ def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
+            profile_details TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS journal_entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            journal_text TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS recommendations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            report_data TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS audit_trails (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            username TEXT NOT NULL,
+            journal_id INTEGER,
+            recommendation TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recommendation_id INTEGER,
+            report_data TEXT NOT NULL DEFAULT '{}',
+            accepted_or_rejected TEXT NOT NULL DEFAULT 'accepted',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            username TEXT NOT NULL,
+            report_data TEXT NOT NULL DEFAULT '{}',
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
         """
@@ -54,6 +111,11 @@ def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
     connection.commit()
 
     # Auto-migrate any columns that might be absent from previous runs
+    user_cursor = connection.execute("PRAGMA table_info(users)")
+    existing_user_cols = {row["name"] for row in user_cursor.fetchall()}
+    if "profile_details" not in existing_user_cols:
+        connection.execute("ALTER TABLE users ADD COLUMN profile_details TEXT NOT NULL DEFAULT '{}'")
+
     cursor = connection.execute("PRAGMA table_info(mood_entries)")
     existing_cols = {row["name"] for row in cursor.fetchall()}
 
@@ -209,3 +271,157 @@ def delete_mood_entry(connection: sqlite3.Connection, entry_id: int, user_id: in
     )
     connection.commit()
     return cursor.rowcount > 0
+
+
+# ---------------------------------------------------------------------------
+# 6 DATABASE ENTITIES PERSISTENCE & RETRIEVAL
+# ---------------------------------------------------------------------------
+
+def save_journal_entry(connection: sqlite3.Connection, user_id: int, journal_text: str) -> int:
+    """Save 2. Journal entries (Journal text)."""
+    cursor = connection.execute(
+        "INSERT INTO journal_entries (user_id, journal_text) VALUES (?, ?)",
+        (user_id, journal_text),
+    )
+    connection.commit()
+    return int(cursor.lastrowid)
+
+
+def save_recommendation(connection: sqlite3.Connection, user_id: int | None, report_data: dict[str, Any] | str) -> int:
+    """Save 3. Recommendations (Recommendation id, user id, report data)."""
+    data_str = json.dumps(report_data) if isinstance(report_data, dict) else str(report_data)
+    cursor = connection.execute(
+        "INSERT INTO recommendations (user_id, report_data) VALUES (?, ?)",
+        (user_id, data_str),
+    )
+    connection.commit()
+    return int(cursor.lastrowid)
+
+
+def save_audit_trail(
+    connection: sqlite3.Connection,
+    user_id: int | None,
+    username: str,
+    journal_id: int | None,
+    recommendation: str,
+) -> int:
+    """Save 4. Audit trails (User id, username, journal id, recommendation)."""
+    cursor = connection.execute(
+        "INSERT INTO audit_trails (user_id, username, journal_id, recommendation) VALUES (?, ?, ?, ?)",
+        (user_id, username, journal_id, recommendation),
+    )
+    connection.commit()
+    return int(cursor.lastrowid)
+
+
+def save_user_feedback(
+    connection: sqlite3.Connection,
+    recommendation_id: int | None,
+    report_data: dict[str, Any] | str,
+    accepted_or_rejected: str = "accepted",
+) -> int:
+    """Save 5. User feedback (recommendation id, report data, accepted/rejected)."""
+    data_str = json.dumps(report_data) if isinstance(report_data, dict) else str(report_data)
+    cursor = connection.execute(
+        "INSERT INTO user_feedback (recommendation_id, report_data, accepted_or_rejected) VALUES (?, ?, ?)",
+        (recommendation_id, data_str, accepted_or_rejected),
+    )
+    connection.commit()
+    return int(cursor.lastrowid)
+
+
+def save_report(
+    connection: sqlite3.Connection,
+    user_id: int | None,
+    username: str,
+    report_data: dict[str, Any] | str,
+) -> int:
+    """Save 6. Reports (Report id, user id, username, timestamp)."""
+    data_str = json.dumps(report_data) if isinstance(report_data, dict) else str(report_data)
+    cursor = connection.execute(
+        "INSERT INTO reports (user_id, username, report_data) VALUES (?, ?, ?)",
+        (user_id, username, data_str),
+    )
+    connection.commit()
+    return int(cursor.lastrowid)
+
+
+def get_all_database_entities(connection: sqlite3.Connection) -> dict[str, list[dict[str, Any]]]:
+    """Retrieve all 6 stored database entities from the database."""
+    users_rows = connection.execute("SELECT id, name, email, profile_details, created_at FROM users ORDER BY id ASC").fetchall()
+    journal_rows = connection.execute("SELECT id, user_id, journal_text, created_at AS timestamp FROM journal_entries ORDER BY id DESC").fetchall()
+    rec_rows = connection.execute("SELECT id, user_id, report_data, created_at FROM recommendations ORDER BY id DESC").fetchall()
+    audit_rows = connection.execute("SELECT id, user_id, username, journal_id, recommendation, created_at AS timestamp FROM audit_trails ORDER BY id DESC").fetchall()
+    feedback_rows = connection.execute("SELECT id, recommendation_id, report_data, accepted_or_rejected, created_at AS timestamp FROM user_feedback ORDER BY id DESC").fetchall()
+    report_rows = connection.execute("SELECT id, user_id, username, report_data, created_at AS timestamp FROM reports ORDER BY id DESC").fetchall()
+
+    def _parse_json(val: Any) -> Any:
+        if isinstance(val, str):
+            try:
+                return json.loads(val)
+            except Exception:
+                return val
+        return val
+
+    return {
+        "users": [
+            {
+                "id": r["id"],
+                "name": r["name"],
+                "email": r["email"],
+                "profile_details": _parse_json(r["profile_details"]),
+                "created_at": r["created_at"],
+            }
+            for r in users_rows
+        ],
+        "journal_entries": [
+            {
+                "id": r["id"],
+                "user_id": r["user_id"],
+                "journal_text": r["journal_text"],
+                "timestamp": r["timestamp"],
+            }
+            for r in journal_rows
+        ],
+        "recommendations": [
+            {
+                "id": r["id"],
+                "user_id": r["user_id"],
+                "report_data": _parse_json(r["report_data"]),
+                "created_at": r["created_at"],
+            }
+            for r in rec_rows
+        ],
+        "audit_trails": [
+            {
+                "id": r["id"],
+                "user_id": r["user_id"],
+                "username": r["username"],
+                "journal_id": r["journal_id"],
+                "recommendation": r["recommendation"],
+                "timestamp": r["timestamp"],
+            }
+            for r in audit_rows
+        ],
+        "user_feedback": [
+            {
+                "id": r["id"],
+                "recommendation_id": r["recommendation_id"],
+                "report_data": _parse_json(r["report_data"]),
+                "accepted_or_rejected": r["accepted_or_rejected"],
+                "timestamp": r["timestamp"],
+            }
+            for r in feedback_rows
+        ],
+        "reports": [
+            {
+                "id": r["id"],
+                "user_id": r["user_id"],
+                "username": r["username"],
+                "report_data": _parse_json(r["report_data"]),
+                "timestamp": r["timestamp"],
+            }
+            for r in report_rows
+        ],
+    }
+

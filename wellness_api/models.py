@@ -1,4 +1,4 @@
-"""SQLAlchemy models for accounts, analysis history, and recommendations."""
+"""SQLAlchemy models for accounts, analysis history, recommendations, audit trails, and feedback."""
 
 from __future__ import annotations
 
@@ -22,6 +22,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
+    profile_details: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False
     )
@@ -29,6 +30,15 @@ class User(Base):
         back_populates="user", cascade="all, delete-orphan"
     )
     sessions: Mapped[list[AuthSession]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    journal_entries: Mapped[list[JournalEntry]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    audit_trails: Mapped[list[AuditTrail]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    reports: Mapped[list[ReportRecord]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -80,12 +90,31 @@ class MoodLog(Base):
     )
 
 
+class JournalEntry(Base):
+    """Journal entries entity storing original reflection text."""
+    __tablename__ = "journal_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    journal_text: Mapped[str] = mapped_column(Text, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, index=True, nullable=False
+    )
+    user: Mapped[User] = relationship(back_populates="journal_entries")
+
+
 class Recommendation(Base):
+    """Personalized recommendations linked to users and telemetry reports."""
     __tablename__ = "recommendations"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    mood_log_id: Mapped[int] = mapped_column(
-        ForeignKey("mood_logs.id", ondelete="CASCADE"), unique=True, index=True, nullable=False
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=True
+    )
+    mood_log_id: Mapped[int | None] = mapped_column(
+        ForeignKey("mood_logs.id", ondelete="CASCADE"), unique=True, index=True, nullable=True
     )
     title: Mapped[str] = mapped_column(String(180), nullable=False)
     category: Mapped[str] = mapped_column(String(100), nullable=False, default="Well-Being")
@@ -94,13 +123,66 @@ class Recommendation(Base):
     action_items: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     action_paths: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False, default=list)
     is_crisis: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    mood_log: Mapped[MoodLog] = relationship(back_populates="recommendation")
+    report_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    mood_log: Mapped[MoodLog | None] = relationship(back_populates="recommendation")
+    user: Mapped[User | None] = relationship()
+
+
+class AuditTrail(Base):
+    """Audit trails logging interactions with user ID, username, journal ID, and recommendation."""
+    __tablename__ = "audit_trails"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+    username: Mapped[str] = mapped_column(String(120), nullable=False)
+    journal_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    recommendation: Mapped[str] = mapped_column(Text, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, index=True, nullable=False
+    )
+    user: Mapped[User | None] = relationship(back_populates="audit_trails")
+
+
+class UserFeedback(Base):
+    """User feedback on recommendations with accepted/rejected status."""
+    __tablename__ = "user_feedback"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    recommendation_id: Mapped[int | None] = mapped_column(Integer, index=True, nullable=True)
+    user_id: Mapped[int | None] = mapped_column(Integer, index=True, nullable=True)
+    report_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    accepted_or_rejected: Mapped[str] = mapped_column(String(32), nullable=False, default="accepted")
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, index=True, nullable=False
+    )
+
+
+class ReportRecord(Base):
+    """Formal generated wellness reports with timestamp, username, and user ID."""
+    __tablename__ = "reports"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+    username: Mapped[str] = mapped_column(String(120), nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, index=True, nullable=False
+    )
+    report_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    user: Mapped[User | None] = relationship(back_populates="reports")
 
 
 def recommendation_dict(recommendation: Recommendation | None) -> dict[str, Any]:
     if recommendation is None:
         return {}
     return {
+        "id": recommendation.id,
         "title": recommendation.title,
         "category": recommendation.category,
         "urgency": recommendation.urgency,
@@ -108,4 +190,5 @@ def recommendation_dict(recommendation: Recommendation | None) -> dict[str, Any]
         "action_items": recommendation.action_items or [],
         "action_paths": recommendation.action_paths or [],
         "is_crisis": recommendation.is_crisis,
+        "report_data": recommendation.report_data or {},
     }

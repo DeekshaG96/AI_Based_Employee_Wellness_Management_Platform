@@ -82,16 +82,33 @@ def create_tables() -> None:
         configure_database(f"sqlite:///{db_path}")
         Base.metadata.create_all(bind=engine)
 
-    if "recommendations" not in inspect(engine).get_table_names():
-        return
-    columns = {column["name"] for column in inspect(engine).get_columns("recommendations")}
-    if "action_paths" in columns:
-        return
-    default = "'[]'::json" if engine.dialect.name == "postgresql" else "'[]'"
-    with engine.begin() as connection:
-        connection.exec_driver_sql(
-            f"ALTER TABLE recommendations ADD COLUMN action_paths JSON NOT NULL DEFAULT {default}"
-        )
+    tables = inspect(engine).get_table_names()
+    if "users" in tables:
+        user_cols = {column["name"] for column in inspect(engine).get_columns("users")}
+        if "profile_details" not in user_cols:
+            default_dict = "'{}'::json" if engine.dialect.name == "postgresql" else "'{}'"
+            with engine.begin() as connection:
+                connection.exec_driver_sql(
+                    f"ALTER TABLE users ADD COLUMN profile_details JSON NOT NULL DEFAULT {default_dict}"
+                )
+
+    if "recommendations" in tables:
+        rec_cols = {column["name"] for column in inspect(engine).get_columns("recommendations")}
+        default_list = "'[]'::json" if engine.dialect.name == "postgresql" else "'[]'"
+        default_dict = "'{}'::json" if engine.dialect.name == "postgresql" else "'{}'"
+        with engine.begin() as connection:
+            if "action_paths" not in rec_cols:
+                connection.exec_driver_sql(
+                    f"ALTER TABLE recommendations ADD COLUMN action_paths JSON NOT NULL DEFAULT {default_list}"
+                )
+            if "user_id" not in rec_cols:
+                connection.exec_driver_sql(
+                    "ALTER TABLE recommendations ADD COLUMN user_id INTEGER"
+                )
+            if "report_data" not in rec_cols:
+                connection.exec_driver_sql(
+                    f"ALTER TABLE recommendations ADD COLUMN report_data JSON NOT NULL DEFAULT {default_dict}"
+                )
 
 
 def get_session() -> Generator[Session, None, None]:

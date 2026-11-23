@@ -7,9 +7,15 @@ from wellness.storage import (
     authenticate_user,
     connect_database,
     delete_mood_entry,
+    get_all_database_entities,
     get_user_mood_entries,
     register_user,
+    save_audit_trail,
+    save_journal_entry,
     save_mood_entry,
+    save_recommendation,
+    save_report,
+    save_user_feedback,
 )
 
 
@@ -80,3 +86,63 @@ def test_save_and_get_mood_entries_with_emotion_telemetry(tmp_path: Path):
     assert delete_mood_entry(connection, entry_id, user_id) is True
     assert len(get_user_mood_entries(connection, user_id)) == 0
     connection.close()
+
+
+def test_six_database_entities_stored_and_retrieved(tmp_path: Path):
+    """Test full persistence and retrieval across all 6 verified database entities:
+    1. Users info (user_id, profile_details)
+    2. Journal entries (journal text)
+    3. Recommendations (recommendation id, user id, report data)
+    4. Audit trails (user id, username, journal id, recommendation)
+    5. User feedback (recommendation id, report data, accepted/rejected)
+    6. Reports (report id, user id, username, timestamp)
+    """
+    connection = connect_database(tmp_path / "wellness_test_6entities.db")
+
+    # 1. Users info
+    uid = register_user(connection, "Dev User", "dev@example.com", "mypassword123")
+    assert uid > 0
+
+    # 2. Journal entries
+    jid = save_journal_entry(connection, uid, "Sprint retrospective was positive and energetic.")
+    assert jid > 0
+
+    # 3. Recommendations
+    rid = save_recommendation(connection, uid, {"title": "Celebration Reflection", "urgency": "Low"})
+    assert rid > 0
+
+    # 4. Audit trails
+    aid = save_audit_trail(connection, uid, "Dev User", jid, "Celebration Reflection")
+    assert aid > 0
+
+    # 5. User feedback
+    fid = save_user_feedback(connection, rid, {"practice": "Gratitude Anchor"}, "accepted")
+    assert fid > 0
+
+    # 6. Reports
+    repid = save_report(connection, uid, "Dev User", {"dominant_emotion": "joy", "compound": 0.72})
+    assert repid > 0
+
+    # Retrieve and verify all 6 entities
+    entities = get_all_database_entities(connection)
+    assert len(entities["users"]) >= 1
+    assert entities["users"][0]["name"] == "Dev User"
+
+    assert len(entities["journal_entries"]) >= 1
+    assert "Sprint retrospective" in entities["journal_entries"][0]["journal_text"]
+
+    assert len(entities["recommendations"]) >= 1
+    assert entities["recommendations"][0]["user_id"] == uid
+
+    assert len(entities["audit_trails"]) >= 1
+    assert entities["audit_trails"][0]["username"] == "Dev User"
+    assert entities["audit_trails"][0]["journal_id"] == jid
+
+    assert len(entities["user_feedback"]) >= 1
+    assert entities["user_feedback"][0]["accepted_or_rejected"] == "accepted"
+
+    assert len(entities["reports"]) >= 1
+    assert entities["reports"][0]["username"] == "Dev User"
+
+    connection.close()
+

@@ -27,19 +27,38 @@ from wellness.wellness_tools import get_cognitive_reframes, get_guided_exercises
 from wellness.yoga import get_all_yoga_remedies, get_yoga_remedy_for_emotion
 
 from .database import create_tables, get_session
-from .models import AuthSession, MoodLog, Recommendation, User, recommendation_dict
+from .models import (
+    AuditTrail,
+    AuthSession,
+    JournalEntry,
+    MoodLog,
+    Recommendation,
+    ReportRecord,
+    User,
+    UserFeedback,
+    recommendation_dict,
+    utc_now,
+)
 from .schemas import (
     AnalysisResponse,
     AnalyzeRequest,
+    AuditTrailResponse,
     AuthResponse,
     CompareRequest,
+    DatabaseEntitiesResponse,
+    FeedbackRequest,
+    FeedbackResponse,
     HistoryResponse,
+    JournalEntryResponse,
     LoginRequest,
     MessageResponse,
     MoodFoodPlanRequest,
+    RecommendationRecordResponse,
     RecommendRequest,
     RegisterRequest,
+    ReportRecordResponse,
     TeamBurnoutRequest,
+    UserInfoResponse,
     UserResponse,
 )
 from .security import current_user, hash_password, issue_session, token_digest, verify_password
@@ -191,6 +210,7 @@ def _persist_report(
     )
     rec = report.recommendations
     log.recommendation = Recommendation(
+        user_id=user.id,
         title=str(rec.get("title", "Well-Being Recommendation"))[:180],
         category=str(rec.get("category", "Well-Being"))[:100],
         urgency=str(rec.get("urgency", "Low"))[:32],
@@ -198,8 +218,39 @@ def _persist_report(
         action_items=[str(item) for item in rec.get("action_items", [])],
         action_paths=[dict(path) for path in rec.get("action_paths", [])],
         is_crisis=bool(rec.get("is_crisis", False)),
+        report_data=report.to_dict(),
     )
     db.add(log)
+    db.flush()
+
+    # 1. Journal entries (Journal text)
+    journal_entry = JournalEntry(
+        user_id=user.id,
+        journal_text=report.original_text,
+        timestamp=utc_now(),
+    )
+    db.add(journal_entry)
+    db.flush()
+
+    # 4. Audit trails (User id, username, journal id, recommendation, timestamp)
+    audit_trail = AuditTrail(
+        user_id=user.id,
+        username=user.name,
+        journal_id=journal_entry.id,
+        recommendation=str(rec.get("title", "Well-Being Recommendation")),
+        timestamp=utc_now(),
+    )
+    db.add(audit_trail)
+
+    # 6. Reports (Report id, user id, username, timestamp)
+    report_record = ReportRecord(
+        user_id=user.id,
+        username=user.name,
+        timestamp=utc_now(),
+        report_data=report.to_dict(),
+    )
+    db.add(report_record)
+
     if commit:
         db.commit()
         db.refresh(log)
@@ -488,6 +539,121 @@ def recommend_endpoint(payload: RecommendRequest) -> dict[str, Any]:
 def get_recommend_by_emotion_endpoint(emotion: str) -> dict[str, Any]:
     """Return curated recommendation strategies for a specified emotion."""
     return generate_recommendations(emotion.lower(), SentimentLabel.NEUTRAL, 0.0, "")
+
+
+# -----------------------------------------------------------------------------
+# DATABASE INFO & AUDIT TRAILS ENDPOINTS (6 Formal Entities Stored & Retrieved)
+# -----------------------------------------------------------------------------
+
+@app.post("/feedback", response_model=FeedbackResponse, tags=["database"])
+def submit_feedback(
+    payload: FeedbackRequest,
+    db: Session = Depends(get_session),
+    user: User = Depends(current_user),
+) -> FeedbackResponse:
+    """Store user feedback for recommendations (accepted/rejected status)."""
+    feedback_record = UserFeedback(
+        recommendation_id=payload.recommendation_id,
+        user_id=user.id,
+        report_data=payload.report_data,
+        accepted_or_rejected=payload.accepted_or_rejected.lower(),
+        timestamp=utc_now(),
+    )
+    db.add(feedback_record)
+    db.commit()
+    db.refresh(feedback_record)
+    return FeedbackResponse(
+        id=feedback_record.id,
+        recommendation_id=feedback_record.recommendation_id,
+        user_id=feedback_record.user_id,
+        report_data=feedback_record.report_data,
+        accepted_or_rejected=feedback_record.accepted_or_rejected,
+        timestamp=feedback_record.timestamp,
+    )
+
+
+@app.get("/database/entities", response_model=DatabaseEntitiesResponse, tags=["database"])
+def get_all_database_entities(
+    db: Session = Depends(get_session),
+    user: User = Depends(current_user),
+) -> DatabaseEntitiesResponse:
+    """Retrieve all 6 stored database entities: Users info, Journal entries,
+    Recommendations, Audit trails, User feedback, and Reports."""
+    del user  # Authenticated access
+    users_rows = db.scalars(select(User).order_by(User.id.asc())).all()
+    journals_rows = db.scalars(select(JournalEntry).order_by(JournalEntry.id.desc())).all()
+    rec_rows = db.scalars(select(Recommendation).order_by(Recommendation.id.desc())).all()
+    audit_rows = db.scalars(select(AuditTrail).order_by(AuditTrail.id.desc())).all()
+    feedback_rows = db.scalars(select(UserFeedback).order_by(UserFeedback.id.desc())).all()
+    reports_rows = db.scalars(select(ReportRecord).order_by(ReportRecord.id.desc())).all()
+
+    return DatabaseEntitiesResponse(
+        users=[
+            UserInfoResponse(
+                id=u.id,
+                name=u.name,
+                email=u.email,
+                profile_details=u.profile_details or {},
+                created_at=u.created_at,
+            )
+            for u in users_rows
+        ],
+        journal_entries=[
+            JournalEntryResponse(
+                id=j.id,
+                user_id=j.user_id,
+                journal_text=j.journal_text,
+                timestamp=j.timestamp,
+            )
+            for j in journals_rows
+        ],
+        recommendations=[
+            RecommendationRecordResponse(
+                id=r.id,
+                user_id=r.user_id,
+                title=r.title,
+                category=r.category,
+                urgency=r.urgency,
+                summary=r.summary,
+                report_data=r.report_data or {},
+                created_at=r.created_at,
+            )
+            for r in rec_rows
+        ],
+        audit_trails=[
+            AuditTrailResponse(
+                id=a.id,
+                user_id=a.user_id,
+                username=a.username,
+                journal_id=a.journal_id,
+                recommendation=a.recommendation,
+                timestamp=a.timestamp,
+            )
+            for a in audit_rows
+        ],
+        user_feedback=[
+            FeedbackResponse(
+                id=f.id,
+                recommendation_id=f.recommendation_id,
+                user_id=f.user_id,
+                report_data=f.report_data or {},
+                accepted_or_rejected=f.accepted_or_rejected,
+                timestamp=f.timestamp,
+            )
+            for f in feedback_rows
+        ],
+        reports=[
+            ReportRecordResponse(
+                id=rep.id,
+                user_id=rep.user_id,
+                username=rep.username,
+                timestamp=rep.timestamp,
+                report_data=rep.report_data or {},
+            )
+            for rep in reports_rows
+        ],
+    )
+
 
 
 

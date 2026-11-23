@@ -158,7 +158,14 @@ def analyze(text: str, token: str, source_name: str = "Direct Entry") -> Analysi
         )
     except Exception:
         from .pipeline import analyze_text
-        from .storage import connect_database, save_mood_entry
+        from .storage import (
+            connect_database,
+            save_audit_trail,
+            save_journal_entry,
+            save_mood_entry,
+            save_recommendation,
+            save_report,
+        )
 
         report = analyze_text(text, source_name=source_name)
         try:
@@ -187,6 +194,24 @@ def analyze(text: str, token: str, source_name: str = "Direct Entry") -> Analysi
                 emotion_scores=getattr(report, "emotion_scores", {}),
                 recommendation=rec_dict,
             )
+            # Store 2. Journal entries (Journal text)
+            jid = save_journal_entry(conn, uid, report.original_text)
+
+            # Store 3. Recommendations (Recommendation id, user id, report data)
+            save_recommendation(conn, uid, report.to_dict())
+
+            # Store 4. Audit trails (User id, username, journal id, recommendation)
+            uname = "Team Member"
+            try:
+                import streamlit as st
+                uname = st.session_state.get("user_name", "Team Member")
+            except Exception:
+                pass
+            rec_title = str(rec_dict.get("title", "Well-Being Recommendation")) if isinstance(rec_dict, dict) else "Well-Being Recommendation"
+            save_audit_trail(conn, uid, uname, jid, rec_title)
+
+            # Store 6. Reports (Report id, user id, username, timestamp)
+            save_report(conn, uid, uname, report.to_dict())
         except Exception as ex:
             logger.debug("Local persistence log: %s", ex)
         return report
@@ -548,3 +573,47 @@ def get_yoga_remedy_client(emotion: str) -> dict[str, Any]:
         from .yoga import get_yoga_remedy_for_emotion
 
         return get_yoga_remedy_for_emotion(emotion)
+
+
+def submit_feedback(
+    recommendation_id: int | None,
+    report_data: dict[str, Any] | str,
+    accepted_or_rejected: str = "accepted",
+    token: str | None = None,
+) -> dict[str, Any]:
+    """Store 5. User feedback (recommendation id, report data, accepted/rejected)."""
+    try:
+        return _request(
+            "POST",
+            "/feedback",
+            token=token,
+            json={
+                "recommendation_id": recommendation_id,
+                "report_data": report_data if isinstance(report_data, dict) else {},
+                "accepted_or_rejected": accepted_or_rejected,
+            },
+        )
+    except Exception:
+        from .storage import connect_database, save_user_feedback
+
+        conn = connect_database()
+        fb_id = save_user_feedback(conn, recommendation_id, report_data, accepted_or_rejected)
+        return {
+            "id": fb_id,
+            "recommendation_id": recommendation_id,
+            "report_data": report_data,
+            "accepted_or_rejected": accepted_or_rejected,
+            "timestamp": datetime.now().isoformat(),
+        }
+
+
+def get_database_entities(token: str | None = None) -> dict[str, list[dict[str, Any]]]:
+    """Retrieve all 6 stored database entities."""
+    try:
+        return _request("GET", "/database/entities", token=token)
+    except Exception:
+        from .storage import connect_database, get_all_database_entities
+
+        conn = connect_database()
+        return get_all_database_entities(conn)
+

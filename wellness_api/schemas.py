@@ -146,4 +146,72 @@ class RecommendRequest(BaseModel):
     text: str = Field(default="", max_length=10000)
 
 
+class FeedbackRequest(BaseModel):
+    recommendation_id: int | None = None
+    report_data: dict[str, Any] = Field(default_factory=dict)
+    accepted_or_rejected: str = Field(default="accepted", max_length=32)
+
+
+class FeedbackResponse(BaseModel):
+    id: int
+    recommendation_id: int | None
+    user_id: int | None
+    report_data: dict[str, Any]
+    accepted_or_rejected: str
+    timestamp: datetime
+
+
+class JournalEntryResponse(BaseModel):
+    id: int
+    user_id: int
+    journal_text: str
+    timestamp: datetime
+
+
+class RecommendationRecordResponse(BaseModel):
+    id: int
+    user_id: int | None
+    title: str
+    category: str
+    urgency: str
+    summary: str
+    report_data: dict[str, Any]
+    created_at: datetime
+
+
+class AuditTrailResponse(BaseModel):
+    id: int
+    user_id: int | None
+    username: str
+    journal_id: int | None
+    recommendation: str
+    timestamp: datetime
+
+
+class ReportRecordResponse(BaseModel):
+    id: int
+    user_id: int | None
+    username: str
+    timestamp: datetime
+    report_data: dict[str, Any]
+
+
+class UserInfoResponse(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    profile_details: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+
+
+class DatabaseEntitiesResponse(BaseModel):
+    users: list[UserInfoResponse]
+    journal_entries: list[JournalEntryResponse]
+    recommendations: list[RecommendationRecordResponse]
+    audit_trails: list[AuditTrailResponse]
+    user_feedback: list[FeedbackResponse]
+    reports: list[ReportRecordResponse]
+
+
+
 
