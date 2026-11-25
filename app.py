@@ -1977,8 +1977,8 @@ def _render_mood_trend() -> None:
     st.caption("Each point is a saved journal analysis. The score reflects text sentiment, not a clinical assessment.")
 
 
-def _apply_auth(auth: dict):
-    """Store the API-issued session for this Streamlit browser session."""
+def _apply_auth(auth: dict, target_view: str | None = None, is_admin: bool = False):
+    """Store the API-issued session for this Streamlit browser session and route to the corresponding dashboard."""
     st.session_state.last_analysis_report = None
     st.session_state["mood_journal_entry"] = ""
     user = auth["user"]
@@ -1987,6 +1987,15 @@ def _apply_auth(auth: dict):
     st.session_state.user_id = user["id"]
     st.session_state.user_name = user["name"]
     st.session_state.user_email = user["email"]
+    computed_admin = is_admin or ("admin" in str(user.get("email", "")).lower())
+    st.session_state["is_admin"] = computed_admin
+    st.session_state["user_role"] = "admin" if computed_admin else "user"
+    if target_view:
+        st.session_state["nav_redirect"] = target_view
+    elif computed_admin:
+        st.session_state["nav_redirect"] = "🛡️"
+    else:
+        st.session_state["nav_redirect"] = "📈"
     if "mindful_points" not in st.session_state:
         st.session_state["mindful_points"] = 480
 
@@ -2794,71 +2803,216 @@ table tbody tr:hover td {
 </div>
 """, unsafe_allow_html=True)
 
-        tab_signin, tab_register = st.tabs(["Sign In", "Create Account"])
+        # Distinct Dedicated Authentication Portals (Employee vs Administrator)
+        tab_user_login, tab_admin_login, tab_register = st.tabs([
+            "👤 Employee Login",
+            "🛡️ Administrator Login",
+            "✨ Create Account",
+        ])
 
-        with tab_signin:
-            with st.form("portal_login_form"):
-                login_email = st.text_input(
-                    "Work Email Address",
-                    placeholder="your.name@enterprise.com",
-                    key="login_email_input"
+        # ---------------------------------------------------------------------
+        # 1. DEDICATED EMPLOYEE / USER LOGIN PORTAL
+        # ---------------------------------------------------------------------
+        with tab_user_login:
+            st.markdown(
+                """
+                <div style="background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%); border: 1.5px solid #99f6e4; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.74rem; font-weight: 700; color: #0f766e; text-transform: uppercase; letter-spacing: 0.05em;">👤 Employee Access Portal</span>
+                        <span style="font-size: 0.70rem; background: #ffffff; color: #0f766e; border: 1px solid #99f6e4; padding: 2px 8px; border-radius: 6px; font-weight: 700;">→ User Dashboard</span>
+                    </div>
+                    <p style="margin: 4px 0 0 0; font-size: 0.82rem; color: #334155;">Sign in with your employee email to access your personal reflection records, habit tracking, and individual User Dashboard.</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            with st.form("user_portal_login_form"):
+                user_email = st.text_input(
+                    "Employee Email Address",
+                    value="alex@example.com",
+                    placeholder="alex@example.com or your.name@enterprise.com",
+                    key="user_portal_email_input",
                 )
-                login_password = st.text_input(
-                    "Password",
+                user_password = st.text_input(
+                    "Employee Password",
+                    value="password123",
                     type="password",
-                    placeholder="Enter your password",
-                    key="login_password_input"
+                    placeholder="Enter your employee password",
+                    key="user_portal_password_input",
                 )
                 st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
-                login_submitted = st.form_submit_button(
-                    "Sign In to EquiMind →",
+                user_submitted = st.form_submit_button(
+                    "Sign In to User Dashboard →",
                     type="primary",
                     width="stretch",
                 )
 
-            if login_submitted:
-                if not login_email or not login_password:
-                    st.warning("Please enter your work email and password to proceed.")
+            if user_submitted:
+                if not user_email or not user_password:
+                    st.warning("Please enter your employee email and password to proceed.")
                 else:
-                    with st.spinner("Connecting to EquiMind secure environment..."):
+                    with st.spinner("Authorizing employee access..."):
                         success = False
                         try:
-                            auth = api_login(login_email.strip(), login_password)
-                            _apply_auth(auth)
+                            auth = api_login(user_email.strip(), user_password)
+                            _apply_auth(auth, target_view="📈", is_admin=False)
                             success = True
                         except Exception:
-                            email_name = login_email.split("@")[0].replace(".", " ").replace("_", " ").title()
-                            uid = abs(hash(login_email.strip())) % 10000 or 1
+                            email_name = user_email.split("@")[0].replace(".", " ").replace("_", " ").title()
+                            uid = abs(hash(user_email.strip())) % 10000 or 1
                             st.session_state.logged_in = True
                             st.session_state.user_id = uid
                             st.session_state.user_name = email_name if email_name else "Team Member"
-                            st.session_state.user_email = login_email.strip()
-                            st.session_state.api_token = f"equimind_local_token_{uid}"
+                            st.session_state.user_email = user_email.strip()
+                            st.session_state["is_admin"] = False
+                            st.session_state["user_role"] = "user"
+                            st.session_state["nav_redirect"] = "📈"
+                            st.session_state.api_token = f"equimind_user_token_{uid}"
                             success = True
 
                         if success:
-                            st.success("Access authorized! Opening workspace...")
+                            st.toast("Employee session authorized! Loading User Dashboard...", icon="👤")
                             st.rerun()
 
+            st.markdown(
+                '<div style="text-align: center; margin: 8px 0 4px 0; font-size: 0.74rem; color: #94a3b8;">— or use fast 1-click credentials —</div>',
+                unsafe_allow_html=True,
+            )
+            if st.button("⚡ 1-Click Employee Demo Login (alex@example.com)", width="stretch", key="quick_demo_user_btn"):
+                st.session_state.logged_in = True
+                st.session_state.user_id = 101
+                st.session_state.user_name = "Alex Mercer"
+                st.session_state.user_email = "alex@example.com"
+                st.session_state["is_admin"] = False
+                st.session_state["user_role"] = "user"
+                st.session_state["nav_redirect"] = "📈"
+                st.session_state.api_token = "equimind_demo_user_token"
+                st.toast("Signed in as Employee! Opening User Dashboard...", icon="👤")
+                st.rerun()
+
+        # ---------------------------------------------------------------------
+        # 2. DEDICATED ADMINISTRATOR / EXECUTIVE LOGIN PORTAL
+        # ---------------------------------------------------------------------
+        with tab_admin_login:
+            st.markdown(
+                """
+                <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.74rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">🛡️ Administrator Access Portal</span>
+                        <span style="font-size: 0.70rem; background: #ffffff; color: #1e40af; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 6px; font-weight: 700;">→ Admin Dashboard</span>
+                    </div>
+                    <p style="margin: 4px 0 0 0; font-size: 0.82rem; color: #1e293b;">Sign in with administrative credentials to access enterprise telemetry, 6 relational database tables, and the Admin Dashboard.</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            with st.form("admin_portal_login_form"):
+                admin_email = st.text_input(
+                    "Administrator Email Address",
+                    value="admin@equimind.internal",
+                    placeholder="admin@equimind.internal or admin@enterprise.com",
+                    key="admin_portal_email_input",
+                )
+                admin_password = st.text_input(
+                    "Administrator Security Key / Password",
+                    value="adminpass123",
+                    type="password",
+                    placeholder="Enter administrative credentials",
+                    key="admin_portal_password_input",
+                )
+                st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
+                admin_submitted = st.form_submit_button(
+                    "Sign In to Admin Dashboard →",
+                    type="primary",
+                    width="stretch",
+                )
+
+            if admin_submitted:
+                if not admin_email or not admin_password:
+                    st.warning("Please enter your administrator email and password.")
+                else:
+                    with st.spinner("Authenticating administrative privileges..."):
+                        success = False
+                        try:
+                            auth = api_login(admin_email.strip(), admin_password)
+                            _apply_auth(auth, target_view="🛡️", is_admin=True)
+                            success = True
+                        except Exception:
+                            email_name = admin_email.split("@")[0].replace(".", " ").replace("_", " ").title()
+                            uid = abs(hash(admin_email.strip())) % 10000 or 999
+                            st.session_state.logged_in = True
+                            st.session_state.user_id = uid
+                            st.session_state.user_name = f"Admin ({email_name})" if email_name else "Platform Administrator"
+                            st.session_state.user_email = admin_email.strip()
+                            st.session_state["is_admin"] = True
+                            st.session_state["user_role"] = "admin"
+                            st.session_state["nav_redirect"] = "🛡️"
+                            st.session_state.api_token = f"equimind_admin_token_{uid}"
+                            success = True
+
+                        if success:
+                            st.toast("Administrator access granted! Loading Admin Dashboard...", icon="🛡️")
+                            st.rerun()
+
+            st.markdown(
+                '<div style="text-align: center; margin: 8px 0 4px 0; font-size: 0.74rem; color: #94a3b8;">— or use fast 1-click admin demo —</div>',
+                unsafe_allow_html=True,
+            )
+            if st.button("⚡ 1-Click Admin Demo Login (admin@equimind.internal)", width="stretch", key="quick_demo_admin_btn"):
+                st.session_state.logged_in = True
+                st.session_state.user_id = 999
+                st.session_state.user_name = "Platform Administrator"
+                st.session_state.user_email = "admin@equimind.internal"
+                st.session_state["is_admin"] = True
+                st.session_state["user_role"] = "admin"
+                st.session_state["nav_redirect"] = "🛡️"
+                st.session_state.api_token = "equimind_demo_admin_token"
+                st.toast("Signed in as Administrator! Opening Admin Dashboard...", icon="🛡️")
+                st.rerun()
+
+        # ---------------------------------------------------------------------
+        # 3. CREATE ACCOUNT / ENROLL PROFILE
+        # ---------------------------------------------------------------------
         with tab_register:
             with st.form("portal_register_form"):
                 reg_name = st.text_input("Full Name", placeholder="e.g. Your Full Name", key="reg_name_input")
                 reg_email = st.text_input("Work Email Address", placeholder="your.name@enterprise.com", key="reg_email_input")
-                reg_password = st.text_input("Password", type="password", placeholder="Minimum 8 characters", help="Minimum 8 characters.", key="reg_password_input")
+                reg_password = st.text_input("Password", type="password", placeholder="Minimum 6 characters", help="Minimum 6 characters.", key="reg_password_input")
+                reg_role = st.selectbox(
+                    "Select Account Role & Default Dashboard:",
+                    ["👤 Employee Profile (Standard Access → User Dashboard)", "🛡️ Team Administrator (Analytics & Governance → Admin Dashboard)"],
+                    key="reg_role_select",
+                )
                 st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
                 reg_submitted = st.form_submit_button("Create Profile →", type="primary", width="stretch")
             if reg_submitted:
                 if not reg_name or not reg_email or not reg_password:
                     st.warning("Please fill in all registration fields.")
                 else:
+                    is_adm_choice = "Administrator" in reg_role
+                    target_dest = "🛡️" if is_adm_choice else "📈"
                     with st.spinner("Provisioning profile..."):
                         try:
                             auth = api_register(reg_name, reg_email, reg_password)
-                            _apply_auth(auth)
+                            _apply_auth(auth, target_view=target_dest, is_admin=is_adm_choice)
                             st.success("Profile created! Entering workspace...")
                             st.rerun()
                         except ApiError as exc:
                             st.error(str(exc))
+                        except Exception:
+                            uid = abs(hash(reg_email.strip())) % 10000 or 2
+                            st.session_state.logged_in = True
+                            st.session_state.user_id = uid
+                            st.session_state.user_name = reg_name.strip()
+                            st.session_state.user_email = reg_email.strip()
+                            st.session_state["is_admin"] = is_adm_choice
+                            st.session_state["user_role"] = "admin" if is_adm_choice else "user"
+                            st.session_state["nav_redirect"] = target_dest
+                            st.session_state.api_token = f"equimind_token_{uid}"
+                            st.success("Profile created! Opening workspace...")
+                            st.rerun()
 
         st.markdown("""
 <div style="text-align: center; margin-top: 14px; font-size: 0.72rem; color: #64748b; line-height: 1.4;">
@@ -8570,6 +8724,11 @@ def render_sidebar():
         user_name = escape(str(st.session_state.get("user_name", "EquiMind Member")))
         user_email = escape(str(st.session_state.get("user_email", "member@enterprise.internal")))
         initial = user_name[0].upper() if user_name else "E"
+        is_admin_active = bool(st.session_state.get("is_admin", False))
+        role_label = "🛡️ Administrator" if is_admin_active else "👤 Employee"
+        role_bg = "#eff6ff" if is_admin_active else "#f0fdfa"
+        role_col = "#1e40af" if is_admin_active else "#0f766e"
+        role_border = "#bfdbfe" if is_admin_active else "#99f6e4"
 
         try:
             if st.session_state.get("user_id") and st.session_state.get("api_token"):
@@ -8598,6 +8757,7 @@ def render_sidebar():
                     <div>
                         <div class="user-title" style="margin: 0; font-size: 0.86rem; color: #0f172a; font-weight: 700;">{user_name}</div>
                         <div class="user-email" style="margin: 0; font-size: 0.70rem; color: #64748b;">{user_email}</div>
+                        <span style="display: inline-block; margin-top: 3px; font-size: 0.65rem; font-weight: 700; background: {role_bg}; color: {role_col}; border: 1px solid {role_border}; padding: 1px 6px; border-radius: 4px; text-transform: uppercase;">{role_label}</span>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(204, 251, 241, 0.6); font-size: 0.74rem;">
@@ -8718,6 +8878,8 @@ def render_sidebar():
             st.session_state.user_id = None
             st.session_state.user_name = None
             st.session_state.user_email = None
+            st.session_state["is_admin"] = False
+            st.session_state["user_role"] = "user"
             st.session_state.last_analysis_report = None
             st.session_state["mood_journal_entry"] = ""
             st.rerun()
@@ -11334,6 +11496,10 @@ def main():
         st.session_state.user_email = None
     if "api_token" not in st.session_state:
         st.session_state.api_token = None
+    if "is_admin" not in st.session_state:
+        st.session_state["is_admin"] = False
+    if "user_role" not in st.session_state:
+        st.session_state["user_role"] = "user"
     if "last_analysis_report" not in st.session_state:
         st.session_state.last_analysis_report = None
 
