@@ -2031,7 +2031,7 @@ def _apply_auth(auth: dict, target_view: str | None = None, is_admin: bool = Fal
         st.session_state["mindful_points"] = 480
 
 
-def _render_bento_kpi_grid(cards: list[dict[str, str]]) -> None:
+def _render_bento_kpi_grid(cards: list[dict[str, str]], cols: int = 3) -> None:
     """Render a Swiss-editorial Bento KPI grid with crisp tabular numbers and zero stock-delta clutter."""
     card_html_parts: list[str] = []
     for c in cards:
@@ -2054,7 +2054,8 @@ def _render_bento_kpi_grid(cards: list[dict[str, str]]) -> None:
             f'<div class="bento-kpi-sub">{sub}</div>'
             f'</div>'
         )
-    grid_html = f'<div class="bento-kpi-grid">{"".join(card_html_parts)}</div>'
+    col_style = f"grid-template-columns: repeat({int(cols)}, minmax(0, 1fr));" if cols != 3 else ""
+    grid_html = f'<div class="bento-kpi-grid" style="{col_style}">{"".join(card_html_parts)}</div>'
     st.markdown(grid_html, unsafe_allow_html=True)
 
 
@@ -7767,28 +7768,19 @@ def render_recommendations_view():
     total_fb = fb.get("accepted", 0) + fb.get("rejected", 0)
     accept_rate = (fb.get("accepted", 0) / total_fb * 100) if total_fb > 0 else 80.0
 
-    # High-Class Luxury Header Banner
+    # Clean Header Banner
     st.markdown(
         f"""
-        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.80) 55%, rgba(248, 250, 252, 0.94) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 22px; padding: 22px 30px; box-shadow: 0 20px 42px -10px rgba(15, 118, 110, 0.10), 0 4px 16px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 1); margin-bottom: 22px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transform-style: preserve-3d; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1px solid #d5ebe5; border-radius: 16px; padding: 16px 22px; box-shadow: 0 8px 24px -6px rgba(15, 118, 110, 0.07); margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                 <div>
-                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Care Pathways & Daily Remedies</h2>
-                    <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Holistic micro-interventions blending somatic yoga, restorative breathwork, cognitive reframing, and nutrition.</p>
+                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.55rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">🎯 Care Pathways & Daily Remedies</h2>
+                    <p style="margin: 3px 0 0 0; font-size: 0.85rem; color: #64748b;">Evidence-informed wellness practices: personalized care plans, desk yoga, mindful nutrition, and calming audio.</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #166534; font-weight: 700; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);">
-                        🌱 <strong>{fb.get('accepted', 4)} Practices Completed</strong>
-                    </div>
-                    <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #92400e; font-weight: 700; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);">
-                        ☀️ <strong>3-Day Streak</strong>
-                    </div>
-                    <div style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #99f6e4; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #0f766e; font-weight: 700; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12);">
-                        💎 <strong>{st.session_state.get('mindful_points', 480)} Resilience Points</strong>
-                    </div>
-                    <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #166534; font-weight: 700; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);">
-                        ✨ <strong>{accept_rate:.0f}% Mindful Alignment</strong>
-                    </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9999px; padding: 4px 12px; font-size: 0.76rem; color: #166534; font-weight: 700;">
+                        {fb.get('accepted', 4)} Practices Completed ({accept_rate:.0f}% Adoption)
+                    </span>
                 </div>
             </div>
         </div>
@@ -8812,9 +8804,6 @@ def render_sidebar():
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(204, 251, 241, 0.6); font-size: 0.74rem;">
                     <span style="color: #0f766e; font-weight: 700;">{count_display} reflections</span>
-                    <span style="color: #0369a1; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-                        <span>💎</span> {st.session_state.get('mindful_points', 480)} pts
-                    </span>
                     <span style="color: #059669; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
                         <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span> Active
                     </span>
@@ -8831,7 +8820,7 @@ def render_sidebar():
         st.markdown(
             """
             <div style="font-size: 0.68rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 4px 0 3px 2px; display: flex; align-items: center; gap: 6px;">
-                <span>🌐</span> <span>Language / ಭಾಷೆ / भाषा</span>
+                <span>🌐</span> <span>Language</span>
             </div>
             """,
             unsafe_allow_html=True,
@@ -8855,57 +8844,14 @@ def render_sidebar():
 
         is_admin_active = bool(st.session_state.get("is_admin", False))
 
-        # Role-Scoped Quick Switcher
-        if is_admin_active:
-            st.markdown(
-                """
-                <div style="font-size: 0.68rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 4px 2px; display: flex; align-items: center; gap: 6px;">
-                    <span>🛡️</span> <span>Admin & Portal Switcher</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            dash_c1, dash_c2 = st.columns(2, gap="small")
-            with dash_c1:
-                if st.button("🛡️ Admin", width="stretch", key="sidebar_quick_admin_dash", help="Open Executive / Admin Dashboard"):
-                    set_active_view("🛡️")
-                    st.rerun()
-            with dash_c2:
-                if st.button("📈 User", width="stretch", key="sidebar_quick_user_dash", help="Preview Employee / User Dashboard"):
-                    set_active_view("📈")
-                    st.rerun()
-        else:
-            st.markdown(
-                """
-                <div style="font-size: 0.68rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 4px 2px; display: flex; align-items: center; gap: 6px;">
-                    <span>⚡</span> <span>Quick Workspace</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            dash_c1, dash_c2 = st.columns(2, gap="small")
-            with dash_c1:
-                if st.button("💬 Reflect", width="stretch", key="sidebar_quick_reflect", help="Open Daily Reflection"):
-                    set_active_view("💬")
-                    st.rerun()
-            with dash_c2:
-                if st.button("📈 My Stats", width="stretch", key="sidebar_quick_user_dash", help="Open Personal User Dashboard"):
-                    set_active_view("📈")
-                    st.rerun()
-
-        st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 2px 4px;">Navigation Menu</p>', unsafe_allow_html=True)
+        st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 10px 0 3px 4px;">Navigation</p>', unsafe_allow_html=True)
         if is_admin_active:
             base_nav = [
                 ("🛡️", "Admin Dashboard", "nav_admin"),
                 ("👥", "Team Health Pulse", "nav_team"),
+                ("📁", "Batch Data Ingestion", "nav_batch"),
                 ("📈", "User Dashboard", "nav_trends"),
                 ("💬", "Daily Reflection", "nav_reflection"),
-                ("🎯", "Personalized Recommendations", "nav_recommendations"),
-                ("🤖", "EquiAI Chat Companion", "nav_companion"),
-                ("🧘", "Somatic Care & Yoga", "nav_somatic"),
-                ("📊", "Holistic Habit Matrix", "nav_habits"),
-                ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
-                ("📁", "Batch Data Ingestion", "nav_batch"),
             ]
         else:
             base_nav = [
@@ -8913,9 +8859,6 @@ def render_sidebar():
                 ("📈", "User Dashboard", "nav_trends"),
                 ("🎯", "Personalized Recommendations", "nav_recommendations"),
                 ("🤖", "EquiAI Chat Companion", "nav_companion"),
-                ("🧘", "Somatic Care & Yoga", "nav_somatic"),
-                ("📊", "Holistic Habit Matrix", "nav_habits"),
-                ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
                 ("📁", "Batch Data Ingestion", "nav_batch"),
             ]
 
@@ -10320,6 +10263,97 @@ def render_admin_dashboard_view():
             f"""
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="font-weight: 700; font-size: 0.90rem; color: #0f172a;">🎯 Care Recommendation Adoption Rate</span>
+            "badge": "14-Day Window",
+            "sub": "Members checking in consistently",
+            "accent": "linear-gradient(90deg, #0284c7, #38bdf8)",
+            "badge_bg": "#f0f9ff",
+            "badge_fg": "#0369a1",
+            "badge_border": "#bae6fd",
+        },
+        {
+            "label": "3. Total Recs / Analysis",
+            "value": f"{tot_recs_ana}",
+            "badge": "Inference",
+            "sub": "Dual NLP & emotion cycles completed",
+            "accent": "linear-gradient(90deg, #6366f1, #818cf8)",
+            "badge_bg": "#eef2ff",
+            "badge_fg": "#4338ca",
+            "badge_border": "#c7d2fe",
+        },
+        {
+            "label": "4. Recommendation Usage",
+            "value": f"{rec_usage}",
+            "badge": "Pathways",
+            "sub": "Personalized care plans generated",
+            "accent": "linear-gradient(90deg, #0d9488, #2dd4bf)",
+            "badge_bg": "#f0fdfa",
+            "badge_fg": "#0f766e",
+            "badge_border": "#99f6e4",
+        },
+        {
+            "label": "5. Acceptance Rate",
+            "value": f"{acc_rate:.1f}%",
+            "badge": "(Acc / Tot) × 100",
+            "sub": "Adopted care suggestions across pods",
+            "accent": "linear-gradient(90deg, #059669, #34d399)",
+            "badge_bg": "#f0fdf4",
+            "badge_fg": "#166534",
+            "badge_border": "#bbf7d0",
+        },
+        {
+            "label": "6. API Performance",
+            "value": f"{api_p['avg_response_time_ms']} ms",
+            "badge": f"{api_p.get('uptime_pct', 99.99)}% Uptime",
+            "sub": f"Error Rate: {api_p['error_rate_pct']:.1f}% · Status: {api_p.get('status', 'Optimal')}",
+            "accent": "linear-gradient(90deg, #f59e0b, #fbbf24)",
+            "badge_bg": "#fffbeb",
+            "badge_fg": "#92400e",
+            "badge_border": "#fde68a",
+        },
+    ])
+
+    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+
+    # -------------------------------------------------------------------------
+    # 4. CHARTS: LATENCY TELEMETRY & ACCEPTANCE VISUALIZER
+    # -------------------------------------------------------------------------
+    c_graph1, c_graph2 = st.columns([1.5, 1], gap="medium")
+    with c_graph1, st.container(border=True):
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; font-size: 0.90rem; color: #0f172a;">⚡ API Performance & Latency Telemetry</span>
+                <span style="font-size: 0.72rem; background: #ecfeff; border: 1px solid #a5f3fc; padding: 2px 8px; border-radius: 6px; color: #0891b2; font-weight: 700;">SLA: &lt; 500 ms</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        perf_df = pd.DataFrame({
+            "Component": ["Average Response", "P95 Tail Latency", "P99 Spike Latency", "SLA Threshold"],
+            "Milliseconds (ms)": [api_p["avg_response_time_ms"], api_p["p95_response_time_ms"], 145.0, 500.0],
+        })
+        fig_perf = px.bar(
+            perf_df,
+            x="Component",
+            y="Milliseconds (ms)",
+            text="Milliseconds (ms)",
+            color="Milliseconds (ms)",
+            color_continuous_scale=["#34d399", "#fcd34d", "#f87171"],
+        )
+        fig_perf.update_traces(texttemplate="%{text:.1f} ms", textposition="outside")
+        fig_perf.update_layout(
+            height=250,
+            margin={"l": 20, "r": 20, "t": 20, "b": 20},
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+        st.plotly_chart(fig_perf, width="stretch")
+
+    with c_graph2, st.container(border=True):
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; font-size: 0.90rem; color: #0f172a;">🎯 Care Recommendation Adoption Rate</span>
                 <span style="font-size: 0.72rem; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 6px; color: #166534; font-weight: 700;">Rate: {acc_rate:.1f}%</span>
             </div>
             """,
@@ -10590,52 +10624,6 @@ def render_workspace():
     """Render the main protected EquiMind workspace driven by active sidebar navigation."""
     active_nav = render_sidebar()
 
-    active_user_name = escape(str(st.session_state.get("user_name", "Team Member")))
-    initial = active_user_name[0].upper() if active_user_name else "E"
-
-    welcome_title = get_ui_translation("welcome")
-    tagline_desc = get_ui_translation("tagline")
-    streak_label = get_ui_translation("streak")
-    pts_label = get_ui_translation("resilience_points")
-    calm_label = get_ui_translation("calm")
-    priv_label = get_ui_translation("private")
-
-    # Compact Editorial Header Banner
-    st.markdown(
-        f"""
-        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.76) 55%, rgba(248, 250, 252, 0.92) 100%); border: 1px solid #d5ebe5; border-radius: 16px; padding: 14px 22px; box-shadow: 0 8px 24px -6px rgba(15, 118, 110, 0.06); margin-bottom: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: #ffffff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);">
-                        {initial}
-                    </div>
-                    <div>
-                        <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.42rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; line-height: 1.18;">
-                            {welcome_title}, <span style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{active_user_name}</span>
-                        </div>
-                        <div style="font-size: 0.82rem; color: #64748b; margin-top: 2px; font-weight: 400;">{tagline_desc}</div>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 9999px; padding: 5px 12px; font-size: 0.76rem; color: #92400e; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
-                        <span>☀️</span> <span>{streak_label}</span>
-                    </div>
-                    <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 9999px; padding: 5px 12px; font-size: 0.76rem; color: #0f766e; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
-                        <span>💎</span> <span>{st.session_state.get('mindful_points', 480)} {pts_label}</span>
-                    </div>
-                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9999px; padding: 5px 12px; font-size: 0.76rem; color: #166534; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
-                        <span>🌿</span> <span>{calm_label}</span>
-                    </div>
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 9999px; padding: 5px 12px; font-size: 0.76rem; color: #475569; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
-                        <span>🔒</span> <span>{priv_label}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     # 1-Click SOS Vagus Nerve Reset (Immediate Calm Modal — triggered from sidebar button)
     render_sos_vagal_reset_banner()
 
@@ -10801,11 +10789,10 @@ def render_workspace():
                         )
 
                     if run_btn:
-                        st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 50
-                        st.toast("🎉 Reflection recorded! +50 Resilience Points earned.", icon="🌟")
-                        st.success(f"Mood analysis saved to your account history. +50 Resilience Points earned! (Total: {st.session_state['mindful_points']} pts)")
+                        st.toast("Reflection analyzed and saved to your journal history.", icon="🌟")
+                        st.success("Mood analysis saved cleanly to your personal journal history.")
                     else:
-                        st.success(f"Mood analysis loaded from active reflection session. (Current Balance: {st.session_state.get('mindful_points', 480)} Resilience Points)")
+                        st.caption("Showing analysis from your current active reflection.")
 
                     # Tell Molly Contextual Metadata Card
                     meta_info = parse_entry_metadata(report.input_summary.source_name, report.original_text)
@@ -10867,40 +10854,63 @@ def render_workspace():
 
                     st.markdown(
                         f"""
-                        <div style="background: {hero_bg}; border: 1px solid {hero_border}; border-radius: 14px; padding: 18px 22px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03);">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="font-size: 2.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">{hero_icon}</div>
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: {hero_badge_bg}; color: {hero_badge}; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Telemetry Verified</span>
-                                        <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">Dominant: {dominant_str}</span>
-                                    </div>
-                                    <h3 style="margin: 3px 0 2px 0; font-size: 1.3rem; font-weight: 800; color: #0f172a;">{sentiment_title}</h3>
-                                    <p style="margin: 0; font-size: 0.85rem; color: #475569;">{sentiment_desc}</p>
+                        <div style="background: {hero_bg}; border: 1px solid {hero_border}; border-radius: 14px; padding: 14px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03);">
+                            <div style="font-size: 2rem;">{hero_icon}</div>
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="background: {hero_badge_bg}; color: {hero_badge}; font-weight: 700; font-size: 0.70rem; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Telemetry Verified</span>
+                                    <span style="font-size: 0.80rem; color: #64748b; font-weight: 600;">Primary Affect: {dominant_str}</span>
                                 </div>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <div style="background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 8px 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                    <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">VADER Compound</div>
-                                    <div style="font-size: 1.3rem; font-weight: 800; color: #0f172a;">{compound:+.3f}</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 8px 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                    <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Primary Emotion</div>
-                                    <div style="font-size: 1.3rem; font-weight: 800; color: #0f172a;">{dominant_str}</div>
-                                </div>
+                                <h3 style="margin: 2px 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">{sentiment_title}</h3>
+                                <p style="margin: 0; font-size: 0.84rem; color: #475569;">{sentiment_desc}</p>
                             </div>
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
 
-                    # Executive Summary Metric Strip
-                    st.markdown("#### Analytical Metrics Summary")
-                    score_cols = st.columns(4, gap="small")
-                    score_cols[0].metric("VADER Compound", f"{compound:+.3f}", delta=sentiment_str)
-                    score_cols[1].metric("Dominant Emotion", dominant_str)
-                    score_cols[2].metric("Positive Cue Share", f"{report.sentiment_scores.positive:.1%}")
-                    score_cols[3].metric("Negative Cue Share", f"{report.sentiment_scores.negative:.1%}")
+                    _render_bento_kpi_grid([
+                        {
+                            "label": "VADER Compound",
+                            "value": f"{compound:+.3f}",
+                            "badge": sentiment_str,
+                            "sub": "Overall lexical polarity",
+                            "accent": "linear-gradient(90deg, #0f766e, #14b8a6)",
+                            "badge_bg": "#f0fdfa",
+                            "badge_fg": "#0f766e",
+                            "badge_border": "#99f6e4",
+                        },
+                        {
+                            "label": "Dominant Emotion",
+                            "value": dominant_str,
+                            "badge": "Classifier",
+                            "sub": "Top emotional dimension",
+                            "accent": "linear-gradient(90deg, #0284c7, #38bdf8)",
+                            "badge_bg": "#f0f9ff",
+                            "badge_fg": "#0369a1",
+                            "badge_border": "#bae6fd",
+                        },
+                        {
+                            "label": "Positive Cue Share",
+                            "value": f"{report.sentiment_scores.positive:.1%}",
+                            "badge": "Positive",
+                            "sub": "Constructive cue density",
+                            "accent": "linear-gradient(90deg, #10b981, #6ee7b7)",
+                            "badge_bg": "#f0fdf4",
+                            "badge_fg": "#166534",
+                            "badge_border": "#bbf7d0",
+                        },
+                        {
+                            "label": "Negative Cue Share",
+                            "value": f"{report.sentiment_scores.negative:.1%}",
+                            "badge": "Strain",
+                            "sub": "Tension & stress cue share",
+                            "accent": "linear-gradient(90deg, #f59e0b, #fbbf24)",
+                            "badge_bg": "#fffbeb",
+                            "badge_fg": "#92400e",
+                            "badge_border": "#fde68a",
+                        },
+                    ], cols=4)
 
                     # Elevate Tailored Recommendations & Restorative Yoga Remedy
                     rec = report.recommendations
@@ -10963,8 +10973,7 @@ def render_workspace():
                                     )
                                 except Exception:
                                     pass
-                                st.session_state["mindful_points"] = st.session_state.get("mindful_points", 480) + 15
-                                st.toast("Practice accepted (+15 pts)! Recorded in database and personal care progress tracker.", icon="🎯")
+                                st.toast("Practice accepted and recorded in your care adoption log.", icon="🎯")
                                 st.rerun()
                         with act_b2:
                             if st.button("❌ Decline / Skip", type="secondary", width="stretch", key="elevated_decline_rec_btn"):
@@ -11019,15 +11028,9 @@ def render_workspace():
                                 st.write(f"- {s}")
 
                         st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-                        y_b1, y_b2 = st.columns([1, 1], gap="small")
-                        with y_b1:
-                            if st.button("🧘 Somatic Care →", type="secondary", width="stretch", key="elevated_open_yoga_btn"):
-                                set_active_view("🧘 Somatic Care & Yoga", soma_tool="yoga")
-                                st.rerun()
-                        with y_b2:
-                            if st.button("🌬️ 2-Min Reset →", type="secondary", width="stretch", key="elevated_open_breath_btn"):
-                                set_active_view("🧘 Somatic Care & Yoga", soma_tool="breath")
-                                st.rerun()
+                        if st.button("🎯 Explore All Yoga & Care Pathways →", type="secondary", width="stretch", key="elevated_open_yoga_btn"):
+                            set_active_view("🎯")
+                            st.rerun()
 
                     # Visualizations Grid
                     st.markdown("---")
@@ -11228,12 +11231,6 @@ def render_workspace():
     elif active_nav.startswith("🎯"):
         render_recommendations_view()
 
-    elif active_nav.startswith("🎮"):
-        render_zen_canvas_view()
-
-    elif active_nav.startswith("📊"):
-        render_holistic_habits_view()
-
     elif active_nav.startswith("📁"):
         st.markdown("#### Batch Data Ingestion & Organization Sync")
         st.write(
@@ -11418,9 +11415,6 @@ def render_workspace():
         else:
             st.error("🔒 Access Restricted: Administrator privileges are required for this view.")
             render_user_dashboard_view()
-
-    elif active_nav.startswith("🧘"):
-        render_wellness_tools_view()
 
     elif active_nav.startswith("👥"):
         if st.session_state.get("is_admin", False):
