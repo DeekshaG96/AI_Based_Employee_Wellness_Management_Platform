@@ -332,7 +332,7 @@ header[data-testid="stHeader"] {
 
 .block-container {
   max-width: 1380px !important;
-  padding: 1.6rem 2.2rem 4rem !important;
+  padding: 0.95rem 2.2rem 3.2rem !important;
 }
 
 /* Refined Luxury Typography Hierarchy - Editorial Serifs Everywhere */
@@ -522,43 +522,41 @@ p, li, label, [data-testid="stMarkdownContainer"] p {
 
 /* Executive Luxury Pill Tab Bar */
 [data-baseweb="tab-list"], div[data-baseweb="tab-list"] {
-  gap: 8px !important;
-  background: rgba(240, 253, 250, 0.75) !important;
+  gap: 6px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  padding: 6px !important;
-  border-radius: 9999px !important;
-  border: 1.5px solid rgba(204, 251, 241, 0.90) !important;
-  box-shadow: 0 4px 18px rgba(15, 118, 110, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.95) !important;
-  margin-bottom: 24px !important;
+  padding: 5px !important;
+  border-radius: 14px !important;
+  border: 1px solid #d5ebe5 !important;
+  box-shadow: 0 2px 10px rgba(15, 118, 110, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  margin-bottom: 16px !important;
   display: flex !important;
   flex-wrap: wrap !important;
 }
 button[data-baseweb="tab"], div[data-baseweb="tab-list"] button {
-  height: 40px !important;
-  padding: 0 20px !important;
-  border: none !important;
-  border-radius: 9999px !important;
+  height: 36px !important;
+  padding: 0 16px !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
   background: transparent !important;
   color: #475569 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 0.88rem !important;
+  font-size: 0.84rem !important;
   font-weight: 600 !important;
   letter-spacing: -0.01em !important;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 button[data-baseweb="tab"]:hover, div[data-baseweb="tab-list"] button:hover {
   color: #0f766e !important;
-  background: rgba(255, 255, 255, 0.65) !important;
-  transform: translateY(-1px) !important;
+  background: rgba(240, 253, 250, 0.75) !important;
 }
 button[data-baseweb="tab"][aria-selected="true"], div[data-baseweb="tab-list"] button[aria-selected="true"] {
   background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%) !important;
   color: #044e47 !important;
   font-weight: 700 !important;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.12), inset 0 1px 1px #ffffff !important;
-  border: 1px solid rgba(204, 251, 241, 0.95) !important;
-  transform: scale(1.02) !important;
+  box-shadow: 0 2px 10px rgba(15, 118, 110, 0.10), inset 0 1px 0 #ffffff !important;
+  border: 1px solid #a7e4d8 !important;
 }
 div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
   display: none !important;
@@ -716,46 +714,127 @@ button[data-testid="baseButton-secondary"]:hover,
   box-shadow: 0 8px 20px rgba(15, 118, 110, 0.22) !important;
 }
 
-/* Metric Cards - Editorial Horology / Swiss Boutique Grade */
+/* Metric Cards - Crisp Swiss Tabular Grade */
 [data-testid="stMetric"] {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.88) 55%, rgba(241, 245, 249, 0.80) 100%) !important;
-  border: 1.5px solid rgba(204, 251, 241, 0.90) !important;
-  border-radius: 18px !important;
-  padding: 18px 22px !important;
-  box-shadow: 0 10px 28px -4px rgba(15, 118, 110, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02), inset 0 1px 1px #ffffff !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  transform-style: preserve-3d !important;
-  transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid #d5ebe5 !important;
+  border-radius: 16px !important;
+  padding: 16px 20px !important;
+  box-shadow: 0 6px 20px -4px rgba(15, 118, 110, 0.06), 0 1px 4px rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 [data-testid="stMetric"]:hover {
-  transform: translateY(-4px) scale(1.01) !important;
+  transform: translateY(-2px) !important;
   border-color: #5eead4 !important;
-  box-shadow: 0 18px 42px -6px rgba(15, 118, 110, 0.18), inset 0 1px 2px #ffffff !important;
+  box-shadow: 0 14px 28px -6px rgba(15, 118, 110, 0.14) !important;
 }
 [data-testid="stMetricLabel"] p,
 [data-testid="stMetricLabel"] span,
 [data-testid="stMetricLabel"] {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  color: #0f766e !important;
+  color: #64748b !important;
   font-size: 0.72rem !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.10em !important;
+  letter-spacing: 0.08em !important;
 }
 [data-testid="stMetricValue"],
 [data-testid="stMetricValue"] div {
-  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
-  color: #044e47 !important;
-  font-size: 2.15rem !important;
-  font-weight: 700 !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-variant-numeric: tabular-nums !important;
+  color: #0f172a !important;
+  font-size: 1.85rem !important;
+  font-weight: 800 !important;
   letter-spacing: -0.03em !important;
+  line-height: 1.2 !important;
 }
 [data-testid="stMetricDelta"],
 [data-testid="stMetricDelta"] div {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 0.82rem !important;
+  font-size: 0.78rem !important;
   font-weight: 600 !important;
+}
+
+/* Bespoke Bento KPI Grid */
+.bento-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+@media (max-width: 900px) {
+  .bento-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .bento-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.bento-kpi-card {
+  position: relative;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.92) 100%);
+  border: 1px solid #d5ebe5;
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 6px 18px -4px rgba(15, 118, 110, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.bento-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: #5eead4;
+  box-shadow: 0 14px 28px -6px rgba(15, 118, 110, 0.13);
+}
+.bento-kpi-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.bento-kpi-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.bento-kpi-label {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.70rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+.bento-kpi-badge {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.69rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+.bento-kpi-value {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+.bento-kpi-sub {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 3D Elevated Frosted Containers & Editorial Expanders */
@@ -1000,185 +1079,124 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
   box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15) !important;
 }
 
-/* 1-Click Mood Check-In Cheerful Pills */
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(1) button,
-div[data-testid="stColumn"]:nth-child(1) button[kind="secondary"],
-div[data-testid="column"]:nth-child(1) button[kind="secondary"],
+/* 1-Click Mood Check-In Cheerful Pills — Strictly Scoped to Quick Mood Buttons */
 .st-key-quick_mood_0 button {
   background: #fefce8 !important;
   background-color: #fefce8 !important;
   border: 1.5px solid #fde047 !important;
-  border-color: #fde047 !important;
   color: #854d0e !important;
   border-radius: 24px !important;
   font-weight: 700 !important;
   font-size: 0.85rem !important;
   box-shadow: 0 2px 6px rgba(234, 179, 8, 0.12) !important;
-  transition: all 0.2s ease !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(1) button:hover,
-div[data-testid="stColumn"]:nth-child(1) button[kind="secondary"]:hover,
 .st-key-quick_mood_0 button:hover {
   background: #fef08a !important;
-  background-color: #fef08a !important;
   box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25) !important;
   transform: translateY(-2px) !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(1) button *,
-div[data-testid="stColumn"]:nth-child(1) button[kind="secondary"] *,
-.st-key-quick_mood_0 button * {
-  color: #854d0e !important;
-  font-weight: 700 !important;
-}
+.st-key-quick_mood_0 button * { color: #854d0e !important; font-weight: 700 !important; }
 
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(2) button,
-div[data-testid="stColumn"]:nth-child(2) button[kind="secondary"],
-div[data-testid="column"]:nth-child(2) button[kind="secondary"],
 .st-key-quick_mood_1 button {
   background: #f0fdf4 !important;
   background-color: #f0fdf4 !important;
   border: 1.5px solid #86efac !important;
-  border-color: #86efac !important;
   color: #166534 !important;
   border-radius: 24px !important;
   font-weight: 700 !important;
   font-size: 0.85rem !important;
   box-shadow: 0 2px 6px rgba(34, 197, 94, 0.12) !important;
-  transition: all 0.2s ease !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(2) button:hover,
-div[data-testid="stColumn"]:nth-child(2) button[kind="secondary"]:hover,
 .st-key-quick_mood_1 button:hover {
   background: #dcfce7 !important;
-  background-color: #dcfce7 !important;
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25) !important;
   transform: translateY(-2px) !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(2) button *,
-div[data-testid="stColumn"]:nth-child(2) button[kind="secondary"] *,
-.st-key-quick_mood_1 button * {
-  color: #166534 !important;
-  font-weight: 700 !important;
-}
+.st-key-quick_mood_1 button * { color: #166534 !important; font-weight: 700 !important; }
 
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(3) button,
-div[data-testid="stColumn"]:nth-child(3) button[kind="secondary"],
-div[data-testid="column"]:nth-child(3) button[kind="secondary"],
 .st-key-quick_mood_2 button {
   background: #f0f9ff !important;
   background-color: #f0f9ff !important;
   border: 1.5px solid #7dd3fc !important;
-  border-color: #7dd3fc !important;
   color: #0369a1 !important;
   border-radius: 24px !important;
   font-weight: 700 !important;
   font-size: 0.85rem !important;
   box-shadow: 0 2px 6px rgba(14, 165, 233, 0.12) !important;
-  transition: all 0.2s ease !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(3) button:hover,
-div[data-testid="stColumn"]:nth-child(3) button[kind="secondary"]:hover,
 .st-key-quick_mood_2 button:hover {
   background: #e0f2fe !important;
-  background-color: #e0f2fe !important;
   box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25) !important;
   transform: translateY(-2px) !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(3) button *,
-div[data-testid="stColumn"]:nth-child(3) button[kind="secondary"] *,
-.st-key-quick_mood_2 button * {
-  color: #0369a1 !important;
-  font-weight: 700 !important;
-}
+.st-key-quick_mood_2 button * { color: #0369a1 !important; font-weight: 700 !important; }
 
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(4) button,
-div[data-testid="stColumn"]:nth-child(4) button[kind="secondary"],
-div[data-testid="column"]:nth-child(4) button[kind="secondary"],
 .st-key-quick_mood_3 button {
   background: #faf5ff !important;
   background-color: #faf5ff !important;
   border: 1.5px solid #d8b4fe !important;
-  border-color: #d8b4fe !important;
   color: #6b21a8 !important;
   border-radius: 24px !important;
   font-weight: 700 !important;
   font-size: 0.85rem !important;
   box-shadow: 0 2px 6px rgba(168, 85, 247, 0.12) !important;
-  transition: all 0.2s ease !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(4) button:hover,
-div[data-testid="stColumn"]:nth-child(4) button[kind="secondary"]:hover,
 .st-key-quick_mood_3 button:hover {
   background: #f3e8ff !important;
-  background-color: #f3e8ff !important;
   box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25) !important;
   transform: translateY(-2px) !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(4) button *,
-div[data-testid="stColumn"]:nth-child(4) button[kind="secondary"] *,
-.st-key-quick_mood_3 button * {
-  color: #6b21a8 !important;
-  font-weight: 700 !important;
-}
+.st-key-quick_mood_3 button * { color: #6b21a8 !important; font-weight: 700 !important; }
 
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(5) button,
-div[data-testid="stColumn"]:nth-child(5) button[kind="secondary"],
-div[data-testid="column"]:nth-child(5) button[kind="secondary"],
 .st-key-quick_mood_4 button {
   background: #fff7ed !important;
   background-color: #fff7ed !important;
   border: 1.5px solid #fdba74 !important;
-  border-color: #fdba74 !important;
   color: #9a3412 !important;
   border-radius: 24px !important;
   font-weight: 700 !important;
   font-size: 0.85rem !important;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.12) !important;
-  transition: all 0.2s ease !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(5) button:hover,
-div[data-testid="stColumn"]:nth-child(5) button[kind="secondary"]:hover,
 .st-key-quick_mood_4 button:hover {
   background: #ffedd5 !important;
-  background-color: #ffedd5 !important;
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25) !important;
   transform: translateY(-2px) !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(5) button *,
-div[data-testid="stColumn"]:nth-child(5) button[kind="secondary"] *,
-.st-key-quick_mood_4 button * {
-  color: #9a3412 !important;
-  font-weight: 700 !important;
-}
+.st-key-quick_mood_4 button * { color: #9a3412 !important; font-weight: 700 !important; }
 
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(6) button,
-div[data-testid="stColumn"]:nth-child(6) button[kind="secondary"],
-div[data-testid="column"]:nth-child(6) button[kind="secondary"],
 .st-key-quick_mood_5 button {
   background: #ecfeff !important;
   background-color: #ecfeff !important;
   border: 1.5px solid #67e8f9 !important;
-  border-color: #67e8f9 !important;
   color: #0e7490 !important;
   border-radius: 24px !important;
   font-weight: 700 !important;
   font-size: 0.85rem !important;
   box-shadow: 0 2px 6px rgba(6, 182, 212, 0.12) !important;
-  transition: all 0.2s ease !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(6) button:hover,
-div[data-testid="stColumn"]:nth-child(6) button[kind="secondary"]:hover,
 .st-key-quick_mood_5 button:hover {
   background: #cffafe !important;
-  background-color: #cffafe !important;
   box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25) !important;
   transform: translateY(-2px) !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div:nth-child(6) button *,
-div[data-testid="stColumn"]:nth-child(6) button[kind="secondary"] *,
-.st-key-quick_mood_5 button * {
-  color: #0e7490 !important;
+.st-key-quick_mood_5 button * { color: #0e7490 !important; font-weight: 700 !important; }
+
+/* Serene SOS Reset Sidebar Trigger */
+.st-key-header_sos_reset_btn button {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%) !important;
+  border: 1px solid #fecdd3 !important;
+  color: #be123c !important;
+  border-radius: 10px !important;
+}
+.st-key-header_sos_reset_btn button * {
+  color: #be123c !important;
   font-weight: 700 !important;
+}
+.st-key-header_sos_reset_btn button:hover {
+  background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%) !important;
+  border-color: #fda4af !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.15) !important;
 }
 
 /* Chips */
@@ -2011,6 +2029,33 @@ def _apply_auth(auth: dict, target_view: str | None = None, is_admin: bool = Fal
         st.session_state["nav_redirect"] = "📈"
     if "mindful_points" not in st.session_state:
         st.session_state["mindful_points"] = 480
+
+
+def _render_bento_kpi_grid(cards: list[dict[str, str]]) -> None:
+    """Render a Swiss-editorial Bento KPI grid with crisp tabular numbers and zero stock-delta clutter."""
+    card_html_parts: list[str] = []
+    for c in cards:
+        accent = c.get("accent", "#0f766e")
+        badge_bg = c.get("badge_bg", "#f0fdfa")
+        badge_fg = c.get("badge_fg", "#0f766e")
+        badge_border = c.get("badge_border", "#99f6e4")
+        label = escape(str(c.get("label", "")))
+        value = escape(str(c.get("value", "")))
+        badge = escape(str(c.get("badge", "")))
+        sub = escape(str(c.get("sub", "")))
+        card_html_parts.append(
+            f'<div class="bento-kpi-card">'
+            f'<div class="bento-kpi-accent" style="background: {accent};"></div>'
+            f'<div class="bento-kpi-top">'
+            f'<span class="bento-kpi-label">{label}</span>'
+            f'<span class="bento-kpi-badge" style="background: {badge_bg}; color: {badge_fg}; border: 1px solid {badge_border};">{badge}</span>'
+            f'</div>'
+            f'<div class="bento-kpi-value">{value}</div>'
+            f'<div class="bento-kpi-sub">{sub}</div>'
+            f'</div>'
+        )
+    grid_html = f'<div class="bento-kpi-grid">{"".join(card_html_parts)}</div>'
+    st.markdown(grid_html, unsafe_allow_html=True)
 
 
 def render_landing_hero_3d() -> str:
@@ -8905,7 +8950,13 @@ def render_sidebar():
         idx = nav_options.index(current_view)
         selected_nav = st.radio("Select View:", nav_options, index=idx, key="equimind_nav_view", label_visibility="collapsed")
 
-        st.markdown("<div style='margin-top: 8px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 8px;'></div>", unsafe_allow_html=True)
+        if not st.session_state.get("show_sos_reset_modal", False):
+            sos_btn_label = get_ui_translation("sos_button")
+            if st.button(sos_btn_label, key="header_sos_reset_btn", type="secondary", width="stretch", help="1-click physiological sigh & parasympathetic de-escalation"):
+                st.session_state["show_sos_reset_modal"] = True
+                st.rerun()
+
         if st.button("🚪 Sign Out / Switch Profile", width="stretch", key="sidebar_signout_btn"):
             try:
                 api_logout(st.session_state.api_token)
@@ -9301,32 +9352,18 @@ def render_user_dashboard_view():
     top_1_cnt = int(emo_freq.iloc[0]) if len(emo_freq) > 0 else 0
     top_1_pct = (top_1_cnt / total_recs * 100) if total_recs > 0 else 0.0
 
-    # Executive Header Banner for User Dashboard
+    # Compact Executive Header Banner for User Dashboard (Streamlined — no duplicate metric clutter)
     st.markdown(
-        f"""
-        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1.5px solid rgba(204, 251, 241, 0.95); border-radius: 20px; padding: 22px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08); margin-bottom: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        """
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.85) 55%, rgba(248, 250, 252, 0.95) 100%); border: 1px solid #d5ebe5; border-radius: 16px; padding: 16px 22px; box-shadow: 0 8px 24px -6px rgba(15, 118, 110, 0.07); margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                        <span style="background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Employee Analytics Portal</span>
-                        <span style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">100% Private to You</span>
+                        <span style="background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; font-size: 0.70rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Employee Analytics Portal</span>
+                        <span style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; font-size: 0.70rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">🔒 100% Private to You</span>
                     </div>
-                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">👤 User Dashboard — Personal Emotional Journey</h2>
-                    <p style="margin: 3px 0 0 0; font-size: 0.86rem; color: #64748b;">Comprehensive personal emotion summaries, percentage distributions, temporal trends, journal history, and care recommendations.</p>
-                </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                        <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Dominant Affect</div>
-                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f766e;">{top_1_emo.capitalize()} ({top_1_pct:.0f}%)</div>
-                    </div>
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                        <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Well-Being Index</div>
-                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">{wellbeing_score}/100</div>
-                    </div>
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                        <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Reflections</div>
-                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">{total_recs} logs</div>
-                    </div>
+                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.50rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">👤 User Dashboard — Personal Emotional Journey</h2>
+                    <p style="margin: 2px 0 0 0; font-size: 0.84rem; color: #64748b;">Emotion summaries, percentage distributions, temporal trends, journal vault, and adaptive care feedback.</p>
                 </div>
             </div>
         </div>
@@ -9335,37 +9372,90 @@ def render_user_dashboard_view():
     )
 
     # Role-Scoped Portal Action Bar
-    u_bar_c1, u_bar_c2 = st.columns([3, 1.2], gap="small")
+    u_bar_c1, u_bar_c2 = st.columns([3.2, 1.1], gap="small")
     if st.session_state.get("is_admin", False):
         with u_bar_c1:
-            st.caption("🛡️ **Administrator Preview:** Inspecting personal analytics template. Return to Admin Dashboard for enterprise telemetry.")
+            st.caption("🛡️ **Administrator Preview:** Inspecting employee analytics layout. Return to Admin Dashboard for enterprise telemetry.")
         with u_bar_c2:
-            if st.button("🛡️ Back to Admin Dashboard →", width="stretch", key="user_dash_jump_admin_btn", help="Return to Executive Admin Dashboard"):
+            if st.button("🛡️ Back to Admin →", width="stretch", key="user_dash_jump_admin_btn", help="Return to Executive Admin Dashboard"):
                 set_active_view("🛡️")
                 st.rerun()
     else:
         with u_bar_c1:
-            st.caption("🔒 **Private Employee Space:** All emotional trends, journal records, and well-being metrics belong strictly to your personal account.")
+            st.caption("🔒 **Private Employee Space:** Emotional trends, journal entries, and self-care metrics belong strictly to your profile.")
         with u_bar_c2:
-            if st.button("💬 New Daily Reflection →", width="stretch", key="user_dash_jump_reflect_btn", help="Log a new private reflection"):
+            if st.button("💬 New Reflection →", width="stretch", key="user_dash_jump_reflect_btn", help="Log a new private reflection"):
                 set_active_view("💬")
                 st.rerun()
 
-    # High-Level Metric Tiles (Symmetrical 2x3 Grid — prevents text truncation & uneven card heights)
+    # Bespoke 3x2 Bento KPI Grid
     pos_log_lbl = "1 log" if pos_count == 1 else f"{pos_count} logs"
     neu_log_lbl = "1 log" if neu_count == 1 else f"{neu_count} logs"
     neg_log_lbl = "1 log" if neg_count == 1 else f"{neg_count} logs"
-    tot_log_lbl = "1 entry saved" if total_recs == 1 else f"{total_recs} entries saved"
+    tot_log_lbl = "1 entry" if total_recs == 1 else f"{total_recs} entries"
 
-    k1, k2, k3 = st.columns(3, gap="small")
-    k4, k5, k6 = st.columns(3, gap="small")
-
-    k1.metric("Total Records", total_recs, tot_log_lbl)
-    k2.metric("Well-Being Index", f"{wellbeing_score}/100", f"{avg_comp:+.2f} compound")
-    k3.metric("Care Adoption", f"{accept_rate:.1f}%", f"{fb.get('accepted', 6)} completed")
-    k4.metric("Positive Valence", f"{(pos_count / total_recs) * 100:.1f}%", pos_log_lbl)
-    k5.metric("Equilibrium", f"{(neu_count / total_recs) * 100:.1f}%", neu_log_lbl)
-    k6.metric("Strain Markers", f"{(neg_count / total_recs) * 100:.1f}%", neg_log_lbl)
+    _render_bento_kpi_grid([
+        {
+            "label": "Total Reflections",
+            "value": f"{total_recs}",
+            "badge": tot_log_lbl,
+            "sub": "Stored privately in vault",
+            "accent": "linear-gradient(90deg, #0f766e, #14b8a6)",
+            "badge_bg": "#f0fdfa",
+            "badge_fg": "#0f766e",
+            "badge_border": "#99f6e4",
+        },
+        {
+            "label": "Well-Being Index",
+            "value": f"{wellbeing_score}/100",
+            "badge": f"{avg_comp:+.2f} compound",
+            "sub": f"Dominant affect: {top_1_emo.capitalize()} ({top_1_pct:.0f}%)",
+            "accent": "linear-gradient(90deg, #0284c7, #38bdf8)",
+            "badge_bg": "#f0f9ff",
+            "badge_fg": "#0369a1",
+            "badge_border": "#bae6fd",
+        },
+        {
+            "label": "Care Adoption",
+            "value": f"{accept_rate:.1f}%",
+            "badge": f"{fb.get('accepted', 6)} completed",
+            "sub": "Recommended practices followed",
+            "accent": "linear-gradient(90deg, #059669, #34d399)",
+            "badge_bg": "#f0fdf4",
+            "badge_fg": "#166534",
+            "badge_border": "#bbf7d0",
+        },
+        {
+            "label": "Positive Valence",
+            "value": f"{(pos_count / total_recs) * 100:.1f}%",
+            "badge": pos_log_lbl,
+            "sub": "Optimistic & joyful reflections",
+            "accent": "linear-gradient(90deg, #10b981, #6ee7b7)",
+            "badge_bg": "#ecfdf5",
+            "badge_fg": "#047857",
+            "badge_border": "#a7f3d0",
+        },
+        {
+            "label": "Equilibrium",
+            "value": f"{(neu_count / total_recs) * 100:.1f}%",
+            "badge": neu_log_lbl,
+            "sub": "Calm & balanced sessions",
+            "accent": "linear-gradient(90deg, #64748b, #94a3b8)",
+            "badge_bg": "#f8fafc",
+            "badge_fg": "#475569",
+            "badge_border": "#cbd5e1",
+        },
+        {
+            "label": "Strain Markers",
+            "value": f"{(neg_count / total_recs) * 100:.1f}%",
+            "badge": neg_log_lbl,
+            "sub": "Fatigue or tension detected",
+            "accent": "linear-gradient(90deg, #f59e0b, #fbbf24)",
+            "badge_bg": "#fffbeb",
+            "badge_fg": "#92400e",
+            "badge_border": "#fde68a",
+        },
+    ])
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -10117,29 +10207,78 @@ def render_admin_dashboard_view():
 
     st.markdown(
         """
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <h4 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: #0f172a;">Executive KPI Telemetry Matrix</h4>
-            <span style="font-size: 0.75rem; background: #f0fdfa; border: 1px solid #ccfbf1; padding: 2px 8px; border-radius: 6px; color: #0f766e; font-weight: 700;">6 Core Indicators</span>
+            <span style="font-size: 0.72rem; background: #f0fdfa; border: 1px solid #99f6e4; padding: 2px 10px; border-radius: 9999px; color: #0f766e; font-weight: 700;">6 Official Telemetry Indicators</span>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    adm_m1, adm_m2, adm_m3 = st.columns(3)
-    adm_m4, adm_m5, adm_m6 = st.columns(3)
+    _render_bento_kpi_grid([
+        {
+            "label": "1. Total Registered Users",
+            "value": f"{total_reg}",
+            "badge": "Enrolled",
+            "sub": "Verified organization accounts",
+            "accent": "linear-gradient(90deg, #0f766e, #14b8a6)",
+            "badge_bg": "#f0fdfa",
+            "badge_fg": "#0f766e",
+            "badge_border": "#99f6e4",
+        },
+        {
+            "label": "2. Active Users",
+            "value": f"{act_users}",
+            "badge": "14-Day Window",
+            "sub": "Members checking in consistently",
+            "accent": "linear-gradient(90deg, #0284c7, #38bdf8)",
+            "badge_bg": "#f0f9ff",
+            "badge_fg": "#0369a1",
+            "badge_border": "#bae6fd",
+        },
+        {
+            "label": "3. Total Recs / Analysis",
+            "value": f"{tot_recs_ana}",
+            "badge": "Inference",
+            "sub": "Dual NLP & emotion cycles completed",
+            "accent": "linear-gradient(90deg, #6366f1, #818cf8)",
+            "badge_bg": "#eef2ff",
+            "badge_fg": "#4338ca",
+            "badge_border": "#c7d2fe",
+        },
+        {
+            "label": "4. Recommendation Usage",
+            "value": f"{rec_usage}",
+            "badge": "Pathways",
+            "sub": "Personalized care plans generated",
+            "accent": "linear-gradient(90deg, #0d9488, #2dd4bf)",
+            "badge_bg": "#f0fdfa",
+            "badge_fg": "#0f766e",
+            "badge_border": "#99f6e4",
+        },
+        {
+            "label": "5. Acceptance Rate",
+            "value": f"{acc_rate:.1f}%",
+            "badge": "(Acc / Tot) × 100",
+            "sub": "Adopted care suggestions across pods",
+            "accent": "linear-gradient(90deg, #059669, #34d399)",
+            "badge_bg": "#f0fdf4",
+            "badge_fg": "#166534",
+            "badge_border": "#bbf7d0",
+        },
+        {
+            "label": "6. API Performance",
+            "value": f"{api_p['avg_response_time_ms']} ms",
+            "badge": f"{api_p.get('uptime_pct', 99.99)}% Uptime",
+            "sub": f"Error Rate: {api_p['error_rate_pct']:.1f}% · Status: {api_p.get('status', 'Optimal')}",
+            "accent": "linear-gradient(90deg, #f59e0b, #fbbf24)",
+            "badge_bg": "#fffbeb",
+            "badge_fg": "#92400e",
+            "badge_border": "#fde68a",
+        },
+    ])
 
-    adm_m1.metric("1. Total Registered Users", f"{total_reg}", "Enrolled Platform Accounts")
-    adm_m2.metric("2. Active Users", f"{act_users}", "Active Check-ins in 14 Days")
-    adm_m3.metric("3. Total Recommendations / Analysis", f"{tot_recs_ana}", "Inference Cycles Completed")
-    adm_m4.metric("4. Recommendation Usage", f"{rec_usage}", "Care Pathways Generated")
-    adm_m5.metric("5. Acceptance Rate", f"{acc_rate:.1f}%", "acc recs / total recs x 100")
-    adm_m6.metric(
-        "6. API Performance",
-        f"{api_p['avg_response_time_ms']} ms",
-        f"Error Rate: {api_p['error_rate_pct']:.1f}% · Uptime: {api_p.get('uptime_pct', 99.99)}%",
-    )
-
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
     # -------------------------------------------------------------------------
     # 4. CHARTS: LATENCY TELEMETRY & ACCEPTANCE VISUALIZER
@@ -10460,35 +10599,34 @@ def render_workspace():
     pts_label = get_ui_translation("resilience_points")
     calm_label = get_ui_translation("calm")
     priv_label = get_ui_translation("private")
-    sos_label = get_ui_translation("sos_button")
 
-    # High-Class Luxury Header Banner (Clutter-Free, Standard, Aesthetic)
+    # Compact Editorial Header Banner
     st.markdown(
         f"""
-        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.72) 55%, rgba(248, 250, 252, 0.90) 100%); border: 1.5px solid rgba(204, 251, 241, 0.85); border-radius: 20px; padding: 20px 28px; box-shadow: 0 16px 36px -8px rgba(15, 118, 110, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 1); margin-bottom: 20px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transform-style: preserve-3d; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div style="width: 46px; height: 46px; min-width: 46px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: #ffffff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.3rem; box-shadow: 0 4px 14px rgba(15, 118, 110, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.4);">
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.76) 55%, rgba(248, 250, 252, 0.92) 100%); border: 1px solid #d5ebe5; border-radius: 16px; padding: 14px 22px; box-shadow: 0 8px 24px -6px rgba(15, 118, 110, 0.06); margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: #ffffff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);">
                         {initial}
                     </div>
                     <div>
-                        <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 700; color: #0f172a; letter-spacing: -0.025em; line-height: 1.2;">
+                        <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.42rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; line-height: 1.18;">
                             {welcome_title}, <span style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{active_user_name}</span>
                         </div>
-                        <div style="font-size: 0.86rem; color: #64748b; margin-top: 3px; font-weight: 400;">{tagline_desc}</div>
+                        <div style="font-size: 0.82rem; color: #64748b; margin-top: 2px; font-weight: 400;">{tagline_desc}</div>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #92400e; font-weight: 700; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12); display: inline-flex; align-items: center; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 9999px; padding: 5px 12px; font-size: 0.76rem; color: #92400e; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
                         <span>☀️</span> <span>{streak_label}</span>
                     </div>
-                    <div style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #99f6e4; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #0f766e; font-weight: 700; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12); display: inline-flex; align-items: center; gap: 6px;">
+                    <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 9999px; padding: 5px 12px; font-size: 0.76rem; color: #0f766e; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
                         <span>💎</span> <span>{st.session_state.get('mindful_points', 480)} {pts_label}</span>
                     </div>
-                    <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #166534; font-weight: 700; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12); display: inline-flex; align-items: center; gap: 6px;">
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9999px; padding: 5px 12px; font-size: 0.76rem; color: #166534; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
                         <span>🌿</span> <span>{calm_label}</span>
                     </div>
-                    <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1px solid #cbd5e1; border-radius: 9999px; padding: 6px 15px; font-size: 0.80rem; color: #475569; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); display: inline-flex; align-items: center; gap: 6px;">
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 9999px; padding: 5px 12px; font-size: 0.76rem; color: #475569; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
                         <span>🔒</span> <span>{priv_label}</span>
                     </div>
                 </div>
@@ -10498,16 +10636,8 @@ def render_workspace():
         unsafe_allow_html=True,
     )
 
-    # 1-Click SOS Vagus Nerve Reset (Immediate Calm Modal)
+    # 1-Click SOS Vagus Nerve Reset (Immediate Calm Modal — triggered from sidebar button)
     render_sos_vagal_reset_banner()
-
-    # Quick Access Micro-Intervention Trigger (Neatly Aligned Right Header Bar)
-    if not st.session_state.get("show_sos_reset_modal", False):
-        _sos_spacer, sos_btn_col = st.columns([3.8, 1.2], gap="small")
-        with sos_btn_col:
-            if st.button(sos_label, key="header_sos_reset_btn", type="secondary", width="stretch", help="1-click physiological sigh & parasympathetic de-escalation"):
-                st.session_state["show_sos_reset_modal"] = True
-                st.rerun()
 
     # Route directly to the selected module from the sidebar
     if active_nav.startswith("💬"):
