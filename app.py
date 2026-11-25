@@ -8814,11 +8814,11 @@ def render_sidebar():
         )
         dash_c1, dash_c2 = st.columns(2, gap="small")
         with dash_c1:
-            if st.button("📈 User Dash", width="stretch", key="sidebar_quick_user_dash", help="Open Employee / User Dashboard"):
+            if st.button("📈 User", width="stretch", key="sidebar_quick_user_dash", help="Open Employee / User Dashboard"):
                 set_active_view("📈")
                 st.rerun()
         with dash_c2:
-            if st.button("🛡️ Admin Dash", width="stretch", key="sidebar_quick_admin_dash", help="Open Executive / Admin Dashboard"):
+            if st.button("🛡️ Admin", width="stretch", key="sidebar_quick_admin_dash", help="Open Executive / Admin Dashboard"):
                 set_active_view("🛡️")
                 st.rerun()
 
@@ -8995,8 +8995,8 @@ def render_deep_nlp_pipeline_inspector(text: str, key_suffix: str = "") -> None:
         )
 
         kpi_c1, kpi_c2, kpi_c3, kpi_c4, kpi_c5 = st.columns(5)
-        kpi_c1.metric("Input Characters", len(active_text))
-        kpi_c2.metric("Raw Tokens", token_count)
+        kpi_c1.metric("Input Characters", len(active_text), "Raw payload")
+        kpi_c2.metric("Raw Tokens", token_count, "Tokenized")
         kpi_c3.metric(
             "Stopwords Pruned",
             pruned_count,
@@ -9008,7 +9008,7 @@ def render_deep_nlp_pipeline_inspector(text: str, key_suffix: str = "") -> None:
             negation_count,
             delta="Shield active" if negation_count > 0 else "0 present",
         )
-        kpi_c5.metric("Final Lemmas", len(lemmas))
+        kpi_c5.metric("Final Lemmas", len(lemmas), "Normalized")
 
         t_walk, t_matrix, t_guard, t_json = st.tabs(
             [
@@ -9303,14 +9303,21 @@ def render_user_dashboard_view():
             set_active_view("🛡️")
             st.rerun()
 
-    # High-Level Metric Tiles
-    k1, k2, k3, k4, k5, k6 = st.columns(6)
-    k1.metric("Total Records", total_recs)
+    # High-Level Metric Tiles (Symmetrical 2x3 Grid — prevents text truncation & uneven card heights)
+    pos_log_lbl = "1 log" if pos_count == 1 else f"{pos_count} logs"
+    neu_log_lbl = "1 log" if neu_count == 1 else f"{neu_count} logs"
+    neg_log_lbl = "1 log" if neg_count == 1 else f"{neg_count} logs"
+    tot_log_lbl = "1 entry saved" if total_recs == 1 else f"{total_recs} entries saved"
+
+    k1, k2, k3 = st.columns(3, gap="small")
+    k4, k5, k6 = st.columns(3, gap="small")
+
+    k1.metric("Total Records", total_recs, tot_log_lbl)
     k2.metric("Well-Being Index", f"{wellbeing_score}/100", f"{avg_comp:+.2f} compound")
     k3.metric("Care Adoption", f"{accept_rate:.1f}%", f"{fb.get('accepted', 6)} completed")
-    k4.metric("Positive Valence", f"{(pos_count / total_recs) * 100:.1f}%", f"{pos_count} logs")
-    k5.metric("Equilibrium", f"{(neu_count / total_recs) * 100:.1f}%", f"{neu_count} logs")
-    k6.metric("Strain Markers", f"{(neg_count / total_recs) * 100:.1f}%", f"{neg_count} logs")
+    k4.metric("Positive Valence", f"{(pos_count / total_recs) * 100:.1f}%", pos_log_lbl)
+    k5.metric("Equilibrium", f"{(neu_count / total_recs) * 100:.1f}%", neu_log_lbl)
+    k6.metric("Strain Markers", f"{(neg_count / total_recs) * 100:.1f}%", neg_log_lbl)
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
