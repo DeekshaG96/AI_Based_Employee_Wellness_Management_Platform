@@ -1474,6 +1474,8 @@ def _clear_last_analysis_report() -> None:
     """Hide an old result when the user edits the journal text."""
     st.session_state["last_analysis_report"] = None
     st.session_state.pop("action_path_choice", None)
+    st.session_state.pop("daily_care_path_idx", None)
+    st.session_state.pop("decline_prompt_daily_reflection", None)
 
 
 # ---------------------------------------------------------------------------
@@ -2057,6 +2059,108 @@ def _render_bento_kpi_grid(cards: list[dict[str, str]], cols: int = 3) -> None:
     col_style = f"grid-template-columns: repeat({int(cols)}, minmax(0, 1fr));" if cols != 3 else ""
     grid_html = f'<div class="bento-kpi-grid" style="{col_style}">{"".join(card_html_parts)}</div>'
     st.markdown(grid_html, unsafe_allow_html=True)
+
+
+DECLINE_REASONS = [
+    "⏱️ Not enough time right now",
+    "📍 Not feasible at my desk / workspace",
+    "🎯 Doesn't match how I feel",
+    "🔁 Already tried this recently",
+    "💬 Other reason",
+]
+
+
+def _render_decline_reason_box(
+    context_key: str,
+    rec_title: str,
+    emotion: str,
+    rec_category: str,
+    recommendation_id: int,
+    action_paths: list[dict[str, Any]] | None = None,
+    path_state_key: str | None = None,
+    api_token: str | None = None,
+) -> None:
+    """Render an inline feedback prompt asking why a suggestion was declined, store the reason, and rotate to an alternative."""
+    prompt_key = f"decline_prompt_{context_key}"
+    if not st.session_state.get(prompt_key, False):
+        return
+
+    with st.container(border=True):
+        st.markdown(
+            """
+            <div style="margin-bottom: 6px;">
+                <span style="font-size: 0.72rem; font-weight: 700; color: #b45309; text-transform: uppercase; letter-spacing: 0.06em;">Adaptive Feedback</span>
+                <div style="font-weight: 700; font-size: 0.95rem; color: #0f172a;">Why didn't this suggestion fit right now?</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        selected_reason = st.radio(
+            "Select reason:",
+            DECLINE_REASONS,
+            key=f"decline_reason_radio_{context_key}",
+            label_visibility="collapsed",
+        )
+        custom_note = st.text_input(
+            "Additional details (optional):",
+            placeholder="e.g. In back-to-back calls, prefer a 1-minute breathing exercise...",
+            key=f"decline_note_input_{context_key}",
+        )
+
+        sub_c1, sub_c2 = st.columns([1.6, 1], gap="small")
+        with sub_c1:
+            if st.button(
+                "Submit Reason & Show Alternative →",
+                type="primary",
+                width="stretch",
+                key=f"submit_decline_btn_{context_key}",
+            ):
+                if "suggestion_feedback" not in st.session_state:
+                    st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
+                st.session_state["suggestion_feedback"]["rejected"] += 1
+
+                if "decline_feedback_log" not in st.session_state:
+                    st.session_state["decline_feedback_log"] = []
+                st.session_state["decline_feedback_log"].insert(
+                    0,
+                    {
+                        "Recommendation": rec_title,
+                        "Emotion": str(emotion).capitalize(),
+                        "Reason": selected_reason,
+                        "Details": custom_note.strip() or "—",
+                        "Timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+                    },
+                )
+
+                payload = {
+                    "title": rec_title,
+                    "category": rec_category,
+                    "emotion": str(emotion),
+                    "decline_reason": selected_reason,
+                    "decline_note": custom_note.strip(),
+                }
+                try:
+                    api_submit_feedback(
+                        recommendation_id=recommendation_id,
+                        report_data=payload,
+                        accepted_or_rejected="rejected",
+                        token=api_token,
+                        api_token=api_token,
+                    )
+                except Exception:
+                    pass
+
+                if path_state_key and action_paths and len(action_paths) > 1:
+                    cur_idx = st.session_state.get(path_state_key, 0)
+                    st.session_state[path_state_key] = (cur_idx + 1) % len(action_paths)
+
+                st.session_state[prompt_key] = False
+                st.toast(f"Feedback saved ({selected_reason}). Showing alternative pathway.", icon="🌿")
+                st.rerun()
+        with sub_c2:
+            if st.button("Cancel", type="secondary", width="stretch", key=f"cancel_decline_btn_{context_key}"):
+                st.session_state[prompt_key] = False
+                st.rerun()
 
 
 def render_landing_hero_3d() -> str:
@@ -7947,20 +8051,7 @@ def render_recommendations_view():
                         st.rerun()
                 with act_b2:
                     if st.button("❌ Decline / Skip", type="secondary", width="stretch", key=f"care_decline_btn_{cur_p_idx}_{active_care_emotion}"):
-                        if "suggestion_feedback" not in st.session_state:
-                            st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
-                        st.session_state["suggestion_feedback"]["rejected"] += 1
-                        st.session_state[p_key] = (cur_p_idx + 1) % len(action_paths)
-                        try:
-                            api_submit_feedback(
-                                recommendation_id=cur_p_idx + 1,
-                                report_data={"pathway": path.get("title"), "emotion": active_care_emotion, "steps": path.get("steps")},
-                                accepted_or_rejected="rejected",
-                                token=st.session_state.get("api_token"),
-                            )
-                        except Exception:
-                            pass
-                        st.toast("Skipped. Switched to alternative pathway.", icon="🌿")
+                        st.session_state[f"decline_prompt_care_{active_care_emotion}"] = True
                         st.rerun()
                 with act_b3:
                     if st.button(f"🔄 Next ({cur_p_idx + 1}/{len(action_paths)})", type="secondary", width="stretch", key=f"care_next_btn_{cur_p_idx}_{active_care_emotion}"):
@@ -7968,6 +8059,17 @@ def render_recommendations_view():
                         next_title = action_paths[(cur_p_idx + 1) % len(action_paths)]["title"]
                         st.toast(f"Switched to: {next_title}", icon="🌿")
                         st.rerun()
+
+                _render_decline_reason_box(
+                    context_key=f"care_{active_care_emotion}",
+                    rec_title=str(path.get("title", "Care Practice")),
+                    emotion=active_care_emotion,
+                    rec_category=rec.get("category", "Well-Being"),
+                    recommendation_id=cur_p_idx + 1,
+                    action_paths=action_paths,
+                    path_state_key=p_key,
+                    api_token=st.session_state.get("api_token"),
+                )
 
                 live_fb = st.session_state.get("suggestion_feedback", {"accepted": 4, "rejected": 1})
                 tot_fb = live_fb.get("accepted", 0) + live_fb.get("rejected", 0)
@@ -8360,7 +8462,7 @@ Setting: {sel_setting} | Duration: {sel_time}
 
     with rec_tab6:
         st.markdown("#### 📜 Recommendation History & Acceptance Vault")
-        st.caption("Official Milestone 3 Relational Database Audit: Stored recommendations, accepted/rejected feedback records, and acceptance rate telemetry.")
+        st.caption("Relational database audit of stored recommendations, accepted/declined feedback records, and decline reasons.")
 
         try:
             db_entities = api_get_database_entities(st.session_state.get("api_token"))
@@ -8407,7 +8509,7 @@ Setting: {sel_setting} | Duration: {sel_time}
 
         st.markdown("---")
         st.markdown("##### ⭐ User Feedback Audit Trail (`user_feedback` Table)")
-        st.caption("Fulfills Requirement: `5. user feedback - recommendation id, report data, accepted/rejected`")
+        st.caption("Tracks recommendation IDs, user acceptance decisions, and declined reason metadata.")
         if fb_entities:
             fb_table_data = []
             for f in fb_entities[:15]:
@@ -9981,16 +10083,20 @@ def render_user_dashboard_view():
                 f"""
                 <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #475569; line-height: 1.55;">
                     <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">Adaptive Recommendation Model:</div>
-                    When you click <strong>✅ Accept Practice</strong> in your daily reflection, the model records positive reinforcement in the <code>user_feedback</code> database table.
+                    When you accept or decline a recommendation, your feedback (including any reason for skipping) is saved to the <code>user_feedback</code> table to better tailor future alternatives.
                     <ul style="margin: 8px 0 8px 18px; padding: 0;">
                         <li><strong>Acceptance Rate Formula:</strong> <code>(Accepted / Total) × 100 = {live_acc_pct:.1f}%</code></li>
-                        <li><strong>Current Habit Consistency:</strong> Highly Responsive · Strong Daily Integration</li>
-                        <li><strong>Resilience Reward:</strong> +15 Mindful Points granted per completed practice</li>
+                        <li><strong>Current Habit Consistency:</strong> Active Personal Care Loop</li>
                     </ul>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
+
+        if st.session_state.get("decline_feedback_log"):
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            st.markdown("##### 💬 Recorded Skip Reasons")
+            st.dataframe(pd.DataFrame(st.session_state["decline_feedback_log"]), width="stretch", hide_index=True)
 
 
 def render_admin_dashboard_view():
@@ -10859,9 +10965,13 @@ def render_workspace():
                             )
 
                         action_paths = rec.get("action_paths", [])
+                        daily_path_key = "daily_care_path_idx"
+                        daily_path_idx = st.session_state.get(daily_path_key, 0) % len(action_paths) if action_paths else 0
+                        active_path_title = rec.get("title", "Self-Care Practice")
                         if action_paths:
-                            path = action_paths[0]
-                            st.markdown(f"##### Recommended Pathway: {path.get('title', 'Action Steps')} (`⏱️ {path.get('duration', '5 min')}`)")
+                            path = action_paths[daily_path_idx]
+                            active_path_title = path.get("title", active_path_title)
+                            st.markdown(f"##### Recommended Pathway ({daily_path_idx + 1}/{len(action_paths)}): {active_path_title} (`⏱️ {path.get('duration', '5 min')}`)")
                             st.write(path.get("description", ""))
                             for s_idx, step in enumerate(path.get("steps", []), 1):
                                 st.markdown(f"**Step {s_idx}:** {step}")
@@ -10877,33 +10987,33 @@ def render_workspace():
                                     api_submit_feedback(
                                         recommendation_id=int(report.history_id) if getattr(report, "history_id", None) else 1,
                                         accepted_or_rejected="accepted",
-                                        report_data={"title": rec.get("title", "Practice"), "category": rec.get("category", "Well-Being")},
+                                        report_data={"title": active_path_title, "category": rec.get("category", "Well-Being")},
                                         api_token=st.session_state.get("api_token")
                                     )
                                 except Exception:
                                     pass
+                                st.session_state["decline_prompt_daily_reflection"] = False
                                 st.toast("Practice accepted and recorded in your care adoption log.", icon="🎯")
                                 st.rerun()
                         with act_b2:
                             if st.button("❌ Decline / Skip", type="secondary", width="stretch", key="elevated_decline_rec_btn"):
-                                if "suggestion_feedback" not in st.session_state:
-                                    st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
-                                st.session_state["suggestion_feedback"]["rejected"] += 1
-                                try:
-                                    api_submit_feedback(
-                                        recommendation_id=int(report.history_id) if getattr(report, "history_id", None) else 1,
-                                        accepted_or_rejected="rejected",
-                                        report_data={"title": rec.get("title", "Practice"), "category": rec.get("category", "Well-Being")},
-                                        api_token=st.session_state.get("api_token")
-                                    )
-                                except Exception:
-                                    pass
-                                st.toast("Suggestion declined. Feedback logged in database for adaptive tailoring.", icon="🌿")
+                                st.session_state["decline_prompt_daily_reflection"] = True
                                 st.rerun()
                         with act_b3:
                             if st.button("🎯 Full Care Hub →", type="secondary", width="stretch", key="elevated_open_hub_btn"):
                                 set_active_view("🎯 Personalized Recommendations")
                                 st.rerun()
+
+                        _render_decline_reason_box(
+                            context_key="daily_reflection",
+                            rec_title=str(active_path_title),
+                            emotion=report.dominant_emotion,
+                            rec_category=rec.get("category", "Well-Being"),
+                            recommendation_id=int(report.history_id) if getattr(report, "history_id", None) else 1,
+                            action_paths=action_paths,
+                            path_state_key=daily_path_key,
+                            api_token=st.session_state.get("api_token"),
+                        )
 
                         fb_live = st.session_state.get("suggestion_feedback", {"accepted": 4, "rejected": 1})
                         tot_fb = fb_live.get("accepted", 0) + fb_live.get("rejected", 0)
