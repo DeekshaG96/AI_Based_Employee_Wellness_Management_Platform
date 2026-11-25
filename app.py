@@ -2818,9 +2818,9 @@ table tbody tr:hover td {
 
         # Distinct Dedicated Authentication Portals (Employee vs Administrator)
         tab_user_login, tab_admin_login, tab_register = st.tabs([
-            "👤 Employee Login",
-            "🛡️ Administrator Login",
-            "✨ Create Account",
+            "👤 User Login",
+            "🛡️ Admin Login",
+            "✨ Sign Up",
         ])
 
         # ---------------------------------------------------------------------
@@ -2843,15 +2843,15 @@ table tbody tr:hover td {
             with st.form("user_portal_login_form"):
                 user_email = st.text_input(
                     "Employee Email Address",
-                    value="alex@example.com",
-                    placeholder="alex@example.com or your.name@enterprise.com",
+                    value="",
+                    placeholder="e.g. your.name@company.com",
                     key="user_portal_email_input",
                 )
                 user_password = st.text_input(
                     "Employee Password",
-                    value="password123",
+                    value="",
                     type="password",
-                    placeholder="Enter your employee password",
+                    placeholder="Enter your password",
                     key="user_portal_password_input",
                 )
                 st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
@@ -2868,7 +2868,7 @@ table tbody tr:hover td {
                     email_clean = user_email.strip().lower()
                     roles = _get_account_roles()
                     if roles.get(email_clean) == "admin" or email_clean == "admin@equimind.internal":
-                        st.error("🛡️ This email is registered as an Administrator account. Please sign in via the Administrator Login tab, or use a separate Employee email.")
+                        st.error("🛡️ This email is registered as an Administrator account. Please sign in via the Admin Login tab, or use a separate Employee email.")
                     else:
                         with st.spinner("Authorizing employee access..."):
                             success = False
@@ -2895,24 +2895,6 @@ table tbody tr:hover td {
                                 st.toast("Employee session authorized! Loading User Dashboard...", icon="👤")
                                 st.rerun()
 
-            st.markdown(
-                '<div style="text-align: center; margin: 8px 0 4px 0; font-size: 0.74rem; color: #94a3b8;">— or use fast 1-click credentials —</div>',
-                unsafe_allow_html=True,
-            )
-            if st.button("⚡ 1-Click Employee Demo Login (alex@example.com)", width="stretch", key="quick_demo_user_btn"):
-                _get_account_roles()["alex@example.com"] = "user"
-                st.session_state.pop("equimind_nav_view", None)
-                st.session_state.logged_in = True
-                st.session_state.user_id = 101
-                st.session_state.user_name = "Alex Mercer"
-                st.session_state.user_email = "alex@example.com"
-                st.session_state["is_admin"] = False
-                st.session_state["user_role"] = "user"
-                st.session_state["nav_redirect"] = "📈"
-                st.session_state.api_token = "equimind_demo_user_token"
-                st.toast("Signed in as Employee! Opening User Dashboard...", icon="👤")
-                st.rerun()
-
         # ---------------------------------------------------------------------
         # 2. DEDICATED ADMINISTRATOR / EXECUTIVE LOGIN PORTAL
         # ---------------------------------------------------------------------
@@ -2933,15 +2915,15 @@ table tbody tr:hover td {
             with st.form("admin_portal_login_form"):
                 admin_email = st.text_input(
                     "Administrator Email Address",
-                    value="admin@equimind.internal",
-                    placeholder="admin@equimind.internal or admin@enterprise.com",
+                    value="",
+                    placeholder="e.g. admin@equimind.internal",
                     key="admin_portal_email_input",
                 )
                 admin_password = st.text_input(
                     "Administrator Security Key / Password",
-                    value="adminpass123",
+                    value="",
                     type="password",
-                    placeholder="Enter administrative credentials",
+                    placeholder="Enter administrator password",
                     key="admin_portal_password_input",
                 )
                 st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
@@ -2958,7 +2940,7 @@ table tbody tr:hover td {
                     admin_email_clean = admin_email.strip().lower()
                     roles = _get_account_roles()
                     if roles.get(admin_email_clean) == "user" or admin_email_clean == "alex@example.com":
-                        st.error(f"🚫 Access Denied: '{admin_email.strip()}' is registered as a standard Employee account and does not have Administrator privileges. Use an Administrator email (such as admin@equimind.internal) or sign in via Employee Login.")
+                        st.error(f"🚫 Access Denied: '{admin_email.strip()}' is registered as a standard Employee account and does not have Administrator privileges. Use an Administrator email (such as admin@equimind.internal) or sign in via User Login.")
                     else:
                         with st.spinner("Authenticating administrative privileges..."):
                             success = False
@@ -2984,24 +2966,6 @@ table tbody tr:hover td {
                             if success:
                                 st.toast("Administrator access granted! Loading Admin Dashboard...", icon="🛡️")
                                 st.rerun()
-
-            st.markdown(
-                '<div style="text-align: center; margin: 8px 0 4px 0; font-size: 0.74rem; color: #94a3b8;">— or use fast 1-click admin demo —</div>',
-                unsafe_allow_html=True,
-            )
-            if st.button("⚡ 1-Click Admin Demo Login (admin@equimind.internal)", width="stretch", key="quick_demo_admin_btn"):
-                _get_account_roles()["admin@equimind.internal"] = "admin"
-                st.session_state.pop("equimind_nav_view", None)
-                st.session_state.logged_in = True
-                st.session_state.user_id = 999
-                st.session_state.user_name = "Platform Administrator"
-                st.session_state.user_email = "admin@equimind.internal"
-                st.session_state["is_admin"] = True
-                st.session_state["user_role"] = "admin"
-                st.session_state["nav_redirect"] = "🛡️"
-                st.session_state.api_token = "equimind_demo_admin_token"
-                st.toast("Signed in as Administrator! Opening Admin Dashboard...", icon="🛡️")
-                st.rerun()
 
         # ---------------------------------------------------------------------
         # 3. CREATE ACCOUNT / ENROLL PROFILE
