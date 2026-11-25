@@ -1977,22 +1977,35 @@ def _render_mood_trend() -> None:
     st.caption("Each point is a saved journal analysis. The score reflects text sentiment, not a clinical assessment.")
 
 
+def _get_account_roles() -> dict[str, str]:
+    """Maintain session-scoped role assignments for email separation between portals."""
+    if "account_roles" not in st.session_state:
+        st.session_state["account_roles"] = {
+            "alex@example.com": "user",
+            "admin@equimind.internal": "admin",
+        }
+    return st.session_state["account_roles"]
+
+
 def _apply_auth(auth: dict, target_view: str | None = None, is_admin: bool = False):
     """Store the API-issued session for this Streamlit browser session and route to the corresponding dashboard."""
     st.session_state.last_analysis_report = None
     st.session_state["mood_journal_entry"] = ""
+    st.session_state.pop("equimind_nav_view", None)
     user = auth["user"]
     st.session_state.logged_in = True
     st.session_state.api_token = auth["access_token"]
     st.session_state.user_id = user["id"]
     st.session_state.user_name = user["name"]
     st.session_state.user_email = user["email"]
-    computed_admin = is_admin or ("admin" in str(user.get("email", "")).lower())
-    st.session_state["is_admin"] = computed_admin
-    st.session_state["user_role"] = "admin" if computed_admin else "user"
+    email_key = str(user.get("email", "")).strip().lower()
+    roles = _get_account_roles()
+    roles[email_key] = "admin" if is_admin else "user"
+    st.session_state["is_admin"] = bool(is_admin)
+    st.session_state["user_role"] = "admin" if is_admin else "user"
     if target_view:
         st.session_state["nav_redirect"] = target_view
-    elif computed_admin:
+    elif is_admin:
         st.session_state["nav_redirect"] = "🛡️"
     else:
         st.session_state["nav_redirect"] = "📈"
@@ -2852,34 +2865,43 @@ table tbody tr:hover td {
                 if not user_email or not user_password:
                     st.warning("Please enter your employee email and password to proceed.")
                 else:
-                    with st.spinner("Authorizing employee access..."):
-                        success = False
-                        try:
-                            auth = api_login(user_email.strip(), user_password)
-                            _apply_auth(auth, target_view="📈", is_admin=False)
-                            success = True
-                        except Exception:
-                            email_name = user_email.split("@")[0].replace(".", " ").replace("_", " ").title()
-                            uid = abs(hash(user_email.strip())) % 10000 or 1
-                            st.session_state.logged_in = True
-                            st.session_state.user_id = uid
-                            st.session_state.user_name = email_name if email_name else "Team Member"
-                            st.session_state.user_email = user_email.strip()
-                            st.session_state["is_admin"] = False
-                            st.session_state["user_role"] = "user"
-                            st.session_state["nav_redirect"] = "📈"
-                            st.session_state.api_token = f"equimind_user_token_{uid}"
-                            success = True
+                    email_clean = user_email.strip().lower()
+                    roles = _get_account_roles()
+                    if roles.get(email_clean) == "admin" or email_clean == "admin@equimind.internal":
+                        st.error("🛡️ This email is registered as an Administrator account. Please sign in via the Administrator Login tab, or use a separate Employee email.")
+                    else:
+                        with st.spinner("Authorizing employee access..."):
+                            success = False
+                            try:
+                                auth = api_login(user_email.strip(), user_password)
+                                _apply_auth(auth, target_view="📈", is_admin=False)
+                                success = True
+                            except Exception:
+                                email_name = user_email.split("@")[0].replace(".", " ").replace("_", " ").title()
+                                uid = abs(hash(email_clean)) % 10000 or 1
+                                roles[email_clean] = "user"
+                                st.session_state.pop("equimind_nav_view", None)
+                                st.session_state.logged_in = True
+                                st.session_state.user_id = uid
+                                st.session_state.user_name = email_name if email_name else "Team Member"
+                                st.session_state.user_email = user_email.strip()
+                                st.session_state["is_admin"] = False
+                                st.session_state["user_role"] = "user"
+                                st.session_state["nav_redirect"] = "📈"
+                                st.session_state.api_token = f"equimind_user_token_{uid}"
+                                success = True
 
-                        if success:
-                            st.toast("Employee session authorized! Loading User Dashboard...", icon="👤")
-                            st.rerun()
+                            if success:
+                                st.toast("Employee session authorized! Loading User Dashboard...", icon="👤")
+                                st.rerun()
 
             st.markdown(
                 '<div style="text-align: center; margin: 8px 0 4px 0; font-size: 0.74rem; color: #94a3b8;">— or use fast 1-click credentials —</div>',
                 unsafe_allow_html=True,
             )
             if st.button("⚡ 1-Click Employee Demo Login (alex@example.com)", width="stretch", key="quick_demo_user_btn"):
+                _get_account_roles()["alex@example.com"] = "user"
+                st.session_state.pop("equimind_nav_view", None)
                 st.session_state.logged_in = True
                 st.session_state.user_id = 101
                 st.session_state.user_name = "Alex Mercer"
@@ -2933,34 +2955,43 @@ table tbody tr:hover td {
                 if not admin_email or not admin_password:
                     st.warning("Please enter your administrator email and password.")
                 else:
-                    with st.spinner("Authenticating administrative privileges..."):
-                        success = False
-                        try:
-                            auth = api_login(admin_email.strip(), admin_password)
-                            _apply_auth(auth, target_view="🛡️", is_admin=True)
-                            success = True
-                        except Exception:
-                            email_name = admin_email.split("@")[0].replace(".", " ").replace("_", " ").title()
-                            uid = abs(hash(admin_email.strip())) % 10000 or 999
-                            st.session_state.logged_in = True
-                            st.session_state.user_id = uid
-                            st.session_state.user_name = f"Admin ({email_name})" if email_name else "Platform Administrator"
-                            st.session_state.user_email = admin_email.strip()
-                            st.session_state["is_admin"] = True
-                            st.session_state["user_role"] = "admin"
-                            st.session_state["nav_redirect"] = "🛡️"
-                            st.session_state.api_token = f"equimind_admin_token_{uid}"
-                            success = True
+                    admin_email_clean = admin_email.strip().lower()
+                    roles = _get_account_roles()
+                    if roles.get(admin_email_clean) == "user" or admin_email_clean == "alex@example.com":
+                        st.error(f"🚫 Access Denied: '{admin_email.strip()}' is registered as a standard Employee account and does not have Administrator privileges. Use an Administrator email (such as admin@equimind.internal) or sign in via Employee Login.")
+                    else:
+                        with st.spinner("Authenticating administrative privileges..."):
+                            success = False
+                            try:
+                                auth = api_login(admin_email.strip(), admin_password)
+                                _apply_auth(auth, target_view="🛡️", is_admin=True)
+                                success = True
+                            except Exception:
+                                email_name = admin_email.split("@")[0].replace(".", " ").replace("_", " ").title()
+                                uid = abs(hash(admin_email_clean)) % 10000 or 999
+                                roles[admin_email_clean] = "admin"
+                                st.session_state.pop("equimind_nav_view", None)
+                                st.session_state.logged_in = True
+                                st.session_state.user_id = uid
+                                st.session_state.user_name = f"Admin ({email_name})" if email_name else "Platform Administrator"
+                                st.session_state.user_email = admin_email.strip()
+                                st.session_state["is_admin"] = True
+                                st.session_state["user_role"] = "admin"
+                                st.session_state["nav_redirect"] = "🛡️"
+                                st.session_state.api_token = f"equimind_admin_token_{uid}"
+                                success = True
 
-                        if success:
-                            st.toast("Administrator access granted! Loading Admin Dashboard...", icon="🛡️")
-                            st.rerun()
+                            if success:
+                                st.toast("Administrator access granted! Loading Admin Dashboard...", icon="🛡️")
+                                st.rerun()
 
             st.markdown(
                 '<div style="text-align: center; margin: 8px 0 4px 0; font-size: 0.74rem; color: #94a3b8;">— or use fast 1-click admin demo —</div>',
                 unsafe_allow_html=True,
             )
             if st.button("⚡ 1-Click Admin Demo Login (admin@equimind.internal)", width="stretch", key="quick_demo_admin_btn"):
+                _get_account_roles()["admin@equimind.internal"] = "admin"
+                st.session_state.pop("equimind_nav_view", None)
                 st.session_state.logged_in = True
                 st.session_state.user_id = 999
                 st.session_state.user_name = "Platform Administrator"
@@ -3002,7 +3033,10 @@ table tbody tr:hover td {
                         except ApiError as exc:
                             st.error(str(exc))
                         except Exception:
-                            uid = abs(hash(reg_email.strip())) % 10000 or 2
+                            reg_email_clean = reg_email.strip().lower()
+                            uid = abs(hash(reg_email_clean)) % 10000 or 2
+                            _get_account_roles()[reg_email_clean] = "admin" if is_adm_choice else "user"
+                            st.session_state.pop("equimind_nav_view", None)
                             st.session_state.logged_in = True
                             st.session_state.user_id = uid
                             st.session_state.user_name = reg_name.strip()
@@ -4568,7 +4602,14 @@ def render_zen_companion_3d_widget(scenario: str = "balanced") -> str:
 
 
 def render_team_health_view():
-    """Render Google Stitch-inspired Team Wellbeing Intelligence & 3D Companion."""
+    """Render Team Wellbeing Intelligence & 3D Companion (Administrator Access Only)."""
+    if not st.session_state.get("is_admin", False):
+        st.error("🔒 Access Restricted: Organizational Team Health Intelligence requires Administrator privileges.")
+        if st.button("← Return to User Dashboard", key="team_health_block_return_btn"):
+            set_active_view("📈")
+            st.rerun()
+        return
+
     refreshed_at = st.session_state.get("team_insights_refreshed_at", "Just now (Live Telemetry)")
 
     st.markdown(
@@ -8803,38 +8844,71 @@ def render_sidebar():
             st.toast(f"Language set to {chosen_lang_label}", icon="🌐")
             st.rerun()
 
-        # Quick 2-Dashboard Switcher
-        st.markdown(
-            """
-            <div style="font-size: 0.68rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 4px 2px; display: flex; align-items: center; gap: 6px;">
-                <span>⚡</span> <span>2 Dedicated Dashboards</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        dash_c1, dash_c2 = st.columns(2, gap="small")
-        with dash_c1:
-            if st.button("📈 User", width="stretch", key="sidebar_quick_user_dash", help="Open Employee / User Dashboard"):
-                set_active_view("📈")
-                st.rerun()
-        with dash_c2:
-            if st.button("🛡️ Admin", width="stretch", key="sidebar_quick_admin_dash", help="Open Executive / Admin Dashboard"):
-                set_active_view("🛡️")
-                st.rerun()
+        is_admin_active = bool(st.session_state.get("is_admin", False))
+
+        # Role-Scoped Quick Switcher
+        if is_admin_active:
+            st.markdown(
+                """
+                <div style="font-size: 0.68rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 4px 2px; display: flex; align-items: center; gap: 6px;">
+                    <span>🛡️</span> <span>Admin & Portal Switcher</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            dash_c1, dash_c2 = st.columns(2, gap="small")
+            with dash_c1:
+                if st.button("🛡️ Admin", width="stretch", key="sidebar_quick_admin_dash", help="Open Executive / Admin Dashboard"):
+                    set_active_view("🛡️")
+                    st.rerun()
+            with dash_c2:
+                if st.button("📈 User", width="stretch", key="sidebar_quick_user_dash", help="Preview Employee / User Dashboard"):
+                    set_active_view("📈")
+                    st.rerun()
+        else:
+            st.markdown(
+                """
+                <div style="font-size: 0.68rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 4px 2px; display: flex; align-items: center; gap: 6px;">
+                    <span>⚡</span> <span>Quick Workspace</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            dash_c1, dash_c2 = st.columns(2, gap="small")
+            with dash_c1:
+                if st.button("💬 Reflect", width="stretch", key="sidebar_quick_reflect", help="Open Daily Reflection"):
+                    set_active_view("💬")
+                    st.rerun()
+            with dash_c2:
+                if st.button("📈 My Stats", width="stretch", key="sidebar_quick_user_dash", help="Open Personal User Dashboard"):
+                    set_active_view("📈")
+                    st.rerun()
 
         st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 8px 0 2px 4px;">Navigation Menu</p>', unsafe_allow_html=True)
-        base_nav = [
-            ("💬", "Daily Reflection", "nav_reflection"),
-            ("📈", "User Dashboard", "nav_trends"),
-            ("🛡️", "Admin Dashboard", "nav_admin"),
-            ("🎯", "Personalized Recommendations", "nav_recommendations"),
-            ("🤖", "EquiAI Chat Companion", "nav_companion"),
-            ("🧘", "Somatic Care & Yoga", "nav_somatic"),
-            ("📊", "Holistic Habit Matrix", "nav_habits"),
-            ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
-            ("📁", "Batch Data Ingestion", "nav_batch"),
-            ("👥", "Team Health Pulse", "nav_team"),
-        ]
+        if is_admin_active:
+            base_nav = [
+                ("🛡️", "Admin Dashboard", "nav_admin"),
+                ("👥", "Team Health Pulse", "nav_team"),
+                ("📈", "User Dashboard", "nav_trends"),
+                ("💬", "Daily Reflection", "nav_reflection"),
+                ("🎯", "Personalized Recommendations", "nav_recommendations"),
+                ("🤖", "EquiAI Chat Companion", "nav_companion"),
+                ("🧘", "Somatic Care & Yoga", "nav_somatic"),
+                ("📊", "Holistic Habit Matrix", "nav_habits"),
+                ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
+                ("📁", "Batch Data Ingestion", "nav_batch"),
+            ]
+        else:
+            base_nav = [
+                ("💬", "Daily Reflection", "nav_reflection"),
+                ("📈", "User Dashboard", "nav_trends"),
+                ("🎯", "Personalized Recommendations", "nav_recommendations"),
+                ("🤖", "EquiAI Chat Companion", "nav_companion"),
+                ("🧘", "Somatic Care & Yoga", "nav_somatic"),
+                ("📊", "Holistic Habit Matrix", "nav_habits"),
+                ("🎮", "Zen Canvas & De-Stress", "nav_canvas"),
+                ("📁", "Batch Data Ingestion", "nav_batch"),
+            ]
 
         active_lang = st.session_state.get("app_language", "en")
         nav_options = []
@@ -8880,6 +8954,8 @@ def render_sidebar():
             st.session_state.user_email = None
             st.session_state["is_admin"] = False
             st.session_state["user_role"] = "user"
+            st.session_state.pop("equimind_nav_view", None)
+            st.session_state.pop("nav_redirect", None)
             st.session_state.last_analysis_report = None
             st.session_state["mood_journal_entry"] = ""
             st.rerun()
@@ -9294,14 +9370,22 @@ def render_user_dashboard_view():
         unsafe_allow_html=True,
     )
 
-    # Fast Portal Switcher
+    # Role-Scoped Portal Action Bar
     u_bar_c1, u_bar_c2 = st.columns([3, 1.2], gap="small")
-    with u_bar_c1:
-        st.caption("🔒 **Employee View Active:** Displaying individual longitudinal trends. Switch to Admin Dashboard for organization telemetry.")
-    with u_bar_c2:
-        if st.button("🛡️ Open Admin Dashboard →", width="stretch", key="user_dash_jump_admin_btn", help="Switch to Executive Admin Dashboard"):
-            set_active_view("🛡️")
-            st.rerun()
+    if st.session_state.get("is_admin", False):
+        with u_bar_c1:
+            st.caption("🛡️ **Administrator Preview:** Inspecting personal analytics template. Return to Admin Dashboard for enterprise telemetry.")
+        with u_bar_c2:
+            if st.button("🛡️ Back to Admin Dashboard →", width="stretch", key="user_dash_jump_admin_btn", help="Return to Executive Admin Dashboard"):
+                set_active_view("🛡️")
+                st.rerun()
+    else:
+        with u_bar_c1:
+            st.caption("🔒 **Private Employee Space:** All emotional trends, journal records, and well-being metrics belong strictly to your personal account.")
+        with u_bar_c2:
+            if st.button("💬 New Daily Reflection →", width="stretch", key="user_dash_jump_reflect_btn", help="Log a new private reflection"):
+                set_active_view("💬")
+                st.rerun()
 
     # High-Level Metric Tiles (Symmetrical 2x3 Grid — prevents text truncation & uneven card heights)
     pos_log_lbl = "1 log" if pos_count == 1 else f"{pos_count} logs"
@@ -9932,6 +10016,13 @@ def render_admin_dashboard_view():
        - 6. Reports (Report id, user id, username, timestamp)
     5. Master JSON & CSV Database Export Center.
     """
+    if not st.session_state.get("is_admin", False):
+        st.error("🔒 Access Restricted: Administrator privileges are required to view the Admin Dashboard.")
+        if st.button("← Return to User Dashboard", key="admin_access_denied_return_btn"):
+            set_active_view("📈")
+            st.rerun()
+        return
+
     # -------------------------------------------------------------------------
     # 1. EXECUTIVE OPERATIONAL HEADER
     # -------------------------------------------------------------------------
@@ -10123,12 +10214,12 @@ def render_admin_dashboard_view():
 
     with c_graph2, st.container(border=True):
         st.markdown(
-            """
+            f"""
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="font-weight: 700; font-size: 0.90rem; color: #0f172a;">🎯 Care Recommendation Adoption Rate</span>
                 <span style="font-size: 0.72rem; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 6px; color: #166534; font-weight: 700;">Rate: {acc_rate:.1f}%</span>
             </div>
-            """.format(acc_rate=acc_rate),
+            """,
             unsafe_allow_html=True,
         )
         fb_accepted = int((acc_rate / 100.0) * max(10, rec_usage))
@@ -11228,13 +11319,21 @@ def render_workspace():
     # 🛡️ ADMIN DASHBOARD — ENTERPRISE TELEMETRY & DATABASE OPERATIONS
     # ---------------------------------------------------------------------------
     elif active_nav.startswith("🛡️"):
-        render_admin_dashboard_view()
+        if st.session_state.get("is_admin", False):
+            render_admin_dashboard_view()
+        else:
+            st.error("🔒 Access Restricted: Administrator privileges are required for this view.")
+            render_user_dashboard_view()
 
     elif active_nav.startswith("🧘"):
         render_wellness_tools_view()
 
     elif active_nav.startswith("👥"):
-        render_team_health_view()
+        if st.session_state.get("is_admin", False):
+            render_team_health_view()
+        else:
+            st.error("🔒 Access Restricted: Organizational Team Health Intelligence is available only to Administrators.")
+            render_user_dashboard_view()
 
     elif active_nav.startswith(("🔬", "🔒")):
         st.markdown("#### Confidentiality, Privacy & Clinical Boundaries")
