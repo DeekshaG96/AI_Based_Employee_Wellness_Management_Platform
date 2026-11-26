@@ -4096,8 +4096,8 @@ def render_sos_vagal_reset_banner():
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: 1.6rem;">⚡</span>
                             <div>
-                                <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800; color: #5eead4;">60-Second Parasympathetic SOS Reset</h3>
-                                <small style="color: #a7f3d0; font-size: 0.80rem;">Physiological Sigh & Vagal Nerve De-escalation Protocol</small>
+                                <div style="margin: 0; font-size: 1.3rem; font-weight: 800; color: #5eead4; line-height: 1.2;">60-Second Parasympathetic SOS Reset</div>
+                                <div style="color: #a7f3d0; font-size: 0.80rem; margin-top: 2px;">Physiological Sigh & Vagal Nerve De-escalation Protocol</div>
                             </div>
                         </div>
                         <span style="background: rgba(45, 212, 191, 0.2); border: 1px solid #2dd4bf; color: #5eead4; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;">
@@ -10177,8 +10177,8 @@ def render_admin_dashboard_view():
                         <span style="background: rgba(45, 212, 191, 0.18); border: 1px solid rgba(45, 212, 191, 0.45); color: #5eead4; font-weight: 700; font-size: 0.70rem; padding: 2px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.06em;">Executive Command Center</span>
                         <span style="background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(74, 222, 128, 0.40); color: #86efac; font-weight: 700; font-size: 0.70rem; padding: 2px 9px; border-radius: 6px;">● 6 Entities Online · {refreshed_ts}</span>
                     </div>
-                    <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 700; color: #ffffff !important; letter-spacing: -0.02em;">🛡️ Admin Dashboard — Enterprise Telemetry & Governance</h2>
-                    <p style="margin: 4px 0 0 0; color: #cbd5e1 !important; font-size: 0.86rem;">Organization-wide engagement, anonymized burnout radar, care adoption feedback, and relational data audit.</p>
+                    <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.62rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; line-height: 1.2;">🛡️ Admin Dashboard — Enterprise Telemetry & Governance</div>
+                    <div style="margin: 4px 0 0 0; color: #cbd5e1; font-size: 0.86rem; line-height: 1.4;">Organization-wide engagement, anonymized burnout radar, care adoption feedback, and relational data audit.</div>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <span style="background: rgba(255, 255, 255, 0.10); border: 1px solid rgba(255, 255, 255, 0.20); padding: 4px 12px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #e2e8f0;">🔒 k-Anonymity (k=5)</span>
@@ -10226,11 +10226,46 @@ def render_admin_dashboard_view():
                     "🎯 Doesn't match how I feel",
                 ]
                 with st.spinner("Ingesting 20 departmental reflections & syncing all 6 database tables..."):
+                    _orig_uid = st.session_state.get("user_id")
+                    _orig_uname = st.session_state.get("user_name")
+                    _sim_users: list[tuple[int, str]] = []
+                    try:
+                        from wellness.storage import connect_database, register_user
+
+                        _conn_sim = connect_database()
+                        _sim_profiles = [
+                            ("Maya Lin", "maya.lin@equimind.internal", "Engineering", "Staff Engineer"),
+                            ("Liam Patel", "liam.patel@equimind.internal", "Design", "Lead Product Designer"),
+                            ("Elena Rostova", "elena.rostova@equimind.internal", "Product", "Product Manager"),
+                            ("Noah Brooks", "noah.brooks@equimind.internal", "Support", "Enterprise Support Lead"),
+                            ("Sofia Alvarez", "sofia.alvarez@equimind.internal", "People / HR", "People Partner"),
+                        ]
+                        for _p_name, _p_email, _p_dept, _p_role in _sim_profiles:
+                            try:
+                                _uid_new = register_user(_conn_sim, _p_name, _p_email, "EquiMindSim123!")
+                                _conn_sim.execute(
+                                    "UPDATE users SET profile_details = ? WHERE id = ?",
+                                    (json.dumps({"role": _p_role, "department": _p_dept}), _uid_new),
+                                )
+                                _conn_sim.commit()
+                                _sim_users.append((_uid_new, _p_name))
+                            except Exception:
+                                row = _conn_sim.execute("SELECT id, name FROM users WHERE email = ?", (_p_email,)).fetchone()
+                                if row:
+                                    _sim_users.append((int(row["id"]), str(row["name"])))
+                    except Exception:
+                        pass
+
                     sim_token = st.session_state.get("api_token")
-                    for idx_sim, (text, dept, tags) in enumerate(SIMULATION_BATCH):
-                        try:
-                            rep = api_analyze(text, sim_token, f"[{dept}] {' '.join(tags)}")
-                            if rep and getattr(rep, "history_id", None):
+                    try:
+                        for idx_sim, (text, dept, tags) in enumerate(SIMULATION_BATCH):
+                            try:
+                                if _sim_users:
+                                    suid, suname = _sim_users[idx_sim % len(_sim_users)]
+                                    st.session_state["user_id"] = suid
+                                    st.session_state["user_name"] = suname
+                                rep = api_analyze(text, sim_token, f"[{dept}] {' '.join(tags)}")
+                                rec_id = int(getattr(rep, "history_id", None) or (idx_sim + 1))
                                 is_rej = (idx_sim % 5) == 4
                                 feed_status = "rejected" if is_rej else "accepted"
                                 fb_payload = {
@@ -10240,13 +10275,16 @@ def render_admin_dashboard_view():
                                 if is_rej:
                                     fb_payload["decline_reason"] = sim_reasons[idx_sim % len(sim_reasons)]
                                 api_submit_feedback(
-                                    recommendation_id=int(rep.history_id),
+                                    recommendation_id=rec_id,
                                     accepted_or_rejected=feed_status,
                                     report_data=fb_payload,
                                     api_token=sim_token,
                                 )
-                        except Exception:
-                            pass
+                            except Exception:
+                                pass
+                    finally:
+                        st.session_state["user_id"] = _orig_uid
+                        st.session_state["user_name"] = _orig_uname
                     st.toast("20 departmental check-ins ingested across all 6 relational database tables!", icon="🚀")
                     st.rerun()
 
@@ -10257,76 +10295,6 @@ def render_admin_dashboard_view():
                 st.rerun()
 
         with cmd_c3:
-            if st.button("👥 Team Pulse →", width="stretch", key="admin_jump_team_btn"):
-                set_active_view("👥")
-                st.rerun()
-
-        with cmd_c4:
-            if st.button("📈 User View →", width="stretch", key="admin_jump_trends_btn"):
-                set_active_view("📈")
-                st.rerun()
-
-    # -------------------------------------------------------------------------
-    # FETCH TELEMETRY & DATABASE ENTITIES
-    # -------------------------------------------------------------------------
-    try:
-        admin_stats = api_get_admin_analytics(st.session_state.get("api_token"))
-    except Exception:
-        admin_stats = {}
-
-    try:
-        entries = api_history(st.session_state.user_id, st.session_state.api_token)
-    except Exception:
-        entries = []
-
-    try:
-        db_all = api_get_database_entities(st.session_state.get("api_token"))
-    except Exception:
-        db_all = {}
-
-    users_list = db_all.get("users", []) or [
-        {
-            "id": 1,
-            "name": st.session_state.get("user_name", "Team Member"),
-            "email": st.session_state.get("user_email", "member@equimind.internal"),
-            "profile_details": {"role": "Senior Engineer", "department": "Core Platform"},
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        }
-    ]
-    journals_list = db_all.get("journal_entries", []) or [
-        {
-            "id": int(r["id"]),
-            "user_id": 1,
-            "journal_text": str(r["original_text"]),
-            "timestamp": str(r["created_at"]),
-        }
-        for r in entries[:15]
-    ]
-    recs_list = db_all.get("recommendations", []) or [
-        {
-            "id": int(r["id"]),
-            "user_id": 1,
-            "title": f"Pathway for {r.get('dominant_emotion', 'neutral')}",
-            "category": "Well-Being",
-            "report_data": {"dominant_emotion": r.get("dominant_emotion")},
-        }
-        for r in entries[:15]
-    ]
-    audits_list = db_all.get("audit_trails", []) or [
-        {
-            "id": int(r["id"]),
-            "user_id": 1,
-            "username": st.session_state.get("user_name", "Team Member"),
-            "journal_id": int(r["id"]),
-            "recommendation": "Care practice delivered",
-            "timestamp": str(r["created_at"]),
-        }
-        for r in entries[:15]
-    ]
-    feedback_list = db_all.get("user_feedback", []) or [
-        {
-            "id": 1,
-            "recommendation_id": 1,
             "report_data": {"practice": "Diaphragmatic Breathwork"},
             "accepted_or_rejected": "accepted",
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -10342,11 +10310,19 @@ def render_admin_dashboard_view():
         for r in entries[:15]
     ]
 
-    total_reg = admin_stats.get("total_registered_users", max(len(users_list), 8))
-    act_users = admin_stats.get("active_users", max(1, min(total_reg, 6)))
+    total_reg = max(admin_stats.get("total_registered_users", 1), len(users_list))
+    act_users = max(admin_stats.get("active_users", 1), 1)
     tot_recs_ana = admin_stats.get("total_recommendations_analysis", len(entries) * 2 if entries else 32)
     rec_usage = admin_stats.get("recommendation_usage", max(len(recs_list), len(entries), 18))
-    acc_rate = admin_stats.get("acceptance_rate", 85.7)
+
+    fb_accepted_raw = sum(1 for f in feedback_list if f.get("accepted_or_rejected") == "accepted")
+    fb_rejected_raw = sum(1 for f in feedback_list if f.get("accepted_or_rejected") == "rejected")
+    if "acceptance_rate" in admin_stats and (admin_stats.get("total_feedback", 0) > 0 or rec_usage > 0):
+        acc_rate = float(admin_stats["acceptance_rate"])
+    elif (fb_accepted_raw + fb_rejected_raw) > 0:
+        acc_rate = round((fb_accepted_raw / (fb_accepted_raw + fb_rejected_raw)) * 100.0, 1)
+    else:
+        acc_rate = 80.0
     api_p = admin_stats.get("api_performance", {
         "avg_response_time_ms": 38.2,
         "p95_response_time_ms": 110.5,
@@ -10481,15 +10457,17 @@ def render_admin_dashboard_view():
                 pie_df,
                 values="Count",
                 names="Feedback",
-                hole=0.58,
+                hole=0.60,
                 color="Feedback",
                 color_discrete_map={"Accepted Practice": "#059669", "Declined / Skipped": "#94a3b8"},
             )
-            fig_pie.update_traces(textinfo="percent+label", textposition="outside")
+            fig_pie.update_traces(textinfo="percent", textposition="inside", insidetextfont={"color": "#ffffff", "size": 12})
             fig_pie.update_layout(
                 height=255,
-                showlegend=False,
-                margin={"l": 10, "r": 10, "t": 10, "b": 10},
+                showlegend=True,
+                legend={"orientation": "h", "yanchor": "bottom", "y": -0.18, "xanchor": "center", "x": 0.5},
+                annotations=[{"text": f"{acc_rate:.0f}%", "x": 0.5, "y": 0.5, "font_size": 20, "showarrow": False, "font_weight": 700, "font_color": "#0f172a"}],
+                margin={"l": 16, "r": 16, "t": 18, "b": 34},
                 paper_bgcolor="rgba(0,0,0,0)",
             )
             st.plotly_chart(fig_pie, width="stretch")
