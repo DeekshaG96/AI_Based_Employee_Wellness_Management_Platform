@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import csv
+import logging
 import os
 import tempfile
+import threading
+import time
+from collections import deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -26,7 +30,7 @@ from wellness.team_analytics import calculate_team_burnout_risk, generate_synthe
 from wellness.wellness_tools import get_cognitive_reframes, get_guided_exercises
 from wellness.yoga import get_all_yoga_remedies, get_yoga_remedy_for_emotion
 
-from .database import create_tables, get_session
+from .database import SessionLocal, create_tables, get_database_status, get_session
 from .models import (
     AuditTrail,
     AuthSession,
@@ -61,19 +65,69 @@ from .schemas import (
     UserInfoResponse,
     UserResponse,
 )
-from .security import current_user, hash_password, issue_session, token_digest, verify_password
+from .security import (
+    admin_email_allowlist,
+    current_user,
+    hash_password,
+    issue_session,
+    normalize_role,
+    require_admin,
+    token_digest,
+    verify_password,
+)
+
+logger = logging.getLogger(__name__)
+
+_telemetry_lock = threading.Lock()
+_latency_samples_ms: deque[float] = deque(maxlen=500)
+_total_requests = 0
+_error_5xx_count = 0
+
+
+def _bootstrap_admin_accounts() -> None:
+    """Apply operator-configured ADMIN_EMAILS and optional ADMIN_BOOTSTRAP_* credentials."""
+    allowlist = admin_email_allowlist()
+    boot_email = os.getenv("ADMIN_BOOTSTRAP_EMAIL", "").strip().lower()
+    boot_pass = os.getenv("ADMIN_BOOTSTRAP_PASSWORD", "")
+    boot_name = os.getenv("ADMIN_BOOTSTRAP_NAME", "Platform Administrator").strip() or "Platform Administrator"
+
+    if not allowlist and not (boot_email and len(boot_pass) >= 8):
+        return
+
+    with SessionLocal() as db:
+        for email in allowlist:
+            existing = db.scalar(select(User).where(User.email == email))
+            if existing and normalize_role(existing.role) != "admin":
+                existing.role = "admin"
+        if boot_email and len(boot_pass) >= 8:
+            existing_boot = db.scalar(select(User).where(User.email == boot_email))
+            if existing_boot is None:
+                db.add(
+                    User(
+                        name=boot_name,
+                        email=boot_email,
+                        password_hash=hash_password(boot_pass),
+                        role="admin",
+                    )
+                )
+            elif normalize_role(existing_boot.role) != "admin":
+                existing_boot.role = "admin"
+        db.commit()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if os.getenv("MOODMENTOR_SKIP_CREATE_TABLES") != "1":
-        create_tables()
+        try:
+            create_tables()
+            _bootstrap_admin_accounts()
+        except Exception as exc:
+            logger.error("Database initialization failed during startup: %s", exc)
     # Eagerly warm up NLP transformer and VADER in a background daemon thread (skip during pytest)
     import sys
     if not ("pytest" in sys.modules or os.getenv("TESTING") == "1"):
-        import threading
-
         from wellness.pipeline import _vader_analyzer, warm_up_emotion_pipeline
+
         _vader_analyzer()
         threading.Thread(target=warm_up_emotion_pipeline, daemon=True, name="nlp_prewarm").start()
     yield
@@ -85,6 +139,28 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def track_api_telemetry(request: Request, call_next):
+    """Measure real API response times and 5xx error counts."""
+    global _total_requests, _error_5xx_count
+    t0 = time.perf_counter()
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
+        if request.url.path != "/health":
+            elapsed_ms = (time.perf_counter() - t0) * 1000.0
+            with _telemetry_lock:
+                _total_requests += 1
+                _latency_samples_ms.append(elapsed_ms)
+                if status_code >= 500:
+                    _error_5xx_count += 1
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -111,18 +187,38 @@ def root() -> dict[str, str]:
 
 
 @app.get("/health", tags=["service"])
-def health(db: Session = Depends(get_session)) -> dict[str, str]:
+def health(db: Session = Depends(get_session)) -> dict[str, Any]:
+    db_stat = get_database_status()
     try:
         db.execute(select(func.count()).select_from(User)).scalar_one()
     except Exception as exc:
         raise HTTPException(status_code=503, detail="Database is unavailable.") from exc
-    return {"status": "ok", "database": "connected"}
+    payload: dict[str, Any] = {"status": "ok", "database": "connected"}
+    if db_stat.get("fallback_active") and db_stat.get("warning"):
+        payload["fallback_active"] = True
+        payload["warning"] = db_stat["warning"]
+    return payload
+
+
+@app.get("/health/database", tags=["service"])
+def database_health(db: Session = Depends(get_session)) -> dict[str, Any]:
+    """Inspect active database backend and fallback health status."""
+    try:
+        db.execute(select(func.count()).select_from(User)).scalar_one()
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Database is unavailable.") from exc
+    return get_database_status()
 
 
 def _auth_response(db: Session, user: User) -> AuthResponse:
     return AuthResponse(
         access_token=issue_session(db, user),
-        user=UserResponse(id=user.id, name=user.name, email=user.email),
+        user=UserResponse(
+            id=user.id,
+            name=user.name,
+            email=user.email,
+            role=normalize_role(getattr(user, "role", None)),
+        ),
     )
 
 
@@ -137,7 +233,13 @@ def register(payload: RegisterRequest, db: Session = Depends(get_session)) -> Au
     existing = db.scalar(select(User).where(User.email == email))
     if existing:
         raise HTTPException(status_code=409, detail="An account with that email already exists.")
-    user = User(name=payload.name, email=email, password_hash=hash_password(payload.password))
+    assigned_role = "admin" if email in admin_email_allowlist() else "employee"
+    user = User(
+        name=payload.name,
+        email=email,
+        password_hash=hash_password(payload.password),
+        role=assigned_role,
+    )
     db.add(user)
     try:
         db.commit()
@@ -156,12 +258,21 @@ def login(payload: LoginRequest, db: Session = Depends(get_session)) -> AuthResp
     user = db.scalar(select(User).where(User.email == email))
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
+    if email in admin_email_allowlist() and normalize_role(user.role) != "admin":
+        user.role = "admin"
+        db.commit()
+        db.refresh(user)
     return _auth_response(db, user)
 
 
 @app.get("/auth/me", response_model=UserResponse, tags=["auth"])
 def me(user: User = Depends(current_user)) -> UserResponse:
-    return UserResponse(id=user.id, name=user.name, email=user.email)
+    return UserResponse(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        role=normalize_role(getattr(user, "role", None)),
+    )
 
 
 @app.post("/auth/logout", response_model=MessageResponse, tags=["auth"])
@@ -433,22 +544,18 @@ def delete_history(
 def analyze_quick(
     payload: AnalyzeRequest,
     db: Session = Depends(get_session),
+    user: User = Depends(current_user),
 ) -> dict[str, Any]:
-    """Analyze single reflection text and sync to database."""
+    """Analyze single reflection text for the authenticated account and sync to database."""
     try:
         report = analyze_text(payload.text, payload.source_name or "web_portal")
-        email = "portal@moodmentor.local"
-        portal_user = db.scalar(select(User).where(User.email == email))
-        if portal_user is None:
-            portal_user = User(
-                name="Portal Explorer",
-                email=email,
-                password_hash=hash_password("portalpass123"),
-            )
-            db.add(portal_user)
-            db.commit()
-            db.refresh(portal_user)
-        saved = _persist_report(db, portal_user, report, "web_portal", payload.source_name or "web_portal")
+        saved = _persist_report(
+            db,
+            user,
+            report,
+            "web_portal",
+            payload.source_name or "web_portal",
+        )
         res = report.to_dict()
         res["id"] = saved.id
         return res
@@ -459,8 +566,12 @@ def analyze_quick(
 
 
 @app.post("/analyze/compare", tags=["evaluation"])
-def compare_models_endpoint(payload: CompareRequest) -> dict[str, Any]:
-    """Compare lexical baseline against fine-tuned DistilBERT transformer for any input text."""
+def compare_models_endpoint(
+    payload: CompareRequest,
+    user: User = Depends(current_user),
+) -> dict[str, Any]:
+    """Compare lexical baseline against fine-tuned DistilBERT transformer for an authenticated user."""
+    del user
     return compare_models(payload.text)
 
 
@@ -477,8 +588,12 @@ def get_reframe_endpoint(emotion: str) -> dict[str, Any]:
 
 
 @app.post("/team/burnout-risk", tags=["wellness"])
-def team_burnout_risk_endpoint(payload: TeamBurnoutRequest) -> dict[str, Any]:
-    """Calculate aggregated Team Burnout Risk Score and Resilience Index."""
+def team_burnout_risk_endpoint(
+    payload: TeamBurnoutRequest,
+    user: User = Depends(require_admin),
+) -> dict[str, Any]:
+    """Calculate aggregated Team Burnout Risk Score and Resilience Index (Admin only)."""
+    del user
     entries = payload.entries
     if not entries:
         entries = generate_synthetic_team_data(days=payload.days, team_size=payload.team_size, scenario=payload.scenario)
@@ -528,38 +643,79 @@ def get_yoga_remedy_endpoint(emotion: str) -> dict[str, Any]:
 
 
 @app.post("/recommend", tags=["recommendations"])
-def recommend_endpoint(payload: RecommendRequest) -> dict[str, Any]:
+def recommend_endpoint(
+    payload: RecommendRequest,
+    user: User = Depends(current_user),
+) -> dict[str, Any]:
     """Generate tailored well-being recommendations and micro-interventions for any emotion."""
+    del user
     lbl_str = payload.sentiment_label.lower()
     lbl = SentimentLabel(lbl_str) if lbl_str in ("positive", "neutral", "negative") else SentimentLabel.NEUTRAL
     return generate_recommendations(payload.emotion.lower(), lbl, payload.compound, payload.text)
 
 
 @app.get("/recommend/{emotion}", tags=["recommendations"])
-def get_recommend_by_emotion_endpoint(emotion: str) -> dict[str, Any]:
+def get_recommend_by_emotion_endpoint(
+    emotion: str,
+    user: User = Depends(current_user),
+) -> dict[str, Any]:
     """Return curated recommendation strategies for a specified emotion."""
+    del user
     return generate_recommendations(emotion.lower(), SentimentLabel.NEUTRAL, 0.0, "")
+
+
+def _measured_api_performance() -> dict[str, Any]:
+    with _telemetry_lock:
+        samples = list(_latency_samples_ms)
+        total = _total_requests
+        errors = _error_5xx_count
+    if not samples or total <= 0:
+        return {
+            "avg_response_time_ms": None,
+            "p95_response_time_ms": None,
+            "error_rate_pct": None,
+            "uptime_pct": None,
+            "status": "No data yet",
+            "sample_count": 0,
+        }
+    samples.sort()
+    avg_ms = round(sum(samples) / len(samples), 2)
+    p95_idx = min(len(samples) - 1, int(0.95 * (len(samples) - 1)))
+    p95_ms = round(samples[p95_idx], 2)
+    err_pct = round((errors / total) * 100.0, 2)
+    avail_pct = round(max(0.0, ((total - errors) / total) * 100.0), 2)
+    return {
+        "avg_response_time_ms": avg_ms,
+        "p95_response_time_ms": p95_ms,
+        "error_rate_pct": err_pct,
+        "uptime_pct": avail_pct,
+        "status": "Optimal" if err_pct < 5.0 else "Degraded",
+        "sample_count": total,
+    }
+
+
+def _redact_report_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
+    """Strip raw private reflection text fields while retaining aggregated telemetry attributes."""
+    if not isinstance(payload, dict):
+        return {}
+    cleaned = dict(payload)
+    for secret_key in ("original_text", "cleaned_text", "processed_text", "vader_input_text"):
+        if secret_key in cleaned:
+            cleaned[secret_key] = "[Redacted]"
+    return cleaned
 
 
 @app.get("/admin/analytics", tags=["admin"])
 def admin_analytics_endpoint(
     db: Session = Depends(get_session),
-    user: User = Depends(current_user),
+    user: User = Depends(require_admin),
 ) -> dict[str, Any]:
-    """Retrieve official Admin Dashboard Analytics metrics:
-    - Total registered users
-    - Active users
-    - Total recommendations/analysis
-    - Recommendation usage (number of recommendations generated)
-    - Acceptance rate (acc recommendations/total recommendations x 100)
-    - API performance (Response time and error rate)
-    """
+    """Retrieve server-enforced Admin Dashboard Analytics from live SQL counts and request telemetry."""
     del user
     total_users = db.scalar(select(func.count()).select_from(User)) or 0
     total_logs = db.scalar(select(func.count()).select_from(MoodLog)) or 0
     total_recs = db.scalar(select(func.count()).select_from(Recommendation)) or 0
-
-    active_users = db.scalar(select(func.count(func.distinct(MoodLog.user_id)))) or min(total_users, 1)
+    active_users = db.scalar(select(func.count(func.distinct(MoodLog.user_id)))) or 0
 
     accepted = db.scalar(
         select(func.count()).select_from(UserFeedback).where(UserFeedback.accepted_or_rejected == "accepted")
@@ -568,29 +724,71 @@ def admin_analytics_endpoint(
         select(func.count()).select_from(UserFeedback).where(UserFeedback.accepted_or_rejected == "rejected")
     ) or 0
     total_fb = accepted + rejected
-    if total_fb > 0:
-        acceptance_rate = round((accepted / total_fb) * 100, 2)
-    elif total_recs > 0:
-        acceptance_rate = 80.0
-    else:
-        acceptance_rate = 0.0
+    acceptance_rate = round((accepted / total_fb) * 100, 2) if total_fb > 0 else None
 
     return {
-        "total_registered_users": max(1, total_users),
-        "active_users": max(1, active_users),
-        "total_recommendations_analysis": total_logs + total_recs,
-        "recommendation_usage": total_recs,
-        "accepted_recommendations": accepted,
-        "rejected_recommendations": rejected,
-        "total_feedback": total_fb,
+        "total_registered_users": int(total_users),
+        "active_users": int(active_users),
+        "total_recommendations_analysis": int(total_logs + total_recs),
+        "recommendation_usage": int(total_recs),
+        "accepted_recommendations": int(accepted),
+        "rejected_recommendations": int(rejected),
+        "total_feedback": int(total_fb),
         "acceptance_rate": acceptance_rate,
-        "api_performance": {
-            "avg_response_time_ms": 42.5,
-            "p95_response_time_ms": 118.0,
-            "error_rate_pct": 0.0,
-            "uptime_pct": 99.98,
-            "status": "Optimal",
-        },
+        "api_performance": _measured_api_performance(),
+        "database_status": get_database_status(),
+    }
+
+
+@app.get("/admin/overview", tags=["admin"])
+def admin_privacy_filtered_overview(
+    db: Session = Depends(get_session),
+    user: User = Depends(require_admin),
+) -> dict[str, Any]:
+    """Return privacy-filtered aggregated organizational telemetry without raw reflection text or PII."""
+    del user
+    users = db.scalars(select(User)).all()
+    logs = db.scalars(select(MoodLog).order_by(MoodLog.created_at.desc())).all()
+    feedback_rows = db.scalars(select(UserFeedback).order_by(UserFeedback.id.desc())).all()
+
+    user_dept: dict[int, str] = {}
+    for u in users:
+        prof = u.profile_details or {}
+        if isinstance(prof, dict) and prof.get("department"):
+            user_dept[u.id] = str(prof["department"])
+
+    records = []
+    for log in logs:
+        src = log.source_name or ""
+        dept = user_dept.get(log.user_id, "General")
+        if "[" in src and "]" in src:
+            parsed = src.split("[", 1)[1].split("]", 1)[0].strip()
+            if parsed:
+                dept = parsed
+        records.append({
+            "department": dept,
+            "dominant_emotion": log.dominant_emotion,
+            "sentiment_label": log.sentiment_label,
+            "compound_score": float(log.compound_score),
+            "created_at": log.created_at.isoformat() if log.created_at else "",
+        })
+
+    feedback_summary = []
+    for fb in feedback_rows[:50]:
+        rd = fb.report_data if isinstance(fb.report_data, dict) else {}
+        feedback_summary.append({
+            "decision": fb.accepted_or_rejected,
+            "department": str(rd.get("department", "General")),
+            "practice": str(rd.get("title") or rd.get("practice") or "Personalized Care Plan"),
+            "decline_reason": rd.get("decline_reason", "") if fb.accepted_or_rejected == "rejected" else "",
+            "timestamp": fb.timestamp.isoformat() if fb.timestamp else "",
+        })
+
+    return {
+        "total_users": len(users),
+        "records": records,
+        "feedback_summary": feedback_summary,
+        "database_status": get_database_status(),
     }
 
 
@@ -621,14 +819,13 @@ def submit_feedback(
     )
 
 
-@app.get("/database/entities", response_model=DatabaseEntitiesResponse, tags=["database"])
+@app.get("/database/entities", response_model=DatabaseEntitiesResponse, tags=["admin"])
 def get_all_database_entities(
     db: Session = Depends(get_session),
-    user: User = Depends(current_user),
+    user: User = Depends(require_admin),
 ) -> DatabaseEntitiesResponse:
-    """Retrieve all 6 stored database entities: Users info, Journal entries,
-    Recommendations, Audit trails, User feedback, and Reports."""
-    del user  # Authenticated access
+    """Retrieve privacy-filtered entity metadata for verified administrators (raw reflection text redacted)."""
+    del user
     users_rows = db.scalars(select(User).order_by(User.id.asc())).all()
     journals_rows = db.scalars(select(JournalEntry).order_by(JournalEntry.id.desc())).all()
     rec_rows = db.scalars(select(Recommendation).order_by(Recommendation.id.desc())).all()
@@ -642,6 +839,7 @@ def get_all_database_entities(
                 id=u.id,
                 name=u.name,
                 email=u.email,
+                role=normalize_role(getattr(u, "role", None)),
                 profile_details=u.profile_details or {},
                 created_at=u.created_at,
             )
@@ -651,7 +849,7 @@ def get_all_database_entities(
             JournalEntryResponse(
                 id=j.id,
                 user_id=j.user_id,
-                journal_text=j.journal_text,
+                journal_text=f"[Redacted private reflection · {len((j.journal_text or '').split())} words]",
                 timestamp=j.timestamp,
             )
             for j in journals_rows
@@ -664,7 +862,7 @@ def get_all_database_entities(
                 category=r.category,
                 urgency=r.urgency,
                 summary=r.summary,
-                report_data=r.report_data or {},
+                report_data=_redact_report_payload(r.report_data),
                 created_at=r.created_at,
             )
             for r in rec_rows
@@ -697,7 +895,7 @@ def get_all_database_entities(
                 user_id=rep.user_id,
                 username=rep.username,
                 timestamp=rep.timestamp,
-                report_data=rep.report_data or {},
+                report_data=_redact_report_payload(rep.report_data),
             )
             for rep in reports_rows
         ],

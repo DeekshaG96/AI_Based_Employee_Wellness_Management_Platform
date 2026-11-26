@@ -144,5 +144,51 @@ def test_six_database_entities_stored_and_retrieved(tmp_path: Path):
     assert len(entities["reports"]) >= 1
     assert entities["reports"][0]["username"] == "Dev User"
 
+    # Privacy-filtered retrieval masks raw reflection text
+    redacted = get_all_database_entities(connection, redact_private_text=True)
+    assert "Sprint retrospective" not in redacted["journal_entries"][0]["journal_text"]
+    assert "Redacted" in redacted["journal_entries"][0]["journal_text"]
+
     connection.close()
+
+
+def test_storage_roles_and_genuine_analytics(tmp_path: Path, monkeypatch):
+    from wellness import api_client
+    from wellness.storage import connect_database, get_admin_analytics, register_user, set_user_role
+
+    db_path = tmp_path / "rbac.db"
+    monkeypatch.setattr("wellness.api_client.is_api_available", lambda: False)
+    monkeypatch.setattr("wellness.storage.connect_database", lambda p=db_path: connect_database(db_path))
+
+    conn = connect_database(db_path)
+    empty_stats = get_admin_analytics(conn)
+    assert empty_stats["total_registered_users"] == 0
+    assert empty_stats["active_users"] == 0
+    assert empty_stats["acceptance_rate"] is None
+
+    register_user(conn, "Emp User", "emp@company.com", "secretpass1")
+    conn.close()
+
+    # Wrong password or nonexistent email must fail with ApiError (no fallback login bypass)
+    with pytest.raises(api_client.ApiError):
+        api_client.login("emp@company.com", "wrong-password")
+    with pytest.raises(api_client.ApiError):
+        api_client.login("nobody@company.com", "anypass123")
+
+    emp_auth = api_client.login("emp@company.com", "secretpass1")
+    assert emp_auth["user"]["role"] == "employee"
+    with pytest.raises(api_client.ApiError):
+        api_client.get_admin_analytics(emp_auth["access_token"])
+    with pytest.raises(api_client.ApiError):
+        api_client.get_database_entities(emp_auth["access_token"])
+
+    conn2 = connect_database(db_path)
+    assert set_user_role(conn2, "emp@company.com", "admin") is True
+    conn2.close()
+
+    adm_auth = api_client.login("emp@company.com", "secretpass1")
+    assert adm_auth["user"]["role"] == "admin"
+    adm_stats = api_client.get_admin_analytics(adm_auth["access_token"])
+    assert adm_stats["total_registered_users"] == 1
+    assert adm_stats["acceptance_rate"] is None
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import os
 import secrets
 from datetime import datetime, timedelta, timezone
 
@@ -18,6 +19,21 @@ from .models import AuthSession, User
 bearer = HTTPBearer(auto_error=False)
 SESSION_DAYS = 30
 PBKDF2_ROUNDS = 310_000
+
+
+def normalize_role(role: str | None) -> str:
+    """Normalize persisted role names to 'admin' or 'employee'."""
+    return "admin" if str(role or "").strip().lower() == "admin" else "employee"
+
+
+def admin_email_allowlist() -> set[str]:
+    """Return trusted operator-configured administrator emails from ADMIN_EMAILS."""
+    raw = os.getenv("ADMIN_EMAILS", "")
+    return {
+        part.strip().lower()
+        for part in raw.replace(";", ",").split(",")
+        if part.strip()
+    }
 
 
 def hash_password(password: str, salt: bytes | None = None) -> str:
@@ -81,3 +97,13 @@ def current_user(
         db.commit()
         raise HTTPException(status_code=401, detail="Session is invalid or expired.")
     return session.user
+
+
+def require_admin(user: User = Depends(current_user)) -> User:
+    """Enforce server-verified administrator role on protected operations."""
+    if normalize_role(getattr(user, "role", None)) != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Administrator privileges are required.",
+        )
+    return user

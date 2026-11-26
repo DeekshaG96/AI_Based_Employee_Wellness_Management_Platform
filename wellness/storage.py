@@ -5,12 +5,35 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
 import secrets
 import sqlite3
 from pathlib import Path
 from typing import Any
 
 from .errors import InputValidationError
+
+
+def normalize_role(role: str | None) -> str:
+    """Normalize stored role names to 'admin' or 'employee'."""
+    return "admin" if str(role or "").strip().lower() == "admin" else "employee"
+
+
+def admin_email_allowlist() -> set[str]:
+    """Return trusted operator-configured admin emails from ADMIN_EMAILS env or Streamlit secrets."""
+    raw = os.getenv("ADMIN_EMAILS", "")
+    if not raw:
+        try:
+            import streamlit as st
+
+            raw = str(st.secrets.get("ADMIN_EMAILS", "") or "")
+        except Exception:
+            raw = ""
+    return {
+        part.strip().lower()
+        for part in raw.replace(";", ",").split(",")
+        if part.strip()
+    }
 
 
 def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
@@ -24,6 +47,7 @@ def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'employee',
             profile_details TEXT NOT NULL DEFAULT '{}',
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
@@ -113,6 +137,8 @@ def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
     # Auto-migrate any columns that might be absent from previous runs
     user_cursor = connection.execute("PRAGMA table_info(users)")
     existing_user_cols = {row["name"] for row in user_cursor.fetchall()}
+    if "role" not in existing_user_cols:
+        connection.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'employee'")
     if "profile_details" not in existing_user_cols:
         connection.execute("ALTER TABLE users ADD COLUMN profile_details TEXT NOT NULL DEFAULT '{}'")
 
@@ -153,7 +179,7 @@ def _check_password(password: str, encoded: str) -> bool:
 
 
 def register_user(connection: sqlite3.Connection, name: str, email: str, password: str) -> int:
-    """Register a new user with salted PBKDF2 hashing."""
+    """Register a new user with salted PBKDF2 hashing (defaults strictly to employee unless allowlisted)."""
     name, email = name.strip(), email.strip().lower()
     if not name or not email or not password:
         raise InputValidationError("Name, email, and password are required.")
@@ -161,10 +187,11 @@ def register_user(connection: sqlite3.Connection, name: str, email: str, passwor
         raise InputValidationError("Enter a valid email address.")
     if len(password) < 6:
         raise InputValidationError("Password must contain at least 6 characters.")
+    assigned_role = "admin" if email in admin_email_allowlist() else "employee"
     try:
         cursor = connection.execute(
-            "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-            (name, email, _hash_password(password)),
+            "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
+            (name, email, _hash_password(password), assigned_role),
         )
         connection.commit()
         return int(cursor.lastrowid)
@@ -172,17 +199,76 @@ def register_user(connection: sqlite3.Connection, name: str, email: str, passwor
         raise InputValidationError("An account with that email already exists.") from exc
 
 
+def set_user_role(connection: sqlite3.Connection, email: str, role: str) -> bool:
+    """Trusted server/CLI helper to promote or demote an existing user's persisted role."""
+    clean_email = email.strip().lower()
+    target_role = normalize_role(role)
+    cursor = connection.execute(
+        "UPDATE users SET role = ? WHERE email = ?",
+        (target_role, clean_email),
+    )
+    connection.commit()
+    return cursor.rowcount > 0
+
+
+def bootstrap_admin_from_env(connection: sqlite3.Connection) -> None:
+    """Provision or sync operator-configured admin accounts from environment or Streamlit secrets."""
+    allowlist = admin_email_allowlist()
+    for adm_email in allowlist:
+        connection.execute("UPDATE users SET role = 'admin' WHERE email = ?", (adm_email,))
+
+    boot_email = os.getenv("ADMIN_BOOTSTRAP_EMAIL", "").strip().lower()
+    boot_pass = os.getenv("ADMIN_BOOTSTRAP_PASSWORD", "")
+    boot_name = os.getenv("ADMIN_BOOTSTRAP_NAME", "Platform Administrator").strip() or "Platform Administrator"
+    if not boot_email:
+        try:
+            import streamlit as st
+
+            boot_email = str(st.secrets.get("ADMIN_BOOTSTRAP_EMAIL", "") or "").strip().lower()
+            boot_pass = str(st.secrets.get("ADMIN_BOOTSTRAP_PASSWORD", "") or "")
+            boot_name = str(st.secrets.get("ADMIN_BOOTSTRAP_NAME", boot_name) or boot_name).strip()
+        except Exception:
+            pass
+
+    if boot_email and len(boot_pass) >= 6:
+        row = connection.execute("SELECT id, role FROM users WHERE email = ?", (boot_email,)).fetchone()
+        if row is None:
+            connection.execute(
+                "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'admin')",
+                (boot_name, boot_email, _hash_password(boot_pass)),
+            )
+        elif normalize_role(row["role"]) != "admin":
+            connection.execute("UPDATE users SET role = 'admin' WHERE id = ?", (row["id"],))
+    connection.commit()
+
+
+def authenticate_user_with_role(
+    connection: sqlite3.Connection, email: str, password: str
+) -> tuple[int, str, str] | None:
+    """Verify user credentials against stored PBKDF2 hash and return (id, name, role)."""
+    clean_email = email.strip().lower()
+    row = connection.execute(
+        "SELECT id, name, password_hash, role FROM users WHERE email = ?",
+        (clean_email,),
+    ).fetchone()
+    if row and _check_password(password, row["password_hash"]):
+        persisted_role = normalize_role(row["role"])
+        if clean_email in admin_email_allowlist() and persisted_role != "admin":
+            connection.execute("UPDATE users SET role = 'admin' WHERE id = ?", (row["id"],))
+            connection.commit()
+            persisted_role = "admin"
+        return int(row["id"]), str(row["name"]), persisted_role
+    return None
+
+
 def authenticate_user(
     connection: sqlite3.Connection, email: str, password: str
 ) -> tuple[int, str] | None:
     """Verify user credentials against stored PBKDF2 hash."""
-    row = connection.execute(
-        "SELECT id, name, password_hash FROM users WHERE email = ?",
-        (email.strip().lower(),),
-    ).fetchone()
-    if row and _check_password(password, row["password_hash"]):
-        return int(row["id"]), str(row["name"])
-    return None
+    res = authenticate_user_with_role(connection, email, password)
+    if res is None:
+        return None
+    return res[0], res[1]
 
 
 def save_mood_entry(
@@ -346,9 +432,22 @@ def save_report(
     return int(cursor.lastrowid)
 
 
-def get_all_database_entities(connection: sqlite3.Connection) -> dict[str, list[dict[str, Any]]]:
-    """Retrieve all 6 stored database entities from the database."""
-    users_rows = connection.execute("SELECT id, name, email, profile_details, created_at FROM users ORDER BY id ASC").fetchall()
+def _redact_report_dict(payload: Any) -> Any:
+    if not isinstance(payload, dict):
+        return payload
+    cleaned = dict(payload)
+    for key in ("original_text", "cleaned_text", "processed_text", "vader_input_text"):
+        if key in cleaned:
+            cleaned[key] = "[Redacted]"
+    return cleaned
+
+
+def get_all_database_entities(
+    connection: sqlite3.Connection,
+    redact_private_text: bool = False,
+) -> dict[str, list[dict[str, Any]]]:
+    """Retrieve stored database entities, optionally redacting private reflection text."""
+    users_rows = connection.execute("SELECT id, name, email, role, profile_details, created_at FROM users ORDER BY id ASC").fetchall()
     journal_rows = connection.execute("SELECT id, user_id, journal_text, created_at AS timestamp FROM journal_entries ORDER BY id DESC").fetchall()
     rec_rows = connection.execute("SELECT id, user_id, report_data, created_at FROM recommendations ORDER BY id DESC").fetchall()
     audit_rows = connection.execute("SELECT id, user_id, username, journal_id, recommendation, created_at AS timestamp FROM audit_trails ORDER BY id DESC").fetchall()
@@ -369,6 +468,7 @@ def get_all_database_entities(connection: sqlite3.Connection) -> dict[str, list[
                 "id": r["id"],
                 "name": r["name"],
                 "email": r["email"],
+                "role": normalize_role(r["role"]),
                 "profile_details": _parse_json(r["profile_details"]),
                 "created_at": r["created_at"],
             }
@@ -378,7 +478,11 @@ def get_all_database_entities(connection: sqlite3.Connection) -> dict[str, list[
             {
                 "id": r["id"],
                 "user_id": r["user_id"],
-                "journal_text": r["journal_text"],
+                "journal_text": (
+                    f"[Redacted private reflection · {len(str(r['journal_text'] or '').split())} words]"
+                    if redact_private_text
+                    else r["journal_text"]
+                ),
                 "timestamp": r["timestamp"],
             }
             for r in journal_rows
@@ -387,7 +491,7 @@ def get_all_database_entities(connection: sqlite3.Connection) -> dict[str, list[
             {
                 "id": r["id"],
                 "user_id": r["user_id"],
-                "report_data": _parse_json(r["report_data"]),
+                "report_data": _redact_report_dict(_parse_json(r["report_data"])) if redact_private_text else _parse_json(r["report_data"]),
                 "created_at": r["created_at"],
             }
             for r in rec_rows
@@ -418,7 +522,7 @@ def get_all_database_entities(connection: sqlite3.Connection) -> dict[str, list[
                 "id": r["id"],
                 "user_id": r["user_id"],
                 "username": r["username"],
-                "report_data": _parse_json(r["report_data"]),
+                "report_data": _redact_report_dict(_parse_json(r["report_data"])) if redact_private_text else _parse_json(r["report_data"]),
                 "timestamp": r["timestamp"],
             }
             for r in report_rows
@@ -427,19 +531,12 @@ def get_all_database_entities(connection: sqlite3.Connection) -> dict[str, list[
 
 
 def get_admin_analytics(connection: sqlite3.Connection) -> dict[str, Any]:
-    """Calculate the 6 required Admin Dashboard Analytics metrics:
-    1. Total registered users
-    2. active users
-    3. Total recommendations/analysis
-    4. Recommendation usage ---- no of recommendations generated
-    5. acceptance rate -- acc recommendations/total recommendations x100
-    6. API performance - Response time and error rate
-    """
+    """Calculate genuine SQL Admin Dashboard metrics without artificial floors or synthetic latencies."""
     total_users_row = connection.execute("SELECT COUNT(*) AS c FROM users").fetchone()
-    total_users = int(total_users_row["c"]) if total_users_row else 1
+    total_users = int(total_users_row["c"]) if total_users_row else 0
 
     active_users_row = connection.execute("SELECT COUNT(DISTINCT user_id) AS c FROM mood_entries").fetchone()
-    active_users = int(active_users_row["c"]) if active_users_row else max(1, total_users)
+    active_users = int(active_users_row["c"]) if active_users_row else 0
 
     logs_row = connection.execute("SELECT COUNT(*) AS c FROM mood_entries").fetchone()
     total_logs = int(logs_row["c"]) if logs_row else 0
@@ -453,28 +550,28 @@ def get_admin_analytics(connection: sqlite3.Connection) -> dict[str, Any]:
     rej_count = int(rej_row["c"]) if rej_row else 0
     total_fb = acc_count + rej_count
 
-    if total_fb > 0:
-        acceptance_rate = round((acc_count / total_fb) * 100, 2)
-    elif total_recs > 0:
-        acceptance_rate = 80.0
-    else:
-        acceptance_rate = 0.0
+    acceptance_rate = round((acc_count / total_fb) * 100, 2) if total_fb > 0 else None
 
     return {
-        "total_registered_users": max(1, total_users),
-        "active_users": max(1, active_users),
+        "total_registered_users": total_users,
+        "active_users": active_users,
         "total_recommendations_analysis": total_logs + total_recs,
-        "recommendation_usage": max(total_recs, total_logs),
+        "recommendation_usage": total_recs,
         "accepted_recommendations": acc_count,
         "rejected_recommendations": rej_count,
         "total_feedback": total_fb,
         "acceptance_rate": acceptance_rate,
         "api_performance": {
-            "avg_response_time_ms": 38.2,
-            "p95_response_time_ms": 110.5,
-            "error_rate_pct": 0.0,
-            "uptime_pct": 99.99,
-            "status": "Optimal",
+            "avg_response_time_ms": None,
+            "p95_response_time_ms": None,
+            "error_rate_pct": None,
+            "uptime_pct": None,
+            "status": "No live API telemetry",
+        },
+        "database_status": {
+            "backend": "sqlite",
+            "fallback_active": False,
+            "warning": None,
         },
     }
 

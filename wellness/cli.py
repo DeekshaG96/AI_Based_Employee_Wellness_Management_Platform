@@ -34,12 +34,53 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--download-nltk-data", action="store_true", help="Install required NLTK data."
     )
+    parser.add_argument("--promote-admin", metavar="EMAIL", help="Promote an existing account to admin.")
+    parser.add_argument("--revoke-admin", metavar="EMAIL", help="Revoke admin privileges back to employee.")
     return parser
+
+
+def _update_persisted_role(email: str, target_role: str) -> int:
+    """Update a user's role in both local SQLite and configured SQLAlchemy database."""
+    from .storage import connect_database, set_user_role
+
+    updated = False
+    conn = connect_database()
+    try:
+        updated = set_user_role(conn, email, target_role) or updated
+    finally:
+        conn.close()
+
+    try:
+        from sqlalchemy import select
+
+        from wellness_api.database import SessionLocal, create_tables
+        from wellness_api.models import User
+
+        create_tables()
+        with SessionLocal() as db:
+            user = db.scalar(select(User).where(User.email == email.strip().lower()))
+            if user is not None:
+                user.role = target_role
+                db.commit()
+                updated = True
+    except ImportError:
+        pass
+    except Exception as exc:
+        print(f"Note: backend DB role update skipped ({exc})", file=sys.stderr)
+
+    if not updated:
+        raise WellnessError(f"No user account found with email '{email.strip().lower()}'.")
+    print(f"Updated '{email.strip().lower()}' role to '{target_role}'.")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.promote_admin:
+            return _update_persisted_role(args.promote_admin, "admin")
+        if args.revoke_admin:
+            return _update_persisted_role(args.revoke_admin, "employee")
         if args.download_nltk_data:
             _download_nltk_data()
             print("NLTK data installed.")

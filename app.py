@@ -1998,32 +1998,21 @@ def _render_mood_trend() -> None:
     st.caption("Each point is a saved journal analysis. The score reflects text sentiment, not a clinical assessment.")
 
 
-def _get_account_roles() -> dict[str, str]:
-    """Maintain session-scoped role assignments for email separation between portals."""
-    if "account_roles" not in st.session_state:
-        st.session_state["account_roles"] = {
-            "alex@example.com": "user",
-            "admin@equimind.internal": "admin",
-        }
-    return st.session_state["account_roles"]
-
-
-def _apply_auth(auth: dict, target_view: str | None = None, is_admin: bool = False):
-    """Store the API-issued session for this Streamlit browser session and route to the corresponding dashboard."""
+def _apply_auth(auth: dict, target_view: str | None = None):
+    """Store the verified session for this Streamlit browser session and route by server role."""
     st.session_state.last_analysis_report = None
     st.session_state["mood_journal_entry"] = ""
     st.session_state.pop("equimind_nav_view", None)
     user = auth["user"]
+    verified_role = "admin" if str(user.get("role", "")).strip().lower() == "admin" else "employee"
+    is_admin = verified_role == "admin"
     st.session_state.logged_in = True
     st.session_state.api_token = auth["access_token"]
     st.session_state.user_id = user["id"]
     st.session_state.user_name = user["name"]
     st.session_state.user_email = user["email"]
-    email_key = str(user.get("email", "")).strip().lower()
-    roles = _get_account_roles()
-    roles[email_key] = "admin" if is_admin else "user"
-    st.session_state["is_admin"] = bool(is_admin)
-    st.session_state["user_role"] = "admin" if is_admin else "user"
+    st.session_state["is_admin"] = is_admin
+    st.session_state["user_role"] = verified_role
     if target_view:
         st.session_state["nav_redirect"] = target_view
     elif is_admin:
@@ -3016,35 +3005,18 @@ table tbody tr:hover td {
                 if not user_email or not user_password:
                     st.warning("Please enter your employee email and password to proceed.")
                 else:
-                    email_clean = user_email.strip().lower()
-                    roles = _get_account_roles()
-                    if roles.get(email_clean) == "admin" or email_clean == "admin@equimind.internal":
-                        st.error("🛡️ This email is registered as an Administrator account. Please sign in via the Admin Login tab, or use a separate Employee email.")
-                    else:
-                        with st.spinner("Authorizing employee access..."):
-                            success = False
-                            try:
-                                auth = api_login(user_email.strip(), user_password)
-                                _apply_auth(auth, target_view="📈", is_admin=False)
-                                success = True
-                            except Exception:
-                                email_name = user_email.split("@")[0].replace(".", " ").replace("_", " ").title()
-                                uid = abs(hash(email_clean)) % 10000 or 1
-                                roles[email_clean] = "user"
-                                st.session_state.pop("equimind_nav_view", None)
-                                st.session_state.logged_in = True
-                                st.session_state.user_id = uid
-                                st.session_state.user_name = email_name if email_name else "Team Member"
-                                st.session_state.user_email = user_email.strip()
-                                st.session_state["is_admin"] = False
-                                st.session_state["user_role"] = "user"
-                                st.session_state["nav_redirect"] = "📈"
-                                st.session_state.api_token = f"equimind_user_token_{uid}"
-                                success = True
-
-                            if success:
+                    with st.spinner("Verifying employee credentials..."):
+                        try:
+                            auth = api_login(user_email.strip(), user_password)
+                            verified_role = str(auth.get("user", {}).get("role", "employee")).strip().lower()
+                            if verified_role == "admin":
+                                st.error("🛡️ This account holds Administrator privileges. Please sign in through the Admin Login tab.")
+                            else:
+                                _apply_auth(auth, target_view="📈")
                                 st.toast("Employee session authorized! Loading User Dashboard...", icon="👤")
                                 st.rerun()
+                        except Exception as exc:
+                            st.error(f"Authentication failed: {exc}")
 
         # ---------------------------------------------------------------------
         # 2. DEDICATED ADMINISTRATOR / EXECUTIVE LOGIN PORTAL
@@ -3057,7 +3029,7 @@ table tbody tr:hover td {
                         <span style="font-size: 0.74rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">🛡️ Administrator Access Portal</span>
                         <span style="font-size: 0.70rem; background: #ffffff; color: #1e40af; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 6px; font-weight: 700;">→ Admin Dashboard</span>
                     </div>
-                    <p style="margin: 4px 0 0 0; font-size: 0.82rem; color: #1e293b;">Sign in with administrative credentials to access enterprise telemetry, 6 relational database tables, and the Admin Dashboard.</p>
+                    <p style="margin: 4px 0 0 0; font-size: 0.82rem; color: #1e293b;">Sign in with a provisioned administrator account to access organization analytics, privacy controls, and governance.</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -3067,11 +3039,11 @@ table tbody tr:hover td {
                 admin_email = st.text_input(
                     "Administrator Email Address",
                     value="",
-                    placeholder="e.g. admin@equimind.internal",
+                    placeholder="e.g. admin@company.com",
                     key="admin_portal_email_input",
                 )
                 admin_password = st.text_input(
-                    "Administrator Security Key / Password",
+                    "Administrator Password",
                     value="",
                     type="password",
                     placeholder="Enter administrator password",
@@ -3084,84 +3056,48 @@ table tbody tr:hover td {
                     width="stretch",
                 )
 
+            st.caption("Admin roles are server-verified via `ADMIN_EMAILS` or `python -m wellness.cli --promote-admin`.")
+
             if admin_submitted:
                 if not admin_email or not admin_password:
                     st.warning("Please enter your administrator email and password.")
                 else:
-                    admin_email_clean = admin_email.strip().lower()
-                    roles = _get_account_roles()
-                    if roles.get(admin_email_clean) == "user" or admin_email_clean == "alex@example.com":
-                        st.error(f"🚫 Access Denied: '{admin_email.strip()}' is registered as a standard Employee account and does not have Administrator privileges. Use an Administrator email (such as admin@equimind.internal) or sign in via User Login.")
-                    else:
-                        with st.spinner("Authenticating administrative privileges..."):
-                            success = False
-                            try:
-                                auth = api_login(admin_email.strip(), admin_password)
-                                _apply_auth(auth, target_view="🛡️", is_admin=True)
-                                success = True
-                            except Exception:
-                                email_name = admin_email.split("@")[0].replace(".", " ").replace("_", " ").title()
-                                uid = abs(hash(admin_email_clean)) % 10000 or 999
-                                roles[admin_email_clean] = "admin"
-                                st.session_state.pop("equimind_nav_view", None)
-                                st.session_state.logged_in = True
-                                st.session_state.user_id = uid
-                                st.session_state.user_name = f"Admin ({email_name})" if email_name else "Platform Administrator"
-                                st.session_state.user_email = admin_email.strip()
-                                st.session_state["is_admin"] = True
-                                st.session_state["user_role"] = "admin"
-                                st.session_state["nav_redirect"] = "🛡️"
-                                st.session_state.api_token = f"equimind_admin_token_{uid}"
-                                success = True
-
-                            if success:
+                    with st.spinner("Verifying administrator credentials..."):
+                        try:
+                            auth = api_login(admin_email.strip(), admin_password)
+                            verified_role = str(auth.get("user", {}).get("role", "employee")).strip().lower()
+                            if verified_role != "admin":
+                                st.error("🚫 Access Denied: This account does not have Administrator privileges.")
+                            else:
+                                _apply_auth(auth, target_view="🛡️")
                                 st.toast("Administrator access granted! Loading Admin Dashboard...", icon="🛡️")
                                 st.rerun()
+                        except Exception as exc:
+                            st.error(f"Administrator authentication failed: {exc}")
 
         # ---------------------------------------------------------------------
-        # 3. CREATE ACCOUNT / ENROLL PROFILE
+        # 3. CREATE EMPLOYEE ACCOUNT
         # ---------------------------------------------------------------------
         with tab_register:
             with st.form("portal_register_form"):
                 reg_name = st.text_input("Full Name", placeholder="e.g. Your Full Name", key="reg_name_input")
                 reg_email = st.text_input("Work Email Address", placeholder="your.name@enterprise.com", key="reg_email_input")
-                reg_password = st.text_input("Password", type="password", placeholder="Minimum 6 characters", help="Minimum 6 characters.", key="reg_password_input")
-                reg_role = st.selectbox(
-                    "Select Account Role & Default Dashboard:",
-                    ["👤 Employee Profile (Standard Access → User Dashboard)", "🛡️ Team Administrator (Analytics & Governance → Admin Dashboard)"],
-                    key="reg_role_select",
-                )
+                reg_password = st.text_input("Password", type="password", placeholder="Minimum 8 characters", help="Minimum 8 characters for API compatibility.", key="reg_password_input")
+                st.caption("New accounts default to Employee access. Administrators must be provisioned separately.")
                 st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
-                reg_submitted = st.form_submit_button("Create Profile →", type="primary", width="stretch")
+                reg_submitted = st.form_submit_button("Create Employee Profile →", type="primary", width="stretch")
             if reg_submitted:
                 if not reg_name or not reg_email or not reg_password:
                     st.warning("Please fill in all registration fields.")
                 else:
-                    is_adm_choice = "Administrator" in reg_role
-                    target_dest = "🛡️" if is_adm_choice else "📈"
-                    with st.spinner("Provisioning profile..."):
+                    with st.spinner("Creating employee profile..."):
                         try:
-                            auth = api_register(reg_name, reg_email, reg_password)
-                            _apply_auth(auth, target_view=target_dest, is_admin=is_adm_choice)
+                            auth = api_register(reg_name.strip(), reg_email.strip(), reg_password)
+                            _apply_auth(auth)
                             st.success("Profile created! Entering workspace...")
                             st.rerun()
-                        except ApiError as exc:
-                            st.error(str(exc))
-                        except Exception:
-                            reg_email_clean = reg_email.strip().lower()
-                            uid = abs(hash(reg_email_clean)) % 10000 or 2
-                            _get_account_roles()[reg_email_clean] = "admin" if is_adm_choice else "user"
-                            st.session_state.pop("equimind_nav_view", None)
-                            st.session_state.logged_in = True
-                            st.session_state.user_id = uid
-                            st.session_state.user_name = reg_name.strip()
-                            st.session_state.user_email = reg_email.strip()
-                            st.session_state["is_admin"] = is_adm_choice
-                            st.session_state["user_role"] = "admin" if is_adm_choice else "user"
-                            st.session_state["nav_redirect"] = target_dest
-                            st.session_state.api_token = f"equimind_token_{uid}"
-                            st.success("Profile created! Opening workspace...")
-                            st.rerun()
+                        except Exception as exc:
+                            st.error(f"Could not create profile: {exc}")
 
         st.markdown("""
 <div style="text-align: center; margin-top: 14px; font-size: 0.72rem; color: #64748b; line-height: 1.4;">
@@ -3193,7 +3129,7 @@ table tbody tr:hover td {
         <div style="height: 100%; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.75) 100%); border: 1.5px solid rgba(204, 251, 241, 0.88); border-radius: 18px; padding: 20px 22px; box-shadow: 0 10px 28px -4px rgba(15, 118, 110, 0.08), inset 0 1px 1px #ffffff; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);">
             <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #fef3c7, #fde68a); display: grid; place-items: center; font-size: 1.3rem; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);">🔒</div>
             <div style="font-family: 'Playfair Display', Georgia, serif; font-weight: 700; color: #044e47; font-size: 1.05rem; letter-spacing: -0.015em; margin-top: 6px;">Confidential Architecture</div>
-            <div style="color: #64748b; font-size: 0.82rem; line-height: 1.6;">Enterprise AES-256 encryption with strict k-anonymity (n &ge; 5) privacy protection.</div>
+            <div style="color: #64748b; font-size: 0.82rem; line-height: 1.6;">Salted PBKDF2 password hashing, role-isolated portals, and strict k-anonymity (n &ge; 5) privacy protection.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -10264,12 +10200,14 @@ def render_admin_dashboard_view():
     refreshed_ts = st.session_state.get("admin_refreshed_at", "Live")
 
     # -------------------------------------------------------------------------
-    # 1. FETCH TELEMETRY & DATABASE ENTITIES
+    # 1. FETCH TELEMETRY & DATABASE ENTITIES (STRICTLY REAL DATA)
     # -------------------------------------------------------------------------
+    admin_fetch_error: str | None = None
     try:
         admin_stats = api_get_admin_analytics(st.session_state.get("api_token"))
-    except Exception:
+    except Exception as exc:
         admin_stats = {}
+        admin_fetch_error = str(exc)
 
     try:
         entries = api_history(st.session_state.user_id, st.session_state.api_token)
@@ -10278,96 +10216,54 @@ def render_admin_dashboard_view():
 
     try:
         db_all = api_get_database_entities(st.session_state.get("api_token"))
-    except Exception:
+    except Exception as exc:
         db_all = {}
+        if not admin_fetch_error:
+            admin_fetch_error = str(exc)
 
-    users_list = db_all.get("users", []) or [
-        {
-            "id": 1,
-            "name": st.session_state.get("user_name", "Team Member"),
-            "email": st.session_state.get("user_email", "member@equimind.internal"),
-            "profile_details": {"role": "Senior Engineer", "department": "Core Platform"},
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        }
-    ]
-    journals_list = db_all.get("journal_entries", []) or [
-        {
-            "id": int(r["id"]),
-            "user_id": 1,
-            "journal_text": str(r["original_text"]),
-            "timestamp": str(r["created_at"]),
-        }
-        for r in entries[:15]
-    ]
-    recs_list = db_all.get("recommendations", []) or [
-        {
-            "id": int(r["id"]),
-            "user_id": 1,
-            "title": f"Pathway for {r.get('dominant_emotion', 'neutral')}",
-            "category": "Well-Being",
-            "report_data": {"dominant_emotion": r.get("dominant_emotion")},
-        }
-        for r in entries[:15]
-    ]
-    audits_list = db_all.get("audit_trails", []) or [
-        {
-            "id": int(r["id"]),
-            "user_id": 1,
-            "username": st.session_state.get("user_name", "Team Member"),
-            "journal_id": int(r["id"]),
-            "recommendation": "Care practice delivered",
-            "timestamp": str(r["created_at"]),
-        }
-        for r in entries[:15]
-    ]
-    feedback_list = db_all.get("user_feedback", []) or [
-        {
-            "id": 1,
-            "recommendation_id": 1,
-            "report_data": {"practice": "Diaphragmatic Breathwork"},
-            "accepted_or_rejected": "accepted",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
-    ]
-    reports_list = db_all.get("reports", []) or [
-        {
-            "id": int(r["id"]),
-            "user_id": 1,
-            "username": st.session_state.get("user_name", "Team Member"),
-            "timestamp": str(r["created_at"]),
-        }
-        for r in entries[:15]
-    ]
+    if admin_fetch_error:
+        st.error(f"🔒 Admin telemetry unavailable: {admin_fetch_error}")
+
+    db_status = admin_stats.get("database_status") or {}
+    if db_status.get("warning"):
+        st.warning(f"⚠️ Database Health Notice: {db_status['warning']}")
+
+    users_list = db_all.get("users", [])
+    journals_list = db_all.get("journal_entries", [])
+    recs_list = db_all.get("recommendations", [])
+    audits_list = db_all.get("audit_trails", [])
+    feedback_list = db_all.get("user_feedback", [])
+    reports_list = db_all.get("reports", [])
 
     org_records = _collect_org_telemetry_records(users_list, reports_list, recs_list, entries)
     dept_options = ["All Departments"] + sorted({r["department"] for r in org_records if r.get("department")})
 
-    total_reg = max(admin_stats.get("total_registered_users", 1), len(users_list))
-    act_users = min(total_reg, max(admin_stats.get("active_users", 1), 1))
-    part_pct = (act_users / max(1, total_reg)) * 100.0
-    total_checkins = max(len(org_records), len(journals_list), admin_stats.get("recommendation_usage", 0))
-    rec_usage = admin_stats.get("recommendation_usage", max(len(recs_list), len(org_records)))
+    total_reg = int(admin_stats.get("total_registered_users", len(users_list)))
+    act_users = min(total_reg, int(admin_stats.get("active_users", 0))) if total_reg > 0 else 0
+    part_pct = (act_users / total_reg) * 100.0 if total_reg > 0 else 0.0
+    total_checkins = len(org_records) or len(journals_list)
+    rec_usage = int(admin_stats.get("recommendation_usage", len(recs_list)))
 
     fb_accepted_raw = sum(1 for f in feedback_list if f.get("accepted_or_rejected") == "accepted")
     fb_rejected_raw = sum(1 for f in feedback_list if f.get("accepted_or_rejected") == "rejected")
     if (fb_accepted_raw + fb_rejected_raw) > 0:
-        acc_rate = round((fb_accepted_raw / (fb_accepted_raw + fb_rejected_raw)) * 100.0, 1)
-    elif "acceptance_rate" in admin_stats and admin_stats.get("total_feedback", 0) > 0:
+        acc_rate: float | None = round((fb_accepted_raw / (fb_accepted_raw + fb_rejected_raw)) * 100.0, 1)
+    elif admin_stats.get("acceptance_rate") is not None and admin_stats.get("total_feedback", 0) > 0:
         acc_rate = float(admin_stats["acceptance_rate"])
     else:
-        acc_rate = 80.0
+        acc_rate = None
 
-    api_p = admin_stats.get("api_performance", {
-        "avg_response_time_ms": 38.2,
-        "p95_response_time_ms": 110.5,
-        "error_rate_pct": 0.0,
-        "uptime_pct": 99.99,
-        "status": "Optimal",
-    })
-    avg_ms = api_p.get("avg_response_time_ms", 38.2)
-    err_pct = api_p.get("error_rate_pct", 0.0)
-    up_pct = api_p.get("uptime_pct", 99.99)
-    api_status = api_p.get("status", "Optimal")
+    api_p = admin_stats.get("api_performance") or {
+        "avg_response_time_ms": None,
+        "p95_response_time_ms": None,
+        "error_rate_pct": None,
+        "uptime_pct": None,
+        "status": "No data yet",
+    }
+    avg_ms = api_p.get("avg_response_time_ms")
+    err_pct = api_p.get("error_rate_pct")
+    up_pct = api_p.get("uptime_pct")
+    api_status = api_p.get("status", "No data yet")
 
     # -------------------------------------------------------------------------
     # 2. CLEAN EXECUTIVE HEADER
@@ -10479,16 +10375,31 @@ def render_admin_dashboard_view():
         if lbl in sent_counts:
             sent_counts[lbl] += 1
 
-    tot_s = max(1, sum(sent_counts.values()))
-    neg_share = (sent_counts["negative"] / tot_s) * 100.0
-    pos_share = (sent_counts["positive"] / tot_s) * 100.0
-    avg_org_comp = (
-        sum(float(r.get("compound_score", 0.0)) for r in filtered_records) / len(filtered_records)
-        if filtered_records
-        else 0.25
+    tot_s = sum(sent_counts.values())
+    neg_share = (sent_counts["negative"] / tot_s) * 100.0 if tot_s > 0 else 0.0
+    pos_share = (sent_counts["positive"] / tot_s) * 100.0 if tot_s > 0 else 0.0
+    if filtered_records:
+        avg_org_comp = sum(float(r.get("compound_score", 0.0)) for r in filtered_records) / len(filtered_records)
+        org_mood_idx: float | None = max(0.0, min(100.0, (avg_org_comp + 1.0) * 50.0))
+        risk_level = "Elevated" if neg_share >= 35.0 else ("Moderate" if neg_share >= 20.0 else "Healthy")
+    else:
+        org_mood_idx = None
+        risk_level = "No data yet"
+
+    acc_value_str = f"{acc_rate:.1f}%" if acc_rate is not None else "No data yet"
+    acc_badge_str = f"{fb_accepted_raw} Accepted" if acc_rate is not None else "Awaiting Feedback"
+    acc_sub_str = f"{fb_rejected_raw} skipped with feedback" if acc_rate is not None else "No feedback decisions recorded yet"
+
+    mood_value_str = f"{org_mood_idx:.0f} / 100" if org_mood_idx is not None else "No data yet"
+    mood_sub_str = f"Positivity {pos_share:.0f}% · Strain {neg_share:.0f}%" if org_mood_idx is not None else "Awaiting check-ins"
+
+    speed_value_str = f"{avg_ms:.1f} ms" if avg_ms is not None else "No data yet"
+    speed_badge_str = f"{up_pct}% Uptime" if up_pct is not None else api_status
+    speed_sub_str = (
+        f"Error Rate: {err_pct:.1f}% · Status: {api_status}"
+        if err_pct is not None
+        else "Live FastAPI instrumentation required"
     )
-    org_mood_idx = max(0.0, min(100.0, (avg_org_comp + 1.0) * 50.0))
-    risk_level = "Elevated" if neg_share >= 35.0 else ("Moderate" if neg_share >= 20.0 else "Healthy")
 
     # -------------------------------------------------------------------------
     # 4. CLEAN EXECUTIVE KPI BENTO GRID
@@ -10497,7 +10408,7 @@ def render_admin_dashboard_view():
         {
             "label": "Registered Employees",
             "value": f"{total_reg}",
-            "badge": "Enrolled",
+            "badge": "Enrolled" if total_reg > 0 else "No data yet",
             "sub": "Verified accounts on platform",
             "accent": "linear-gradient(90deg, #0f766e, #14b8a6)",
             "badge_bg": "#f0fdfa",
@@ -10506,9 +10417,9 @@ def render_admin_dashboard_view():
         },
         {
             "label": "Active Participation",
-            "value": f"{act_users} of {total_reg}",
-            "badge": f"{part_pct:.0f}% Active",
-            "sub": "Members checking in consistently",
+            "value": f"{act_users} of {total_reg}" if total_reg > 0 else "0",
+            "badge": f"{part_pct:.0f}% Active" if total_reg > 0 else "No data yet",
+            "sub": "Members with recorded check-ins",
             "accent": "linear-gradient(90deg, #0284c7, #38bdf8)",
             "badge_bg": "#f0f9ff",
             "badge_fg": "#0369a1",
@@ -10526,9 +10437,9 @@ def render_admin_dashboard_view():
         },
         {
             "label": "Care Plan Adoption",
-            "value": f"{acc_rate:.1f}%",
-            "badge": f"{fb_accepted_raw} Accepted",
-            "sub": f"{fb_rejected_raw} skipped with feedback",
+            "value": acc_value_str,
+            "badge": acc_badge_str,
+            "sub": acc_sub_str,
             "accent": "linear-gradient(90deg, #059669, #34d399)",
             "badge_bg": "#f0fdf4",
             "badge_fg": "#166534",
@@ -10536,19 +10447,19 @@ def render_admin_dashboard_view():
         },
         {
             "label": "Org Well-Being Index",
-            "value": f"{org_mood_idx:.0f} / 100",
+            "value": mood_value_str,
             "badge": risk_level,
-            "sub": f"Positivity {pos_share:.0f}% · Strain {neg_share:.0f}%",
+            "sub": mood_sub_str,
             "accent": "linear-gradient(90deg, #0d9488, #2dd4bf)",
-            "badge_bg": "#f0fdf4" if risk_level == "Healthy" else ("#fffbeb" if risk_level == "Moderate" else "#fef2f2"),
-            "badge_fg": "#166534" if risk_level == "Healthy" else ("#92400e" if risk_level == "Moderate" else "#b91c1c"),
-            "badge_border": "#bbf7d0" if risk_level == "Healthy" else ("#fde68a" if risk_level == "Moderate" else "#fecaca"),
+            "badge_bg": "#f0fdf4" if risk_level == "Healthy" else ("#fffbeb" if risk_level == "Moderate" else "#f8fafc"),
+            "badge_fg": "#166534" if risk_level == "Healthy" else ("#92400e" if risk_level == "Moderate" else "#475569"),
+            "badge_border": "#bbf7d0" if risk_level == "Healthy" else ("#fde68a" if risk_level == "Moderate" else "#cbd5e1"),
         },
         {
             "label": "Platform Speed & SLA",
-            "value": f"{avg_ms} ms",
-            "badge": f"{up_pct}% Uptime",
-            "sub": f"Error Rate: {err_pct:.1f}% · Status: {api_status}",
+            "value": speed_value_str,
+            "badge": speed_badge_str,
+            "sub": speed_sub_str,
             "accent": "linear-gradient(90deg, #f59e0b, #fbbf24)",
             "badge_bg": "#fffbeb",
             "badge_fg": "#92400e",
@@ -10632,36 +10543,36 @@ def render_admin_dashboard_view():
                 st.info("No check-ins found for this filter yet. Check in or load sample data in **Data Explorer & Exports**.")
 
         with c_right, st.container(border=True):
-            st.markdown(f"##### 🎯 Care Plan Adoption ({acc_rate:.1f}%)")
             fb_acc_filt = sum(1 for item in filtered_feedback if item["Decision"].startswith("✅"))
             fb_rej_filt = sum(1 for item in filtered_feedback if item["Decision"].startswith("⏭️"))
-            if (fb_acc_filt + fb_rej_filt) == 0:
-                fb_acc_filt = fb_accepted_raw if fb_accepted_raw > 0 else int((acc_rate / 100.0) * max(10, rec_usage))
-                fb_rej_filt = fb_rejected_raw if fb_rejected_raw > 0 else max(1, max(10, rec_usage) - fb_acc_filt)
-            filt_acc_pct = round((fb_acc_filt / max(1, fb_acc_filt + fb_rej_filt)) * 100.0, 1)
-
-            pie_df = pd.DataFrame({
-                "Feedback": ["Accepted", "Declined"],
-                "Count": [fb_acc_filt, fb_rej_filt],
-            })
-            fig_pie = px.pie(
-                pie_df,
-                values="Count",
-                names="Feedback",
-                hole=0.62,
-                color="Feedback",
-                color_discrete_map={"Accepted": "#059669", "Declined": "#94a3b8"},
-            )
-            fig_pie.update_traces(textinfo="percent", textposition="inside", insidetextfont={"color": "#ffffff", "size": 12})
-            fig_pie.update_layout(
-                height=230,
-                showlegend=True,
-                legend={"orientation": "h", "yanchor": "top", "y": -0.05, "xanchor": "center", "x": 0.5},
-                annotations=[{"text": f"{filt_acc_pct:.0f}%", "x": 0.5, "y": 0.5, "font_size": 20, "showarrow": False, "font_weight": 700, "font_color": "#0f172a"}],
-                margin={"l": 12, "r": 12, "t": 10, "b": 42},
-                paper_bgcolor="rgba(0,0,0,0)",
-            )
-            st.plotly_chart(fig_pie, width="stretch")
+            if (fb_acc_filt + fb_rej_filt) > 0:
+                filt_acc_pct = round((fb_acc_filt / (fb_acc_filt + fb_rej_filt)) * 100.0, 1)
+                st.markdown(f"##### 🎯 Care Plan Adoption ({filt_acc_pct:.1f}%)")
+                pie_df = pd.DataFrame({
+                    "Feedback": ["Accepted", "Declined"],
+                    "Count": [fb_acc_filt, fb_rej_filt],
+                })
+                fig_pie = px.pie(
+                    pie_df,
+                    values="Count",
+                    names="Feedback",
+                    hole=0.62,
+                    color="Feedback",
+                    color_discrete_map={"Accepted": "#059669", "Declined": "#94a3b8"},
+                )
+                fig_pie.update_traces(textinfo="percent", textposition="inside", insidetextfont={"color": "#ffffff", "size": 12})
+                fig_pie.update_layout(
+                    height=230,
+                    showlegend=True,
+                    legend={"orientation": "h", "yanchor": "top", "y": -0.05, "xanchor": "center", "x": 0.5},
+                    annotations=[{"text": f"{filt_acc_pct:.0f}%", "x": 0.5, "y": 0.5, "font_size": 20, "showarrow": False, "font_weight": 700, "font_color": "#0f172a"}],
+                    margin={"l": 12, "r": 12, "t": 10, "b": 42},
+                    paper_bgcolor="rgba(0,0,0,0)",
+                )
+                st.plotly_chart(fig_pie, width="stretch")
+            else:
+                st.markdown("##### 🎯 Care Plan Adoption (No data yet)")
+                st.info("No recommendation accept/decline feedback submitted for this selection yet.")
 
             st.markdown("###### 💬 Top Reasons Care Was Skipped")
             if reason_counts:
@@ -10680,32 +10591,33 @@ def render_admin_dashboard_view():
         b_c1, b_c2 = st.columns([1.2, 1], gap="medium")
         with b_c1, st.container(border=True):
             st.markdown("##### 🎭 Organization Emotion Breakdown")
-            if not emo_counts:
-                emo_counts = {"Neutral": 1}
-            emo_admin_df = pd.DataFrame(
-                [{"Emotion": k, "Count": v} for k, v in sorted(emo_counts.items(), key=lambda x: x[1], reverse=True)]
-            )
-            fig_emo_org = px.bar(
-                emo_admin_df,
-                x="Count",
-                y="Emotion",
-                orientation="h",
-                text="Count",
-                color="Count",
-                color_continuous_scale=["#99f6e4", "#14b8a6", "#0f766e"],
-            )
-            fig_emo_org.update_traces(textposition="outside")
-            fig_emo_org.update_layout(
-                height=265,
-                showlegend=False,
-                coloraxis_showscale=False,
-                yaxis={"categoryorder": "total ascending", "title": ""},
-                xaxis={"title": "Check-ins"},
-                margin={"l": 12, "r": 24, "t": 12, "b": 12},
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-            )
-            st.plotly_chart(fig_emo_org, width="stretch")
+            if emo_counts:
+                emo_admin_df = pd.DataFrame(
+                    [{"Emotion": k, "Count": v} for k, v in sorted(emo_counts.items(), key=lambda x: x[1], reverse=True)]
+                )
+                fig_emo_org = px.bar(
+                    emo_admin_df,
+                    x="Count",
+                    y="Emotion",
+                    orientation="h",
+                    text="Count",
+                    color="Count",
+                    color_continuous_scale=["#99f6e4", "#14b8a6", "#0f766e"],
+                )
+                fig_emo_org.update_traces(textposition="outside")
+                fig_emo_org.update_layout(
+                    height=265,
+                    showlegend=False,
+                    coloraxis_showscale=False,
+                    yaxis={"categoryorder": "total ascending", "title": ""},
+                    xaxis={"title": "Check-ins"},
+                    margin={"l": 12, "r": 24, "t": 12, "b": 12},
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                )
+                st.plotly_chart(fig_emo_org, width="stretch")
+            else:
+                st.info("No reflection emotions logged for this selection yet.")
 
         with b_c2, st.container(border=True):
             st.markdown("##### 🩺 Strain Triage & Leadership Playbook")

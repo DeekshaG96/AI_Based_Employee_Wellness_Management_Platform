@@ -31,6 +31,7 @@ class UserResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
+    role: str = "employee"
 
 
 class AuthResponse(BaseModel):
@@ -200,6 +201,7 @@ class UserInfoResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
+    role: str = "employee"
     profile_details: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
 

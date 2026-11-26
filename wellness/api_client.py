@@ -6,6 +6,7 @@ import io
 import json
 import logging
 import os
+import secrets
 import time
 from datetime import datetime, timedelta
 from typing import Any
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 _api_available: bool | None = None
 _last_check_time: float = 0.0
+_LOCAL_SESSIONS: dict[str, tuple[int, str]] = {}
 
 
 class ApiError(RuntimeError):
@@ -96,67 +98,95 @@ def _request(
     return body
 
 
-def register(name: str, email: str, password: str) -> dict[str, Any]:
+def _require_local_admin(token: str | None) -> int:
+    """Verify administrator role for local SQLite fallback sessions."""
+    from .storage import connect_database, normalize_role
+
+    if not token or token not in _LOCAL_SESSIONS:
+        raise ApiError("Administrator sign-in is required.")
+    uid, cached_role = _LOCAL_SESSIONS[token]
+    conn = connect_database()
     try:
+        row = conn.execute("SELECT role FROM users WHERE id = ?", (uid,)).fetchone()
+        db_role = normalize_role(row["role"]) if row else normalize_role(cached_role)
+    finally:
+        conn.close()
+    if db_role != "admin":
+        raise ApiError("Administrator privileges are required.")
+    return uid
+
+
+def register(name: str, email: str, password: str) -> dict[str, Any]:
+    if is_api_available():
         return _request(
             "POST", "/auth/register", json={"name": name, "email": email, "password": password}
         )
-    except Exception:
-        from .storage import connect_database, register_user
 
-        conn = connect_database()
+    from .storage import admin_email_allowlist, connect_database, register_user
+
+    conn = connect_database()
+    try:
         try:
             uid = register_user(conn, name, email, password)
-        except Exception:
-            row = conn.execute("SELECT id, name FROM users WHERE email = ?", (email.strip().lower(),)).fetchone()
-            uid = row["id"] if row else 1
+        except Exception as exc:
+            raise ApiError(str(exc)) from exc
+        clean_email = email.strip().lower()
+        role = "admin" if clean_email in admin_email_allowlist() else "employee"
+        tok = secrets.token_urlsafe(24)
+        _LOCAL_SESSIONS[tok] = (uid, role)
         return {
-            "access_token": f"equimind_local_token_{uid}",
+            "access_token": tok,
             "token_type": "bearer",
-            "user": {"id": uid, "name": name, "email": email},
+            "user": {"id": uid, "name": name.strip(), "email": clean_email, "role": role},
         }
+    finally:
+        conn.close()
 
 
 def login(email: str, password: str) -> dict[str, Any]:
-    try:
+    if is_api_available():
         return _request("POST", "/auth/login", json={"email": email, "password": password})
-    except Exception:
-        from .storage import authenticate_user, connect_database, register_user
 
-        conn = connect_database()
-        auth = authenticate_user(conn, email, password)
-        if auth:
-            uid, uname = auth
-        else:
-            row = conn.execute("SELECT id, name FROM users WHERE email = ?", (email.strip().lower(),)).fetchone()
-            if row:
-                uid, uname = row["id"], row["name"]
-            else:
-                uname = email.split("@")[0].replace(".", " ").replace("_", " ").title() or "Team Member"
-                try:
-                    uid = register_user(conn, uname, email, password)
-                except Exception:
-                    uid = 1
+    from .storage import (
+        authenticate_user_with_role,
+        bootstrap_admin_from_env,
+        connect_database,
+    )
+
+    conn = connect_database()
+    try:
+        bootstrap_admin_from_env(conn)
+        auth = authenticate_user_with_role(conn, email, password)
+        if auth is None:
+            raise ApiError("Invalid email or password.")
+        uid, uname, urole = auth
+        tok = secrets.token_urlsafe(24)
+        _LOCAL_SESSIONS[tok] = (uid, urole)
         return {
-            "access_token": f"equimind_local_token_{uid}",
+            "access_token": tok,
             "token_type": "bearer",
-            "user": {"id": uid, "name": uname, "email": email},
+            "user": {"id": uid, "name": uname, "email": email.strip().lower(), "role": urole},
         }
+    finally:
+        conn.close()
 
 
 def logout(token: str) -> None:
-    try:
-        _request("POST", "/auth/logout", token=token)
-    except Exception:
-        pass
+    if token:
+        _LOCAL_SESSIONS.pop(token, None)
+    if is_api_available():
+        try:
+            _request("POST", "/auth/logout", token=token)
+        except Exception:
+            pass
 
 
 def analyze(text: str, token: str, source_name: str = "Direct Entry") -> AnalysisReport:
-    try:
+    if is_api_available():
         return analysis_report_from_dict(
             _request("POST", "/analyze", token=token, json={"text": text, "source_name": source_name})
         )
-    except Exception:
+    if True:
         from .pipeline import analyze_text
         from .storage import (
             connect_database,
@@ -377,27 +407,22 @@ def _seed_starter_reflections(conn: Any, user_id: int) -> None:
 
 
 def history(user_id: int, token: str, limit: int = 500) -> list[dict[str, Any]]:
-    try:
+    if is_api_available():
         response = _request("GET", f"/history/{user_id}", token=token, params={"limit": limit})
         entries = response.get("items", [])
         for entry in entries:
             entry["tokens"] = ", ".join(entry.get("tokens") or [])
             entry["recommendation"] = entry.get("recommendation") or {}
-        if entries:
-            return entries
-    except Exception:
-        pass
+        return entries
 
-    # Seamless SQLite In-Process Fallback
+    # User-scoped SQLite in-process fallback (never fall back to user_id=None)
     from .storage import connect_database, get_user_mood_entries
 
     conn = connect_database()
-    raw_entries = get_user_mood_entries(conn, user_id=user_id)
-    if not raw_entries:
-        raw_entries = get_user_mood_entries(conn, user_id=None)
-    if not raw_entries:
-        _seed_starter_reflections(conn, user_id)
+    try:
         raw_entries = get_user_mood_entries(conn, user_id=user_id)
+    finally:
+        conn.close()
 
     formatted: list[dict[str, Any]] = []
     for e in raw_entries[:limit]:
@@ -443,14 +468,17 @@ def history(user_id: int, token: str, limit: int = 500) -> list[dict[str, Any]]:
 
 
 def delete_entry(entry_id: int, token: str) -> None:
-    try:
+    if is_api_available():
         _request("DELETE", f"/history/{entry_id}", token=token)
-    except Exception:
-        from .storage import connect_database, delete_mood_entry
+        return
+    from .storage import connect_database, delete_mood_entry
 
-        conn = connect_database()
+    conn = connect_database()
+    try:
         uid = _get_current_user_id()
         delete_mood_entry(conn, entry_id, uid)
+    finally:
+        conn.close()
 
 
 def analysis_report_from_dict(data: dict[str, Any]) -> AnalysisReport:
@@ -484,24 +512,22 @@ def analysis_report_from_dict(data: dict[str, Any]) -> AnalysisReport:
     )
 
 
-def compare_models_client(text: str) -> dict[str, Any]:
+def compare_models_client(text: str, token: str | None = None) -> dict[str, Any]:
     """Call the comparative analysis endpoint across baseline and transformer models."""
-    try:
-        return _request("POST", "/analyze/compare", json={"text": text})
-    except Exception:
-        from .comparator import compare_models
+    if is_api_available() and token:
+        return _request("POST", "/analyze/compare", token=token, json={"text": text})
+    from .comparator import compare_models
 
-        return compare_models(text)
+    return compare_models(text)
 
 
 def get_wellness_exercises_client() -> list[dict[str, Any]]:
     """Fetch catalog of evidence-based somatic and cognitive micro-interventions."""
-    try:
+    if is_api_available():
         return _request("GET", "/wellness/exercises")
-    except Exception:
-        from .wellness_tools import get_guided_exercises
+    from .wellness_tools import get_guided_exercises
 
-        return get_guided_exercises()
+    return get_guided_exercises()
 
 
 def get_team_burnout_risk_client(
@@ -509,20 +535,21 @@ def get_team_burnout_risk_client(
     scenario: str = "balanced",
     days: int = 14,
     team_size: int = 8,
+    token: str | None = None,
 ) -> dict[str, Any]:
-    """Calculate team burnout risk score and resilience index via API."""
-    try:
+    """Calculate team burnout risk score and resilience index (Admin required)."""
+    if is_api_available():
         payload = {
             "entries": entries or [],
             "scenario": scenario,
             "days": days,
             "team_size": team_size,
         }
-        return _request("POST", "/team/burnout-risk", json=payload)
-    except Exception:
-        from .team_analytics import calculate_team_burnout_risk
+        return _request("POST", "/team/burnout-risk", token=token, json=payload)
+    _require_local_admin(token)
+    from .team_analytics import calculate_team_burnout_risk
 
-        return calculate_team_burnout_risk(entries or [])
+    return calculate_team_burnout_risk(entries or [])
 
 
 def get_mood_food_plan_client(emotion: str, dietary_pref: str = "any") -> dict[str, Any]:
@@ -585,7 +612,7 @@ def submit_feedback(
 ) -> dict[str, Any]:
     """Store 5. User feedback (recommendation id, report data, accepted/rejected)."""
     effective_token = token or api_token or kwargs.get("auth_token")
-    try:
+    if is_api_available():
         return _request(
             "POST",
             "/feedback",
@@ -596,10 +623,11 @@ def submit_feedback(
                 "accepted_or_rejected": accepted_or_rejected,
             },
         )
-    except Exception:
-        from .storage import connect_database, save_user_feedback
 
-        conn = connect_database()
+    from .storage import connect_database, save_user_feedback
+
+    conn = connect_database()
+    try:
         fb_id = save_user_feedback(conn, recommendation_id, report_data, accepted_or_rejected)
         return {
             "id": fb_id,
@@ -608,32 +636,40 @@ def submit_feedback(
             "accepted_or_rejected": accepted_or_rejected,
             "timestamp": datetime.now().isoformat(),
         }
+    finally:
+        conn.close()
 
 
 def get_database_entities(token: str | None = None) -> dict[str, list[dict[str, Any]]]:
-    """Retrieve all 6 stored database entities."""
-    try:
+    """Retrieve privacy-filtered database entities (Administrator required)."""
+    if is_api_available():
         return _request("GET", "/database/entities", token=token)
-    except Exception:
-        from .storage import connect_database, get_all_database_entities
+    _require_local_admin(token)
+    from .storage import connect_database, get_all_database_entities
 
-        conn = connect_database()
-        return get_all_database_entities(conn)
+    conn = connect_database()
+    try:
+        return get_all_database_entities(conn, redact_private_text=True)
+    finally:
+        conn.close()
 
 
 def get_admin_analytics(token: str | None = None) -> dict[str, Any]:
-    """Retrieve official Admin Dashboard Analytics metrics."""
-    try:
+    """Retrieve Admin Dashboard Analytics metrics (Administrator required)."""
+    if is_api_available():
         return _request("GET", "/admin/analytics", token=token)
-    except Exception:
-        from .storage import (
-            connect_database,
-        )
-        from .storage import (
-            get_admin_analytics as get_storage_admin_analytics,
-        )
+    _require_local_admin(token)
+    from .storage import (
+        connect_database,
+    )
+    from .storage import (
+        get_admin_analytics as get_storage_admin_analytics,
+    )
 
-        conn = connect_database()
+    conn = connect_database()
+    try:
         return get_storage_admin_analytics(conn)
+    finally:
+        conn.close()
 
 
