@@ -19,6 +19,7 @@ import streamlit as st
 from wellness.api_client import (
     ApiError,
     analysis_report_from_dict,
+    is_api_available,
 )
 from wellness.api_client import (
     analyze as api_analyze,
@@ -4733,9 +4734,9 @@ def render_team_health_view():
                 <span style="background: #d7e8c6; color: #3d4b32; padding: 3px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">AI Synthesis & Strategy</span>
                 <span style="color: #70796f; font-size: 0.8rem;">• Synchronized {refreshed_at}</span>
             </div>
-            <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.7rem; font-weight: 700; color: #1a1c1b; letter-spacing: -0.025em;">Team Wellbeing Intelligence</h2>
+            <h2 style="margin: 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.7rem; font-weight: 700; color: #1a1c1b; letter-spacing: -0.025em;">Team Health & Leadership Playbooks</h2>
             <p style="margin: 4px 0 0 0; color: #404940; font-size: 0.92rem; line-height: 1.5;">
-                Synthesized insights derived from active check-ins, sentiment trends, and organizational rhythm to optimize leadership action, guided by your interactive AI Wellbeing Companion.
+                Model workload scenarios, deploy team recovery schedules, and track weekly manager well-being actions.
             </p>
         </div>
         """,
@@ -4744,14 +4745,13 @@ def render_team_health_view():
 
     # Telemetry Stream Mode Switcher
     stream_tabs = st.tabs([
-        "🔮 Scenario Stress-Testing & Forecasts",
-        "📝 Log Instant Team Pulse",
-        "📋 Team Check-in Activity Log",
-        "🛡️ Admin Dashboard Analytics",
+        "🔮 Scenario Forecasts & Playbooks",
+        "📝 Log Team Pulse",
+        "📋 Team Pulse Activity Log",
     ])
 
     with stream_tabs[0]:
-        col_ctrl, col_companion = st.columns([1.1, 0.9], gap="large")
+        col_ctrl, col_impact = st.columns([1.2, 0.8], gap="large")
         with col_ctrl:
             scenario = st.radio(
                 "Select Team Operating Scenario to Model:",
@@ -4781,13 +4781,13 @@ def render_team_health_view():
 
             c_btn1, c_btn2 = st.columns(2)
             with c_btn1:
-                if st.button("Refresh AI Insights", type="primary", width="stretch", key="btn_refresh_team_ai"):
+                if st.button("🔄 Refresh Insights", type="primary", width="stretch", key="btn_refresh_team_ai"):
                     st.session_state["team_insights_refreshed_at"] = datetime.now(timezone.utc).strftime("%I:%M:%S %p UTC")
                     st.toast("Telemetry synchronized across all active check-ins.", icon="✨")
                     st.rerun()
             with c_btn2:
                 st.download_button(
-                    "Export Intelligence Report",
+                    "📥 Export Pulse CSV",
                     data=pd.DataFrame(mock_data).to_csv(index=False),
                     file_name=f"team_wellbeing_{scenario}_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv",
                     mime="text/csv",
@@ -4795,9 +4795,25 @@ def render_team_health_view():
                     key="btn_export_team_report",
                 )
 
-        with col_companion:
-            # Embed Interactive 3D Zen Companion (Three.js WebGL with scenario tuning)
-            render_iframe(render_zen_companion_3d_widget(scenario=scenario), height=360)
+        with col_impact, st.container(border=True):
+            scen_cfg = {
+                "balanced": ("Healthy Cadence", "#0f766e", "#f0fdfa", "#99f6e4", "Maintain current sprint load and protect mid-week focus hours.", "Focus Recovery: ~4.5 hrs/wk"),
+                "thriving": ("High Flow & Safety", "#059669", "#f0fdf4", "#bbf7d0", "Capture peer recognition wins and replicate async habits across pods.", "Focus Recovery: ~6.0 hrs/wk"),
+                "burnout": ("Elevated Burnout Risk", "#dc2626", "#fef2f2", "#fecaca", "Immediately schedule a Team Recharge block and prune 2+ recurring status syncs.", "Priority Action: Immediate Load Reset"),
+            }[scenario]
+            st.markdown(
+                f"""
+                <div style="background: {scen_cfg[2]}; border: 1px solid {scen_cfg[3]}; border-radius: 12px; padding: 14px 16px;">
+                    <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #475569;">Scenario Outlook</div>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: {scen_cfg[1]}; margin: 4px 0 8px 0;">{scen_cfg[0]}</div>
+                    <div style="font-size: 0.84rem; color: #334155; line-height: 1.5; margin-bottom: 10px;">{scen_cfg[4]}</div>
+                    <div style="display: inline-block; background: #ffffff; border: 1px solid {scen_cfg[3]}; color: {scen_cfg[1]}; font-size: 0.76rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">
+                        {scen_cfg[5]}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         st.markdown("---")
 
@@ -5144,88 +5160,7 @@ END:VCALENDAR"""
                     st.toast("Loaded 4 sample engineering sprint check-ins!", icon="🌱")
                     st.rerun()
             else:
-                st.dataframe(pd.DataFrame(live_records), width="stretch")
-
-    with stream_tabs[3], st.container(border=True):
-        st.markdown(
-            """
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-                <div>
-                    <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: #0f172a;">Admin Dashboard Analytics & Platform Operations</h3>
-                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">Enterprise oversight: registered employee base, inference volumes, care adoption, and API latency.</p>
-                </div>
-                <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 700; font-size: 0.74rem; padding: 3px 10px; border-radius: 9999px;">Operational SLIs</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        try:
-            admin_stats = api_get_admin_analytics(st.session_state.get("api_token"))
-        except Exception:
-            admin_stats = {}
-
-        total_reg = admin_stats.get("total_registered_users", 8)
-        act_users = admin_stats.get("active_users", 6)
-        tot_recs_ana = admin_stats.get("total_recommendations_analysis", 32)
-        rec_usage = admin_stats.get("recommendation_usage", 18)
-        acc_rate = admin_stats.get("acceptance_rate", 85.7)
-        api_p = admin_stats.get("api_performance", {"avg_response_time_ms": 38.2, "p95_response_time_ms": 110.5, "error_rate_pct": 0.0, "uptime_pct": 99.99, "status": "Optimal"})
-
-        c1, c2, c3 = st.columns(3)
-        c4, c5, c6 = st.columns(3)
-
-        c1.metric("1. Total Registered Users", f"{total_reg}", "Platform Enrolled")
-        c2.metric("2. Active Users", f"{act_users}", "Engaged in Last 14 Days")
-        c3.metric("3. Total Recommendations / Analysis", f"{tot_recs_ana}", "Inference Cycles")
-        c4.metric("4. Recommendation Usage", f"{rec_usage}", "no of recommendations generated")
-        c5.metric("5. Acceptance Rate", f"{acc_rate:.1f}%", "acc recs / total recs x 100")
-        c6.metric("6. API Performance", f"{api_p['avg_response_time_ms']} ms", f"Error Rate: {api_p['error_rate_pct']:.1f}% (Uptime {api_p.get('uptime_pct', 99.99)}%)")
-
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-        t_col1, t_col2 = st.columns([1.5, 1], gap="medium")
-        with t_col1:
-            st.markdown("##### ⚡ API Performance Telemetry (Response Time & Error Rate)")
-            adm_chart_df = pd.DataFrame({
-                "Component": ["Inference Latency (Avg)", "P95 Tail Latency", "Database Query (P50)", "NLP Tokenizer"],
-                "Milliseconds (ms)": [api_p["avg_response_time_ms"], api_p["p95_response_time_ms"], 4.2, 12.8],
-            })
-            fig_adm = px.bar(
-                adm_chart_df,
-                x="Component",
-                y="Milliseconds (ms)",
-                text="Milliseconds (ms)",
-                color="Milliseconds (ms)",
-                color_continuous_scale=["#34d399", "#fcd34d", "#f87171"],
-            )
-            fig_adm.update_traces(texttemplate="%{text:.1f} ms", textposition="outside")
-            fig_adm.update_layout(height=260, margin={"l": 20, "r": 20, "t": 20, "b": 20}, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-            st.plotly_chart(fig_adm, width="stretch")
-
-        with t_col2:
-            st.markdown("##### 🛡️ Operational Reliability & Compliance")
-            st.markdown(
-                f"""
-                <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; font-size: 0.85rem; color: #334155; line-height: 1.55;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span>Health Telemetry:</span> <strong style="color: #166534;">● {api_p['status']}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span>Service Uptime:</span> <strong>{api_p.get('uptime_pct', 99.99)}%</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span>HTTP 5xx Error Rate:</span> <strong style="color: #166534;">{api_p['error_rate_pct']:.2f}%</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span>Acceptance Formula:</span> <strong>acc / total x 100</strong>
-                    </div>
-                    <div style="margin-top: 10px; padding: 8px 12px; background: #f0fdfa; border-left: 3px solid #0f766e; border-radius: 4px; font-size: 0.78rem; color: #0f766e;">
-                        High recommendation adoption rate ({acc_rate:.1f}%) demonstrates evidence-based relevance and user psychological safety.
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                st.dataframe(pd.DataFrame(live_records), width="stretch", hide_index=True)
 
 
 
@@ -8884,6 +8819,11 @@ def render_sidebar():
             entry_count = len(st.session_state.get("local_history", []))
 
         count_display = str(entry_count) if entry_count is not None else "0"
+        if is_admin_active:
+            status_summary_html = '<span style="color: #1e40af; font-weight: 700;">Governance Portal</span>'
+        else:
+            status_summary_html = f'<span style="color: #0f766e; font-weight: 700;">{count_display} reflections</span>'
+
         st.markdown(
             f"""
             <div class="sidebar-brand-box" style="display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(204, 251, 241, 0.85); margin-bottom: 12px;">
@@ -8905,7 +8845,7 @@ def render_sidebar():
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(204, 251, 241, 0.6); font-size: 0.74rem;">
-                    <span style="color: #0f766e; font-weight: 700;">{count_display} reflections</span>
+                    {status_summary_html}
                     <span style="color: #059669; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
                         <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span> Active
                     </span>
@@ -8952,8 +8892,6 @@ def render_sidebar():
                 ("🛡️", "Admin Dashboard", "nav_admin"),
                 ("👥", "Team Health Pulse", "nav_team"),
                 ("📁", "Batch Data Ingestion", "nav_batch"),
-                ("📈", "User Dashboard", "nav_trends"),
-                ("💬", "Daily Reflection", "nav_reflection"),
             ]
         else:
             base_nav = [
@@ -8996,7 +8934,7 @@ def render_sidebar():
         selected_nav = st.radio("Select View:", nav_options, index=idx, key="equimind_nav_view", label_visibility="collapsed")
 
         st.markdown("<div style='margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 8px;'></div>", unsafe_allow_html=True)
-        if not st.session_state.get("show_sos_reset_modal", False):
+        if not is_admin_active and not st.session_state.get("show_sos_reset_modal", False):
             sos_btn_label = get_ui_translation("sos_button")
             if st.button(sos_btn_label, key="header_sos_reset_btn", type="secondary", width="stretch", help="1-click physiological sigh & parasympathetic de-escalation"):
                 st.session_state["show_sos_reset_modal"] = True
@@ -10100,7 +10038,7 @@ def render_user_dashboard_view():
 
 
 def _render_admin_entity_tab(
-    schema_doc: str,
+    description: str,
     rows: list[dict[str, Any]],
     json_cols: tuple[str, ...],
     search_key: str,
@@ -10109,7 +10047,7 @@ def _render_admin_entity_tab(
     csv_filename: str,
     csv_key: str,
 ) -> None:
-    """Render a standardized, searchable relational database entity table with live row counts and CSV export."""
+    """Render a clean, searchable Admin data table with live row count and CSV export."""
     cleaned_rows: list[dict[str, Any]] = []
     for row in rows:
         item = dict(row)
@@ -10137,11 +10075,11 @@ def _render_admin_entity_tab(
 
     with ctrl_c2:
         st.markdown(
-            f"<div style='text-align: right; padding-top: 8px; font-size: 0.78rem; color: #0f766e; font-weight: 700;'>Showing {len(df_entity)} of {total_count} rows</div>",
+            f"<div style='text-align: right; padding-top: 8px; font-size: 0.78rem; color: #0f766e; font-weight: 700;'>Showing {len(df_entity)} of {total_count} records</div>",
             unsafe_allow_html=True,
         )
 
-    st.caption(f"Schema: `{schema_doc}`")
+    st.caption(description)
     st.dataframe(df_entity, width="stretch", hide_index=True)
     st.download_button(
         csv_label,
@@ -10152,8 +10090,168 @@ def _render_admin_entity_tab(
     )
 
 
+def _extract_department_name(source_name: str, fallback_dept: str = "General") -> str:
+    """Parse bracketed department/pod tag from source_name cleanly."""
+    if "[" in source_name and "]" in source_name:
+        parsed = source_name.split("[", 1)[1].split("]", 1)[0].strip()
+        if parsed:
+            return parsed
+    return fallback_dept or "General"
+
+
+def _collect_org_telemetry_records(
+    users_list: list[dict[str, Any]],
+    reports_list: list[dict[str, Any]],
+    recs_list: list[dict[str, Any]],
+    fallback_entries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build organization-wide normalized telemetry records across all member accounts."""
+    user_dept_map: dict[int, str] = {}
+    for u in users_list:
+        uid = u.get("id")
+        prof = u.get("profile_details", {})
+        if isinstance(prof, str):
+            try:
+                prof = json.loads(prof)
+            except Exception:
+                prof = {}
+        dept = prof.get("department") if isinstance(prof, dict) else None
+        if uid is not None and dept:
+            user_dept_map[int(uid)] = str(dept)
+
+    records: list[dict[str, Any]] = []
+    source_rows = reports_list if any(isinstance(r.get("report_data"), dict) and r["report_data"].get("sentiment_scores") for r in reports_list) else []
+    if not source_rows:
+        source_rows = recs_list if any(isinstance(r.get("report_data"), dict) and r["report_data"].get("sentiment_scores") for r in recs_list) else []
+
+    for row in source_rows:
+        rd = row.get("report_data", {})
+        if isinstance(rd, str):
+            try:
+                rd = json.loads(rd)
+            except Exception:
+                rd = {}
+        if not isinstance(rd, dict) or "sentiment_scores" not in rd:
+            continue
+        uid = row.get("user_id")
+        prof_dept = user_dept_map.get(int(uid), "General") if uid is not None else "General"
+        src = str((rd.get("input_summary") or {}).get("source_name", ""))
+        scores = rd.get("sentiment_scores") or {}
+        records.append({
+            "department": _extract_department_name(src, prof_dept),
+            "dominant_emotion": str(rd.get("dominant_emotion", "neutral")).lower(),
+            "sentiment_label": str(rd.get("sentiment_label", "neutral")).lower(),
+            "compound_score": float(scores.get("compound", 0.0)),
+            "timestamp": str(row.get("timestamp") or row.get("created_at") or ""),
+        })
+
+    if records:
+        return records
+
+    for r in fallback_entries:
+        src = str(r.get("source_name", "") or r.get("input_source", ""))
+        records.append({
+            "department": _extract_department_name(src, "General"),
+            "dominant_emotion": str(r.get("dominant_emotion", "neutral")).lower(),
+            "sentiment_label": str(r.get("sentiment_label", "neutral")).lower(),
+            "compound_score": float(r.get("compound_score", 0.0)),
+            "timestamp": str(r.get("created_at", "")),
+        })
+    return records
+
+
+def _seed_admin_sample_checkins() -> None:
+    """Populate 20 sample reflections across 5 departmental profiles for demonstration."""
+    simulation_batch = [
+        ("Shipped the core microservice architecture refactoring today. System throughput improved 38% and the sprint demo was a huge success!", "Engineering", ["#win", "#focus"]),
+        ("Back-to-back design critiques and user journey walkthroughs. Feeling slightly depleted but energized by clear component consistency.", "Design", ["#screen-break", "#clarity"]),
+        ("Resolved a high-priority enterprise SLA escalation proactively. Client sent a personal commendation to our leadership team.", "Support", ["#win", "#gratitude"]),
+        ("Drafting Q4 product strategy deck for the executive committee. Minor apprehension about capacity constraints but clear priorities.", "Product", ["#deadline", "#focus"]),
+        ("Smooth sprint retrospective with the cross-functional pod. Vulnerable and constructive conversation on unblocking dependencies.", "Operations", ["#team", "#gratitude"]),
+        ("Debugging a persistent memory leak under sustained load. Taking a mindful 5-minute breather before re-running the profiling harness.", "Engineering", ["#focus", "#stress"]),
+        ("Conducted 6 candidate interviews today. Cognitive bandwidth is running low; looking forward to quiet evening decompression.", "People / HR", ["#fatigue", "#screen-break"]),
+        ("Seamless Kubernetes cluster canary rollout with zero customer downtime. Excellent collaboration across the SRE team.", "Engineering", ["#win", "#calm"]),
+        ("Aligning cross-regional design tokens between web and mobile platforms. Productive synergy across all design chapters.", "Design", ["#focus", "#team"]),
+        ("Customer satisfaction score reached 98.4% this week. Celebrating our front-line support specialists in today's standup.", "Support", ["#win", "#gratitude"]),
+        ("Sprint backlog grooming took longer than anticipated. Feeling a bit scattered with competing stakeholder priorities.", "Product", ["#stress", "#deadline"]),
+        ("Completed somatic breathwork and a 15-minute lunchtime walk. Returned to the afternoon sprint feeling refreshed and centered.", "Operations", ["#calm", "#energy"]),
+        ("All unit and end-to-end regression suites passing with 100% green coverage. Ready for Friday release window.", "Engineering", ["#win", "#clarity"]),
+        ("Rapid prototype feedback session revealed 3 crucial usability simplifications. Excited to refine the interaction model tomorrow.", "Design", ["#focus", "#win"]),
+        ("Dealing with an unexpected third-party API outage. Managing communications calmly while the vendor works on resolution.", "Support", ["#stress", "#calm"]),
+        ("Quarterly OKR review finalized with unanimous alignment. Strategic objectives for H1 are transparent and actionable.", "Product", ["#clarity", "#team"]),
+        ("Organized the team wellness coffee hour. Wonderful connection and laughter with colleagues from disparate departments.", "People / HR", ["#gratitude", "#team"]),
+        ("Automated our CI/CD pipeline artifact cache, reducing build times from 18 minutes to 4 minutes flat.", "Engineering", ["#win", "#focus"]),
+        ("Design system documentation overhaul complete. Design-to-code velocity expected to double for upcoming sprints.", "Design", ["#win", "#clarity"]),
+        ("Reflecting on the month's accomplishments. Grateful for our team's psychological safety and steadfast mutual support.", "Operations", ["#gratitude", "#calm"]),
+    ]
+    sim_reasons = [
+        "⏱️ Not enough time right now",
+        "📍 Not feasible at my desk / workspace",
+        "🎯 Doesn't match how I feel",
+    ]
+    orig_uid = st.session_state.get("user_id")
+    orig_uname = st.session_state.get("user_name")
+    sim_users: list[tuple[int, str]] = []
+    try:
+        from wellness.storage import connect_database, register_user
+
+        conn_sim = connect_database()
+        sim_profiles = [
+            ("Maya Lin", "maya.lin@equimind.internal", "Engineering", "Staff Engineer"),
+            ("Liam Patel", "liam.patel@equimind.internal", "Design", "Lead Product Designer"),
+            ("Elena Rostova", "elena.rostova@equimind.internal", "Product", "Product Manager"),
+            ("Noah Brooks", "noah.brooks@equimind.internal", "Support", "Enterprise Support Lead"),
+            ("Sofia Alvarez", "sofia.alvarez@equimind.internal", "People / HR", "People Partner"),
+        ]
+        for p_name, p_email, p_dept, p_role in sim_profiles:
+            try:
+                uid_new = register_user(conn_sim, p_name, p_email, "EquiMindSim123!")
+                conn_sim.execute(
+                    "UPDATE users SET profile_details = ? WHERE id = ?",
+                    (json.dumps({"role": p_role, "department": p_dept}), uid_new),
+                )
+                conn_sim.commit()
+                sim_users.append((uid_new, p_name))
+            except Exception:
+                row = conn_sim.execute("SELECT id, name FROM users WHERE email = ?", (p_email,)).fetchone()
+                if row:
+                    sim_users.append((int(row["id"]), str(row["name"])))
+    except Exception:
+        pass
+
+    sim_token = st.session_state.get("api_token")
+    try:
+        for idx_sim, (text, dept, tags) in enumerate(simulation_batch):
+            try:
+                if sim_users:
+                    suid, suname = sim_users[idx_sim % len(sim_users)]
+                    st.session_state["user_id"] = suid
+                    st.session_state["user_name"] = suname
+                rep = api_analyze(text, sim_token, f"[{dept}] {' '.join(tags)}")
+                rec_id = int(getattr(rep, "history_id", None) or (idx_sim + 1))
+                is_rej = (idx_sim % 5) == 4
+                fb_status = "rejected" if is_rej else "accepted"
+                fb_payload = {
+                    "title": rep.recommendations.get("title", "Practice"),
+                    "department": dept,
+                }
+                if is_rej:
+                    fb_payload["decline_reason"] = sim_reasons[idx_sim % len(sim_reasons)]
+                api_submit_feedback(
+                    recommendation_id=rec_id,
+                    accepted_or_rejected=fb_status,
+                    report_data=fb_payload,
+                    api_token=sim_token,
+                )
+            except Exception:
+                pass
+    finally:
+        st.session_state["user_id"] = orig_uid
+        st.session_state["user_name"] = orig_uname
+
+
 def render_admin_dashboard_view():
-    """Render the Executive Admin Command Center featuring KPI telemetry, departmental analytics, burnout radar, 6 database entities, and governance checks."""
+    """Render the Admin Dashboard with organization wellbeing metrics, department triage, feedback insights, data exports, and privacy checks."""
     if not st.session_state.get("is_admin", False):
         st.error("🔒 Access Restricted: Administrator privileges are required to view the Admin Dashboard.")
         if st.button("← Return to User Dashboard", key="admin_access_denied_return_btn"):
@@ -10163,149 +10261,10 @@ def render_admin_dashboard_view():
 
     import time as _time
 
-    refreshed_ts = st.session_state.get("admin_refreshed_at", "Live Stream")
+    refreshed_ts = st.session_state.get("admin_refreshed_at", "Live")
 
     # -------------------------------------------------------------------------
-    # 1. EXECUTIVE OPERATIONAL HEADER
-    # -------------------------------------------------------------------------
-    st.markdown(
-        f"""
-        <div style="background: linear-gradient(135deg, #0f172a 0%, #134e4a 60%, #0f766e 100%); border: 1px solid rgba(94, 234, 212, 0.35); border-radius: 18px; padding: 20px 26px; box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.25); margin-bottom: 14px; color: #f8fafc;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-                <div>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                        <span style="background: rgba(45, 212, 191, 0.18); border: 1px solid rgba(45, 212, 191, 0.45); color: #5eead4; font-weight: 700; font-size: 0.70rem; padding: 2px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.06em;">Executive Command Center</span>
-                        <span style="background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(74, 222, 128, 0.40); color: #86efac; font-weight: 700; font-size: 0.70rem; padding: 2px 9px; border-radius: 6px;">● 6 Entities Online · {refreshed_ts}</span>
-                    </div>
-                    <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.62rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; line-height: 1.2;">🛡️ Admin Dashboard — Enterprise Telemetry & Governance</div>
-                    <div style="margin: 4px 0 0 0; color: #cbd5e1; font-size: 0.86rem; line-height: 1.4;">Organization-wide engagement, anonymized burnout radar, care adoption feedback, and relational data audit.</div>
-                </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <span style="background: rgba(255, 255, 255, 0.10); border: 1px solid rgba(255, 255, 255, 0.20); padding: 4px 12px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #e2e8f0;">🔒 k-Anonymity (k=5)</span>
-                    <span style="background: rgba(255, 255, 255, 0.10); border: 1px solid rgba(255, 255, 255, 0.20); padding: 4px 12px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #5eead4;">⚡ SLA 99.99% Uptime</span>
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # -------------------------------------------------------------------------
-    # 2. OPERATIONAL CONTROL TOOLBAR
-    # -------------------------------------------------------------------------
-    with st.container(border=True):
-        cmd_c1, cmd_c2, cmd_c3, cmd_c4 = st.columns([1.65, 1.0, 1.05, 1.05], gap="small")
-
-        with cmd_c1:
-            if st.button("🚀 Simulate 20 Dept Check-ins", type="primary", width="stretch", key="admin_sim_20_btn", help="Populate 20 realistic reflections across Engineering, Design, Product, Support, Operations, and People pods"):
-                SIMULATION_BATCH = [
-                    ("Shipped the core microservice architecture refactoring today. System throughput improved 38% and the sprint demo was a huge success!", "Engineering", ["#win", "#focus"]),
-                    ("Back-to-back design critiques and user journey walkthroughs. Feeling slightly depleted but energized by clear component consistency.", "Design", ["#screen-break", "#clarity"]),
-                    ("Resolved a high-priority enterprise SLA escalation proactively. Client sent a personal commendation to our leadership team.", "Support", ["#win", "#gratitude"]),
-                    ("Drafting Q4 product strategy deck for the executive committee. Minor apprehension about capacity constraints but clear priorities.", "Product", ["#deadline", "#focus"]),
-                    ("Smooth sprint retrospective with the cross-functional pod. Vulnerable and constructive conversation on unblocking dependencies.", "Operations", ["#team", "#gratitude"]),
-                    ("Debugging a persistent memory leak under sustained load. Taking a mindful 5-minute breather before re-running the profiling harness.", "Engineering", ["#focus", "#stress"]),
-                    ("Conducted 6 candidate interviews today. Cognitive bandwidth is running low; looking forward to quiet evening decompression.", "People / HR", ["#fatigue", "#screen-break"]),
-                    ("Seamless Kubernetes cluster canary rollout with zero customer downtime. Excellent collaboration across the SRE team.", "Engineering", ["#win", "#calm"]),
-                    ("Aligning cross-regional design tokens between web and mobile platforms. Productive synergy across all design chapters.", "Design", ["#focus", "#team"]),
-                    ("Customer satisfaction score reached 98.4% this week. Celebrating our front-line support specialists in today's standup.", "Support", ["#win", "#gratitude"]),
-                    ("Sprint backlog grooming took longer than anticipated. Feeling a bit scattered with competing stakeholder priorities.", "Product", ["#stress", "#deadline"]),
-                    ("Completed somatic breathwork and a 15-minute lunchtime walk. Returned to the afternoon sprint feeling refreshed and centered.", "Operations", ["#calm", "#energy"]),
-                    ("All unit and end-to-end regression suites passing with 100% green coverage. Ready for Friday release window.", "Engineering", ["#win", "#clarity"]),
-                    ("Rapid prototype feedback session revealed 3 crucial usability simplifications. Excited to refine the interaction model tomorrow.", "Design", ["#focus", "#win"]),
-                    ("Dealing with an unexpected third-party API outage. Managing communications calmly while the vendor works on resolution.", "Support", ["#stress", "#calm"]),
-                    ("Quarterly OKR review finalized with unanimous alignment. Strategic objectives for H1 are transparent and actionable.", "Product", ["#clarity", "#team"]),
-                    ("Organized the team wellness coffee hour. Wonderful connection and laughter with colleagues from disparate departments.", "People / HR", ["#gratitude", "#team"]),
-                    ("Automated our CI/CD pipeline artifact cache, reducing build times from 18 minutes to 4 minutes flat.", "Engineering", ["#win", "#focus"]),
-                    ("Design system documentation overhaul complete. Design-to-code velocity expected to double for upcoming sprints.", "Design", ["#win", "#clarity"]),
-                    ("Reflecting on the month's accomplishments. Grateful for our team's psychological safety and steadfast mutual support.", "Operations", ["#gratitude", "#calm"]),
-                ]
-                sim_reasons = [
-                    "⏱️ Not enough time right now",
-                    "📍 Not feasible at my desk / workspace",
-                    "🎯 Doesn't match how I feel",
-                ]
-                with st.spinner("Ingesting 20 departmental reflections & syncing all 6 database tables..."):
-                    _orig_uid = st.session_state.get("user_id")
-                    _orig_uname = st.session_state.get("user_name")
-                    _sim_users: list[tuple[int, str]] = []
-                    try:
-                        from wellness.storage import connect_database, register_user
-
-                        _conn_sim = connect_database()
-                        _sim_profiles = [
-                            ("Maya Lin", "maya.lin@equimind.internal", "Engineering", "Staff Engineer"),
-                            ("Liam Patel", "liam.patel@equimind.internal", "Design", "Lead Product Designer"),
-                            ("Elena Rostova", "elena.rostova@equimind.internal", "Product", "Product Manager"),
-                            ("Noah Brooks", "noah.brooks@equimind.internal", "Support", "Enterprise Support Lead"),
-                            ("Sofia Alvarez", "sofia.alvarez@equimind.internal", "People / HR", "People Partner"),
-                        ]
-                        for _p_name, _p_email, _p_dept, _p_role in _sim_profiles:
-                            try:
-                                _uid_new = register_user(_conn_sim, _p_name, _p_email, "EquiMindSim123!")
-                                _conn_sim.execute(
-                                    "UPDATE users SET profile_details = ? WHERE id = ?",
-                                    (json.dumps({"role": _p_role, "department": _p_dept}), _uid_new),
-                                )
-                                _conn_sim.commit()
-                                _sim_users.append((_uid_new, _p_name))
-                            except Exception:
-                                row = _conn_sim.execute("SELECT id, name FROM users WHERE email = ?", (_p_email,)).fetchone()
-                                if row:
-                                    _sim_users.append((int(row["id"]), str(row["name"])))
-                    except Exception:
-                        pass
-
-                    sim_token = st.session_state.get("api_token")
-                    try:
-                        for idx_sim, (text, dept, tags) in enumerate(SIMULATION_BATCH):
-                            try:
-                                if _sim_users:
-                                    suid, suname = _sim_users[idx_sim % len(_sim_users)]
-                                    st.session_state["user_id"] = suid
-                                    st.session_state["user_name"] = suname
-                                rep = api_analyze(text, sim_token, f"[{dept}] {' '.join(tags)}")
-                                rec_id = int(getattr(rep, "history_id", None) or (idx_sim + 1))
-                                is_rej = (idx_sim % 5) == 4
-                                feed_status = "rejected" if is_rej else "accepted"
-                                fb_payload = {
-                                    "title": rep.recommendations.get("title", "Practice"),
-                                    "department": dept,
-                                }
-                                if is_rej:
-                                    fb_payload["decline_reason"] = sim_reasons[idx_sim % len(sim_reasons)]
-                                api_submit_feedback(
-                                    recommendation_id=rec_id,
-                                    accepted_or_rejected=feed_status,
-                                    report_data=fb_payload,
-                                    api_token=sim_token,
-                                )
-                            except Exception:
-                                pass
-                    finally:
-                        st.session_state["user_id"] = _orig_uid
-                        st.session_state["user_name"] = _orig_uname
-                    st.toast("20 departmental check-ins ingested across all 6 relational database tables!", icon="🚀")
-                    st.rerun()
-
-        with cmd_c2:
-            if st.button("🔄 Refresh Live", width="stretch", key="admin_refresh_btn"):
-                st.session_state["admin_refreshed_at"] = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
-                st.toast("Telemetry synced with database!", icon="🔄")
-                st.rerun()
-
-        with cmd_c3:
-            if st.button("👥 Team Pulse →", width="stretch", key="admin_jump_team_btn"):
-                set_active_view("👥")
-                st.rerun()
-
-        with cmd_c4:
-            if st.button("📈 User View →", width="stretch", key="admin_jump_trends_btn"):
-                set_active_view("📈")
-                st.rerun()
-
-    # -------------------------------------------------------------------------
-    # FETCH TELEMETRY & DATABASE ENTITIES
+    # 1. FETCH TELEMETRY & DATABASE ENTITIES
     # -------------------------------------------------------------------------
     try:
         admin_stats = api_get_admin_analytics(st.session_state.get("api_token"))
@@ -10380,19 +10339,24 @@ def render_admin_dashboard_view():
         for r in entries[:15]
     ]
 
+    org_records = _collect_org_telemetry_records(users_list, reports_list, recs_list, entries)
+    dept_options = ["All Departments"] + sorted({r["department"] for r in org_records if r.get("department")})
+
     total_reg = max(admin_stats.get("total_registered_users", 1), len(users_list))
-    act_users = max(admin_stats.get("active_users", 1), 1)
-    tot_recs_ana = admin_stats.get("total_recommendations_analysis", len(entries) * 2 if entries else 32)
-    rec_usage = admin_stats.get("recommendation_usage", max(len(recs_list), len(entries), 18))
+    act_users = min(total_reg, max(admin_stats.get("active_users", 1), 1))
+    part_pct = (act_users / max(1, total_reg)) * 100.0
+    total_checkins = max(len(org_records), len(journals_list), admin_stats.get("recommendation_usage", 0))
+    rec_usage = admin_stats.get("recommendation_usage", max(len(recs_list), len(org_records)))
 
     fb_accepted_raw = sum(1 for f in feedback_list if f.get("accepted_or_rejected") == "accepted")
     fb_rejected_raw = sum(1 for f in feedback_list if f.get("accepted_or_rejected") == "rejected")
-    if "acceptance_rate" in admin_stats and (admin_stats.get("total_feedback", 0) > 0 or rec_usage > 0):
-        acc_rate = float(admin_stats["acceptance_rate"])
-    elif (fb_accepted_raw + fb_rejected_raw) > 0:
+    if (fb_accepted_raw + fb_rejected_raw) > 0:
         acc_rate = round((fb_accepted_raw / (fb_accepted_raw + fb_rejected_raw)) * 100.0, 1)
+    elif "acceptance_rate" in admin_stats and admin_stats.get("total_feedback", 0) > 0:
+        acc_rate = float(admin_stats["acceptance_rate"])
     else:
         acc_rate = 80.0
+
     api_p = admin_stats.get("api_performance", {
         "avg_response_time_ms": 38.2,
         "p95_response_time_ms": 110.5,
@@ -10400,31 +10364,150 @@ def render_admin_dashboard_view():
         "uptime_pct": 99.99,
         "status": "Optimal",
     })
-
     avg_ms = api_p.get("avg_response_time_ms", 38.2)
-    p95_ms = api_p.get("p95_response_time_ms", 110.5)
     err_pct = api_p.get("error_rate_pct", 0.0)
     up_pct = api_p.get("uptime_pct", 99.99)
     api_status = api_p.get("status", "Optimal")
 
     # -------------------------------------------------------------------------
-    # 3. THE 6 OFFICIAL ADMIN KPI METRICS (SWISS BENTO GRID)
+    # 2. CLEAN EXECUTIVE HEADER
+    # -------------------------------------------------------------------------
+    st.markdown(
+        f"""
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #134e4a 60%, #0f766e 100%); border: 1px solid rgba(94, 234, 212, 0.35); border-radius: 18px; padding: 20px 26px; box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.25); margin-bottom: 14px; color: #f8fafc;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                        <span style="background: rgba(45, 212, 191, 0.18); border: 1px solid rgba(45, 212, 191, 0.45); color: #5eead4; font-weight: 700; font-size: 0.70rem; padding: 2px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.06em;">Organization Overview</span>
+                        <span style="background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(74, 222, 128, 0.40); color: #86efac; font-weight: 700; font-size: 0.70rem; padding: 2px 9px; border-radius: 6px;">● {total_reg} Members · {refreshed_ts}</span>
+                    </div>
+                    <div style="font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.62rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; line-height: 1.2;">🛡️ Admin Dashboard</div>
+                    <div style="margin: 4px 0 0 0; color: #cbd5e1; font-size: 0.86rem; line-height: 1.4;">Anonymized team wellbeing insights, department burnout signals, care adoption feedback, and data exports.</div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span style="background: rgba(255, 255, 255, 0.10); border: 1px solid rgba(255, 255, 255, 0.20); padding: 4px 12px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #e2e8f0;">🔒 k-Anonymity (k≥5)</span>
+                    <span style="background: rgba(255, 255, 255, 0.10); border: 1px solid rgba(255, 255, 255, 0.20); padding: 4px 12px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; color: #5eead4;">⚡ {api_status}</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # -------------------------------------------------------------------------
+    # 3. USER-FRIENDLY ACTION BAR (FILTER + EXPORT + SYNC + PLAYBOOKS)
+    # -------------------------------------------------------------------------
+    with st.container(border=True):
+        cmd_c1, cmd_c2, cmd_c3, cmd_c4 = st.columns([1.45, 1.15, 0.85, 0.95], gap="small")
+        with cmd_c1:
+            selected_dept = st.selectbox(
+                "Filter Department",
+                options=dept_options,
+                key="admin_dept_filter",
+                label_visibility="collapsed",
+                help="Filter charts, burnout radar, and feedback insights by department",
+            )
+
+        filtered_records = (
+            org_records
+            if selected_dept == "All Departments"
+            else [r for r in org_records if r.get("department") == selected_dept]
+        )
+
+        # Build clean per-department summary upfront for both Export CTA & Overview chart
+        dept_groups: dict[str, list[dict[str, Any]]] = {}
+        for r in filtered_records:
+            dept_groups.setdefault(r["department"], []).append(r)
+
+        dept_summary_rows: list[dict[str, Any]] = []
+        for dept_name, rows_in_dept in sorted(dept_groups.items(), key=lambda x: len(x[1]), reverse=True):
+            avg_comp = sum(item["compound_score"] for item in rows_in_dept) / max(1, len(rows_in_dept))
+            mood_idx = round((avg_comp + 1.0) * 50.0, 1)
+            neg_count = sum(1 for item in rows_in_dept if item["sentiment_label"] == "negative")
+            strain_pct = round((neg_count / max(1, len(rows_in_dept))) * 100.0, 1)
+            emo_freq: dict[str, int] = {}
+            for item in rows_in_dept:
+                e_lbl = item["dominant_emotion"].capitalize()
+                emo_freq[e_lbl] = emo_freq.get(e_lbl, 0) + 1
+            top_emo = max(emo_freq.items(), key=lambda x: x[1])[0] if emo_freq else "Neutral"
+            status_lbl = "Needs Care" if (mood_idx < 48 or strain_pct >= 35) else ("Watch" if strain_pct >= 20 else "Healthy")
+            dept_summary_rows.append({
+                "Department": dept_name,
+                "Check-ins": len(rows_in_dept),
+                "Well-Being Index": mood_idx,
+                "Strain %": strain_pct,
+                "Top Emotion": top_emo,
+                "Status": status_lbl,
+            })
+
+        exec_df = pd.DataFrame(dept_summary_rows) if dept_summary_rows else pd.DataFrame([{
+            "Department": selected_dept,
+            "Check-ins": 0,
+            "Well-Being Index": 0.0,
+            "Strain %": 0.0,
+            "Top Emotion": "Neutral",
+            "Status": "No Data",
+        }])
+
+        with cmd_c2:
+            st.download_button(
+                "📥 Export Executive Brief",
+                data=exec_df.to_csv(index=False).encode("utf-8"),
+                file_name=f"equimind_executive_brief_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv",
+                mime="text/csv",
+                type="primary",
+                width="stretch",
+                key="admin_export_brief_btn",
+            )
+        with cmd_c3:
+            if st.button("🔄 Sync Data", width="stretch", key="admin_refresh_btn"):
+                st.session_state["admin_refreshed_at"] = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
+                st.toast("Telemetry synced with database!", icon="🔄")
+                st.rerun()
+        with cmd_c4:
+            if st.button("👥 Action Plans →", width="stretch", key="admin_jump_team_btn"):
+                set_active_view("👥")
+                st.rerun()
+
+    # Compute org wellbeing & strain metrics from active filtered set
+    sent_counts = {"positive": 0, "neutral": 0, "negative": 0}
+    emo_counts: dict[str, int] = {}
+    for r in filtered_records:
+        emo = str(r.get("dominant_emotion", "neutral")).capitalize()
+        emo_counts[emo] = emo_counts.get(emo, 0) + 1
+        lbl = str(r.get("sentiment_label", "neutral")).lower()
+        if lbl in sent_counts:
+            sent_counts[lbl] += 1
+
+    tot_s = max(1, sum(sent_counts.values()))
+    neg_share = (sent_counts["negative"] / tot_s) * 100.0
+    pos_share = (sent_counts["positive"] / tot_s) * 100.0
+    avg_org_comp = (
+        sum(float(r.get("compound_score", 0.0)) for r in filtered_records) / len(filtered_records)
+        if filtered_records
+        else 0.25
+    )
+    org_mood_idx = max(0.0, min(100.0, (avg_org_comp + 1.0) * 50.0))
+    risk_level = "Elevated" if neg_share >= 35.0 else ("Moderate" if neg_share >= 20.0 else "Healthy")
+
+    # -------------------------------------------------------------------------
+    # 4. CLEAN EXECUTIVE KPI BENTO GRID
     # -------------------------------------------------------------------------
     _render_bento_kpi_grid([
         {
-            "label": "1. Total Registered Users",
+            "label": "Registered Employees",
             "value": f"{total_reg}",
             "badge": "Enrolled",
-            "sub": "Verified platform accounts",
+            "sub": "Verified accounts on platform",
             "accent": "linear-gradient(90deg, #0f766e, #14b8a6)",
             "badge_bg": "#f0fdfa",
             "badge_fg": "#0f766e",
             "badge_border": "#99f6e4",
         },
         {
-            "label": "2. Active Users",
-            "value": f"{act_users}",
-            "badge": "14-Day Window",
+            "label": "Active Participation",
+            "value": f"{act_users} of {total_reg}",
+            "badge": f"{part_pct:.0f}% Active",
             "sub": "Members checking in consistently",
             "accent": "linear-gradient(90deg, #0284c7, #38bdf8)",
             "badge_bg": "#f0f9ff",
@@ -10432,37 +10515,37 @@ def render_admin_dashboard_view():
             "badge_border": "#bae6fd",
         },
         {
-            "label": "3. Total Recs / Analysis",
-            "value": f"{tot_recs_ana}",
-            "badge": "Inference",
-            "sub": "Dual NLP & emotion cycles completed",
+            "label": "Reflections Analyzed",
+            "value": f"{total_checkins}",
+            "badge": f"{rec_usage} Care Plans",
+            "sub": "Total check-ins processed cleanly",
             "accent": "linear-gradient(90deg, #6366f1, #818cf8)",
             "badge_bg": "#eef2ff",
             "badge_fg": "#4338ca",
             "badge_border": "#c7d2fe",
         },
         {
-            "label": "4. Recommendation Usage",
-            "value": f"{rec_usage}",
-            "badge": "Pathways",
-            "sub": "Personalized care plans generated",
-            "accent": "linear-gradient(90deg, #0d9488, #2dd4bf)",
-            "badge_bg": "#f0fdfa",
-            "badge_fg": "#0f766e",
-            "badge_border": "#99f6e4",
-        },
-        {
-            "label": "5. Acceptance Rate",
+            "label": "Care Plan Adoption",
             "value": f"{acc_rate:.1f}%",
-            "badge": "(Acc / Tot) × 100",
-            "sub": "Adopted suggestions vs declined",
+            "badge": f"{fb_accepted_raw} Accepted",
+            "sub": f"{fb_rejected_raw} skipped with feedback",
             "accent": "linear-gradient(90deg, #059669, #34d399)",
             "badge_bg": "#f0fdf4",
             "badge_fg": "#166534",
             "badge_border": "#bbf7d0",
         },
         {
-            "label": "6. API Performance",
+            "label": "Org Well-Being Index",
+            "value": f"{org_mood_idx:.0f} / 100",
+            "badge": risk_level,
+            "sub": f"Positivity {pos_share:.0f}% · Strain {neg_share:.0f}%",
+            "accent": "linear-gradient(90deg, #0d9488, #2dd4bf)",
+            "badge_bg": "#f0fdf4" if risk_level == "Healthy" else ("#fffbeb" if risk_level == "Moderate" else "#fef2f2"),
+            "badge_fg": "#166534" if risk_level == "Healthy" else ("#92400e" if risk_level == "Moderate" else "#b91c1c"),
+            "badge_border": "#bbf7d0" if risk_level == "Healthy" else ("#fde68a" if risk_level == "Moderate" else "#fecaca"),
+        },
+        {
+            "label": "Platform Speed & SLA",
             "value": f"{avg_ms} ms",
             "badge": f"{up_pct}% Uptime",
             "sub": f"Error Rate: {err_pct:.1f}% · Status: {api_status}",
@@ -10473,172 +10556,132 @@ def render_admin_dashboard_view():
         },
     ])
 
+    if selected_dept != "All Departments":
+        st.info(f"Showing filtered view for **{selected_dept}** ({len(filtered_records)} check-ins). Switch back to **All Departments** above for organization-wide totals.")
+
+    # Precompute feedback & decline reasons cleanly
+    filtered_feedback = []
+    reason_counts: dict[str, int] = {}
+    for f in feedback_list:
+        rd = f.get("report_data", {})
+        if isinstance(rd, str):
+            try:
+                rd = json.loads(rd)
+            except Exception:
+                rd = {}
+        rd = rd if isinstance(rd, dict) else {}
+        f_dept = str(rd.get("department", "General"))
+        if selected_dept != "All Departments" and f_dept != selected_dept:
+            continue
+        status_val = str(f.get("accepted_or_rejected", "accepted"))
+        rsn = rd.get("decline_reason", "") if status_val == "rejected" else ""
+        if rsn:
+            reason_counts[rsn] = reason_counts.get(rsn, 0) + 1
+        filtered_feedback.append({
+            "Decision": "✅ Accepted" if status_val == "accepted" else "⏭️ Declined",
+            "Department": f_dept,
+            "Practice": str(rd.get("title") or rd.get("practice") or "Personalized Care Plan"),
+            "Skip Reason": rsn or "—",
+            "Logged At": str(f.get("timestamp", ""))[:19].replace("T", " "),
+        })
+    for log_item in st.session_state.get("decline_feedback_log", []):
+        rsn = log_item.get("Reason")
+        if rsn:
+            reason_counts[rsn] = reason_counts.get(rsn, 0) + 1
+
     # -------------------------------------------------------------------------
-    # 4. ORGANIZED 4-TAB ADMIN WORKSPACE
+    # 5. ORGANIZED 4-TAB ADMIN WORKSPACE
     # -------------------------------------------------------------------------
     adm_tab_overview, adm_tab_burnout, adm_tab_db, adm_tab_governance = st.tabs([
-        "📊 Telemetry, Departments & Feedback",
-        "🚨 Organizational Burnout Radar",
-        "🗄️ Database Vault (All 6 Entities)",
-        "🛡️ System Health, RBAC & SLAs",
+        "📊 Overview & Departments",
+        "🚨 Burnout Radar & Feedback",
+        "🗄️ Data Explorer & Exports",
+        "🛡️ Privacy, Governance & Health",
     ])
 
     # =========================================================================
-    # ADMIN TAB 1: TELEMETRY, DEPARTMENTS & DECLINE REASONS
+    # TAB 1: ORGANIZATION WELLBEING BY DEPARTMENT + CARE ADOPTION
     # =========================================================================
     with adm_tab_overview:
-        c_graph1, c_graph2 = st.columns([1.4, 1], gap="medium")
-        with c_graph1, st.container(border=True):
-            st.markdown("##### ⚡ API Performance & SLA Latency Distribution")
-            perf_df = pd.DataFrame({
-                "Component": ["Avg Response", "P95 Tail Latency", "P99 Spike Latency", "SLA Target Limit"],
-                "Milliseconds (ms)": [avg_ms, p95_ms, 145.0, 500.0],
-            })
-            fig_perf = px.bar(
-                perf_df,
-                x="Component",
-                y="Milliseconds (ms)",
-                text="Milliseconds (ms)",
-                color="Milliseconds (ms)",
-                color_continuous_scale=["#10b981", "#fbbf24", "#f87171"],
-            )
-            fig_perf.update_traces(texttemplate="%{text:.1f} ms", textposition="outside")
-            fig_perf.update_layout(
-                height=255,
-                showlegend=False,
-                margin={"l": 16, "r": 16, "t": 18, "b": 16},
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-            )
-            st.plotly_chart(fig_perf, width="stretch")
+        c_left, c_right = st.columns([1.35, 1], gap="medium")
 
-        with c_graph2, st.container(border=True):
-            st.markdown(f"##### 🎯 Care Recommendation Adoption ({acc_rate:.1f}%)")
-            fb_accepted = sum(1 for f in feedback_list if f.get("accepted_or_rejected") == "accepted")
-            fb_rejected = sum(1 for f in feedback_list if f.get("accepted_or_rejected") == "rejected")
-            if (fb_accepted + fb_rejected) == 0:
-                fb_accepted = int((acc_rate / 100.0) * max(10, rec_usage))
-                fb_rejected = max(1, max(10, rec_usage) - fb_accepted)
+        with c_left, st.container(border=True):
+            st.markdown("##### 🏢 Department Wellbeing & Engagement")
+            if dept_summary_rows:
+                fig_dept = px.bar(
+                    exec_df,
+                    x="Department",
+                    y="Well-Being Index",
+                    text="Check-ins",
+                    color="Well-Being Index",
+                    color_continuous_scale=["#f59e0b", "#14b8a6", "#059669"],
+                )
+                fig_dept.update_traces(texttemplate="%{text} logs", textposition="outside")
+                fig_dept.update_layout(
+                    height=245,
+                    yaxis={"range": [0, 112], "title": "Mood Index (0–100)"},
+                    xaxis={"title": ""},
+                    coloraxis_showscale=False,
+                    margin={"l": 12, "r": 12, "t": 14, "b": 16},
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                )
+                st.plotly_chart(fig_dept, width="stretch")
+                st.dataframe(exec_df, width="stretch", hide_index=True)
+            else:
+                st.info("No check-ins found for this filter yet. Check in or load sample data in **Data Explorer & Exports**.")
+
+        with c_right, st.container(border=True):
+            st.markdown(f"##### 🎯 Care Plan Adoption ({acc_rate:.1f}%)")
+            fb_acc_filt = sum(1 for item in filtered_feedback if item["Decision"].startswith("✅"))
+            fb_rej_filt = sum(1 for item in filtered_feedback if item["Decision"].startswith("⏭️"))
+            if (fb_acc_filt + fb_rej_filt) == 0:
+                fb_acc_filt = fb_accepted_raw if fb_accepted_raw > 0 else int((acc_rate / 100.0) * max(10, rec_usage))
+                fb_rej_filt = fb_rejected_raw if fb_rejected_raw > 0 else max(1, max(10, rec_usage) - fb_acc_filt)
+            filt_acc_pct = round((fb_acc_filt / max(1, fb_acc_filt + fb_rej_filt)) * 100.0, 1)
+
             pie_df = pd.DataFrame({
-                "Feedback": ["Accepted Practice", "Declined / Skipped"],
-                "Count": [fb_accepted, fb_rejected],
+                "Feedback": ["Accepted", "Declined"],
+                "Count": [fb_acc_filt, fb_rej_filt],
             })
             fig_pie = px.pie(
                 pie_df,
                 values="Count",
                 names="Feedback",
-                hole=0.60,
+                hole=0.62,
                 color="Feedback",
-                color_discrete_map={"Accepted Practice": "#059669", "Declined / Skipped": "#94a3b8"},
+                color_discrete_map={"Accepted": "#059669", "Declined": "#94a3b8"},
             )
             fig_pie.update_traces(textinfo="percent", textposition="inside", insidetextfont={"color": "#ffffff", "size": 12})
             fig_pie.update_layout(
-                height=255,
+                height=230,
                 showlegend=True,
-                legend={"orientation": "h", "yanchor": "bottom", "y": -0.18, "xanchor": "center", "x": 0.5},
-                annotations=[{"text": f"{acc_rate:.0f}%", "x": 0.5, "y": 0.5, "font_size": 20, "showarrow": False, "font_weight": 700, "font_color": "#0f172a"}],
-                margin={"l": 16, "r": 16, "t": 18, "b": 34},
+                legend={"orientation": "h", "yanchor": "top", "y": -0.05, "xanchor": "center", "x": 0.5},
+                annotations=[{"text": f"{filt_acc_pct:.0f}%", "x": 0.5, "y": 0.5, "font_size": 20, "showarrow": False, "font_weight": 700, "font_color": "#0f172a"}],
+                margin={"l": 12, "r": 12, "t": 10, "b": 42},
                 paper_bgcolor="rgba(0,0,0,0)",
             )
             st.plotly_chart(fig_pie, width="stretch")
 
-        # Department Engagement + Decline Reason Analytics Row
-        d_col1, d_col2 = st.columns([1.3, 1], gap="medium")
-        with d_col1, st.container(border=True):
-            st.markdown("##### 🏢 Aggregated Pod & Department Activity (Anonymized)")
-            dept_counts: dict[str, list[float]] = {}
-            for r in entries:
-                src = str(r.get("source_name", "") or r.get("input_source", ""))
-                comp = float(r.get("compound_score", 0.0))
-                if "[" in src and "]" in src:
-                    dept_name = src.split("[", 1)[1].split("]", 1)[0].strip()
-                else:
-                    dept_name = "General"
-                dept_counts.setdefault(dept_name, []).append(comp)
-            if not dept_counts:
-                dept_counts = {
-                    "Engineering": [0.42, 0.35],
-                    "Design": [0.28],
-                    "Product": [0.18],
-                    "Support": [0.51],
-                    "Operations": [0.39],
-                }
-            dept_rows = [
-                {
-                    "Department / Pod": d,
-                    "Reflections": len(scores),
-                    "Avg Mood Index": round(((sum(scores) / len(scores)) + 1.0) * 50.0, 1),
-                }
-                for d, scores in sorted(dept_counts.items(), key=lambda x: len(x[1]), reverse=True)
-            ]
-            dept_df = pd.DataFrame(dept_rows)
-            fig_dept = px.bar(
-                dept_df,
-                x="Department / Pod",
-                y="Avg Mood Index",
-                text="Reflections",
-                color="Avg Mood Index",
-                color_continuous_scale=["#f59e0b", "#14b8a6", "#059669"],
-            )
-            fig_dept.update_traces(texttemplate="%{text} logs", textposition="outside")
-            fig_dept.update_layout(
-                height=250,
-                yaxis={"range": [0, 110]},
-                margin={"l": 16, "r": 16, "t": 16, "b": 16},
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-            )
-            st.plotly_chart(fig_dept, width="stretch")
-
-        with d_col2, st.container(border=True):
-            st.markdown("##### 💬 Why Recommendations Were Declined")
-            reason_counts: dict[str, int] = {}
-            for f in feedback_list:
-                if f.get("accepted_or_rejected") == "rejected":
-                    rd = f.get("report_data", {})
-                    if isinstance(rd, str):
-                        try:
-                            rd = json.loads(rd)
-                        except Exception:
-                            rd = {}
-                    rsn = rd.get("decline_reason") if isinstance(rd, dict) else None
-                    if rsn:
-                        reason_counts[rsn] = reason_counts.get(rsn, 0) + 1
-            for log_item in st.session_state.get("decline_feedback_log", []):
-                rsn = log_item.get("Reason")
-                if rsn:
-                    reason_counts[rsn] = reason_counts.get(rsn, 0) + 1
-
+            st.markdown("###### 💬 Top Reasons Care Was Skipped")
             if reason_counts:
                 rc_df = pd.DataFrame(
                     [{"Reason": k, "Count": v} for k, v in sorted(reason_counts.items(), key=lambda x: x[1], reverse=True)]
                 )
                 st.dataframe(rc_df, width="stretch", hide_index=True)
-                top_rsn = rc_df.iloc[0]["Reason"]
-                st.caption(f"Top friction driver: **{top_rsn}** — optimize care length & desk compatibility.")
+                st.caption(f"Top barrier: **{rc_df.iloc[0]['Reason']}** — consider shorter desk-friendly interventions.")
             else:
-                st.info("No skip reasons logged yet. Whenever an employee skips a suggestion and enters a reason, trends aggregate here.")
+                st.info("No skip reasons logged for this selection yet.")
 
     # =========================================================================
-    # ADMIN TAB 2: ORGANIZATIONAL BURNOUT RADAR & SENTIMENT SIGNALS
+    # TAB 2: BURNOUT RADAR & ANONYMIZED FEEDBACK LOG
     # =========================================================================
     with adm_tab_burnout:
-        b_c1, b_c2 = st.columns([1.25, 1], gap="medium")
+        b_c1, b_c2 = st.columns([1.2, 1], gap="medium")
         with b_c1, st.container(border=True):
-            st.markdown("##### 🎭 Organization-Wide Emotion Telemetry")
-            emo_counts: dict[str, int] = {}
-            sent_counts = {"positive": 0, "neutral": 0, "negative": 0}
-            for r in entries:
-                emo = str(r.get("dominant_emotion", "neutral")).capitalize()
-                emo_counts[emo] = emo_counts.get(emo, 0) + 1
-                lbl = str(r.get("sentiment_label", "neutral")).lower()
-                if lbl in sent_counts:
-                    sent_counts[lbl] += 1
-
+            st.markdown("##### 🎭 Organization Emotion Breakdown")
             if not emo_counts:
-                emo_counts = {"Joy": 7, "Neutral": 4, "Sadness": 2, "Fear": 2, "Surprise": 1}
-                sent_counts = {"positive": 8, "neutral": 4, "negative": 4}
-
+                emo_counts = {"Neutral": 1}
             emo_admin_df = pd.DataFrame(
                 [{"Emotion": k, "Count": v} for k, v in sorted(emo_counts.items(), key=lambda x: x[1], reverse=True)]
             )
@@ -10648,121 +10691,133 @@ def render_admin_dashboard_view():
                 y="Emotion",
                 orientation="h",
                 text="Count",
-                color="Emotion",
+                color="Count",
+                color_continuous_scale=["#99f6e4", "#14b8a6", "#0f766e"],
             )
+            fig_emo_org.update_traces(textposition="outside")
             fig_emo_org.update_layout(
                 height=265,
                 showlegend=False,
-                margin={"l": 12, "r": 18, "t": 12, "b": 12},
+                coloraxis_showscale=False,
+                yaxis={"categoryorder": "total ascending", "title": ""},
+                xaxis={"title": "Check-ins"},
+                margin={"l": 12, "r": 24, "t": 12, "b": 12},
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
             )
             st.plotly_chart(fig_emo_org, width="stretch")
 
         with b_c2, st.container(border=True):
-            st.markdown("##### 🛡️ Anonymous Strain Triage & Leadership Actions")
-            tot_s = max(1, sum(sent_counts.values()))
-            neg_share = (sent_counts["negative"] / tot_s) * 100.0
-            pos_share = (sent_counts["positive"] / tot_s) * 100.0
-
-            risk_level = "Elevated" if neg_share >= 35.0 else ("Moderate" if neg_share >= 20.0 else "Healthy")
+            st.markdown("##### 🩺 Strain Triage & Leadership Playbook")
             risk_color = "#dc2626" if neg_share >= 35.0 else ("#d97706" if neg_share >= 20.0 else "#059669")
             st.markdown(
                 f"""
                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Org Burnout Risk Signal</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: {risk_color}; margin: 2px 0;">{risk_level} ({neg_share:.1f}% Strain)</div>
-                    <div style="font-size: 0.80rem; color: #475569;">Constructive Positivity: <strong>{pos_share:.1f}%</strong> · Cluster Privacy Enforced (n &ge; 5)</div>
+                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Wellbeing Risk Signal</div>
+                    <div style="font-size: 1.45rem; font-weight: 800; color: {risk_color}; margin: 2px 0;">{risk_level} ({neg_share:.1f}% Strain)</div>
+                    <div style="font-size: 0.80rem; color: #475569;">Constructive Positivity: <strong>{pos_share:.1f}%</strong> · Individual entries remain private</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            if neg_share >= 30.0:
-                st.warning("Recommended Action: Schedule meeting-free recovery blocks and spotlight 2-minute desk breathwork.")
+            watchlist_depts = [row["Department"] for row in dept_summary_rows if row["Status"] != "Healthy"]
+            if watchlist_depts:
+                st.warning(f"Pods on Watch: **{', '.join(watchlist_depts)}** — schedule meeting-free recovery blocks and share 2-minute breathing breaks.")
+            elif neg_share >= 25.0:
+                st.warning("Recommended Action: Spotlight async standups and protect deep-focus hours this week.")
             else:
-                st.success("Organization pulse is balanced. Continue regular asynchronous standups and optional recharge breaks.")
+                st.success("All pods look steady. Continue asynchronous check-ins and optional recharge breaks.")
+            if st.button("Open Leadership Action Plans →", width="stretch", key="burnout_open_team_btn"):
+                set_active_view("👥")
+                st.rerun()
+
+        with st.container(border=True):
+            st.markdown("##### 📋 Recent Care Feedback & Skip Decisions")
+            if filtered_feedback:
+                st.dataframe(pd.DataFrame(filtered_feedback[:25]), width="stretch", hide_index=True)
+            else:
+                st.info("No employee recommendation decisions logged for this filter yet.")
 
     # =========================================================================
-    # ADMIN TAB 3: RELATIONAL DATABASE VAULT (ALL 6 ENTITIES)
+    # TAB 3: DATA EXPLORER & EXPORTS
     # =========================================================================
     with adm_tab_db:
         ent_t1, ent_t2, ent_t3, ent_t4, ent_t5, ent_t6 = st.tabs([
-            f"👤 1. Users ({len(users_list)})",
-            f"📝 2. Journals ({len(journals_list)})",
-            f"💡 3. Recommendations ({len(recs_list)})",
-            f"📋 4. Audits ({len(audits_list)})",
-            f"⭐ 5. Feedback ({len(feedback_list)})",
-            f"📄 6. Reports ({len(reports_list)})",
+            f"👤 Users ({len(users_list)})",
+            f"📝 Journals ({len(journals_list)})",
+            f"💡 Care Plans ({len(recs_list)})",
+            f"📋 Activity Log ({len(audits_list)})",
+            f"⭐ Care Feedback ({len(feedback_list)})",
+            f"📄 Reports ({len(reports_list)})",
         ])
 
         with ent_t1:
             _render_admin_entity_tab(
-                "id (int), name (str), email (str), profile_details (json), created_at (timestamp)",
+                "Registered platform accounts, roles, and department assignments.",
                 users_list,
                 ("profile_details",),
                 "admin_search_users",
-                "Filter users by name, email, or department...",
-                "📥 Download Users Table (CSV)",
+                "Filter by name, email, or department...",
+                "📥 Download Users CSV",
                 "equimind_users_table.csv",
                 "dl_users_csv",
             )
         with ent_t2:
             _render_admin_entity_tab(
-                "id (int), user_id (int), journal_text (text), timestamp (iso)",
+                "Stored employee reflection check-ins linked by member ID.",
                 journals_list,
                 (),
                 "admin_search_journals",
-                "Filter journals by reflection text or user ID...",
-                "📥 Download Journal Entries Table (CSV)",
+                "Filter by reflection text or member ID...",
+                "📥 Download Journals CSV",
                 "equimind_journal_entries_table.csv",
                 "dl_journals_csv",
             )
         with ent_t3:
             _render_admin_entity_tab(
-                "id (int), user_id (int), report_data (json), title (str), category (str), urgency (str)",
+                "Generated care recommendations and emotional analysis payloads.",
                 recs_list,
                 ("report_data",),
                 "admin_search_recs",
-                "Filter recommendations by title, emotion, or category...",
-                "📥 Download Recommendations Table (CSV)",
+                "Filter by title, emotion, or category...",
+                "📥 Download Care Plans CSV",
                 "equimind_recommendations_table.csv",
                 "dl_recs_csv",
             )
         with ent_t4:
             _render_admin_entity_tab(
-                "id (int), user_id (int), username (str), journal_id (int), recommendation (text), timestamp (iso)",
+                "Chronological log of check-ins and delivered interventions.",
                 audits_list,
                 (),
                 "admin_search_audits",
-                "Filter audit trails by username or action...",
-                "📥 Download Audit Trails Table (CSV)",
+                "Filter by member name or action...",
+                "📥 Download Activity Log CSV",
                 "equimind_audit_trails_table.csv",
                 "dl_audits_csv",
             )
         with ent_t5:
             _render_admin_entity_tab(
-                "id (int), recommendation_id (int), report_data (json), accepted_or_rejected (str), timestamp (iso)",
+                "Accepted vs declined recommendations with optional skip reasons.",
                 feedback_list,
                 ("report_data",),
                 "admin_search_feedback",
-                "Filter feedback by decision (accepted/rejected) or decline reason...",
-                "📥 Download Feedback Table (CSV)",
+                "Filter by accepted/rejected or skip reason...",
+                "📥 Download Feedback CSV",
                 "equimind_feedback_table.csv",
                 "dl_feedback_csv",
             )
         with ent_t6:
             _render_admin_entity_tab(
-                "id (int), user_id (int), username (str), report_data (json), timestamp (iso)",
+                "Full structured wellness reports saved after each reflection analysis.",
                 reports_list,
                 ("report_data",),
                 "admin_search_reports",
-                "Filter reports by username, timestamp, or payload...",
-                "📥 Download Reports Table (CSV)",
+                "Filter by username, timestamp, or report summary...",
+                "📥 Download Reports CSV",
                 "equimind_reports_table.csv",
                 "dl_reports_csv",
             )
 
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         all_export_data = {
             "users": users_list,
             "journal_entries": journals_list,
@@ -10772,19 +10827,12 @@ def render_admin_dashboard_view():
             "reports": reports_list,
             "exported_at": datetime.now(timezone.utc).isoformat(),
         }
-        with st.container(border=True):
-            st.markdown(
-                """
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-weight: 700; font-size: 0.90rem; color: #0f172a;">📦 Master Database Archive & Export Package</span>
-                    <span style="font-size: 0.74rem; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 2px 8px; border-radius: 6px; font-weight: 700;">All 6 Tables (JSON)</span>
-                </div>
-                <p style="margin: 0 0 10px 0; font-size: 0.82rem; color: #64748b;">Download a complete relational backup across all verified database tables.</p>
-                """,
-                unsafe_allow_html=True,
-            )
+        c_exp, c_seed = st.columns([1.2, 1], gap="medium")
+        with c_exp, st.container(border=True):
+            st.markdown("##### 📦 Full Backup Archive (JSON)")
+            st.caption("Download all 6 platform tables in one structured JSON archive.")
             st.download_button(
-                "📦 Download Master Enterprise Database Package (JSON)",
+                "📦 Download Complete Database Archive (JSON)",
                 data=json.dumps(all_export_data, indent=2, default=str).encode("utf-8"),
                 file_name="equimind_master_database_package.json",
                 mime="application/json",
@@ -10792,35 +10840,43 @@ def render_admin_dashboard_view():
                 key="dl_master_db_json",
             )
 
+        with c_seed, st.expander("🧪 Demo & Testing Utilities (Load Sample Data)", expanded=False):
+            st.caption("Populate 20 sample reflections across Engineering, Design, Product, Support, and People / HR for evaluation.")
+            if st.button("Load 20 Sample Dept Check-ins", width="stretch", key="admin_sim_20_btn"):
+                with st.spinner("Generating 20 departmental sample check-ins..."):
+                    _seed_admin_sample_checkins()
+                st.toast("Loaded 20 sample check-ins across all 6 tables!", icon="🚀")
+                st.rerun()
+
     # =========================================================================
-    # ADMIN TAB 4: SYSTEM HEALTH, RBAC & LIVE DIAGNOSTIC BENCHMARK
+    # TAB 4: PRIVACY, GOVERNANCE & SYSTEM HEALTH
     # =========================================================================
     with adm_tab_governance:
         g_c1, g_c2 = st.columns([1.2, 1], gap="medium")
         with g_c1, st.container(border=True):
-            st.markdown("##### 🛡️ Security, Privacy & Role-Access Matrix")
+            st.markdown("##### 🔒 Privacy & Access Controls")
             gov_df = pd.DataFrame([
-                {"Control": "Portal Role Separation", "Status": "✅ Enforced", "Detail": "Employee accounts strictly isolated from Admin views"},
-                {"Control": "Differential Privacy / k-Anonymity", "Status": "✅ Active (k=5)", "Detail": "Department telemetry hides individual text entries"},
-                {"Control": "Relational Persistence Integrity", "Status": "✅ 6 Tables Verified", "Detail": "SQLite WAL mode + Foreign-Key cascade rules"},
-                {"Control": "NLP Hybrid Availability", "Status": "✅ Resilient Fallback", "Detail": "Auto-downloading VADER + bundled heuristic protection"},
-                {"Control": "Audit & Skip-Reason Capture", "Status": "✅ Operational", "Detail": "All recommendations & decline reasons logged live"},
+                {"Safeguard": "Role Isolation", "Status": "✅ Enforced", "Details": "Employee and Administrator portals strictly separated"},
+                {"Safeguard": "Group Privacy (k≥5)", "Status": "✅ Active", "Details": "Department metrics aggregate insights without exposing private text"},
+                {"Safeguard": "Feedback Capture", "Status": "✅ Active", "Details": "Accept/skip choices and skip reasons logged for quality tuning"},
+                {"Safeguard": "Resilient NLP Engine", "Status": "✅ Operational", "Details": "Sentiment & emotion analysis works with automatic offline fallback"},
             ])
             st.dataframe(gov_df, width="stretch", hide_index=True)
 
         with g_c2, st.container(border=True):
-            st.markdown("##### ⚡ Live Pipeline Latency Benchmark")
-            st.caption("Run a real in-memory check measuring end-to-end NLP analysis + recommendation synthesis speed.")
-            if st.button("⚡ Run Live System Latency Self-Check", type="primary", width="stretch", key="admin_run_diag_btn"):
+            st.markdown("##### ⚡ Live System Health Check")
+            backend_mode = "FastAPI Backend Connected" if is_api_available() else "Embedded Local SQLite (wellness.db)"
+            st.caption(f"Current storage mode: **{backend_mode}**")
+            if st.button("⚡ Run Live Health Check", type="primary", width="stretch", key="admin_run_diag_btn"):
                 t0 = _time.perf_counter()
                 try:
                     from wellness.pipeline import analyze_text
 
-                    _diag_rep = analyze_text("Feeling focused after completing our afternoon design sprint.", source_name="Diagnostic")
+                    diag_rep = analyze_text("Feeling focused after completing our afternoon design sprint.", source_name="Diagnostic")
                     elapsed_ms = (_time.perf_counter() - t0) * 1000.0
-                    st.success(f"System Optimal — End-to-end NLP inference completed in **{elapsed_ms:.1f} ms** (Dominant: `{_diag_rep.dominant_emotion.capitalize()}`).")
+                    st.success(f"System Healthy — End-to-end analysis completed in **{elapsed_ms:.1f} ms** (Detected: `{diag_rep.dominant_emotion.capitalize()}`).")
                 except Exception as exc:
-                    st.error(f"Diagnostic exception: {exc}")
+                    st.error(f"Health check error: {exc}")
 
 
 # Inlined portal removed: single unified Streamlit UI active
