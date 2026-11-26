@@ -145,6 +145,14 @@ def create_tables() -> None:
                     f"ALTER TABLE users ADD COLUMN profile_details JSON NOT NULL DEFAULT {default_dict}"
                 )
 
+    if "audit_trails" in tables:
+        audit_cols = {column["name"] for column in inspect(engine).get_columns("audit_trails")}
+        if "action" not in audit_cols:
+            with engine.begin() as connection:
+                connection.exec_driver_sql(
+                    "ALTER TABLE audit_trails ADD COLUMN action VARCHAR(64) NOT NULL DEFAULT 'JOURNAL_ANALYSIS'"
+                )
+
     if "recommendations" in tables:
         rec_cols = {column["name"] for column in inspect(engine).get_columns("recommendations")}
         default_list = "'[]'::json" if engine.dialect.name == "postgresql" else "'[]'"

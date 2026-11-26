@@ -192,3 +192,75 @@ def test_storage_roles_and_genuine_analytics(tmp_path: Path, monkeypatch):
     assert adm_stats["total_registered_users"] == 1
     assert adm_stats["acceptance_rate"] is None
 
+
+def test_api_telemetry_summary_and_delete_all_user_entries(tmp_path, monkeypatch):
+    from wellness import api_client
+    from wellness.storage import (
+        connect_database,
+        delete_user_mood_entries,
+        get_admin_analytics,
+        get_api_telemetry_summary,
+        get_user_mood_entries,
+        register_user,
+        save_api_log,
+        save_mood_entry,
+        set_user_role,
+    )
+
+    db_path = tmp_path / "telemetry_delete.db"
+    monkeypatch.setenv("MOODMENTOR_DB_PATH", str(db_path))
+    monkeypatch.setattr("wellness.api_client.is_api_available", lambda: False)
+    monkeypatch.setattr("wellness.storage.connect_database", lambda p=db_path: connect_database(db_path))
+
+    conn = connect_database(db_path)
+    uid_a = register_user(conn, "Alice", "alice@company.com", "secretpass1")
+    uid_b = register_user(conn, "Bob", "bob@company.com", "secretpass1")
+
+    # Empty telemetry reports clean No data state without fake numbers
+    empty_tele = get_api_telemetry_summary(conn)
+    assert empty_tele["endpoints"] == []
+    assert get_admin_analytics(conn)["api_performance"]["avg_response_time_ms"] is None
+
+    # Save reflections for both users
+    for uid in (uid_a, uid_b):
+        save_mood_entry(
+            connection=conn,
+            user_id=uid,
+            source_type="text",
+            source_name="Journal",
+            original_text="Calm and focused day",
+            cleaned_text="calm focused day",
+            tokens=["calm", "focused", "day"],
+            sentiment_label="positive",
+            neg_score=0.0,
+            neu_score=0.4,
+            pos_score=0.6,
+            compound_score=0.65,
+            dominant_emotion="joy",
+            emotion_scores={"joy": 0.9},
+            recommendation={"title": "Keep journaling"},
+        )
+
+    save_api_log(conn, "POST", "/analyze", 200, 14.5)
+    save_api_log(conn, "GET", "/history/1", 200, 3.5)
+    tele = get_api_telemetry_summary(conn)
+    assert len(tele["endpoints"]) == 2
+    assert get_admin_analytics(conn)["api_performance"]["avg_response_time_ms"] == 9.0
+
+    # Deleting all of Alice's entries leaves Bob's entries untouched
+    deleted = delete_user_mood_entries(conn, uid_a)
+    assert deleted == 1
+    assert len(get_user_mood_entries(conn, uid_a)) == 0
+    assert len(get_user_mood_entries(conn, uid_b)) == 1
+    conn.close()
+
+    # Verify api_client fallback for delete_all_user_entries and role update
+    set_user_role(connect_database(db_path), "alice@company.com", "admin")
+    adm_auth = api_client.login("alice@company.com", "secretpass1")
+    updated = api_client.update_user_role_client(uid_b, "admin", adm_auth["access_token"])
+    assert updated["role"] == "admin"
+    assert api_client.delete_all_user_entries(uid_b, adm_auth["access_token"]) == 1
+    conn_check = connect_database(db_path)
+    assert len(get_user_mood_entries(conn_check, uid_b)) == 0
+    conn_check.close()
+

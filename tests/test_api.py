@@ -196,3 +196,102 @@ def test_production_db_failure_refuses_sqlite_fallback(tmp_path, monkeypatch):
         assert database.get_database_status()["backend"] == "unavailable"
     finally:
         database.configure_database(f"sqlite:///{tmp_path / 'cleanup.db'}")
+
+
+def test_admin_telemetry_role_update_and_structured_audit_trails(client: TestClient, monkeypatch):
+    def fake_analyze(text: str, source_name: str) -> AnalysisReport:
+        return AnalysisReport(
+            input_summary=InputSummary("text", source_name, len(text), 1, 2),
+            original_text=text,
+            cleaned_text=text.lower(),
+            processed_text="clear progress",
+            tokens=("clear", "progress"),
+            sentiment_scores=SentimentScores(0.0, 0.4, 0.6, 0.65),
+            sentiment_label=SentimentLabel.POSITIVE,
+            counts={"characters": len(text), "lines": 1},
+            vader_input_text=text,
+            dominant_emotion="joy",
+            emotion_scores={"joy": 0.9},
+            recommendations={"title": "Gratitude Walk", "category": "Well-Being", "urgency": "Low"},
+        )
+
+    monkeypatch.setattr("wellness_api.main.analyze_text", fake_analyze)
+
+    emp_res = client.post(
+        "/auth/register",
+        json={"name": "Employee One", "email": "emp1@company.com", "password": "password123"},
+    )
+    assert emp_res.status_code == 201
+    emp_token = emp_res.json()["access_token"]
+    emp_id = emp_res.json()["user"]["id"]
+    emp_headers = {"Authorization": f"Bearer {emp_token}"}
+
+    # Employees are forbidden from admin telemetry and role endpoints
+    assert client.get("/admin/telemetry", headers=emp_headers).status_code == 403
+    assert (
+        client.post(
+            f"/admin/users/{emp_id}/role",
+            headers=emp_headers,
+            json={"role": "admin"},
+        ).status_code
+        == 403
+    )
+
+    # Admin registered via trusted ADMIN_EMAILS allowlist then logs in
+    monkeypatch.setenv("ADMIN_EMAILS", "adm2@company.com")
+    adm_reg = client.post(
+        "/auth/register",
+        json={"name": "Admin Two", "email": "adm2@company.com", "password": "password123"},
+    )
+    assert adm_reg.status_code == 201
+    adm_id = adm_reg.json()["user"]["id"]
+
+    adm_login = client.post(
+        "/auth/login",
+        json={"email": "adm2@company.com", "password": "password123"},
+    )
+    assert adm_login.status_code == 200
+    adm_headers = {"Authorization": f"Bearer {adm_login.json()['access_token']}"}
+
+    # Analyze & give feedback -> generates structured audit trail events & api_logs
+    ana = client.post(
+        "/analyze",
+        headers=adm_headers,
+        json={"text": "Grateful for clear team coordination and steady progress today.", "source_name": "Work"},
+    )
+    assert ana.status_code == 200
+    fb = client.post(
+        "/feedback",
+        headers=adm_headers,
+        json={"recommendation_id": None, "report_data": {"title": "Gratitude Walk"}, "accepted_or_rejected": "accepted"},
+    )
+    assert fb.status_code == 200
+
+    # Admin promotes employee user, but cannot demote self
+    role_upd = client.post(
+        f"/admin/users/{emp_id}/role",
+        headers=adm_headers,
+        json={"role": "admin"},
+    )
+    assert role_upd.status_code == 200
+    assert role_upd.json()["role"] == "admin"
+
+    self_demote = client.post(
+        f"/admin/users/{adm_id}/role",
+        headers=adm_headers,
+        json={"role": "employee"},
+    )
+    assert self_demote.status_code == 400
+
+    # Real per-endpoint telemetry reflects logged invocations
+    telemetry = client.get("/admin/telemetry", headers=adm_headers)
+    assert telemetry.status_code == 200
+    endpoints = telemetry.json()["endpoints"]
+    assert any(row["endpoint"] == "/analyze" and row["invocations"] >= 1 for row in endpoints)
+    assert all(row["avg_latency_ms"] >= 0.0 for row in endpoints)
+
+    # Audit trails include structured action codes
+    entities = client.get("/database/entities", headers=adm_headers)
+    assert entities.status_code == 200
+    actions = {item["action"] for item in entities.json()["audit_trails"]}
+    assert {"USER_REGISTER", "ADMIN_LOGIN", "JOURNAL_ANALYSIS", "RECOMMENDATION_ACCEPT", "ADMIN_ROLE_UPDATE"}.issubset(actions)

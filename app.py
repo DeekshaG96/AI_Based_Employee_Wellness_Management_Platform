@@ -8822,20 +8822,29 @@ def render_sidebar():
 
         is_admin_active = bool(st.session_state.get("is_admin", False))
 
-        st.markdown('<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 10px 0 3px 4px;">Navigation</p>', unsafe_allow_html=True)
+        sidebar_section_title = "Enterprise Governance" if is_admin_active else "Workspace"
+        st.markdown(f'<p style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 10px 0 3px 4px;">{sidebar_section_title}</p>', unsafe_allow_html=True)
         if is_admin_active:
             base_nav = [
-                ("🛡️", "Admin Dashboard", "nav_admin"),
-                ("👥", "Team Health Pulse", "nav_team"),
-                ("📁", "Batch Data Ingestion", "nav_batch"),
+                ("🛡️", "Admin Overview", "nav_admin"),
+                ("👥", "User Management", "nav_users"),
+                ("📊", "Global Emotion Analytics", "nav_global"),
+                ("🔬", "Model Performance", "nav_models"),
+                ("🎯", "Recommendation Analytics", "nav_recs"),
+                ("📋", "Security Audit Trails", "nav_audit"),
+                ("📁", "Reports Repository", "nav_reports"),
+                ("⚡", "API Performance", "nav_api"),
             ]
         else:
             base_nav = [
-                ("💬", "Daily Reflection", "nav_reflection"),
-                ("📈", "User Dashboard", "nav_trends"),
-                ("🎯", "Personalized Recommendations", "nav_recommendations"),
-                ("🤖", "EquiAI Chat Companion", "nav_companion"),
-                ("📁", "Batch Data Ingestion", "nav_batch"),
+                ("🏠", "Overview", "nav_overview"),
+                ("💬", "Emotion Analyzer", "nav_reflection"),
+                ("📝", "Journal History", "nav_history"),
+                ("📈", "Emotion Trends", "nav_trends"),
+                ("🎯", "Recommendations", "nav_recommendations"),
+                ("⭐", "Feedback Summary", "nav_feedback"),
+                ("📁", "Reports & Upload", "nav_batch"),
+                ("🔒", "Profile & Privacy", "nav_privacy"),
             ]
 
         active_lang = st.session_state.get("app_language", "en")
@@ -8849,11 +8858,44 @@ def render_sidebar():
 
         # Check if a view change was queued by any button in the app
         if st.session_state.get("nav_redirect"):
-            redirect_target = st.session_state.pop("nav_redirect")
-            for opt in nav_options:
-                if opt.startswith(redirect_target[:2]):
-                    st.session_state["equimind_nav_view"] = opt
-                    break
+            redirect_target = str(st.session_state.pop("nav_redirect")).strip()
+            _alias_map = (
+                {
+                    "🛡️": "🛡️ Admin Overview",
+                    "📈": "🛡️ Admin Overview",
+                    "👥": "📊 Global Emotion Analytics",
+                    "📁": "📁 Reports Repository",
+                    "🔬": "🔬 Model Performance",
+                    "🎯": "🎯 Recommendation Analytics",
+                    "📋": "📋 Security Audit Trails",
+                    "⚡": "⚡ API Performance",
+                }
+                if is_admin_active
+                else {
+                    "🏠": "🏠 Overview",
+                    "📈": "🏠 Overview",
+                    "💬": "💬 Emotion Analyzer",
+                    "📝": "📝 Journal History",
+                    "🎯": "🎯 Recommendations",
+                    "🤖": "🎯 Recommendations",
+                    "⭐": "⭐ Feedback Summary",
+                    "📁": "📁 Reports & Upload",
+                    "🔒": "🔒 Profile & Privacy",
+                    "🔬": "🔒 Profile & Privacy",
+                }
+            )
+            if redirect_target.startswith("🤖") and not is_admin_active:
+                st.session_state["rec_hub_focus_equiai"] = True
+            resolved = _alias_map.get(redirect_target) or _alias_map.get(redirect_target[:2])
+            if redirect_target in nav_options:
+                st.session_state["equimind_nav_view"] = redirect_target
+            elif resolved and resolved in nav_options:
+                st.session_state["equimind_nav_view"] = resolved
+            else:
+                for opt in nav_options:
+                    if opt.startswith(redirect_target[:2]):
+                        st.session_state["equimind_nav_view"] = opt
+                        break
 
         current_view = st.session_state.get("equimind_nav_view", nav_options[0])
         if current_view not in nav_options:
@@ -8894,6 +8936,27 @@ def render_sidebar():
             st.session_state["mood_journal_entry"] = ""
             st.rerun()
 
+        if is_admin_active:
+            st.markdown(
+                """
+                <div style="margin-top: 12px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 11px 13px;">
+                    <div style="font-size: 0.76rem; font-weight: 700; color: #f8fafc;">🛡️ Enterprise Audit Active</div>
+                    <div style="font-size: 0.71rem; color: #cbd5e1; margin-top: 3px; line-height: 1.35;">Role-based access enforced. All admin activity is logged.</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                """
+                <div style="margin-top: 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 11px 13px;">
+                    <div style="font-size: 0.76rem; font-weight: 700; color: #065f46;">🔒 Your space, your data</div>
+                    <div style="font-size: 0.71rem; color: #047857; margin-top: 3px; line-height: 1.35;">Your reflection logs are completely private to your account.</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
         return selected_nav
 
 
@@ -8921,6 +8984,1432 @@ PENN_TREEBANK_DESC = {
     "PRP$": "Possessive Pronoun",
     "UH": "Interjection (Emotional Particle)",
 }
+
+
+def _inject_saas_theme_css() -> None:
+    """Inject clean SaaS card, table, pill, and progress bar styling."""
+    st.markdown(
+        """
+        <style>
+        .equi-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0 14px 0;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 18px;
+        }
+        .equi-crumb {
+            font-size: 0.90rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .equi-crumb strong {
+            color: #0f172a;
+            font-weight: 700;
+        }
+        .equi-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #334155;
+            white-space: nowrap;
+        }
+        .equi-status-pill.admin {
+            background: #f5f3ff;
+            border-color: #ddd6fe;
+            color: #6d28d9;
+        }
+        .equi-status-pill.emp {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+            color: #047857;
+        }
+        .equi-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.88rem;
+            background: #e0e7ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+        }
+        .equi-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px 22px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+            margin-bottom: 16px;
+        }
+        .equi-eyebrow {
+            font-size: 0.70rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .equi-kpi {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 18px;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+            height: 100%;
+        }
+        .equi-kpi-label {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .equi-kpi-value {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 6px 0 4px 0;
+            line-height: 1.15;
+        }
+        .equi-kpi-sub {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        .equi-table-wrap {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+        .equi-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .equi-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        .equi-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #0f172a;
+            vertical-align: middle;
+        }
+        .equi-table tr:last-child td {
+            border-bottom: none;
+        }
+        .equi-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+        .equi-method {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 6px;
+            font-size: 0.71rem;
+            font-weight: 700;
+            font-family: monospace;
+            letter-spacing: 0.04em;
+        }
+        .equi-bar-track {
+            width: 100%;
+            height: 7px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+        .equi-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+        }
+        .equi-cm-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .equi-cm-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .equi-cm-cell {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .equi-cm-lbl {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .equi-cm-num {
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 2px;
+        }
+        .equi-note-bar {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.80rem;
+            color: #065f46;
+            margin-top: 12px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_saas_topbar(section_label: str, page_title: str, is_admin: bool = False) -> None:
+    """Render breadcrumb topbar with active role status pill, sign out, and user avatar."""
+    _inject_saas_theme_css()
+    user_name = str(st.session_state.get("user_name") or ("Admin" if is_admin else "Member")).strip()
+    initial = escape((user_name[0] if user_name else "M").upper())
+    pill_cls = "admin" if is_admin else "emp"
+    dot_color = "#7c3aed" if is_admin else "#10b981"
+    pill_text = "Administrator Active" if is_admin else "AI engine workspace"
+
+    col_crumb, col_pill, col_sign, col_ava = st.columns([5.3, 2.0, 1.0, 0.5], gap="small")
+    with col_crumb:
+        st.markdown(
+            f'<div class="equi-crumb" style="padding-top: 6px;">{escape(section_label)} &nbsp;/&nbsp; <strong>{escape(page_title)}</strong></div>',
+            unsafe_allow_html=True,
+        )
+    with col_pill:
+        st.markdown(
+            f'<div style="text-align: right; padding-top: 3px;"><span class="equi-status-pill {pill_cls}"><span style="color:{dot_color};">●</span> {pill_text}</span></div>',
+            unsafe_allow_html=True,
+        )
+    with col_sign:
+        if st.button("Sign out", key=f"topbar_signout_{section_label}_{page_title}".replace(" ", "_"), width="stretch"):
+            try:
+                api_logout(st.session_state.get("api_token"))
+            except Exception:
+                pass
+            st.session_state.logged_in = False
+            st.session_state.api_token = None
+            st.session_state.user_id = None
+            st.session_state.user_name = None
+            st.session_state.user_email = None
+            st.session_state["is_admin"] = False
+            st.session_state["user_role"] = "user"
+            st.session_state.pop("equimind_nav_view", None)
+            st.session_state.pop("nav_redirect", None)
+            st.session_state.last_analysis_report = None
+            st.session_state["mood_journal_entry"] = ""
+            st.rerun()
+    with col_ava:
+        st.markdown(
+            f'<div style="display:flex; justify-content:flex-end; padding-top: 1px;"><div class="equi-avatar" title="{escape(user_name)}">{initial}</div></div>',
+            unsafe_allow_html=True,
+        )
+    st.markdown('<hr style="margin: 6px 0 18px 0; border: none; border-top: 1px solid #e2e8f0;">', unsafe_allow_html=True)
+
+
+def _render_saas_kpi_grid(cards: list[dict[str, str]], cols: int = 3) -> None:
+    """Render crisp responsive SaaS KPI cards."""
+    for i in range(0, len(cards), cols):
+        chunk = cards[i : i + cols]
+        columns = st.columns(len(chunk), gap="medium")
+        for col, card in zip(columns, chunk):
+            with col:
+                st.markdown(
+                    f"""
+                    <div class="equi-kpi">
+                        <div class="equi-kpi-label">{escape(str(card.get('label', '')))}</div>
+                        <div class="equi-kpi-value">{escape(str(card.get('value', '—')))}</div>
+                        <div class="equi-kpi-sub">{escape(str(card.get('sub', '')))}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+
+def _load_user_history_df() -> pd.DataFrame:
+    """Load the signed-in employee's normalized reflection history DataFrame."""
+    try:
+        entries = api_history(st.session_state.user_id, st.session_state.api_token)
+    except Exception:
+        entries = []
+    if not entries:
+        return pd.DataFrame()
+    df = pd.DataFrame(entries)
+    df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce", utc=True)
+    parsed_meta = [
+        parse_entry_metadata(r.get("source_name", ""), r.get("original_text", ""))
+        for _, r in df.iterrows()
+    ]
+    df["domain_category"] = [m["category"] for m in parsed_meta]
+    df["entry_tags"] = [m["tags"] for m in parsed_meta]
+    df["entry_tags_str"] = [", ".join(m["tags"]) if m["tags"] else "—" for m in parsed_meta]
+    df["entry_note"] = [m["note"] for m in parsed_meta]
+    return df
+
+
+def _load_user_feedback_records() -> list[dict[str, Any]]:
+    """Load feedback decisions submitted by the current authenticated user."""
+    records: list[dict[str, Any]] = list(st.session_state.get("user_feedback_history") or [])
+    seen_keys = {str(r.get("id") or r.get("timestamp") or idx) for idx, r in enumerate(records)}
+    uid = st.session_state.get("user_id")
+    if uid is not None:
+        try:
+            from wellness.api_client import is_api_available
+            if not is_api_available():
+                from wellness.storage import connect_database
+
+                conn = connect_database()
+                try:
+                    rows = conn.execute(
+                        "SELECT id, recommendation_id, report_data, accepted_or_rejected, timestamp FROM feedback ORDER BY id DESC LIMIT 100"
+                    ).fetchall()
+                    for row in rows:
+                        rd_raw = row["report_data"]
+                        try:
+                            rd = json.loads(rd_raw) if isinstance(rd_raw, str) and rd_raw else {}
+                        except Exception:
+                            rd = {}
+                        if rd.get("user_id") == uid:
+                            row_id = str(row["id"])
+                            if row_id not in seen_keys:
+                                records.append(
+                                    {
+                                        "id": row["id"],
+                                        "recommendation_id": row["recommendation_id"],
+                                        "title": str(rd.get("title") or rd.get("practice") or "Wellbeing Suggestion"),
+                                        "decision": str(row["accepted_or_rejected"]),
+                                        "comment": str(rd.get("comment") or rd.get("decline_reason") or ""),
+                                        "timestamp": str(row["timestamp"] or ""),
+                                    }
+                                )
+                                seen_keys.add(row_id)
+                finally:
+                    conn.close()
+        except Exception:
+            pass
+    return records
+
+
+def _record_user_feedback_event(
+    recommendation_id: int | None,
+    decision: str,
+    title: str,
+    emotion: str,
+    comment: str = "",
+    decline_reason: str = "",
+) -> None:
+    """Persist user acceptance or rejection feedback and update local session history."""
+    from wellness.api_client import submit_feedback
+
+    uid = st.session_state.get("user_id")
+    payload = {
+        "user_id": uid,
+        "title": title,
+        "dominant_emotion": emotion,
+        "comment": comment.strip(),
+        "decline_reason": decline_reason.strip(),
+    }
+    res = submit_feedback(
+        recommendation_id=recommendation_id,
+        report_data=payload,
+        accepted_or_rejected=decision,
+        token=st.session_state.get("api_token"),
+    )
+    entry = {
+        "id": res.get("id"),
+        "recommendation_id": recommendation_id,
+        "title": title,
+        "decision": decision,
+        "comment": comment.strip() or decline_reason.strip(),
+        "timestamp": res.get("timestamp") or datetime.now(timezone.utc).isoformat(),
+    }
+    hist = list(st.session_state.get("user_feedback_history") or [])
+    hist.insert(0, entry)
+    st.session_state["user_feedback_history"] = hist[:100]
+
+
+def _render_clean_reflection_insights(report: Any, user_text: str) -> None:
+    """Render Screenshot-aligned Your Reflection Insights and Wellbeing Suggestion card."""
+    _inject_saas_theme_css()
+    sentiment_val = (
+        report.sentiment_label.value
+        if hasattr(report.sentiment_label, "value")
+        else str(report.sentiment_label)
+    ).lower()
+    compound = float(report.sentiment_scores.compound)
+    emo_method = str(getattr(report, "emotion_method", "keyword_fallback") or "keyword_fallback")
+    if "transformer" in emo_method or "distilbert" in emo_method or "goemotion" in emo_method:
+        estimator_label = "Transformative GoEmotions NLP"
+    else:
+        estimator_label = "Lexical Fallback Estimator"
+
+    sent_badge_styles = {
+        "positive": ("Positive", "#dcfce7", "#15803d"),
+        "negative": ("Negative", "#fee2e2", "#b91c1c"),
+        "neutral": ("Neutral", "#f1f5f9", "#475569"),
+    }
+    sent_text, sent_bg, sent_fg = sent_badge_styles.get(sentiment_val, ("Neutral", "#f1f5f9", "#475569"))
+
+    with st.container(border=True):
+        hdr_l, hdr_r = st.columns([3.2, 1.3], gap="medium")
+        with hdr_l:
+            st.markdown(
+                '<div class="equi-eyebrow">Analysis Complete</div>'
+                '<h3 style="margin: 0; font-size: 1.55rem; font-weight: 800; color: #0f172a;">Your Reflection Insights</h3>',
+                unsafe_allow_html=True,
+            )
+        with hdr_r:
+            stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            st.download_button(
+                "⬇ Download PDF Report",
+                data=_build_analysis_report_pdf(report),
+                file_name=f"equimind-report-{stamp}.pdf",
+                mime="application/pdf",
+                width="stretch",
+                key="clean_insights_pdf_dl",
+            )
+
+        st.markdown(
+            f"""
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+                        padding:10px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; margin:12px 0 16px 0;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.84rem; color:#475569;">Overall Sentiment:</span>
+                    <span class="equi-pill" style="background:{sent_bg}; color:{sent_fg};">{sent_text}</span>
+                </div>
+                <div style="font-size:0.80rem; color:#64748b; font-weight:500;">
+                    VADER compound score: <strong style="color:#0f172a;">{compound:+.3f}</strong> &nbsp;·&nbsp; Estimator: <strong style="color:#0f172a;">{escape(estimator_label)}</strong>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Detected Emotions horizontal percentage bars
+        st.markdown('<div style="font-weight:700; font-size:0.92rem; color:#0f172a; margin-bottom:10px;">Detected Emotions</div>', unsafe_allow_html=True)
+        raw_scores = dict(getattr(report, "emotion_scores", {}) or {})
+        dominant_emo = str(getattr(report, "dominant_emotion", "neutral") or "neutral").lower()
+        if emo_method == "no_emotion_signal" and not raw_scores:
+            st.info("No strong emotion keywords detected; showing overall VADER sentiment polarity instead of forcing an emotion label.")
+        else:
+            if not raw_scores:
+                raw_scores = {dominant_emo: 1.0}
+            sorted_emos = sorted(raw_scores.items(), key=lambda x: float(x[1]), reverse=True)[:5]
+            emo_bars_html = ""
+            for idx_e, (emo_name, emo_val) in enumerate(sorted_emos):
+                pct = max(0.0, min(100.0, float(emo_val) * 100.0 if float(emo_val) <= 1.0 else float(emo_val)))
+                bar_color = "#0284c7" if idx_e == 0 else "#6366f1"
+                emo_bars_html += (
+                    f'<div style="margin-bottom:10px;">'
+                    f'<div style="display:flex; justify-content:space-between; font-size:0.84rem; margin-bottom:4px;">'
+                    f'<span style="color:#334155; font-weight:600;">{escape(str(emo_name).capitalize())}</span>'
+                    f'<span style="color:#0f172a; font-weight:700;">{pct:.1f}%</span>'
+                    f'</div>'
+                    f'<div class="equi-bar-track"><div class="equi-bar-fill" style="width:{max(pct, 2.0):.1f}%; background:{bar_color};"></div></div>'
+                    f'</div>'
+                )
+            st.markdown(emo_bars_html, unsafe_allow_html=True)
+
+        # Wellbeing Suggestion Card
+        recs = getattr(report, "recommendations", {}) or {}
+        if isinstance(recs, list) and recs:
+            recs = recs[0] if isinstance(recs[0], dict) else {"title": str(recs[0])}
+        if not isinstance(recs, dict):
+            recs = {}
+        if recs.get("is_crisis"):
+            st.error(
+                "**24/7 Confidential Support:** If you may be in severe distress or danger, please reach out immediately "
+                "(India Tele-MANAS: 14416, US/CA: 988, Global: befrienders.org)."
+            )
+        rec_title = str(recs.get("title") or "Mindful Recovery Step")
+        action_paths = recs.get("action_paths") or []
+        if isinstance(action_paths, list) and action_paths and isinstance(action_paths[0], dict):
+            top_path = action_paths[0]
+            rec_title = str(top_path.get("title") or rec_title)
+            path_steps = top_path.get("steps") or []
+            primary_step = str(path_steps[0]) if path_steps else str(top_path.get("description") or recs.get("summary") or "")
+        else:
+            actions_list = recs.get("actions") or recs.get("steps") or []
+            primary_step = str(actions_list[0]) if actions_list else str(recs.get("summary") or recs.get("description") or "Take 3 slow breaths and focus on one manageable priority.")
+
+        st.markdown(
+            f"""
+            <div style="margin-top:14px; border:1px solid #e2e8f0; border-radius:12px; padding:16px 18px; background:#ffffff;">
+                <div style="font-size:0.95rem; font-weight:700; color:#0f172a; margin-bottom:6px;">Wellbeing Suggestion</div>
+                <div style="font-size:0.90rem; font-weight:600; color:#1e293b;">{escape(rec_title)}</div>
+                <div style="font-size:0.84rem; color:#475569; margin-top:4px; line-height:1.45;">{escape(primary_step)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        sig = abs(hash(f"{user_text[:40]}_{compound}_{dominant_emo}")) % 100000
+        choice_key = f"clean_fb_choice_{sig}"
+        if choice_key not in st.session_state:
+            st.session_state[choice_key] = "accepted"
+
+        c_acc, c_rej, _spacer = st.columns([1.0, 1.0, 4.0], gap="small")
+        with c_acc:
+            acc_type = "primary" if st.session_state[choice_key] == "accepted" else "secondary"
+            if st.button("✓ Accept", key=f"btn_acc_{sig}", type=acc_type, width="stretch"):
+                st.session_state[choice_key] = "accepted"
+                st.rerun()
+        with c_rej:
+            rej_type = "primary" if st.session_state[choice_key] == "rejected" else "secondary"
+            if st.button("✕ Reject", key=f"btn_rej_{sig}", type=rej_type, width="stretch"):
+                st.session_state[choice_key] = "rejected"
+                st.rerun()
+
+        decline_reason = ""
+        if st.session_state[choice_key] == "rejected":
+            decline_reason = st.selectbox(
+                "Optional reason:",
+                ["Not relevant right now", "Too time-consuming", "Already tried this", "Other"],
+                key=f"clean_decline_reason_{sig}",
+            )
+
+        comment_col, save_col = st.columns([4.2, 1.2], gap="small")
+        with comment_col:
+            fb_comment = st.text_input(
+                "Comment",
+                placeholder="Add optional comment...",
+                label_visibility="collapsed",
+                key=f"clean_fb_comment_{sig}",
+            )
+        with save_col:
+            if st.button("Save feedback", type="primary", key=f"btn_save_fb_{sig}", width="stretch"):
+                try:
+                    _record_user_feedback_event(
+                        recommendation_id=getattr(report, "history_id", None) or getattr(report, "id", None),
+                        decision=st.session_state[choice_key],
+                        title=rec_title,
+                        emotion=dominant_emo,
+                        comment=fb_comment,
+                        decline_reason=decline_reason,
+                    )
+                    st.toast("Feedback saved to your history!", icon="✅")
+                    st.success("Your recommendation feedback has been saved.")
+                except Exception as fb_exc:
+                    st.error(f"Could not save feedback: {fb_exc}")
+
+        st.markdown(
+            '<div class="equi-note-bar">ℹ️ Predictions are statistical language model estimates and should be used as self-reflection aids, not a clinical diagnosis.</div>',
+            unsafe_allow_html=True,
+        )
+
+    with st.expander("🔬 Detailed NLP Tokens, Cognitive Reframe, Nutrition & Desk Yoga", expanded=False):
+        yoga_tab, reframe_tab, nutri_tab, nlp_tab, export_tab = st.tabs([
+            "🧘 Desk Yoga", "🧠 Cognitive Reframe", "🍵 Nutrition", "🔎 NLP Tokens", "📄 Markdown Summary"
+        ])
+        with yoga_tab:
+            render_yoga_remedies_view(default_emotion=dominant_emo, key_prefix="clean_insight_yoga")
+        with reframe_tab:
+            render_ai_cognitive_reframe_studio(dominant_emo, report.original_text)
+        with nutri_tab:
+            render_mood_food_planner_view(default_emotion=dominant_emo, key_prefix="clean_insight_food")
+        with nlp_tab:
+            render_deep_nlp_pipeline_inspector(report.original_text, key_suffix="journal_analysis")
+        with export_tab:
+            md_text = _build_analysis_report_markdown(report)
+            st.download_button(
+                "⬇ Download Markdown (.md)",
+                data=md_text,
+                file_name=f"equimind-report-{datetime.now().strftime('%Y%m%d-%H%M%S')}.md",
+                mime="text/markdown",
+                key="clean_insights_md_dl",
+            )
+            st.code(md_text[:1500], language="markdown")
+
+
+def _render_admin_overview_view() -> None:
+    """Admin Console Screen 1: Real-time SQL Overview & System Status."""
+    _render_saas_topbar("Admin Console", "Admin Overview", True)
+    token = st.session_state.get("api_token")
+    try:
+        from wellness.api_client import get_admin_analytics, get_database_entities
+
+        stats = get_admin_analytics(token)
+        entities = get_database_entities(token)
+    except Exception as exc:
+        st.error(f"Unable to load administrator analytics: {exc}")
+        return
+
+    api_perf = stats.get("api_performance") or {}
+    db_stat = stats.get("database_status") or {}
+    accept_rate = stats.get("acceptance_rate")
+    avg_ms = api_perf.get("avg_response_time_ms")
+
+    st.markdown(
+        '<div class="equi-eyebrow">Enterprise Governance</div>'
+        '<h2 style="margin:0 0 6px 0; color:#0f172a; font-weight:800;">Executive Telemetry Overview</h2>'
+        '<p style="color:#64748b; margin-bottom:18px; font-size:0.90rem;">Real-time SQL counts, privacy-filtered activity signals, and measured endpoint response latency.</p>',
+        unsafe_allow_html=True,
+    )
+
+    _render_saas_kpi_grid(
+        [
+            {"label": "Registered Users", "value": str(stats.get("total_registered_users", 0)), "sub": "Verified accounts in database"},
+            {"label": "Active Users", "value": str(stats.get("active_users", 0)), "sub": "Distinct users with reflection logs"},
+            {"label": "Total Analyses", "value": str(len(entities.get("journals") or [])), "sub": "Private reflection evaluations run"},
+            {"label": "Recommendations", "value": str(stats.get("recommendation_usage", 0)), "sub": "Personalized care plans served"},
+            {"label": "Acceptance Rate", "value": f"{accept_rate:.1f}%" if accept_rate is not None else "No data yet", "sub": f"{stats.get('total_feedback', 0)} user feedback decisions"},
+            {"label": "Avg API Latency", "value": f"{avg_ms:.1f} ms" if avg_ms is not None else "No data yet", "sub": f"Storage: {db_stat.get('backend', 'sqlite').upper()} · {api_perf.get('status', 'No data yet')}"},
+        ],
+        cols=3,
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    c_left, c_right = st.columns([1.4, 1.0], gap="medium")
+    mood_logs = entities.get("mood_logs") or []
+    with c_left, st.container(border=True):
+        st.markdown("##### Aggregated Emotion Distribution")
+        if mood_logs:
+            df_m = pd.DataFrame(mood_logs)
+            counts = df_m["dominant_emotion"].fillna("neutral").str.capitalize().value_counts().reset_index()
+            counts.columns = ["Emotion", "Count"]
+            fig = px.bar(counts.head(8), x="Emotion", y="Count", color="Emotion", template="plotly_white")
+            fig.update_layout(showlegend=False, height=280, margin={"l": 10, "r": 10, "t": 10, "b": 10})
+            st.plotly_chart(fig, width="stretch")
+        else:
+            st.info("No reflection records analyzed yet.")
+
+    with c_right, st.container(border=True):
+        st.markdown("##### System Governance & Storage")
+        backend_name = str(db_stat.get("backend") or "sqlite").upper()
+        health_lbl = "Healthy" if db_stat.get("healthy", True) else "Warning"
+        st.markdown(
+            f"""
+            - **Database Backend:** `{backend_name}` ({health_lbl})
+            - **Role Enforcement:** Server-verified RBAC (`employee` default)
+            - **Journal Privacy:** Private reflection texts are redacted (`[Redacted]`) across all organization queries.
+            - **Total Audit Events:** {len(entities.get("audit_trails") or [])}
+            """
+        )
+        b1, b2 = st.columns(2)
+        with b1:
+            if st.button("👥 Manage Users", key="adm_ov_users_btn", width="stretch"):
+                st.session_state["nav_redirect"] = "👥 User Management"
+                st.rerun()
+        with b2:
+            if st.button("📋 View Audit Trails", key="adm_ov_audit_btn", width="stretch"):
+                st.session_state["nav_redirect"] = "📋 Security Audit Trails"
+                st.rerun()
+
+
+def _render_admin_users_view() -> None:
+    """Admin Console Screen 2: User Directory & Server-Enforced Role Governance."""
+    _render_saas_topbar("Admin Console", "User Management", True)
+    token = st.session_state.get("api_token")
+    try:
+        from wellness.api_client import get_database_entities, update_user_role_client
+
+        entities = get_database_entities(token)
+    except Exception as exc:
+        st.error(f"Unable to load user directory: {exc}")
+        return
+
+    users = entities.get("users") or []
+    journals = entities.get("journals") or []
+    count_by_uid: dict[int, int] = {}
+    for j in journals:
+        uid = j.get("user_id")
+        if uid is not None:
+            count_by_uid[int(uid)] = count_by_uid.get(int(uid), 0) + 1
+
+    st.markdown(
+        '<div class="equi-eyebrow">Access Control & Directory</div>'
+        '<h2 style="margin:0 0 6px 0; color:#0f172a; font-weight:800;">User Management</h2>'
+        '<p style="color:#64748b; margin-bottom:16px; font-size:0.90rem;">Inspect verified accounts and manage persisted workspace roles safely.</p>',
+        unsafe_allow_html=True,
+    )
+
+    f1, f2, f3 = st.columns([2.4, 1.2, 1.0], gap="small")
+    with f1:
+        q = st.text_input("Search users", placeholder="Search by name or email...", label_visibility="collapsed", key="adm_usr_search").strip().lower()
+    with f2:
+        role_flt = st.selectbox("Role filter", ["All roles", "admin", "employee"], label_visibility="collapsed", key="adm_usr_role_flt")
+    filtered = [
+        u for u in users
+        if (role_flt == "All roles" or str(u.get("role", "employee")).lower() == role_flt)
+        and (not q or q in str(u.get("name", "")).lower() or q in str(u.get("email", "")).lower())
+    ]
+    with f3:
+        st.markdown(f'<div style="text-align:right; padding-top:8px; color:#64748b; font-size:0.84rem; font-weight:600;">{len(filtered)} users</div>', unsafe_allow_html=True)
+
+    rows_html = ""
+    for u in filtered:
+        uid = int(u.get("id", 0))
+        uname = escape(str(u.get("name") or "—"))
+        uemail = escape(str(u.get("email") or "—"))
+        urole = str(u.get("role") or "employee").lower()
+        pill_bg = "#ede9fe" if urole == "admin" else "#f1f5f9"
+        pill_fg = "#6d28d9" if urole == "admin" else "#475569"
+        joined = escape(str(u.get("created_at") or "—")[:19].replace("T", " "))
+        entries_n = count_by_uid.get(uid, 0)
+        rows_html += (
+            f"<tr>"
+            f"<td><strong>#{uid}</strong></td>"
+            f"<td>{uname}</td>"
+            f"<td style='color:#475569;'>{uemail}</td>"
+            f"<td><span class='equi-pill' style='background:{pill_bg}; color:{pill_fg};'>{urole.upper()}</span></td>"
+            f"<td>{entries_n}</td>"
+            f"<td style='color:#64748b;'>{joined}</td>"
+            f"</tr>"
+        )
+    if not rows_html:
+        rows_html = '<tr><td colspan="6" style="text-align:center; color:#64748b; padding:24px;">No matching user accounts.</td></tr>'
+
+    st.markdown(
+        f'<div class="equi-table-wrap"><table class="equi-table">'
+        f'<thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Reflections</th><th>Created</th></tr></thead>'
+        f'<tbody>{rows_html}</tbody></table></div>',
+        unsafe_allow_html=True,
+    )
+
+    if users:
+        with st.container(border=True):
+            st.markdown("##### Role Assignment Governance")
+            st.caption("New signups default to `employee`. Administrators can promote or adjust roles here; self-demotion is blocked by the server.")
+            user_choices = {f"#{u['id']} · {u['name']} ({u['email']}) [{u.get('role', 'employee')}]": int(u["id"]) for u in users}
+            rc1, rc2, rc3 = st.columns([2.6, 1.2, 1.0], gap="small")
+            with rc1:
+                chosen_lbl = st.selectbox("Target account", list(user_choices.keys()), key="adm_role_target_sel")
+            with rc2:
+                target_role = st.selectbox("New role", ["employee", "admin"], key="adm_role_new_sel")
+            with rc3:
+                st.markdown("<div style='height:27px;'></div>", unsafe_allow_html=True)
+                if st.button("Update Role", type="primary", width="stretch", key="adm_role_apply_btn"):
+                    try:
+                        res = update_user_role_client(user_choices[chosen_lbl], target_role, token)
+                        st.toast(f"Updated {res['email']} to {res['role']}", icon="✅")
+                        st.rerun()
+                    except Exception as exc:
+                        st.error(str(exc))
+
+
+def _render_admin_global_emotions_view() -> None:
+    """Admin Console Screen 3: Global Anonymized Emotion Trends & Team Health Playbooks."""
+    _render_saas_topbar("Admin Console", "Global Emotion Analytics", True)
+    token = st.session_state.get("api_token")
+    t_org, t_team = st.tabs(["📊 Organization Emotion Pulse", "🔮 Scenario Forecasts & Playbooks"])
+
+    with t_org:
+        try:
+            from wellness.api_client import get_database_entities
+
+            entities = get_database_entities(token)
+        except Exception as exc:
+            st.error(f"Unable to load analytics: {exc}")
+            return
+        mood_logs = entities.get("mood_logs") or []
+        if not mood_logs:
+            st.info("No anonymized emotion telemetry recorded yet.")
+        else:
+            df = pd.DataFrame(mood_logs)
+            if len(df) < 5:
+                st.warning("k-Anonymity Notice (k=5): Organization dataset currently has fewer than 5 records; treat patterns as early signals only.")
+            c1, c2 = st.columns(2, gap="medium")
+            with c1, st.container(border=True):
+                st.markdown("##### Dominant Emotion Counts")
+                emo_df = df["dominant_emotion"].fillna("neutral").str.capitalize().value_counts().reset_index()
+                emo_df.columns = ["Emotion", "Count"]
+                fig_e = px.bar(emo_df, x="Emotion", y="Count", color="Emotion", template="plotly_white")
+                fig_e.update_layout(showlegend=False, height=320)
+                st.plotly_chart(fig_e, width="stretch")
+            with c2, st.container(border=True):
+                st.markdown("##### Sentiment Mix")
+                sent_df = df["sentiment_label"].fillna("neutral").str.capitalize().value_counts().reset_index()
+                sent_df.columns = ["Sentiment", "Count"]
+                fig_s = px.pie(sent_df, names="Sentiment", values="Count", hole=0.45, template="plotly_white")
+                fig_s.update_layout(height=320)
+                st.plotly_chart(fig_s, width="stretch")
+
+    with t_team:
+        render_team_health_view()
+
+
+def _render_admin_model_perf_view() -> None:
+    """Admin Console Screen 4: Real NLP Evaluation Metrics & 2x2 Confusion Matrices."""
+    _render_saas_topbar("Admin Console", "Model Performance & Specs", True)
+    go_path = Path("docs/goemotions-distilbert-evaluation.json")
+    se_path = Path("docs/semeval-binary-polarity-89plus.json")
+    go_data = json.loads(go_path.read_text(encoding="utf-8")) if go_path.exists() else {}
+    se_data = json.loads(se_path.read_text(encoding="utf-8")) if se_path.exists() else {}
+
+    transformer_disabled = os.getenv("WELLNESS_DISABLE_TRANSFORMER", "0").strip().lower() in {"1", "true", "yes"}
+    active_model_str = "Lexical Keyword Fallback (`WELLNESS_DISABLE_TRANSFORMER=1`)" if transformer_disabled else "Transformer (`bhadresh-savani/bert-base-go-emotion` with lexical fallback)"
+
+    st.info(f"**Active Runtime Emotion Estimator:** {active_model_str} · **Benchmark Dataset Below:** `{go_data.get('model_id', 'bhadresh-savani/bert-base-go-emotion')}` on GoEmotions test split (`n={go_data.get('examples', 5427)}`) & Polarity Subset (`n={se_data.get('evaluated_examples', 2306)}`).")
+
+    _render_saas_kpi_grid(
+        [
+            {"label": "Micro F1 (GoEmotions)", "value": f"{float(go_data.get('micro_f1', 0.0)) * 100:.2f}%", "sub": f"Micro P: {float(go_data.get('micro_precision', 0.0))*100:.1f}% · R: {float(go_data.get('micro_recall', 0.0))*100:.1f}%"},
+            {"label": "Macro F1 (28 Classes)", "value": f"{float(go_data.get('macro_f1', 0.0)) * 100:.2f}%", "sub": f"Exact match accuracy: {float(go_data.get('exact_match_accuracy', 0.0))*100:.2f}%"},
+            {"label": "Binary Polarity Accuracy", "value": str(se_data.get("overall_accuracy_percentage", "86.86%")), "sub": f"Binary Macro F1: {se_data.get('macro_f1_percentage', '85.52%')}"},
+        ],
+        cols=3,
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    per_label = go_data.get("per_label") or {}
+    thresh = go_data.get("threshold", 0.5)
+    total_ex = int(go_data.get("examples", 5427))
+
+    pill_palette = {
+        "joy": ("#dbeafe", "#1d4ed8"),
+        "sadness": ("#fef3c7", "#b45309"),
+        "anger": ("#fee2e2", "#b91c1c"),
+        "fear": ("#cffafe", "#0e7490"),
+        "surprise": ("#f3e8ff", "#7e22ce"),
+        "love": ("#fce7f3", "#be185d"),
+        "neutral": ("#f1f5f9", "#475569"),
+        "gratitude": ("#dcfce7", "#15803d"),
+        "admiration": ("#e0e7ff", "#4338ca"),
+        "optimism": ("#ecfccb", "#4d7c0f"),
+    }
+
+    with st.container(border=True):
+        c_hl, c_hr = st.columns([3.5, 1.5])
+        with c_hl:
+            st.markdown("##### Per-Emotion Classification Report")
+            st.caption("Class-resolved Precision, Recall, and F1-Scores from `docs/goemotions-distilbert-evaluation.json`")
+        with c_hr:
+            st.markdown('<div style="text-align:right; padding-top:4px;"><span class="equi-pill" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569;">GOEMOTIONS TEST BENCHMARK</span></div>', unsafe_allow_html=True)
+
+        show_all = st.checkbox("Show all 28 GoEmotions classes", value=False, key="adm_model_show_all")
+        core_labels = ["joy", "sadness", "anger", "fear", "surprise", "love", "neutral", "gratitude"]
+        keys_to_show = sorted(per_label.keys(), key=lambda k: float(per_label[k].get("f1", 0.0)), reverse=True) if show_all else [k for k in core_labels if k in per_label]
+
+        rep_rows = ""
+        for lbl in keys_to_show:
+            m = per_label[lbl]
+            bg, fg = pill_palette.get(lbl, ("#f1f5f9", "#334155"))
+            p_pct = float(m.get("precision", 0.0)) * 100.0
+            r_pct = float(m.get("recall", 0.0)) * 100.0
+            f1_pct = float(m.get("f1", 0.0)) * 100.0
+            supp = int(m.get("support", 0))
+            rep_rows += (
+                f"<tr>"
+                f"<td><span class='equi-pill' style='background:{bg}; color:{fg};'>{escape(lbl.capitalize())}</span></td>"
+                f"<td>{p_pct:.1f}%</td>"
+                f"<td>{r_pct:.1f}%</td>"
+                f"<td><strong>{f1_pct:.1f}%</strong></td>"
+                f"<td>{supp}</td>"
+                f"<td style='color:#64748b;'>{thresh}</td>"
+                f"</tr>"
+            )
+        st.markdown(
+            f'<div class="equi-table-wrap"><table class="equi-table">'
+            f'<thead><tr><th>Emotion Label</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Test Support</th><th>Calibrated Threshold</th></tr></thead>'
+            f'<tbody>{rep_rows}</tbody></table></div>',
+            unsafe_allow_html=True,
+        )
+
+    with st.container(border=True):
+        cm_l, cm_r = st.columns([3.5, 1.5])
+        with cm_l:
+            st.markdown("##### Per-Emotion Binary Confusion Matrices")
+            st.caption("One-vs-Rest classification counts (TP, FN, FP, TN) derived from Precision, Recall & Support across 5,427 examples.")
+        with cm_r:
+            st.markdown('<div style="text-align:right; padding-top:4px;"><span class="equi-pill" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569;">2 × 2 MATRICES</span></div>', unsafe_allow_html=True)
+
+        cm_labels = [k for k in core_labels if k in per_label]
+        for idx in range(0, len(cm_labels), 4):
+            batch = cm_labels[idx : idx + 4]
+            cols_cm = st.columns(4, gap="small")
+            for col_c, lbl in zip(cols_cm, batch):
+                m = per_label[lbl]
+                p = float(m.get("precision", 0.0))
+                r = float(m.get("recall", 0.0))
+                supp = int(m.get("support", 0))
+                tp = round(r * supp)
+                fn = max(0, supp - tp)
+                fp = round(tp * ((1.0 / p) - 1.0)) if p > 0 else 0
+                tn = max(0, total_ex - tp - fn - fp)
+                with col_c:
+                    st.markdown(
+                        f"""
+                        <div class="equi-cm-box">
+                            <div style="font-weight:700; font-size:0.86rem; color:#0f172a;">{escape(lbl.capitalize())}</div>
+                            <div class="equi-cm-grid">
+                                <div class="equi-cm-cell"><div class="equi-cm-lbl">TP</div><div class="equi-cm-num" style="color:#047857;">{tp}</div></div>
+                                <div class="equi-cm-cell"><div class="equi-cm-lbl">FP</div><div class="equi-cm-num" style="color:#b45309;">{fp}</div></div>
+                                <div class="equi-cm-cell"><div class="equi-cm-lbl">FN</div><div class="equi-cm-num" style="color:#b91c1c;">{fn}</div></div>
+                                <div class="equi-cm-cell"><div class="equi-cm-lbl">TN</div><div class="equi-cm-num">{tn}</div></div>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+    with st.expander("⚡ Live Multi-Model Inference Comparator (Baseline vs GoEmotions)", expanded=False):
+        render_model_comparator_view()
+
+
+def _render_admin_recommendations_view() -> None:
+    """Admin Console Screen 5: Recommendation & Feedback Acceptance Analytics."""
+    _render_saas_topbar("Admin Console", "Recommendation Analytics", True)
+    token = st.session_state.get("api_token")
+    try:
+        from wellness.api_client import get_admin_analytics, get_database_entities
+
+        stats = get_admin_analytics(token)
+        entities = get_database_entities(token)
+    except Exception as exc:
+        st.error(f"Unable to load recommendation analytics: {exc}")
+        return
+
+    recs = entities.get("recommendations") or []
+    fb_rows = entities.get("feedback") or []
+    acc = int(stats.get("accepted_recommendations", 0))
+    rej = int(stats.get("rejected_recommendations", 0))
+    total_fb = acc + rej
+    rate_str = f"{(acc / total_fb * 100):.1f}%" if total_fb > 0 else "No data yet"
+
+    _render_saas_kpi_grid(
+        [
+            {"label": "Recommendations Generated", "value": str(len(recs)), "sub": "Total tailored suggestions logged"},
+            {"label": "Feedback Submitted", "value": str(total_fb), "sub": f"{acc} accepted · {rej} rejected"},
+            {"label": "Adoption Rate", "value": rate_str, "sub": "Computed from real user feedback rows"},
+        ],
+        cols=3,
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    c1, c2 = st.columns([1.1, 1.3], gap="medium")
+    with c1, st.container(border=True):
+        st.markdown("##### Suggestions by Emotion Trigger")
+        if recs:
+            df_r = pd.DataFrame(recs)
+            cat_col = "recommendation_category" if "recommendation_category" in df_r.columns else "id"
+            cat_counts = df_r[cat_col].fillna("general").astype(str).str.capitalize().value_counts().reset_index()
+            cat_counts.columns = ["Trigger", "Count"]
+            fig = px.bar(cat_counts.head(8), x="Trigger", y="Count", color="Trigger", template="plotly_white")
+            fig.update_layout(showlegend=False, height=300)
+            st.plotly_chart(fig, width="stretch")
+        else:
+            st.info("No recommendations generated yet.")
+
+    with c2, st.container(border=True):
+        st.markdown("##### Recent User Feedback Decisions")
+        if fb_rows:
+            table_rows = ""
+            for f in fb_rows[:15]:
+                dec = str(f.get("accepted_or_rejected") or "").lower()
+                is_acc = dec == "accepted"
+                pill_bg = "#dcfce7" if is_acc else "#fee2e2"
+                pill_fg = "#15803d" if is_acc else "#b91c1c"
+                rd = f.get("report_data") or {}
+                if isinstance(rd, str):
+                    try:
+                        rd = json.loads(rd)
+                    except Exception:
+                        rd = {}
+                title = escape(str(rd.get("title") or rd.get("practice") or "Care Suggestion"))
+                reason = escape(str(rd.get("comment") or rd.get("decline_reason") or "—"))
+                ts = escape(str(f.get("created_at") or "—")[:19].replace("T", " "))
+                table_rows += (
+                    f"<tr>"
+                    f"<td>#{f.get('id', '—')}</td>"
+                    f"<td><span class='equi-pill' style='background:{pill_bg}; color:{pill_fg};'>{dec.upper()}</span></td>"
+                    f"<td>{title}</td>"
+                    f"<td style='color:#64748b;'>{reason}</td>"
+                    f"<td style='color:#64748b;'>{ts}</td>"
+                    f"</tr>"
+                )
+            st.markdown(
+                f'<div class="equi-table-wrap"><table class="equi-table">'
+                f'<thead><tr><th>ID</th><th>Decision</th><th>Suggestion</th><th>Comment / Reason</th><th>Timestamp</th></tr></thead>'
+                f'<tbody>{table_rows}</tbody></table></div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info("No user acceptance or rejection feedback submitted yet.")
+
+
+def _render_admin_audit_trails_view() -> None:
+    """Admin Console Screen 6: Searchable Security Audit Trails Table."""
+    _render_saas_topbar("Admin Console", "Security Audit Trails", True)
+    token = st.session_state.get("api_token")
+    try:
+        from wellness.api_client import get_database_entities
+
+        entities = get_database_entities(token)
+    except Exception as exc:
+        st.error(f"Unable to load audit trails: {exc}")
+        return
+
+    trails = entities.get("audit_trails") or []
+    st.markdown(
+        '<div class="equi-eyebrow">Cybersecurity &amp; Compliance</div>'
+        '<h2 style="margin:0 0 6px 0; color:#0f172a; font-weight:800;">Audit Trails</h2>'
+        '<p style="color:#64748b; margin-bottom:16px; font-size:0.90rem;">Structured security events, authentication logs, feedback actions, and role updates.</p>',
+        unsafe_allow_html=True,
+    )
+
+    actions_available = sorted({str(t.get("action") or "JOURNAL_ANALYSIS") for t in trails})
+    fc1, fc2, fc3 = st.columns([2.5, 1.3, 0.9], gap="small")
+    with fc1:
+        q = st.text_input("Search audit", placeholder="Search by action, actor, or details...", label_visibility="collapsed", key="adm_audit_search").strip().lower()
+    with fc2:
+        act_flt = st.selectbox("Action filter", ["All actions"] + actions_available, label_visibility="collapsed", key="adm_audit_action_flt")
+
+    filtered = [
+        t for t in trails
+        if (act_flt == "All actions" or str(t.get("action") or "JOURNAL_ANALYSIS") == act_flt)
+        and (not q or q in str(t.get("action", "")).lower() or q in str(t.get("username", "")).lower() or q in str(t.get("recommendation", "")).lower())
+    ]
+    with fc3:
+        st.markdown(f'<div style="text-align:right; padding-top:8px; color:#64748b; font-size:0.84rem; font-weight:600;">{len(filtered)} audit records</div>', unsafe_allow_html=True)
+
+    act_colors = {
+        "ADMIN_LOGIN": ("#ede9fe", "#6d28d9"),
+        "ADMIN_ROLE_UPDATE": ("#fef3c7", "#b45309"),
+        "USER_LOGIN": ("#dbeafe", "#1d4ed8"),
+        "USER_REGISTER": ("#dcfce7", "#15803d"),
+        "RECOMMENDATION_ACCEPT": ("#d1fae5", "#047857"),
+        "RECOMMENDATION_REJECT": ("#fee2e2", "#b91c1c"),
+        "JOURNAL_ANALYSIS": ("#f1f5f9", "#334155"),
+    }
+    rows_html = ""
+    for t in filtered[:100]:
+        ts = escape(str(t.get("created_at") or "—")[:19].replace("T", " "))
+        act = str(t.get("action") or "JOURNAL_ANALYSIS")
+        bg, fg = act_colors.get(act, ("#f1f5f9", "#334155"))
+        actor = escape(str(t.get("username") or f"user#{t.get('user_id', '?')}"))
+        details = escape(str(t.get("recommendation") or "—"))
+        rows_html += (
+            f"<tr>"
+            f"<td style='color:#64748b; white-space:nowrap;'>{ts}</td>"
+            f"<td><span class='equi-pill' style='background:{bg}; color:{fg}; font-family:monospace; font-size:0.72rem;'>{escape(act)}</span></td>"
+            f"<td><strong>@{actor}</strong></td>"
+            f"<td style='color:#334155;'>{details}</td>"
+            f"</tr>"
+        )
+    if not rows_html:
+        rows_html = '<tr><td colspan="4" style="text-align:center; color:#64748b; padding:24px;">No audit records match your filter.</td></tr>'
+
+    st.markdown(
+        f'<div class="equi-table-wrap"><table class="equi-table">'
+        f'<thead><tr><th>Timestamp</th><th>Action</th><th>Actor</th><th>Event Details</th></tr></thead>'
+        f'<tbody>{rows_html}</tbody></table></div>',
+        unsafe_allow_html=True,
+    )
+
+    if filtered:
+        export_df = pd.DataFrame(filtered)
+        st.download_button(
+            "⬇ Export Audit Log (.csv)",
+            data=export_df.to_csv(index=False).encode("utf-8"),
+            file_name="equimind-security-audit-trails.csv",
+            mime="text/csv",
+            key="adm_audit_export_btn",
+        )
+
+
+def _render_admin_reports_view() -> None:
+    """Admin Console Screen 7: Privacy-Filtered Entity Vault, Exports & Batch Tools."""
+    _render_saas_topbar("Admin Console", "Reports Repository", True)
+    token = st.session_state.get("api_token")
+    t_vault, t_demo = st.tabs(["📦 Entity Exports & Vault", "🛠️ Demo Data Utilities"])
+
+    with t_vault:
+        try:
+            from wellness.api_client import get_database_entities
+
+            entities = get_database_entities(token)
+        except Exception as exc:
+            st.error(f"Unable to fetch repository data: {exc}")
+            return
+        st.caption("Private journal reflection texts are permanently masked (`[Redacted]`) inside all administrative exports.")
+        c1, c2, c3 = st.columns(3, gap="small")
+        c1.metric("Users", len(entities.get("users") or []))
+        c2.metric("Mood Logs (Redacted)", len(entities.get("mood_logs") or []))
+        c3.metric("Reports", len(entities.get("reports") or []))
+
+        entity_choice = st.selectbox(
+            "Select table to preview & export:",
+            ["reports", "mood_logs", "recommendations", "feedback", "audit_trails", "users"],
+            key="adm_rep_entity_sel",
+        )
+        rows = entities.get(entity_choice) or []
+        if rows:
+            df_e = pd.DataFrame(rows)
+            st.dataframe(df_e.head(50), width="stretch", hide_index=True)
+            dl1, dl2 = st.columns(2)
+            with dl1:
+                st.download_button(
+                    f"⬇ Export {entity_choice}.csv",
+                    data=df_e.to_csv(index=False).encode("utf-8"),
+                    file_name=f"equimind-{entity_choice}.csv",
+                    mime="text/csv",
+                    key=f"adm_dl_csv_{entity_choice}",
+                )
+            with dl2:
+                st.download_button(
+                    f"⬇ Export {entity_choice}.json",
+                    data=json.dumps(rows, indent=2, default=str).encode("utf-8"),
+                    file_name=f"equimind-{entity_choice}.json",
+                    mime="application/json",
+                    key=f"adm_dl_json_{entity_choice}",
+                )
+        else:
+            st.info(f"No records currently stored in `{entity_choice}`.")
+
+    with t_demo, st.expander("Generate Demo Organization Check-ins (Testing Only)", expanded=False):
+        st.caption("Adds sample check-ins cleanly labeled as synthetic check-ins for local testing.")
+        if st.button("🚀 Generate 20 Sample Dept Check-ins", key="adm_repo_seed_btn"):
+            _seed_admin_sample_checkins()
+            st.toast("20 sample check-ins stored.", icon="✅")
+            st.rerun()
+
+
+def _render_admin_api_perf_view() -> None:
+    """Admin Console Screen 8: Real Per-Endpoint Latency & Invocation Telemetry."""
+    _render_saas_topbar("Admin Console", "API Telemetry & Performance", True)
+    token = st.session_state.get("api_token")
+    try:
+        from wellness.api_client import get_admin_analytics, get_endpoint_telemetry
+
+        tele = get_endpoint_telemetry(token)
+        stats = get_admin_analytics(token)
+    except Exception as exc:
+        st.error(f"Unable to fetch endpoint telemetry: {exc}")
+        return
+
+    endpoints = tele.get("endpoints") or []
+    api_perf = stats.get("api_performance") or {}
+    db_stat = tele.get("database_status") or stats.get("database_status") or {}
+    total_calls = sum(int(e.get("invocations", 0)) for e in endpoints)
+    avg_ms = api_perf.get("avg_response_time_ms")
+
+    _render_saas_kpi_grid(
+        [
+            {"label": "Tracked Endpoints", "value": str(len(endpoints)), "sub": "Distinct HTTP route groups logged"},
+            {"label": "Total Invocations", "value": str(total_calls), "sub": "Recorded API & persistence calls"},
+            {"label": "Overall Avg Latency", "value": f"{avg_ms:.1f} ms" if avg_ms is not None else "No data yet", "sub": f"Backend: {str(db_stat.get('backend', 'sqlite')).upper()}"},
+        ],
+        cols=3,
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    max_lat = max([float(e.get("avg_latency_ms", 0.0)) for e in endpoints] or [1.0])
+    method_styles = {
+        "POST": ("#dcfce7", "#15803d"),
+        "GET": ("#dbeafe", "#1d4ed8"),
+        "PATCH": ("#fef3c7", "#b45309"),
+        "PUT": ("#fef3c7", "#b45309"),
+        "DELETE": ("#fee2e2", "#b91c1c"),
+    }
+    rows_html = ""
+    for e in endpoints:
+        meth = str(e.get("method") or "GET").upper()
+        m_bg, m_fg = method_styles.get(meth, ("#f1f5f9", "#334155"))
+        path = escape(str(e.get("endpoint") or "/"))
+        inv = int(e.get("invocations", 0))
+        lat = float(e.get("avg_latency_ms", 0.0))
+        bar_w = max(4.0, min(100.0, (lat / max_lat) * 100.0))
+        bar_col = "#10b981" if lat < 150.0 else ("#6366f1" if lat < 400.0 else "#f59e0b")
+        rows_html += (
+            f"<tr>"
+            f"<td><span class='equi-method' style='background:{m_bg}; color:{m_fg};'>{meth}</span></td>"
+            f"<td style='font-family:monospace; color:#334155;'>{path}</td>"
+            f"<td><strong>{inv}</strong></td>"
+            f"<td>{lat:.1f} ms</td>"
+            f"<td style='width:220px;'><div class='equi-bar-track'><div class='equi-bar-fill' style='width:{bar_w:.1f}%; background:{bar_col};'></div></div></td>"
+            f"</tr>"
+        )
+    if not rows_html:
+        rows_html = '<tr><td colspan="5" style="text-align:center; color:#64748b; padding:24px;">No endpoint invocations logged yet. Interact with the workspace to populate live telemetry.</td></tr>'
+
+    st.markdown(
+        f'<div class="equi-table-wrap"><table class="equi-table">'
+        f'<thead><tr><th>HTTP Method</th><th>Endpoint Path</th><th>Total Invocations</th><th>Average Latency</th><th>Latency Profile</th></tr></thead>'
+        f'<tbody>{rows_html}</tbody></table></div>',
+        unsafe_allow_html=True,
+    )
+
+    if st.button("🔄 Refresh Live Telemetry", key="adm_api_refresh_btn"):
+        st.rerun()
+
+
+def _render_emp_overview_view() -> None:
+    """Employee Workspace Screen 1: Daily Welcome, Check-in CTA & Personal Snapshot."""
+    _render_saas_topbar("Workspace", "Overview", False)
+    user_name = str(st.session_state.get("user_name") or "Member")
+    hr = datetime.now().hour
+    greeting = "Good morning" if hr < 12 else ("Good afternoon" if hr < 17 else "Good evening")
+
+    c_wel, c_cta = st.columns([2.3, 1.2], gap="medium")
+    with c_wel:
+        st.markdown(
+            f'<div class="equi-eyebrow">Personal Wellness Space</div>'
+            f'<h2 style="margin:0 0 6px 0; color:#0f172a; font-weight:800;">{greeting}, {escape(user_name)}</h2>'
+            f'<p style="color:#64748b; font-size:0.92rem; margin:0;">Your reflections stay completely private to your account. Check in anytime for calm, tailored support.</p>',
+            unsafe_allow_html=True,
+        )
+    with c_cta:
+        st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+        if st.button("💬 How are you feeling today? →", type="primary", width="stretch", key="emp_ov_checkin_btn"):
+            set_active_view("💬 Emotion Analyzer")
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    df = _load_user_history_df()
+    if df.empty:
+        st.info("You haven't logged a reflection yet. Click **How are you feeling today?** above to run your first private check-in.")
+        return
+
+    avg_comp = float(df["compound_score"].mean())
+    wellbeing_idx = round(max(0.0, min(100.0, ((avg_comp + 1.0) / 2.0) * 100.0)), 1)
+    latest_emo = str(df.iloc[0].get("dominant_emotion") or "neutral").capitalize()
+    recent_7d = df[df["created_at"] >= (pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=7))] if not df["created_at"].isna().all() else df
+
+    _render_saas_kpi_grid(
+        [
+            {"label": "Total Reflections", "value": str(len(df)), "sub": "Private entries saved"},
+            {"label": "Latest Emotion", "value": latest_emo, "sub": "Most recent check-in signal"},
+            {"label": "7-Day Check-ins", "value": str(len(recent_7d)), "sub": "Reflections over past 7 days"},
+            {"label": "Well-Being Balance", "value": f"{wellbeing_idx:.1f}%", "sub": f"Mean compound: {avg_comp:+.2f}"},
+        ],
+        cols=4,
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("##### Recent 7-Day Sentiment Rhythm")
+        chart_df = df.dropna(subset=["created_at"]).sort_values("created_at").tail(20)
+        if not chart_df.empty:
+            fig = px.area(chart_df, x="created_at", y="compound_score", markers=True, template="plotly_white")
+            fig.update_layout(height=250, margin={"l": 10, "r": 10, "t": 10, "b": 10}, yaxis_range=[-1.05, 1.05], xaxis_title="", yaxis_title="Sentiment (-1 to +1)")
+            st.plotly_chart(fig, width="stretch")
+
+
+def _render_emp_history_view() -> None:
+    """Employee Workspace Screen 3: Private Journal History & Single-Entry Management."""
+    _render_saas_topbar("Workspace", "Journal History", False)
+    df = _load_user_history_df()
+    if df.empty:
+        st.info("No journal history yet. Open **Emotion Analyzer** to write your first private check-in.")
+        return
+
+    fc1, fc2, fc3 = st.columns([2.2, 1.2, 1.0], gap="small")
+    with fc1:
+        q = st.text_input("Search notes", placeholder="Search your reflections...", label_visibility="collapsed", key="emp_hist_search").strip().lower()
+    with fc2:
+        s_flt = st.selectbox("Sentiment", ["All sentiments", "positive", "neutral", "negative"], label_visibility="collapsed", key="emp_hist_sent")
+    filtered = df.copy()
+    if q:
+        filtered = filtered[filtered["original_text"].fillna("").str.lower().str.contains(q, regex=False)]
+    if s_flt != "All sentiments":
+        filtered = filtered[filtered["sentiment_label"].str.lower() == s_flt]
+    with fc3:
+        st.markdown(f'<div style="text-align:right; padding-top:8px; color:#64748b; font-size:0.84rem; font-weight:600;">{len(filtered)} entries</div>', unsafe_allow_html=True)
+
+    for idx, row in filtered.head(25).iterrows():
+        with st.container(border=True):
+            h1, h2, h3 = st.columns([3.5, 1.2, 0.7])
+            ts = str(row.get("created_at") or "")[:16].replace("T", " ")
+            emo = str(row.get("dominant_emotion") or "neutral").capitalize()
+            sent = str(row.get("sentiment_label") or "neutral").capitalize()
+            h1.markdown(f"**{ts}** &nbsp;·&nbsp; Emotion: `{emo}` &nbsp;·&nbsp; Sentiment: `{sent}`")
+            h2.caption(f"{row.get('domain_category', 'General')}")
+            if h3.button("🗑 Delete", key=f"emp_hist_del_{row.get('id', idx)}"):
+                try:
+                    api_delete_entry(int(row["id"]), st.session_state.api_token)
+                    st.toast("Reflection removed.", icon="🗑️")
+                    st.rerun()
+                except Exception as exc:
+                    st.error(str(exc))
+            st.write(str(row.get("original_text") or ""))
+
+
+def _render_emp_trends_view() -> None:
+    """Employee Workspace Screen 4: 7-Day & 30-Day Personal Emotion Trends."""
+    _render_saas_topbar("Workspace", "Emotion Trends", False)
+    df = _load_user_history_df()
+    if df.empty:
+        st.info("No reflections recorded yet to chart trends.")
+        return
+
+    window_choice = st.radio("Timeframe", ["7 Days", "30 Days", "All Time"], horizontal=True, key="emp_trends_win")
+    now_utc = pd.Timestamp.now(tz="UTC")
+    if window_choice == "7 Days" and not df["created_at"].isna().all():
+        sub_df = df[df["created_at"] >= (now_utc - pd.Timedelta(days=7))]
+    elif window_choice == "30 Days" and not df["created_at"].isna().all():
+        sub_df = df[df["created_at"] >= (now_utc - pd.Timedelta(days=30))]
+    else:
+        sub_df = df
+
+    if sub_df.empty:
+        st.info(f"No check-ins found in the selected {window_choice} window.")
+        return
+
+    c1, c2 = st.columns(2, gap="medium")
+    with c1, st.container(border=True):
+        st.markdown("##### Top Detected Emotions")
+        ec = sub_df["dominant_emotion"].fillna("neutral").str.capitalize().value_counts().reset_index()
+        ec.columns = ["Emotion", "Count"]
+        fig1 = px.bar(ec, x="Emotion", y="Count", color="Emotion", template="plotly_white")
+        fig1.update_layout(showlegend=False, height=300)
+        st.plotly_chart(fig1, width="stretch")
+
+    with c2, st.container(border=True):
+        st.markdown("##### Sentiment Proportion")
+        sc = sub_df["sentiment_label"].fillna("neutral").str.capitalize().value_counts().reset_index()
+        sc.columns = ["Sentiment", "Count"]
+        fig2 = px.pie(sc, names="Sentiment", values="Count", hole=0.45, template="plotly_white")
+        fig2.update_layout(height=300)
+        st.plotly_chart(fig2, width="stretch")
+
+
+def _render_emp_feedback_view() -> None:
+    """Employee Workspace Screen 6: Personal Suggestion Feedback History."""
+    _render_saas_topbar("Workspace", "Feedback Summary", False)
+    fb_list = _load_user_feedback_records()
+    if not fb_list:
+        st.info("No feedback submitted yet. Open **Emotion Analyzer**, review a suggestion, and click **Save feedback**.")
+        return
+
+    acc_n = sum(1 for r in fb_list if str(r.get("decision", "")).lower() == "accepted")
+    rej_n = sum(1 for r in fb_list if str(r.get("decision", "")).lower() == "rejected")
+    tot = len(fb_list)
+    pct = f"{(acc_n / tot * 100):.1f}%" if tot > 0 else "0.0%"
+
+    _render_saas_kpi_grid(
+        [
+            {"label": "Total Responses", "value": str(tot), "sub": "Suggestions you rated"},
+            {"label": "Accepted", "value": str(acc_n), "sub": "Helpful interventions saved"},
+            {"label": "Rejected / Skipped", "value": str(rej_n), "sub": f"Adoption match: {pct}"},
+        ],
+        cols=3,
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    rows_html = ""
+    for item in fb_list[:30]:
+        dec = str(item.get("decision") or "accepted").lower()
+        bg = "#dcfce7" if dec == "accepted" else "#fee2e2"
+        fg = "#15803d" if dec == "accepted" else "#b91c1c"
+        rows_html += (
+            f"<tr>"
+            f"<td><span class='equi-pill' style='background:{bg}; color:{fg};'>{dec.upper()}</span></td>"
+            f"<td>{escape(str(item.get('title') or 'Wellbeing Suggestion'))}</td>"
+            f"<td style='color:#475569;'>{escape(str(item.get('comment') or '—'))}</td>"
+            f"<td style='color:#64748b;'>{escape(str(item.get('timestamp') or '—')[:19].replace('T', ' '))}</td>"
+            f"</tr>"
+        )
+    st.markdown(
+        f'<div class="equi-table-wrap"><table class="equi-table">'
+        f'<thead><tr><th>Decision</th><th>Suggestion</th><th>Note / Reason</th><th>Timestamp</th></tr></thead>'
+        f'<tbody>{rows_html}</tbody></table></div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _render_emp_privacy_view() -> None:
+    """Employee Workspace Screen 8: Confidentiality, Active Model Info, Helplines & Full Data Deletion."""
+    _render_saas_topbar("Workspace", "Profile & Privacy", False)
+    user_name = str(st.session_state.get("user_name") or "Member")
+    user_email = str(st.session_state.get("user_email") or "—")
+    uid = st.session_state.get("user_id")
+    token = st.session_state.get("api_token")
+
+    transformer_disabled = os.getenv("WELLNESS_DISABLE_TRANSFORMER", "0").strip().lower() in {"1", "true", "yes"}
+    model_badge = "Lexical Keyword Fallback" if transformer_disabled else "DistilBERT / GoEmotions Transformer + Fallback"
+
+    p_left, p_right = st.columns([1.25, 1.0], gap="medium")
+    with p_left:
+        with st.container(border=True):
+            st.markdown("##### 🛡️ Account & Data Privacy")
+            st.markdown(
+                f"""
+                - **Signed in as:** `{escape(user_name)}` (`{escape(user_email)}`)
+                - **Role Scope:** `employee` (Private personal workspace)
+                - **Active AI Estimator:** {model_badge} (statistical estimate, not a clinical diagnosis)
+                - **Private Journals:** Only you can read your reflection text. Admin telemetry stores anonymized aggregates and redacts reflection content.
+                """
+            )
+        with st.container(border=True):
+            st.markdown("##### 🗑️ Permanent Personal Data Deletion")
+            st.caption("Remove all of your stored reflections permanently from your account history.")
+            confirm_erase = st.checkbox("I understand this will permanently erase all my personal reflection entries.", key="emp_confirm_erase_all")
+            if st.button("Delete All My Personal Reflections", type="secondary", disabled=not confirm_erase, key="emp_erase_all_btn"):
+                try:
+                    from wellness.api_client import delete_all_user_entries
+
+                    deleted_count = delete_all_user_entries(int(uid), token)
+                    st.session_state.last_analysis_report = None
+                    st.toast(f"Deleted {deleted_count} personal reflection entries.", icon="🗑️")
+                    st.success(f"Removed {deleted_count} reflection record(s) from your history.")
+                    st.rerun()
+                except Exception as exc:
+                    st.error(f"Deletion failed: {exc}")
+
+    with p_right:
+        with st.container(border=True):
+            st.markdown("##### 🚨 24/7 Confidential Crisis Resources")
+            st.markdown(
+                """
+                EquiMind is an everyday self-reflection companion, not a substitute for emergency medical or psychological care:
+                - **Tele-MANAS (India):** [14416](tel:14416) or [1800 891 4416](tel:18008914416)
+                - **988 Suicide & Crisis Lifeline (US & Canada):** Call or text [988](tel:988)
+                - **Vandrevala Foundation:** [+91 9999 666 555](tel:+919999666555)
+                - **Befrienders Worldwide:** [befrienders.org](https://www.befrienders.org)
+                """
+            )
+        with st.container(border=True):
+            st.markdown("##### 🔬 Model Context & Research Caveats")
+            st.caption("GoEmotions models are trained on public social-forum language and serve strictly as reflective signals for workplace journaling—always interpret suggestions alongside your own judgment.")
+
+
+def _render_emp_recommendations_view() -> None:
+    """Employee Workspace Screen 5: Care Hub Practices & EquiAI Companion."""
+    _render_saas_topbar("Workspace", "Recommendations & Care Hub", False)
+    focus_equiai = bool(st.session_state.pop("rec_hub_focus_equiai", False))
+    if focus_equiai:
+        tab_ai, tab_care = st.tabs(["🤖 EquiAI Chat Companion", "🌟 Care Hub & Somatic Practices"])
+        with tab_ai:
+            render_equiai_companion_view()
+        with tab_care:
+            render_recommendations_view()
+    else:
+        tab_care, tab_ai = st.tabs(["🌟 Care Hub & Somatic Practices", "🤖 EquiAI Chat Companion"])
+        with tab_care:
+            render_recommendations_view()
+        with tab_ai:
+            render_equiai_companion_view()
 
 
 def render_deep_nlp_pipeline_inspector(text: str, key_suffix: str = "") -> None:
@@ -10803,6 +12292,7 @@ def render_workspace():
 
     # Route directly to the selected module from the sidebar
     if active_nav.startswith("💬"):
+        _render_saas_topbar("Workspace", "Emotion Analyzer", False)
         with st.container(border=True):
             active_qm = st.session_state.get("active_quick_mood")
             mood_badge_html = (
@@ -10968,448 +12458,26 @@ def render_workspace():
                     else:
                         st.caption("Showing analysis from your current active reflection.")
 
-                    # Tell Molly Contextual Metadata Card
-                    meta_info = parse_entry_metadata(report.input_summary.source_name, report.original_text)
-                    if st.session_state.get("last_analysis_metadata"):
-                        meta_info["category"] = st.session_state["last_analysis_metadata"].get("category", meta_info["category"])
-                        for t in st.session_state["last_analysis_metadata"].get("tags", []):
-                            if t not in meta_info["tags"]:
-                                meta_info["tags"].append(t)
-                        if st.session_state["last_analysis_metadata"].get("note"):
-                            meta_info["note"] = st.session_state["last_analysis_metadata"]["note"]
-
-                    tag_chips_html = "".join([f'<span class="chip chip-tag">{escape(t)}</span>' for t in meta_info["tags"]]) if meta_info["tags"] else '<span style="color: #94a3b8; font-size: 0.78rem;">No tags specified</span>'
-                    note_card_html = f'<div style="margin-top: 8px; padding: 8px 12px; background: rgba(248, 250, 252, 0.9); border-left: 3px solid #0f766e; border-radius: 4px; font-size: 0.82rem; color: #334155; font-style: italic;"><strong>Reflection Note:</strong> “{escape(meta_info["note"])}”</div>' if meta_info["note"] else ''
-
-                    st.markdown(
-                        f"""
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                <span class="chip chip-cat">{escape(meta_info["category"])}</span>
-                                <div>{tag_chips_html}</div>
-                            </div>
-                            <div style="font-size: 0.70rem; color: #0f766e; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: #f0fdfa; border: 1px solid #ccfbf1; padding: 2px 8px; border-radius: 6px;">
-                                🏷️ Domain & Tag Structured
-                            </div>
-                        </div>
-                        {note_card_html}
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                    compound = report.sentiment_scores.compound
-                    sentiment_str = report.sentiment_label.value.upper()
-                    dominant_str = report.dominant_emotion.capitalize()
-
-                    if report.sentiment_label.value == "positive":
-                        hero_bg = "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)"
-                        hero_border = "#86efac"
-                        hero_badge = "#15803d"
-                        hero_badge_bg = "#bbf7d0"
-                        hero_icon = "✨"
-                        sentiment_title = "Positive & Constructive Tone"
-                        sentiment_desc = "Cognitive markers indicate constructive momentum and high psychological resilience."
-                    elif report.sentiment_label.value == "negative":
-                        hero_bg = "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)"
-                        hero_border = "#fca5a5"
-                        hero_badge = "#b91c1c"
-                        hero_badge_bg = "#fecaca"
-                        hero_icon = "🛡️"
-                        sentiment_title = "Elevated Cognitive Strain Detected"
-                        sentiment_desc = "Telemetry reflects heightened tension or fatigue; supportive micro-protocols recommended below."
-                    else:
-                        hero_bg = "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)"
-                        hero_border = "#cbd5e1"
-                        hero_badge = "#475569"
-                        hero_badge_bg = "#e2e8f0"
-                        hero_icon = "⚖️"
-                        sentiment_title = "Neutral Affective Equilibrium"
-                        sentiment_desc = "Reflection reflects objective, balanced processing across workplace dimensions."
-
-                    st.markdown(
-                        f"""
-                        <div style="background: {hero_bg}; border: 1px solid {hero_border}; border-radius: 14px; padding: 14px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03);">
-                            <div style="font-size: 2rem;">{hero_icon}</div>
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="background: {hero_badge_bg}; color: {hero_badge}; font-weight: 700; font-size: 0.70rem; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Telemetry Verified</span>
-                                    <span style="font-size: 0.80rem; color: #64748b; font-weight: 600;">Primary Affect: {dominant_str}</span>
-                                </div>
-                                <h3 style="margin: 2px 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">{sentiment_title}</h3>
-                                <p style="margin: 0; font-size: 0.84rem; color: #475569;">{sentiment_desc}</p>
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                    _render_bento_kpi_grid([
-                        {
-                            "label": "VADER Compound",
-                            "value": f"{compound:+.3f}",
-                            "badge": sentiment_str,
-                            "sub": "Overall lexical polarity",
-                            "accent": "linear-gradient(90deg, #0f766e, #14b8a6)",
-                            "badge_bg": "#f0fdfa",
-                            "badge_fg": "#0f766e",
-                            "badge_border": "#99f6e4",
-                        },
-                        {
-                            "label": "Dominant Emotion",
-                            "value": dominant_str,
-                            "badge": "Classifier",
-                            "sub": "Top emotional dimension",
-                            "accent": "linear-gradient(90deg, #0284c7, #38bdf8)",
-                            "badge_bg": "#f0f9ff",
-                            "badge_fg": "#0369a1",
-                            "badge_border": "#bae6fd",
-                        },
-                        {
-                            "label": "Positive Cue Share",
-                            "value": f"{report.sentiment_scores.positive:.1%}",
-                            "badge": "Positive",
-                            "sub": "Constructive cue density",
-                            "accent": "linear-gradient(90deg, #10b981, #6ee7b7)",
-                            "badge_bg": "#f0fdf4",
-                            "badge_fg": "#166534",
-                            "badge_border": "#bbf7d0",
-                        },
-                        {
-                            "label": "Negative Cue Share",
-                            "value": f"{report.sentiment_scores.negative:.1%}",
-                            "badge": "Strain",
-                            "sub": "Tension & stress cue share",
-                            "accent": "linear-gradient(90deg, #f59e0b, #fbbf24)",
-                            "badge_bg": "#fffbeb",
-                            "badge_fg": "#92400e",
-                            "badge_border": "#fde68a",
-                        },
-                    ], cols=4)
-
-                    # Elevate Tailored Recommendations & Restorative Yoga Remedy
-                    rec = report.recommendations
-                    yoga_remedy = get_yoga_remedy_for_emotion(report.dominant_emotion)
-
-                    st.markdown("---")
-                    st.markdown(
-                        f"""
-                        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 250, 0.72) 100%); border: 1px solid rgba(204, 251, 241, 0.85); border-radius: 16px; padding: 18px 22px; box-shadow: 0 8px 24px -4px rgba(15, 118, 110, 0.08); margin: 12px 0 16px 0; backdrop-filter: blur(10px);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">✨ Instant Personalized Care</div>
-                                    <h3 style="margin: 3px 0 0 0; font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: #0f172a; letter-spacing: -0.015em;">Personalized Recommendation & Yoga Remedy</h3>
-                                </div>
-                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                    <span style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; color: #0891b2; font-weight: 700;">Emotion: {dominant_str}</span>
-                                    <span style="background: #f0fdf4; border: 1px solid #86efac; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; color: #166534; font-weight: 700;">Urgency: {rec.get('urgency', 'Low')}</span>
-                                </div>
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                    rec_col1, rec_col2 = st.columns([1.4, 1.2], gap="medium")
-                    with rec_col1, st.container(border=True):
-                        st.markdown(f"#### 💡 {rec.get('title', 'Self-Care Focus')}")
-                        st.markdown(
-                            f"<span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: #475569; font-weight: 600;'>Category: {rec.get('category', 'Well-Being')}</span> · <span style='background: #ecfeff; border: 1px solid #a5f3fc; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: #0e7490; font-weight: 600;'>Urgency: {rec.get('urgency', 'Low')}</span>",
-                            unsafe_allow_html=True,
-                        )
-                        st.write(rec.get("summary", ""))
-
-                        if rec.get("is_crisis"):
-                            st.error(
-                                "**Confidential Crisis Protocol**: If you may be in immediate danger or severe distress, please connect with a qualified crisis line or emergency medical professional immediately (US/CA: 988, UK: 111, Global: befrienders.org)."
-                            )
-
-                        action_paths = rec.get("action_paths", [])
-                        daily_path_key = "daily_care_path_idx"
-                        daily_path_idx = st.session_state.get(daily_path_key, 0) % len(action_paths) if action_paths else 0
-                        active_path_title = rec.get("title", "Self-Care Practice")
-                        if action_paths:
-                            path = action_paths[daily_path_idx]
-                            active_path_title = path.get("title", active_path_title)
-                            st.markdown(f"##### Recommended Pathway ({daily_path_idx + 1}/{len(action_paths)}): {active_path_title} (`⏱️ {path.get('duration', '5 min')}`)")
-                            st.write(path.get("description", ""))
-                            for s_idx, step in enumerate(path.get("steps", []), 1):
-                                st.markdown(f"**Step {s_idx}:** {step}")
-
-                        st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
-                        act_b1, act_b2, act_b3 = st.columns([1.2, 1, 1], gap="small")
-                        with act_b1:
-                            if st.button("✅ Accept Practice", type="primary", width="stretch", key="elevated_adopt_rec_btn"):
-                                if "suggestion_feedback" not in st.session_state:
-                                    st.session_state["suggestion_feedback"] = {"accepted": 4, "rejected": 1}
-                                st.session_state["suggestion_feedback"]["accepted"] += 1
-                                try:
-                                    api_submit_feedback(
-                                        recommendation_id=int(report.history_id) if getattr(report, "history_id", None) else 1,
-                                        accepted_or_rejected="accepted",
-                                        report_data={"title": active_path_title, "category": rec.get("category", "Well-Being")},
-                                        api_token=st.session_state.get("api_token")
-                                    )
-                                except Exception:
-                                    pass
-                                st.session_state["decline_prompt_daily_reflection"] = False
-                                st.toast("Practice accepted and recorded in your care adoption log.", icon="🎯")
-                                st.rerun()
-                        with act_b2:
-                            if st.button("❌ Decline / Skip", type="secondary", width="stretch", key="elevated_decline_rec_btn"):
-                                st.session_state["decline_prompt_daily_reflection"] = True
-                                st.rerun()
-                        with act_b3:
-                            if st.button("🎯 Full Care Hub →", type="secondary", width="stretch", key="elevated_open_hub_btn"):
-                                set_active_view("🎯 Personalized Recommendations")
-                                st.rerun()
-
-                        _render_decline_reason_box(
-                            context_key="daily_reflection",
-                            rec_title=str(active_path_title),
-                            emotion=report.dominant_emotion,
-                            rec_category=rec.get("category", "Well-Being"),
-                            recommendation_id=int(report.history_id) if getattr(report, "history_id", None) else 1,
-                            action_paths=action_paths,
-                            path_state_key=daily_path_key,
-                            api_token=st.session_state.get("api_token"),
-                        )
-
-                        fb_live = st.session_state.get("suggestion_feedback", {"accepted": 4, "rejected": 1})
-                        tot_fb = fb_live.get("accepted", 0) + fb_live.get("rejected", 0)
-                        rate_live = (fb_live.get("accepted", 0) / tot_fb * 100) if tot_fb > 0 else 80.0
-                        st.markdown(
-                            f"""
-                            <div style="margin-top: 8px; padding: 6px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 0.74rem; color: #166534; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                                <span>🌱 <strong>Care Suggestion Adoption:</strong> {rate_live:.1f}% ({fb_live.get('accepted', 4)} Completed)</span>
-                                <span>✨ <strong>Habit Consistency:</strong> Strong Daily Practice</span>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-
-                    with rec_col2, st.container(border=True):
-                        st.markdown(f"#### 🧘 {yoga_remedy.get('icon', '🧘')} {yoga_remedy.get('english_name', 'Restorative Asana')}")
-                        st.markdown(
-                            f"<span style='color: #0f766e; font-weight: 700; font-size: 0.82rem;'>Sanskrit: {yoga_remedy.get('sanskrit_name', 'Asana')}</span> · <span style='background: #f8fafc; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;'>⏱️ {yoga_remedy.get('duration', '3 mins')}</span>",
-                            unsafe_allow_html=True,
-                        )
-                        st.markdown(
-                            f"<p style='font-size: 0.82rem; color: #475569; margin: 6px 0;'><strong>Somatic Mechanism:</strong> {yoga_remedy.get('somatic_mechanism', 'Eases tension and restores autonomic balance.')}</p>",
-                            unsafe_allow_html=True,
-                        )
-
-                        yoga_p_tab1, yoga_p_tab2 = st.tabs(["🖥️ Desk Seated", "🧘 Floor Mat"])
-                        with yoga_p_tab1:
-                            st.write(yoga_remedy.get("office_variation", "Sit tall, breathe deeply, and gently decompress."))
-                        with yoga_p_tab2:
-                            for s in yoga_remedy.get("steps_floor", []):
-                                st.write(f"- {s}")
-
-                        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-                        if st.button("🎯 Explore All Yoga & Care Pathways →", type="secondary", width="stretch", key="elevated_open_yoga_btn"):
-                            set_active_view("🎯")
-                            st.rerun()
-
-                    # Visualizations Grid
-                    st.markdown("---")
-                    st.markdown("#### Sentiment Spectrum & Emotion Topography")
-                    col_gauge, col_emotions = st.columns([1, 1.2], gap="large")
-
-                    with col_gauge:
-                        pol_val = report.sentiment_label.value.upper()
-                        pol_color = "#10b981" if pol_val == "POSITIVE" else ("#ef4444" if pol_val == "NEGATIVE" else "#f59e0b")
-                        pol_bg = "#ecfdf5" if pol_val == "POSITIVE" else ("#fef2f2" if pol_val == "NEGATIVE" else "#fffbeb")
-                        st.markdown(
-                            f"""
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                                <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Sentiment Tone (VADER)</span>
-                                <span style="background: {pol_bg}; color: {pol_color}; border: 1px solid {pol_color}40; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
-                                    Polarity: {pol_val}
-                                </span>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                        # Clean Gauge Chart
-                        compound = report.sentiment_scores.compound
-                        fig_gauge = go.Figure(
-                            go.Indicator(
-                                mode="gauge+number",
-                                value=compound,
-                                domain={"x": [0, 1], "y": [0, 1]},
-                                number={"font": {"size": 38, "family": "Plus Jakarta Sans, sans-serif", "color": "#0f172a"}},
-                                gauge={
-                                    "axis": {"range": [-1.0, 1.0], "tickwidth": 1, "tickcolor": "#94a3b8"},
-                                    "bar": {"color": "#0f766e"},
-                                    "steps": [
-                                        {"range": [-1.0, -0.05], "color": "rgba(239, 68, 68, 0.2)"},
-                                        {"range": [-0.05, 0.05], "color": "rgba(245, 158, 11, 0.2)"},
-                                        {"range": [0.05, 1.0], "color": "rgba(16, 185, 129, 0.2)"},
-                                    ],
-                                    "threshold": {
-                                        "line": {"color": "#0f766e", "width": 3},
-                                        "thickness": 0.8,
-                                        "value": compound,
-                                    },
-                                },
-                            )
-                        )
-                        fig_gauge.update_layout(
-                            height=200,
-                            margin={"l": 20, "r": 20, "t": 10, "b": 10},
-                            paper_bgcolor="rgba(0,0,0,0)",
-                            font={"family": "Plus Jakarta Sans, sans-serif"},
-                        )
-                        st.plotly_chart(fig_gauge, width="stretch")
-
-                    with col_emotions:
-                        st.markdown("##### Fine-Grained Emotion Signals")
-                        if report.emotion_method == "no_emotion_signal":
-                            st.info(
-                                "No clear emotion keywords matched, so MoodMentor is leaving "
-                                "this chart unclassified instead of guessing how you feel. "
-                                "Your VADER sentiment result is shown alongside it."
-                            )
-                        else:
-                            estimator = EMOTION_ESTIMATOR_LABELS.get(
-                                report.emotion_method, report.emotion_method
-                            )
-                            is_multilabel = report.emotion_method == "transformer_multilabel"
-                            is_transformer = report.emotion_method in {
-                                "transformer", "transformer_multilabel"
-                            }
-                            score_label = "Model score" if is_transformer else "Relative cue share"
-                            if is_multilabel:
-                                score_note = (
-                                    "Showing the strongest signals. Multi-emotion scores are independent, "
-                                    "so they do not add up to 100%; this is not a diagnosis."
-                                )
-                            elif is_transformer:
-                                score_note = "Model estimates are indicators, not a diagnosis."
-                            else:
-                                score_note = (
-                                    "This result used keyword matching. Scores show relative matched-word shares, "
-                                    "not DistilBERT predictions or model confidence values."
-                                )
-                            st.caption(f"Estimator: {estimator}. {score_note}")
-                            emo_df = pd.DataFrame(
-                                [
-                                    {
-                                        "Emotion": emo.capitalize(),
-                                        "Score": prob,
-                                        "Color": EMOTION_PALETTE.get(emo, "#94a3b8"),
-                                    }
-                                    for emo, prob in report.emotion_scores.items()
-                                ]
-                            ).sort_values("Score", ascending=True)
-                            if len(emo_df) > 8:
-                                emo_df = emo_df.nlargest(8, "Score").sort_values("Score")
-
-                            chart_tabs = st.tabs(["Bar Ranking", "Radar Topology"])
-                            with chart_tabs[0]:
-                                fig_bar = px.bar(
-                                    emo_df,
-                                    x="Score",
-                                    y="Emotion",
-                                    orientation="h",
-                                    text="Score",
-                                    color="Emotion",
-                                    color_discrete_map={
-                                        row["Emotion"]: row["Color"] for _, row in emo_df.iterrows()
-                                    },
-                                )
-                                fig_bar.update_traces(texttemplate="%{text:.1%}", textposition="outside")
-                                fig_bar.update_layout(
-                                    showlegend=False,
-                                    height=260,
-                                    margin={"l": 10, "r": 30, "t": 10, "b": 10},
-                                    xaxis={
-                                        "range": [0, 1.1],
-                                        "tickformat": ".0%",
-                                        "title": score_label,
-                                    },
-                                    paper_bgcolor="rgba(0,0,0,0)",
-                                    plot_bgcolor="rgba(0,0,0,0)",
-                                )
-                                st.plotly_chart(fig_bar, width="stretch")
-                            with chart_tabs[1]:
-                                top_radar_df = emo_df.sort_values("Score", ascending=False).head(8)
-                                r_vals = top_radar_df["Score"].tolist()
-                                theta_vals = top_radar_df["Emotion"].tolist()
-                                if r_vals:
-                                    r_vals.append(r_vals[0])
-                                    theta_vals.append(theta_vals[0])
-                                fig_radar = go.Figure(
-                                    go.Scatterpolar(
-                                        r=r_vals,
-                                        theta=theta_vals,
-                                        fill="toself",
-                                        line_color="#155c49",
-                                        fillcolor="rgba(21, 92, 73, 0.25)",
-                                    )
-                                )
-                                fig_radar.update_layout(
-                                    polar={"radialaxis": {"visible": True, "range": [0, max(r_vals) * 1.15 if r_vals else 1]}},
-                                    showlegend=False,
-                                    height=260,
-                                    margin={"l": 30, "r": 30, "t": 20, "b": 20},
-                                    paper_bgcolor="rgba(0,0,0,0)",
-                                    plot_bgcolor="rgba(0,0,0,0)",
-                                )
-                                st.plotly_chart(fig_radar, width="stretch")
-
-                    st.caption("Evidence-informed self-care suggestions and restorative somatic practices are educational, non-clinical reflections.")
-
-                    # AI Cognitive Reframing Studio
-                    render_ai_cognitive_reframe_studio(report.dominant_emotion, report.original_text)
-
-                    # Tailored Nutritional Support for the Analyzed Reflection
-                    with st.expander(f"View Personalized Mood-Food Nutrition Plan for {report.dominant_emotion.upper()}", expanded=False):
-                        render_mood_food_planner_view(default_emotion=report.dominant_emotion, key_prefix="journal_analysis")
-
-                    # Prescribed Yoga Asana Remedy for the Analyzed Reflection
-                    with st.expander(f"View Prescribed Yoga Asana Remedy for {report.dominant_emotion.upper()}", expanded=False):
-                        render_yoga_remedies_view(default_emotion=report.dominant_emotion, key_prefix="journal_analysis_yoga")
-
-                    # Mood trend and downloadable report
-                    st.markdown("---")
-                    st.markdown("### Mood Trend Over Time")
-                    _render_mood_trend()
-                    report_stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-                    markdown_col, pdf_col = st.columns(2)
-                    with markdown_col:
-                        st.download_button(
-                            "Download Report (.md)",
-                            data=_build_analysis_report_markdown(report),
-                            file_name=f"moodmentor-report-{report_stamp}.md",
-                            mime="text/markdown",
-                            width="stretch",
-                        )
-                    with pdf_col:
-                        st.download_button(
-                            "Download Report (.pdf)",
-                            data=_build_analysis_report_pdf(report),
-                            file_name=f"moodmentor-report-{report_stamp}.pdf",
-                            mime="application/pdf",
-                            width="stretch",
-                        )
-
-                    # Deep NLP Inspector
-                    st.markdown("---")
-                    render_deep_nlp_pipeline_inspector(report.original_text, key_suffix="journal_analysis")
+                    _render_clean_reflection_insights(report, user_text)
 
                 except Exception as exc:
                     st.error(f"Error during analysis: {exc}")
 
-
-
     elif active_nav.startswith("🤖"):
-        render_equiai_companion_view()
+        st.session_state["rec_hub_focus_equiai"] = True
+        _render_emp_recommendations_view()
 
     elif active_nav.startswith("🎯"):
-        render_recommendations_view()
+        if st.session_state.get("is_admin", False):
+            _render_admin_recommendations_view()
+        else:
+            _render_emp_recommendations_view()
 
     elif active_nav.startswith("📁"):
+        if st.session_state.get("is_admin", False):
+            _render_admin_reports_view()
+            return
+        _render_saas_topbar("Workspace", "Reports & Upload", False)
         st.markdown("#### Batch Data Ingestion & Organization Sync")
         st.write(
             "Upload unstructured `.txt` notes or multi-row `.csv` feedback tables to process bulk employee telemetry."
@@ -11578,69 +12646,61 @@ def render_workspace():
                 else:
                     st.warning("Sample dataset not found.")
 
-    # ---------------------------------------------------------------------------
-    # 👤 USER DASHBOARD — PERSONAL EMOTIONAL JOURNEY & TELEMETRY
-    # ---------------------------------------------------------------------------
-    elif active_nav.startswith("📈"):
-        render_user_dashboard_view()
+    elif active_nav.startswith("🏠"):
+        _render_emp_overview_view()
 
-    # ---------------------------------------------------------------------------
-    # 🛡️ ADMIN DASHBOARD — ENTERPRISE TELEMETRY & DATABASE OPERATIONS
-    # ---------------------------------------------------------------------------
+    elif active_nav.startswith("📝"):
+        _render_emp_history_view()
+
+    elif active_nav.startswith("📈"):
+        _render_emp_trends_view()
+
+    elif active_nav.startswith("⭐"):
+        _render_emp_feedback_view()
+
     elif active_nav.startswith("🛡️"):
         if st.session_state.get("is_admin", False):
-            render_admin_dashboard_view()
+            _render_admin_overview_view()
         else:
             st.error("🔒 Access Restricted: Administrator privileges are required for this view.")
-            render_user_dashboard_view()
+            _render_emp_overview_view()
 
     elif active_nav.startswith("👥"):
         if st.session_state.get("is_admin", False):
-            render_team_health_view()
+            _render_admin_users_view()
         else:
-            st.error("🔒 Access Restricted: Organizational Team Health Intelligence is available only to Administrators.")
-            render_user_dashboard_view()
+            st.error("🔒 Access Restricted: Administrator privileges are required for this view.")
+            _render_emp_overview_view()
 
-    elif active_nav.startswith(("🔬", "🔒")):
-        st.markdown("#### Confidentiality, Privacy & Clinical Boundaries")
-        st.caption("Guiding principles, employee privacy boundaries, and immediate crisis support resources.")
+    elif active_nav.startswith("📊"):
+        if st.session_state.get("is_admin", False):
+            _render_admin_global_emotions_view()
+        else:
+            st.error("🔒 Access Restricted: Administrator privileges are required for this view.")
+            _render_emp_overview_view()
 
-        priv_c1, priv_c2 = st.columns([1.2, 1], gap="medium")
-        with priv_c1:
-            with st.container(border=True):
-                st.markdown("##### 🛡️ Confidentiality & Data Protection")
-                st.markdown(
-                    r"""
-                    EquiMind is engineered with employee privacy and agency as its primary commitment:
-                    - **Zero Model Retraining:** Your reflections and journal check-ins are private to you and never shared, sold, or used to train public language models.
-                    - **Isolated Storage:** Every entry is protected with strong cryptographic digests and strictly scoped to your private profile.
-                    - **GDPR Article 17 Erasure:** You maintain absolute sovereignty over your records with 1-click permanent deletion rights.
-                    - **k-Anonymity ($k \ge 5$):** Aggregated team telemetry enforces strict cluster thresholds so individual check-ins can never be reverse-identified.
-                    """
-                )
+    elif active_nav.startswith("🔬"):
+        if st.session_state.get("is_admin", False):
+            _render_admin_model_perf_view()
+        else:
+            _render_emp_privacy_view()
 
-            with st.container(border=True):
-                st.markdown("##### ⚕️ Non-Clinical Boundary Declaration")
-                st.markdown(
-                    """
-                    EquiMind is strictly an educational self-reflection companion for workplace resilience:
-                    - It does **not** provide medical, psychiatric, or clinical psychological diagnosis.
-                    - Recommendations are supportive micro-interventions (breathwork, desk yoga, nutrition) to enhance daily well-being.
-                    - Always consult certified medical or psychological professionals for clinical care.
-                    """
-                )
+    elif active_nav.startswith("📋"):
+        if st.session_state.get("is_admin", False):
+            _render_admin_audit_trails_view()
+        else:
+            st.error("🔒 Access Restricted: Administrator privileges are required for this view.")
+            _render_emp_overview_view()
 
-        with priv_c2, st.container(border=True):
-            st.markdown("##### 🚨 24/7 Confidential Crisis Helplines")
-            st.markdown(
-                """
-                If you or a colleague are experiencing severe emotional distress, support is available 24/7:
-                - **Tele-MANAS (India):** [14416](tel:14416) or [1800 891 4416](tel:18008914416) (Free, confidential 24/7 mental health helpline)
-                - **988 Suicide & Crisis Lifeline (US & Canada):** Call or text [988](tel:988)
-                - **Vandrevala Foundation:** [+91 9999 666 555](tel:+919999666555)
-                - **Befrienders Worldwide:** [befrienders.org](https://www.befrienders.org)
-                """
-            )
+    elif active_nav.startswith("⚡"):
+        if st.session_state.get("is_admin", False):
+            _render_admin_api_perf_view()
+        else:
+            st.error("🔒 Access Restricted: Administrator privileges are required for this view.")
+            _render_emp_overview_view()
+
+    elif active_nav.startswith("🔒"):
+        _render_emp_privacy_view()
 
 
 

@@ -81,8 +81,21 @@ def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             username TEXT NOT NULL,
+            action TEXT NOT NULL DEFAULT 'JOURNAL_ANALYSIS',
             journal_id INTEGER,
             recommendation TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS api_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            method TEXT NOT NULL,
+            endpoint TEXT NOT NULL,
+            status_code INTEGER NOT NULL,
+            latency_ms REAL NOT NULL,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
         """
@@ -156,6 +169,12 @@ def connect_database(path: str | Path = "wellness.db") -> sqlite3.Connection:
     if "recommendation" not in existing_cols:
         connection.execute(
             "ALTER TABLE mood_entries ADD COLUMN recommendation TEXT NOT NULL DEFAULT ''"
+        )
+    audit_cursor = connection.execute("PRAGMA table_info(audit_trails)")
+    existing_audit_cols = {row["name"] for row in audit_cursor.fetchall()}
+    if "action" not in existing_audit_cols:
+        connection.execute(
+            "ALTER TABLE audit_trails ADD COLUMN action TEXT NOT NULL DEFAULT 'JOURNAL_ANALYSIS'"
         )
     connection.commit()
 
@@ -359,6 +378,14 @@ def delete_mood_entry(connection: sqlite3.Connection, entry_id: int, user_id: in
     return cursor.rowcount > 0
 
 
+def delete_user_mood_entries(connection: sqlite3.Connection, user_id: int) -> int:
+    """Delete all mood and journal entries belonging exclusively to user_id."""
+    cur_m = connection.execute("DELETE FROM mood_entries WHERE user_id = ?", (user_id,))
+    connection.execute("DELETE FROM journal_entries WHERE user_id = ?", (user_id,))
+    connection.commit()
+    return int(cur_m.rowcount or 0)
+
+
 # ---------------------------------------------------------------------------
 # 6 DATABASE ENTITIES PERSISTENCE & RETRIEVAL
 # ---------------------------------------------------------------------------
@@ -390,14 +417,59 @@ def save_audit_trail(
     username: str,
     journal_id: int | None,
     recommendation: str,
+    action: str = "JOURNAL_ANALYSIS",
 ) -> int:
-    """Save 4. Audit trails (User id, username, journal id, recommendation)."""
+    """Save 4. Audit trails (User id, username, action, journal id, details)."""
     cursor = connection.execute(
-        "INSERT INTO audit_trails (user_id, username, journal_id, recommendation) VALUES (?, ?, ?, ?)",
-        (user_id, username, journal_id, recommendation),
+        "INSERT INTO audit_trails (user_id, username, action, journal_id, recommendation) VALUES (?, ?, ?, ?, ?)",
+        (user_id, username, action, journal_id, recommendation),
     )
     connection.commit()
     return int(cursor.lastrowid)
+
+
+def save_api_log(
+    connection: sqlite3.Connection,
+    method: str,
+    endpoint: str,
+    status_code: int,
+    latency_ms: float,
+) -> None:
+    """Persist per-endpoint execution latency for honest API telemetry."""
+    connection.execute(
+        "INSERT INTO api_logs (method, endpoint, status_code, latency_ms) VALUES (?, ?, ?, ?)",
+        (method.upper(), endpoint[:180], int(status_code), round(float(latency_ms), 2)),
+    )
+    connection.commit()
+
+
+def get_api_telemetry_summary(connection: sqlite3.Connection) -> dict[str, Any]:
+    """Aggregate real endpoint invocation counts and average latencies from api_logs."""
+    rows = connection.execute(
+        """
+        SELECT method, endpoint,
+               COUNT(*) AS invocations,
+               AVG(latency_ms) AS avg_latency_ms,
+               SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) AS error_count
+        FROM api_logs
+        GROUP BY method, endpoint
+        ORDER BY invocations DESC
+        """
+    ).fetchall()
+    endpoints = [
+        {
+            "method": r["method"],
+            "endpoint": r["endpoint"],
+            "invocations": int(r["invocations"]),
+            "avg_latency_ms": round(float(r["avg_latency_ms"] or 0.0), 1),
+            "error_count": int(r["error_count"] or 0),
+        }
+        for r in rows
+    ]
+    return {
+        "endpoints": endpoints,
+        "database_status": {"backend": "sqlite", "fallback_active": False, "warning": None},
+    }
 
 
 def save_user_feedback(
@@ -450,7 +522,7 @@ def get_all_database_entities(
     users_rows = connection.execute("SELECT id, name, email, role, profile_details, created_at FROM users ORDER BY id ASC").fetchall()
     journal_rows = connection.execute("SELECT id, user_id, journal_text, created_at AS timestamp FROM journal_entries ORDER BY id DESC").fetchall()
     rec_rows = connection.execute("SELECT id, user_id, report_data, created_at FROM recommendations ORDER BY id DESC").fetchall()
-    audit_rows = connection.execute("SELECT id, user_id, username, journal_id, recommendation, created_at AS timestamp FROM audit_trails ORDER BY id DESC").fetchall()
+    audit_rows = connection.execute("SELECT id, user_id, username, action, journal_id, recommendation, created_at AS timestamp FROM audit_trails ORDER BY id DESC").fetchall()
     feedback_rows = connection.execute("SELECT id, recommendation_id, report_data, accepted_or_rejected, created_at AS timestamp FROM user_feedback ORDER BY id DESC").fetchall()
     report_rows = connection.execute("SELECT id, user_id, username, report_data, created_at AS timestamp FROM reports ORDER BY id DESC").fetchall()
 
@@ -501,6 +573,7 @@ def get_all_database_entities(
                 "id": r["id"],
                 "user_id": r["user_id"],
                 "username": r["username"],
+                "action": r["action"],
                 "journal_id": r["journal_id"],
                 "recommendation": r["recommendation"],
                 "timestamp": r["timestamp"],
@@ -552,6 +625,38 @@ def get_admin_analytics(connection: sqlite3.Connection) -> dict[str, Any]:
 
     acceptance_rate = round((acc_count / total_fb) * 100, 2) if total_fb > 0 else None
 
+    lat_rows = [
+        float(r["latency_ms"])
+        for r in connection.execute("SELECT latency_ms FROM api_logs ORDER BY latency_ms ASC").fetchall()
+    ]
+    err_row = connection.execute(
+        "SELECT COUNT(*) AS c FROM api_logs WHERE status_code >= 500"
+    ).fetchone()
+    err_cnt = int(err_row["c"]) if err_row else 0
+    if lat_rows:
+        avg_ms = round(sum(lat_rows) / len(lat_rows), 2)
+        p95_idx = min(len(lat_rows) - 1, int(0.95 * (len(lat_rows) - 1)))
+        p95_ms = round(lat_rows[p95_idx], 2)
+        err_pct = round((err_cnt / len(lat_rows)) * 100.0, 2)
+        up_pct = round(max(0.0, ((len(lat_rows) - err_cnt) / len(lat_rows)) * 100.0), 2)
+        api_perf = {
+            "avg_response_time_ms": avg_ms,
+            "p95_response_time_ms": p95_ms,
+            "error_rate_pct": err_pct,
+            "uptime_pct": up_pct,
+            "status": "Optimal" if err_pct < 5.0 else "Degraded",
+            "sample_count": len(lat_rows),
+        }
+    else:
+        api_perf = {
+            "avg_response_time_ms": None,
+            "p95_response_time_ms": None,
+            "error_rate_pct": None,
+            "uptime_pct": None,
+            "status": "No data yet",
+            "sample_count": 0,
+        }
+
     return {
         "total_registered_users": total_users,
         "active_users": active_users,
@@ -561,13 +666,7 @@ def get_admin_analytics(connection: sqlite3.Connection) -> dict[str, Any]:
         "rejected_recommendations": rej_count,
         "total_feedback": total_fb,
         "acceptance_rate": acceptance_rate,
-        "api_performance": {
-            "avg_response_time_ms": None,
-            "p95_response_time_ms": None,
-            "error_rate_pct": None,
-            "uptime_pct": None,
-            "status": "No live API telemetry",
-        },
+        "api_performance": api_perf,
         "database_status": {
             "backend": "sqlite",
             "fallback_active": False,

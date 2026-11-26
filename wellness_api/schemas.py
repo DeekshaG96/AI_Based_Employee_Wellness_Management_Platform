@@ -184,9 +184,14 @@ class AuditTrailResponse(BaseModel):
     id: int
     user_id: int | None
     username: str
+    action: str = "JOURNAL_ANALYSIS"
     journal_id: int | None
     recommendation: str
     timestamp: datetime
+
+
+class RoleUpdateRequest(BaseModel):
+    role: str = Field(pattern="^(employee|admin)$")
 
 
 class ReportRecordResponse(BaseModel):

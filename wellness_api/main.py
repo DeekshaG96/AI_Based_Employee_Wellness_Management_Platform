@@ -30,8 +30,10 @@ from wellness.team_analytics import calculate_team_burnout_risk, generate_synthe
 from wellness.wellness_tools import get_cognitive_reframes, get_guided_exercises
 from wellness.yoga import get_all_yoga_remedies, get_yoga_remedy_for_emotion
 
-from .database import SessionLocal, create_tables, get_database_status, get_session
+from . import database as api_database
+from .database import create_tables, get_database_status, get_session
 from .models import (
+    ApiLog,
     AuditTrail,
     AuthSession,
     JournalEntry,
@@ -61,6 +63,7 @@ from .schemas import (
     RecommendRequest,
     RegisterRequest,
     ReportRecordResponse,
+    RoleUpdateRequest,
     TeamBurnoutRequest,
     UserInfoResponse,
     UserResponse,
@@ -94,7 +97,7 @@ def _bootstrap_admin_accounts() -> None:
     if not allowlist and not (boot_email and len(boot_pass) >= 8):
         return
 
-    with SessionLocal() as db:
+    with api_database.SessionLocal() as db:
         for email in allowlist:
             existing = db.scalar(select(User).where(User.email == email))
             if existing and normalize_role(existing.role) != "admin":
@@ -159,6 +162,19 @@ async def track_api_telemetry(request: Request, call_next):
                 _latency_samples_ms.append(elapsed_ms)
                 if status_code >= 500:
                     _error_5xx_count += 1
+            try:
+                with api_database.SessionLocal() as log_db:
+                    log_db.add(
+                        ApiLog(
+                            method=request.method,
+                            endpoint=request.url.path[:180],
+                            status_code=int(status_code),
+                            latency_ms=round(elapsed_ms, 2),
+                        )
+                    )
+                    log_db.commit()
+            except Exception:
+                pass
 
 
 app.add_middleware(
@@ -210,6 +226,26 @@ def database_health(db: Session = Depends(get_session)) -> dict[str, Any]:
     return get_database_status()
 
 
+def _log_audit(
+    db: Session,
+    user: User,
+    action: str,
+    detail: str,
+    journal_id: int | None = None,
+) -> None:
+    db.add(
+        AuditTrail(
+            user_id=user.id,
+            username=user.name,
+            action=action[:64],
+            journal_id=journal_id,
+            recommendation=detail,
+            timestamp=utc_now(),
+        )
+    )
+    db.commit()
+
+
 def _auth_response(db: Session, user: User) -> AuthResponse:
     return AuthResponse(
         access_token=issue_session(db, user),
@@ -249,6 +285,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_session)) -> Au
             status_code=409, detail="An account with that email already exists."
         ) from exc
     db.refresh(user)
+    _log_audit(db, user, "USER_REGISTER", f"Registered employee account ({email})")
     return _auth_response(db, user)
 
 
@@ -262,6 +299,8 @@ def login(payload: LoginRequest, db: Session = Depends(get_session)) -> AuthResp
         user.role = "admin"
         db.commit()
         db.refresh(user)
+    login_action = "ADMIN_LOGIN" if normalize_role(user.role) == "admin" else "USER_LOGIN"
+    _log_audit(db, user, login_action, f"Signed in via authenticated session ({email})")
     return _auth_response(db, user)
 
 
@@ -792,6 +831,60 @@ def admin_privacy_filtered_overview(
     }
 
 
+@app.get("/admin/telemetry", tags=["admin"])
+def admin_endpoint_telemetry(
+    db: Session = Depends(get_session),
+    user: User = Depends(require_admin),
+) -> dict[str, Any]:
+    """Return real per-endpoint invocation counts and latency stats from persisted api_logs."""
+    del user
+    rows = db.execute(
+        select(
+            ApiLog.method,
+            ApiLog.endpoint,
+            func.count(ApiLog.id).label("invocations"),
+            func.avg(ApiLog.latency_ms).label("avg_latency_ms"),
+        )
+        .group_by(ApiLog.method, ApiLog.endpoint)
+        .order_by(func.count(ApiLog.id).desc())
+    ).all()
+    items = [
+        {
+            "method": row.method,
+            "endpoint": row.endpoint,
+            "invocations": int(row.invocations),
+            "avg_latency_ms": round(float(row.avg_latency_ms or 0.0), 1),
+        }
+        for row in rows
+    ]
+    return {"endpoints": items, "database_status": get_database_status()}
+
+
+@app.post("/admin/users/{target_user_id}/role", tags=["admin"])
+def update_user_role_endpoint(
+    target_user_id: int,
+    payload: RoleUpdateRequest,
+    db: Session = Depends(get_session),
+    admin_user: User = Depends(require_admin),
+) -> dict[str, Any]:
+    """Allow an administrator to update another user's role safely."""
+    target = db.scalar(select(User).where(User.id == target_user_id))
+    if target is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if target.id == admin_user.id and payload.role != "admin":
+        raise HTTPException(status_code=400, detail="You cannot revoke your own active administrator role.")
+    target.role = normalize_role(payload.role)
+    db.commit()
+    db.refresh(target)
+    _log_audit(
+        db,
+        admin_user,
+        "ADMIN_ROLE_UPDATE",
+        f"Updated user #{target.id} ({target.email}) role to {target.role}",
+    )
+    return {"id": target.id, "email": target.email, "role": target.role}
+
+
 @app.post("/feedback", response_model=FeedbackResponse, tags=["database"])
 def submit_feedback(
     payload: FeedbackRequest,
@@ -799,16 +892,20 @@ def submit_feedback(
     user: User = Depends(current_user),
 ) -> FeedbackResponse:
     """Store user feedback for recommendations (accepted/rejected status)."""
+    decision = payload.accepted_or_rejected.lower()
     feedback_record = UserFeedback(
         recommendation_id=payload.recommendation_id,
         user_id=user.id,
         report_data=payload.report_data,
-        accepted_or_rejected=payload.accepted_or_rejected.lower(),
+        accepted_or_rejected=decision,
         timestamp=utc_now(),
     )
     db.add(feedback_record)
     db.commit()
     db.refresh(feedback_record)
+    action_code = "RECOMMENDATION_ACCEPT" if decision == "accepted" else "RECOMMENDATION_REJECT"
+    rec_title = str((payload.report_data or {}).get("title") or "Care suggestion")
+    _log_audit(db, user, action_code, f"{decision}: {rec_title}")
     return FeedbackResponse(
         id=feedback_record.id,
         recommendation_id=feedback_record.recommendation_id,
@@ -872,6 +969,7 @@ def get_all_database_entities(
                 id=a.id,
                 user_id=a.user_id,
                 username=a.username,
+                action=getattr(a, "action", "JOURNAL_ANALYSIS"),
                 journal_id=a.journal_id,
                 recommendation=a.recommendation,
                 timestamp=a.timestamp,

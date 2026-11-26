@@ -116,6 +116,43 @@ def _require_local_admin(token: str | None) -> int:
     return uid
 
 
+def _record_local_telemetry(
+    method: str, endpoint: str, start_time: float, status_code: int = 200
+) -> None:
+    """Persist local execution latency to sqlite api_logs."""
+    from .storage import connect_database, save_api_log
+
+    latency_ms = max(0.1, (time.perf_counter() - start_time) * 1000.0)
+    try:
+        conn = connect_database()
+        try:
+            save_api_log(conn, method, endpoint, status_code, latency_ms)
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
+def _record_local_audit(
+    user_id: int,
+    username: str,
+    action: str,
+    details: str,
+    journal_id: int | None = None,
+) -> None:
+    """Persist local structured security event to sqlite audit_trails."""
+    from .storage import connect_database, save_audit_trail
+
+    try:
+        conn = connect_database()
+        try:
+            save_audit_trail(conn, user_id, username, journal_id, details, action=action)
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
 def register(name: str, email: str, password: str) -> dict[str, Any]:
     if is_api_available():
         return _request(
@@ -124,6 +161,7 @@ def register(name: str, email: str, password: str) -> dict[str, Any]:
 
     from .storage import admin_email_allowlist, connect_database, register_user
 
+    t0 = time.perf_counter()
     conn = connect_database()
     try:
         try:
@@ -134,6 +172,8 @@ def register(name: str, email: str, password: str) -> dict[str, Any]:
         role = "admin" if clean_email in admin_email_allowlist() else "employee"
         tok = secrets.token_urlsafe(24)
         _LOCAL_SESSIONS[tok] = (uid, role)
+        _record_local_telemetry("POST", "/auth/register", t0, 200)
+        _record_local_audit(uid, name.strip(), "USER_REGISTER", f"Registered account ({clean_email})")
         return {
             "access_token": tok,
             "token_type": "bearer",
@@ -153,6 +193,7 @@ def login(email: str, password: str) -> dict[str, Any]:
         connect_database,
     )
 
+    t0 = time.perf_counter()
     conn = connect_database()
     try:
         bootstrap_admin_from_env(conn)
@@ -162,6 +203,13 @@ def login(email: str, password: str) -> dict[str, Any]:
         uid, uname, urole = auth
         tok = secrets.token_urlsafe(24)
         _LOCAL_SESSIONS[tok] = (uid, urole)
+        _record_local_telemetry("POST", "/auth/login", t0, 200)
+        _record_local_audit(
+            uid,
+            uname,
+            "ADMIN_LOGIN" if urole == "admin" else "USER_LOGIN",
+            f"Authenticated ({urole})",
+        )
         return {
             "access_token": tok,
             "token_type": "bearer",
@@ -190,6 +238,7 @@ def analyze(text: str, token: str, source_name: str = "Direct Entry") -> Analysi
         from .pipeline import analyze_text
         from .storage import (
             connect_database,
+            save_api_log,
             save_audit_trail,
             save_journal_entry,
             save_mood_entry,
@@ -197,6 +246,7 @@ def analyze(text: str, token: str, source_name: str = "Direct Entry") -> Analysi
             save_report,
         )
 
+        t0 = time.perf_counter()
         report = analyze_text(text, source_name=source_name)
         try:
             conn = connect_database()
@@ -238,10 +288,11 @@ def analyze(text: str, token: str, source_name: str = "Direct Entry") -> Analysi
             except Exception:
                 pass
             rec_title = str(rec_dict.get("title", "Well-Being Recommendation")) if isinstance(rec_dict, dict) else "Well-Being Recommendation"
-            save_audit_trail(conn, uid, uname, jid, rec_title)
+            save_audit_trail(conn, uid, uname, jid, rec_title, action="JOURNAL_ANALYSIS")
 
             # Store 6. Reports (Report id, user id, username, timestamp)
             save_report(conn, uid, uname, report.to_dict())
+            save_api_log(conn, "POST", "/analyze", 200, max(0.1, (time.perf_counter() - t0) * 1000.0))
         except Exception as ex:
             logger.debug("Local persistence log: %s", ex)
         return report
@@ -416,11 +467,13 @@ def history(user_id: int, token: str, limit: int = 500) -> list[dict[str, Any]]:
         return entries
 
     # User-scoped SQLite in-process fallback (never fall back to user_id=None)
-    from .storage import connect_database, get_user_mood_entries
+    from .storage import connect_database, get_user_mood_entries, save_api_log
 
+    t0 = time.perf_counter()
     conn = connect_database()
     try:
         raw_entries = get_user_mood_entries(conn, user_id=user_id)
+        save_api_log(conn, "GET", f"/history/{user_id}", 200, max(0.1, (time.perf_counter() - t0) * 1000.0))
     finally:
         conn.close()
 
@@ -471,12 +524,41 @@ def delete_entry(entry_id: int, token: str) -> None:
     if is_api_available():
         _request("DELETE", f"/history/{entry_id}", token=token)
         return
-    from .storage import connect_database, delete_mood_entry
+    from .storage import connect_database, delete_mood_entry, save_api_log
 
+    t0 = time.perf_counter()
     conn = connect_database()
     try:
         uid = _get_current_user_id()
         delete_mood_entry(conn, entry_id, uid)
+        save_api_log(conn, "DELETE", "/history/{entry_id}", 200, max(0.1, (time.perf_counter() - t0) * 1000.0))
+    finally:
+        conn.close()
+
+
+def delete_all_user_entries(user_id: int, token: str | None = None) -> int:
+    """Delete all mood entries belonging to the authenticated user."""
+    if is_api_available():
+        deleted = 0
+        while True:
+            items = history(user_id, token or "", limit=200)
+            if not items:
+                break
+            for item in items:
+                _request("DELETE", f"/history/{item['id']}", token=token)
+                deleted += 1
+            if len(items) < 200:
+                break
+        return deleted
+
+    from .storage import connect_database, delete_user_mood_entries, save_api_log
+
+    t0 = time.perf_counter()
+    conn = connect_database()
+    try:
+        count = delete_user_mood_entries(conn, user_id)
+        save_api_log(conn, "DELETE", "/history/all", 200, max(0.1, (time.perf_counter() - t0) * 1000.0))
+        return count
     finally:
         conn.close()
 
@@ -624,16 +706,34 @@ def submit_feedback(
             },
         )
 
-    from .storage import connect_database, save_user_feedback
+    from .storage import connect_database, save_api_log, save_audit_trail, save_user_feedback
 
+    t0 = time.perf_counter()
     conn = connect_database()
     try:
-        fb_id = save_user_feedback(conn, recommendation_id, report_data, accepted_or_rejected)
+        decision = str(accepted_or_rejected or "accepted").lower()
+        fb_id = save_user_feedback(conn, recommendation_id, report_data, decision)
+        uid = _get_current_user_id()
+        uname = "Team Member"
+        try:
+            import streamlit as st
+
+            uname = str(st.session_state.get("user_name") or "Team Member")
+        except Exception:
+            pass
+        rec_title = (
+            str(report_data.get("title") or "Care suggestion")
+            if isinstance(report_data, dict)
+            else "Care suggestion"
+        )
+        action_code = "RECOMMENDATION_ACCEPT" if decision == "accepted" else "RECOMMENDATION_REJECT"
+        save_audit_trail(conn, uid, uname, None, f"{decision}: {rec_title}", action=action_code)
+        save_api_log(conn, "POST", "/feedback", 200, max(0.1, (time.perf_counter() - t0) * 1000.0))
         return {
             "id": fb_id,
             "recommendation_id": recommendation_id,
             "report_data": report_data,
-            "accepted_or_rejected": accepted_or_rejected,
+            "accepted_or_rejected": decision,
             "timestamp": datetime.now().isoformat(),
         }
     finally:
@@ -645,11 +745,14 @@ def get_database_entities(token: str | None = None) -> dict[str, list[dict[str, 
     if is_api_available():
         return _request("GET", "/database/entities", token=token)
     _require_local_admin(token)
-    from .storage import connect_database, get_all_database_entities
+    from .storage import connect_database, get_all_database_entities, save_api_log
 
+    t0 = time.perf_counter()
     conn = connect_database()
     try:
-        return get_all_database_entities(conn, redact_private_text=True)
+        res = get_all_database_entities(conn, redact_private_text=True)
+        save_api_log(conn, "GET", "/database/entities", 200, max(0.1, (time.perf_counter() - t0) * 1000.0))
+        return res
     finally:
         conn.close()
 
@@ -659,16 +762,86 @@ def get_admin_analytics(token: str | None = None) -> dict[str, Any]:
     if is_api_available():
         return _request("GET", "/admin/analytics", token=token)
     _require_local_admin(token)
-    from .storage import (
-        connect_database,
-    )
-    from .storage import (
-        get_admin_analytics as get_storage_admin_analytics,
-    )
+    from .storage import connect_database, save_api_log
+    from .storage import get_admin_analytics as get_storage_admin_analytics
 
+    t0 = time.perf_counter()
     conn = connect_database()
     try:
-        return get_storage_admin_analytics(conn)
+        res = get_storage_admin_analytics(conn)
+        save_api_log(conn, "GET", "/admin/analytics", 200, max(0.1, (time.perf_counter() - t0) * 1000.0))
+        return res
+    finally:
+        conn.close()
+
+
+def get_endpoint_telemetry(token: str | None = None) -> dict[str, Any]:
+    """Retrieve aggregated per-endpoint telemetry metrics (Administrator required)."""
+    if is_api_available():
+        return _request("GET", "/admin/telemetry", token=token)
+    _require_local_admin(token)
+    from .storage import connect_database, get_api_telemetry_summary, save_api_log
+
+    t0 = time.perf_counter()
+    conn = connect_database()
+    try:
+        res = get_api_telemetry_summary(conn)
+        save_api_log(conn, "GET", "/admin/telemetry", 200, max(0.1, (time.perf_counter() - t0) * 1000.0))
+        return res
+    finally:
+        conn.close()
+
+
+def update_user_role_client(
+    target_user_id: int, new_role: str, token: str | None = None
+) -> dict[str, Any]:
+    """Update a user's persisted role (Administrator required)."""
+    if is_api_available():
+        return _request(
+            "POST",
+            f"/admin/users/{target_user_id}/role",
+            token=token,
+            json={"role": new_role},
+        )
+    admin_uid = _require_local_admin(token)
+    from .storage import connect_database, normalize_role, save_api_log, save_audit_trail
+
+    normalized = normalize_role(new_role)
+    if target_user_id == admin_uid and normalized != "admin":
+        raise ApiError("You cannot revoke your own active administrator role.")
+    t0 = time.perf_counter()
+    conn = connect_database()
+    try:
+        row = conn.execute(
+            "SELECT id, email FROM users WHERE id = ?", (target_user_id,)
+        ).fetchone()
+        if row is None:
+            raise ApiError("User not found.")
+        admin_row = conn.execute(
+            "SELECT name FROM users WHERE id = ?", (admin_uid,)
+        ).fetchone()
+        admin_name = str(admin_row["name"]) if admin_row else "Administrator"
+        conn.execute(
+            "UPDATE users SET role = ? WHERE id = ?",
+            (normalized, target_user_id),
+        )
+        conn.commit()
+        save_audit_trail(
+            conn,
+            admin_uid,
+            admin_name,
+            None,
+            f"Updated user #{target_user_id} ({row['email']}) role to {normalized}",
+            action="ADMIN_ROLE_UPDATE",
+        )
+        save_api_log(
+            conn,
+            "POST",
+            "/admin/users/{target_user_id}/role",
+            200,
+            max(0.1, (time.perf_counter() - t0) * 1000.0),
+        )
+        return {"id": int(row["id"]), "email": str(row["email"]), "role": normalized}
     finally:
         conn.close()
 

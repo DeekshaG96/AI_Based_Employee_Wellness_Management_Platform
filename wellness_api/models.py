@@ -133,7 +133,7 @@ class Recommendation(Base):
 
 
 class AuditTrail(Base):
-    """Audit trails logging interactions with user ID, username, journal ID, and recommendation."""
+    """Audit trails logging security events and reflection actions."""
     __tablename__ = "audit_trails"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -141,12 +141,27 @@ class AuditTrail(Base):
         ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True
     )
     username: Mapped[str] = mapped_column(String(120), nullable=False)
+    action: Mapped[str] = mapped_column(String(64), nullable=False, default="JOURNAL_ANALYSIS")
     journal_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     recommendation: Mapped[str] = mapped_column(Text, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, index=True, nullable=False
     )
     user: Mapped[User | None] = relationship(back_populates="audit_trails")
+
+
+class ApiLog(Base):
+    """Per-endpoint HTTP invocation and latency telemetry log."""
+    __tablename__ = "api_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    method: Mapped[str] = mapped_column(String(16), nullable=False)
+    endpoint: Mapped[str] = mapped_column(String(180), index=True, nullable=False)
+    status_code: Mapped[int] = mapped_column(Integer, nullable=False)
+    latency_ms: Mapped[float] = mapped_column(Float, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, index=True, nullable=False
+    )
 
 
 class UserFeedback(Base):
